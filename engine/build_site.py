@@ -106,10 +106,18 @@ def editions_dir(root, sid):
 
 
 def scan_library(root):
-    """Yield (series_id, slug, file_path) for every edition under root."""
+    """Yield (series_id, slug, file_path) for every edition under root.
+
+    Accepts a library checkout (contains library/) or a bare library folder
+    (itself named 'library') — never an arbitrary directory, or a repo
+    checkout's templates/ would be ingested as a series.
+    """
     lib = os.path.join(root, "library")
-    base = lib if os.path.isdir(lib) else root
-    if not os.path.isdir(base):
+    if os.path.isdir(lib):
+        base = lib
+    elif os.path.basename(os.path.normpath(root)) == "library":
+        base = root
+    else:
         return
     for sid in sorted(os.listdir(base)):
         d = os.path.join(base, sid)
