@@ -13,22 +13,33 @@ asserts the §13.6 outcomes: a multi-edition front page on night 1, rollover
 and permanence on night 2, and feed updates both nights. It also rehearses a
 same-slug race (losing PR is refused with `B-MODE`).
 
-This rehearsal caught and drove two engine fixes:
+Phase 6 review caught and drove four production fixes:
 1. PR mode loaded series configs from the PR checkout, which on a real orphan
    `library` branch has none — every production PR would have failed
    `B-SERIES`. `check.py` now takes `--main` (check.yml passes `_main`).
 2. YAML reads unquoted `slug: 2026-07-05` in PR bodies as a date object —
    every rolling PR would have failed `B-META-MATCH`. `parse_pr_body` now
    normalizes dates to ISO strings.
+3. GitHub fires `pull_request`/`push` triggers only from workflow files
+   present on the base/pushed branch — an orphan `library` carries none, so
+   neither the editor nor the press would ever have run. `setup.sh` now seeds
+   trigger-only copies of both workflows onto `library` (all engine logic is
+   still checked out from `main` at run time, so §1 invariant 1 holds;
+   `B-DIFF-SHAPE` keeps agent PRs off the seeded files).
+4. Pushes made with `GITHUB_TOKEN` fire no events (recursion guard), so the
+   editor's auto-merge could never have started the press. The automerge job
+   now dispatches `publish.yml` explicitly; human merges trigger it normally.
 
 ## Cloud half — human-run, two nights
 
 What the automation cannot prove: a real harness schedule firing unattended,
 GitHub Actions running the editor and the press, and Pages serving the result.
 
-1. Fork (or use a test fork of) this repo; clone; run `./setup.sh`.
-2. Keep the two shipped series (`semiconductors` = collection,
-   `ai-briefs` = rolling) or configure your own pair.
+1. Fork (or use a test fork of) this repo; clone; run `./setup.sh`. Confirm
+   the `library` branch now carries `.github/workflows/` (the seeded triggers).
+2. On the upstream repo the shipped dogfood pair is the assignment
+   (`semiconductors` = collection, `ai-briefs` = rolling). On a fork, setup
+   clears them — configure your own collection + rolling pair instead.
 3. Connect the fork at claude.ai/code, then create two Routines per
    `harnesses/claude.md` — one per series, nightly cadence, the filled
    schedule prompt.
