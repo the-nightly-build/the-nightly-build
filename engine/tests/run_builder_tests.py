@@ -86,9 +86,9 @@ check("newsstand leads with the night's date",
       "Monday, July 6, 2026" in newsstand)
 check("newsstand totals the night's reading",
       "min read</span>" in newsstand and "nb-editionline" in newsstand)
-check("lead story is the longest read (dossier, 15 min)",
-      '<article class="nb-lead"><a href="library/semiconductors/micron.html">'
-      in newsstand, detail="lead selection")
+check("lead cell is the longest read (dossier, 15 min)",
+      'nb-lead-cell" href="library/semiconductors/micron.html"' in newsstand,
+      detail="lead selection")
 check("newsstand has appearance toggle", 'class="nb-appearance"' in newsstand)
 check("stories carry section kickers", 'class="nb-kicker"' in newsstand)
 check("newsstand links the previous night", 'href="builds/2026-07-05/"' in newsstand)

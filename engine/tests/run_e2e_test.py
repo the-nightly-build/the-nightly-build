@@ -163,7 +163,7 @@ editor_merge("nb/n1-brief")
 catalog1 = press_run("2026-07-05T09:00:00+00:00")
 front1 = (sitedir / "index.html").read_text()
 check("front page shows a multi-edition build",
-      '<article class="nb-lead">' in front1 and 'class="nb-grid"' in front1)
+      "nb-lead-cell" in front1 and 'class="nb-grid"' in front1)
 check("night 1 build page lists both editions",
       catalog1["builds"]["2026-07-05"] == ["ai-briefs/2026-07-05",
                                            "semiconductors/micron"])

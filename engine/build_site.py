@@ -367,30 +367,29 @@ def story_item(ed, series_cfgs, depth=0):
             f"{item_meta_row(ed)}</a>")
 
 
-def lead_story(ed, series_cfgs, depth=0):
+def lead_cell(ed, series_cfgs, depth=0):
     rel = "../" * depth
     meta = ed["meta"]
-    return (f'<article class="nb-lead">'
-            f'<a href="{rel}library/{ed["series"]}/{ed["slug"]}.html">'
+    return (f'<a class="nb-item nb-lead-cell" '
+            f'href="{rel}library/{ed["series"]}/{ed["slug"]}.html">'
             f'<div class="nb-kicker">{esc(kicker_text(ed, series_cfgs))}</div>'
             f'<h2>{esc(str(meta.get("title", ed["slug"])))}</h2>'
             f'<p class="nb-dek">{esc(str(meta.get("dek", "")))}</p>'
-            f"{item_meta_row(ed)}</a></article>")
+            f"{item_meta_row(ed)}</a>")
 
 
 def night_body(eds, series_cfgs, depth, date):
-    """One night's page: edition line, lead (longest read), ruled grid."""
+    """One night's page: edition line, then ONE ruled table — the lead is
+    its full-width first cell, the rest of the night fills the grid."""
     eds = sorted(eds, key=lambda e: -e["reading_minutes"])
     total = sum(e["reading_minutes"] for e in eds)
     body = (f'<div class="nb-editionline"><span>{esc(pretty_date(date))}</span>'
             f'<span class="nb-editionline-facts">{total} min read</span></div>')
     if not eds:
         return body + '<div class="nb-empty"><p>No editions this night.</p></div>'
-    body += lead_story(eds[0], series_cfgs, depth)
-    rest = "".join(story_item(e, series_cfgs, depth) for e in eds[1:])
-    if rest:
-        body += f'<div class="nb-grid">{rest}</div>'
-    return body
+    cells = lead_cell(eds[0], series_cfgs, depth) + "".join(
+        story_item(e, series_cfgs, depth) for e in eds[1:])
+    return body + f'<div class="nb-grid">{cells}</div>' 
 
 
 def render_newsstand(site, catalog, series_cfgs, editions, now):
