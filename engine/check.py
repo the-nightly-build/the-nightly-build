@@ -600,21 +600,28 @@ def check_edition(html_path, series_id, repo, library_dir, rep,
                 rep.warn("W-WHY-MISSING",
                          f"item #{i} lacks a 'why it matters' line (data-nb-why)")
 
-    # required docs / urls
+    # source policy: required docs must be read AND cited; consult prefixes
+    # must be read first but citing them is optional (no check here); with
+    # sources_exclusive, citations may come ONLY from the declared set.
     req_docs = list((item_cfg or {}).get("required_docs") or []) + \
         list(series.get("required_docs") or [])
+    declared_doc_ids = {doc.get("id") for doc in req_docs}
     got_required = {s["required"] for s in ed.sources if s["required"]}
     for doc in req_docs:
         if doc.get("id") not in got_required:
             rep.warn("W-REQ-DOC",
                      f"required doc '{doc.get('id')}' has no data-nb-required source entry")
-    req_urls = list(series.get("required_urls") or []) + \
-        list((item_cfg or {}).get("required_urls") or [])
-    hrefs = [s["href"] for s in ed.sources]
-    for prefix in req_urls:
-        if not any(h.startswith(prefix) for h in hrefs):
-            rep.warn("W-REQ-URL", f"no source matching required prefix {prefix}",
-                     "add a citation from that source")
+    consult = list(series.get("consult") or []) + \
+        list((item_cfg or {}).get("consult") or [])
+    if series.get("sources_exclusive"):
+        for s in ed.sources:
+            if s["required"] and s["required"] in declared_doc_ids:
+                continue
+            if not any(s["href"].startswith(prefix) for prefix in consult):
+                rep.block("B-SOURCES-EXCLUSIVE",
+                          f"source outside the declared set: {s['href']}",
+                          "this series is sources_exclusive — cite only "
+                          "required_docs and consult sources")
 
     # self-counts
     if isinstance(meta.get("sources"), int) and ed.sources:

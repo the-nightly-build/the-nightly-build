@@ -283,12 +283,38 @@ expect("W-REQ-DOC satisfied when attribute present",
 expect("W-REQ-DOC", run_local(
     mut(' data-nb-required="mu-10k-2025"', ''), "semiconductors", repo=reqdoc_repo),
     must_have=["W-REQ-DOC"], blocks=0)
-expect("W-REQ-URL", run_local(
+expect("consult prefix without a citation is fine", run_local(
     mut("https://www.sec.gov/filings/mu-10k", "https://example.org/not-sec"),
-    "semiconductors"), must_have=["W-REQ-URL"], blocks=0)
+    "semiconductors"), must_not=["W-REQ-URL", "B-SOURCES-EXCLUSIVE"], blocks=0)
 expect("W-SELF-COUNT", run_local(
     mut('"sources": 8', '"sources": 20'), "semiconductors"),
     must_have=["W-SELF-COUNT"], blocks=0)
+
+print("== sources_exclusive ==")
+excl_repo = tempfile.mkdtemp()
+for sub in ("series", "templates"):
+    shutil.copytree(pathlib.Path(TESTREPO) / sub, pathlib.Path(excl_repo) / sub)
+ey = pathlib.Path(excl_repo) / "series" / "semiconductors" / "series.yaml"
+ey.write_text(ey.read_text().replace(
+    "consult:\n  - https://www.sec.gov/",
+    "sources_exclusive: true\nconsult:\n  - https://www.sec.gov/\n"
+    "  - https://example.org/"))
+expect("exclusive: all sources in the declared set",
+       run_local(VALID, "semiconductors", repo=excl_repo),
+       must_not=["B-SOURCES-EXCLUSIVE"], blocks=0)
+expect("exclusive: outside source is a BLOCK", run_local(
+    mut('href="https://example.org/src4"', 'href="https://other.example/x"'),
+    "semiconductors", repo=excl_repo),
+    must_have=["B-SOURCES-EXCLUSIVE"])
+ey.write_text(ey.read_text().replace("  - https://example.org/\n", "")
+              .replace(
+    'prompt: "Emphasize the HBM supply-agreement structure and the memory-cycle debate."',
+    'required_docs:\n      - id: mu-10k-2025\n        path: sources/mu-10k-2025.txt'))
+# 8 sources: s1 exempt (declared doc), s2 exempt (sec.gov consult) — the
+# remaining 6 example.org sources violate. blocks=6 proves both exemptions.
+expect("exclusive: declared required-doc entries are exempt", run_local(
+    VALID, "semiconductors", repo=excl_repo),
+    must_have=["B-SOURCES-EXCLUSIVE"], must_not=["W-REQ-DOC"], blocks=6)
 
 print("== strict promotion ==")
 strict_repo = tempfile.mkdtemp()

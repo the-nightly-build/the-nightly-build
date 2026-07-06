@@ -37,7 +37,9 @@ Ask before writing. Keep it short — one round of questions, then a proposal:
   or ongoing briefings (**rolling**)?
 - Depth and tone preferences; emphases to bake into the series prompt.
 - Must-read documents or must-check sites? These become `required_docs`
-  (committed files) and `required_urls` (URL prefixes).
+  (committed files, must be read and cited) and `consult` (URL prefixes read
+  first; citing optional). If they want editions built ONLY from their
+  sources, set `sources_exclusive: true` — outside citations then BLOCK.
 
 **Paywalled sources warning (always give it when required_docs come up):**
 credentials never go in the repo. If they want paywalled material covered,

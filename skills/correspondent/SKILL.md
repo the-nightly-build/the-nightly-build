@@ -42,7 +42,10 @@ not failure.**
 
 ## 3. Research
 
-- Read every `required_docs` file; consult every `required_urls` prefix.
+- Read every `required_docs` file. Visit and read every `consult` prefix
+  BEFORE researching elsewhere — they orient the work; citing them is optional.
+- If the series sets `sources_exclusive: true`, cite ONLY the declared docs
+  and consult sources — anything else is a BLOCK.
 - Use web access; prefer primary sources; verify numbers against them.
 - Every load-bearing claim gets an inline citation that links to a source
   entry. Never fabricate a citation — an uncited true claim beats a cited

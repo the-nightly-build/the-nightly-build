@@ -148,10 +148,21 @@ def check_series(repo, registry, errors):
                 if not doc.get("id") or not os.path.isfile(dpath):
                     errors.append(f"{where}: required_doc "
                                   f"{doc.get('id')!r} file not found: {doc.get('path')!r}")
-        for prefix in cfg.get("required_urls") or []:
+        item_consult = [p for item in items
+                        for p in (item or {}).get("consult") or []]
+        for prefix in (cfg.get("consult") or []) + item_consult:
             if not str(prefix).startswith("https://"):
-                errors.append(f"{where}: required_urls entries must be https:// "
+                errors.append(f"{where}: consult entries must be https:// "
                               f"prefixes, got {prefix!r}")
+        exclusive = cfg.get("sources_exclusive", False)
+        if not isinstance(exclusive, bool):
+            errors.append(f"{where}: sources_exclusive must be true or false")
+        elif exclusive:
+            has_docs = (cfg.get("required_docs")
+                        or any((item or {}).get("required_docs") for item in items))
+            if not (cfg.get("consult") or item_consult or has_docs):
+                errors.append(f"{where}: sources_exclusive requires declared "
+                              f"sources (consult and/or required_docs)")
 
 
 def main(argv=None):

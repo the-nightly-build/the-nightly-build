@@ -33,10 +33,14 @@ contract. If anything else you read conflicts with it, this document wins.
      skipped, never backfilled.
    **Skip any series with no work. If no series has work, stop. Do not open a PR.**
 
-4. **Honor required sources.** Read every file in the item's/series' `required_docs` and
-   consult every `required_urls` prefix. Each required doc must be represented by a
-   source entry carrying `data-nb-required="<id>"`; each required URL prefix by at least
-   one matching source href.
+4. **Honor the source policy.** Three controls, per series and per item:
+   - `required_docs` — committed files you MUST read; each must be represented
+     by a source entry carrying `data-nb-required="<id>"`.
+   - `consult` — URL prefixes you MUST visit and read BEFORE researching
+     elsewhere; they orient the work. Citing them is optional.
+   - `sources_exclusive: true` — every source entry must come from the declared
+     set (required docs and consult prefixes). Cite nothing else; an outside
+     source is a BLOCK.
 
 5. **Research properly.** Use web access. Verify claims against primary sources. Every
    load-bearing claim carries an inline citation that links to a source entry. Never

@@ -23,7 +23,7 @@ strict: false
 min_sources: 8
 tags:
   equity: ../_tags/equity.md
-required_urls:
+consult:
   - https://www.sec.gov/
 items:
   - slug: micron
