@@ -40,12 +40,13 @@ GitHub Actions running the editor and the press, and Pages serving the result.
 2. On the upstream repo the shipped dogfood pair is the assignment
    (`semiconductors` = collection, `ai-briefs` = rolling). On a fork, setup
    clears them — configure your own collection + rolling pair instead.
-3. Connect the fork at claude.ai/code, then create two Routines per
-   `harnesses/claude.md` — one per series, nightly cadence, the filled
-   schedule prompt.
-4. **Night 1 checklist:** two PRs titled `nb: …` appear → `nightly-build-check`
-   passes → auto-merge → `nightly-build-publish` deploys → the Pages front
-   page shows a two-edition build → `feed.xml` has both entries.
+3. Connect the repo at claude.ai/code, then create ONE press-level Routine per
+   `harnesses/claude.md` — nightly cadence, the generic schedule prompt. (On a
+   fork, also enable workflows once in the Actions tab.)
+4. **Night 1 checklist:** the single run opens two PRs titled `nb: …` (one per
+   series) → `nightly-build-check` passes → auto-merge → `nightly-build-publish`
+   deploys → the Pages front page shows a two-edition build → `feed.xml` has
+   both entries.
 5. **Night 2 checklist:** the rolling series publishes the new date; the
    collection series publishes its next item; night 1's build page is
    unchanged; feeds updated.
