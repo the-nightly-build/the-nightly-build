@@ -2,3 +2,4 @@ press-check/
 __pycache__/
 *.pyc
 .DS_Store
+docs/agent-only/
