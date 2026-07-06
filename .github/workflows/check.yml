@@ -2,6 +2,9 @@
 # SECURITY: trigger is pull_request (never pull_request_target); the validate job runs
 # with read-only contents and no secrets against untrusted diffs. The merge job only
 # uses GITHUB_TOKEN and only fires after the check passes.
+# PLACEMENT: GitHub fires pull_request triggers only from workflow files present on
+# the PR's base branch, so setup.sh seeds a copy of this file onto library. Keep this
+# file a pure trigger — all engine logic is checked out from main at run time.
 name: nightly-build-check
 
 on:
@@ -49,7 +52,7 @@ jobs:
         run: |
           set +e
           python3 _main/engine/check.py --pr \
-            --repo . \
+            --repo . --main _main \
             --base "origin/${{ github.base_ref }}" \
             --head "HEAD" \
             --library _library \
@@ -57,7 +60,7 @@ jobs:
             --json > /tmp/proof.json
           code=$?
           python3 _main/engine/check.py --pr \
-            --repo . \
+            --repo . --main _main \
             --base "origin/${{ github.base_ref }}" \
             --head "HEAD" \
             --library _library \
@@ -104,6 +107,14 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: gh pr merge ${{ github.event.pull_request.number }} --squash --repo ${{ github.repository }}
+
+      # Pushes made with GITHUB_TOKEN never fire push-triggered workflows
+      # (recursion guard), so the merge above cannot start the press by
+      # itself — dispatch it explicitly. Human merges trigger it normally.
+      - name: Start the press
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run publish.yml --repo ${{ github.repository }} --ref library || true
 
       - name: Supersede competing PRs for the same slug
         env:

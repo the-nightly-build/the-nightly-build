@@ -10,7 +10,12 @@ Invocations:
   Agent loop / press check:
     python3 engine/check.py library/<series>/<slug>.html --series <id> --repo . [--library DIR]
   CI:
-    python3 engine/check.py --pr --repo . --base <ref> --head <ref> [--pr-body FILE] [--library DIR]
+    python3 engine/check.py --pr --repo . --main <main checkout> \
+        --base <ref> --head <ref> [--pr-body FILE] [--library DIR]
+
+  In PR mode --repo is the PR checkout (git diff + edition file); configs and
+  the registry load from --main, because the library branch carries no engine
+  or series files. --main defaults to --repo for repos that keep both together.
 
   --library DIR points at the PUBLISHED state (the library branch checkout, or its
   library/ folder) BEFORE this edition; used for sequence/rolling next-work checks.
@@ -641,7 +646,12 @@ def parse_pr_body(path):
         return None
     try:
         data = yaml.safe_load(m.group(1))
-        return data if isinstance(data, dict) else None
+        if not isinstance(data, dict):
+            return None
+        # YAML reads bare dates (slug: 2026-07-05) as date objects; nb-meta
+        # holds strings — normalize so honest PR bodies compare equal
+        return {k: (v.isoformat() if isinstance(v, _dt.date) else v)
+                for k, v in data.items()}
     except Exception:
         return None
 
@@ -680,7 +690,8 @@ def run_pr_mode(args, rep):
                   f"added file must be library/<series>/<slug>.html; got '{path}'")
         return
     series_id = m.group(1)
-    series_cfg, _ = load_series(args.repo, series_id)
+    cfg_repo = getattr(args, "main", None) or args.repo
+    series_cfg, _ = load_series(cfg_repo, series_id)
     rep.strict = bool(series_cfg and series_cfg.get("strict"))
     pr_body_meta = None
     if args.pr_body:
@@ -688,7 +699,7 @@ def run_pr_mode(args, rep):
         if pr_body_meta is None:
             rep.block("B-META-MATCH", "PR body lacks a parseable ```nb-meta``` yaml block")
     fs_path = os.path.join(args.repo, path)
-    check_edition(fs_path, series_id, args.repo, args.library, rep,
+    check_edition(fs_path, series_id, cfg_repo, args.library, rep,
                   pr_body_meta=pr_body_meta,
                   today=args.today and _dt.date.fromisoformat(args.today))
 
@@ -727,7 +738,11 @@ def main(argv=None):
     p = argparse.ArgumentParser(description="The Nightly Build proof")
     p.add_argument("file", nargs="?", help="edition HTML file (local mode)")
     p.add_argument("--series", help="series id (local mode)")
-    p.add_argument("--repo", default=".", help="repo root (main checkout)")
+    p.add_argument("--repo", default=".",
+                   help="repo root (local mode: main checkout; PR mode: PR checkout)")
+    p.add_argument("--main",
+                   help="main checkout for configs/registry (PR mode; "
+                        "defaults to --repo)")
     p.add_argument("--library", help="published library state (branch checkout dir)")
     p.add_argument("--pr", action="store_true", help="CI mode")
     p.add_argument("--base", help="PR base ref (pr mode)")

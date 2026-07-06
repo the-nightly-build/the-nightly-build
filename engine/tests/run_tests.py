@@ -9,12 +9,13 @@ are BLOCK-clean). PR mode is tested against a real throwaway git repo.
 Run: python3 engine/tests/run_tests.py
 """
 import json
-import os
 import pathlib
+import re as _re
 import shutil
 import subprocess
 import sys
 import tempfile
+import types
 
 HERE = pathlib.Path(__file__).resolve().parent
 REPO = HERE.parent.parent
@@ -248,15 +249,10 @@ expect("W-SOURCES-MIN", run_local(
          .replace('<sup class="nb-cite"><a href="#s7">7</a></sup>', '')
          .replace('<sup class="nb-cite"><a href="#s8">8</a></sup>', ''),
     "semiconductors"), must_have=["W-SOURCES-MIN"], blocks=0)
-no_cites_in_debate = VALID
-for n in range(1, 9):
-    no_cites_in_debate = no_cites_in_debate.replace(
-        f'<section data-nb-section="debate"><h2>Bull versus bear</h2>',
-        f'<section data-nb-section="debate"><h2>Bull versus bear</h2>', 1)
 # strip cites only inside debate section
-import re as _re
 m = _re.search(r'(<section data-nb-section="debate">.*?</section>)',
                VALID, _re.S)
+assert m is not None
 deb = m.group(1)
 deb_stripped = _re.sub(r'<sup class="nb-cite">.*?</sup>', '', deb)
 expect("W-CITE-DENSITY (per-section)", run_local(
@@ -343,7 +339,7 @@ for template_id, treg in registry.items():
     ok_sections = all(tpl.sections.count(s) == 1
                       for s in treg.get("sections") or [])
     try:
-        json.loads(tpl.meta_raw)
+        json.loads(tpl.meta_raw or "")
         ok_meta = True
     except Exception:
         ok_meta = False
@@ -408,13 +404,9 @@ def run_pr(extra_body=None, mutate=None):
     if mutate:
         mutate()
     rep = C.Report()
-    args = type("A", (), {})()
-    args.repo = prdir
-    args.base = "library"
-    args.head = "claude/night-run"
-    args.pr_body = str(extra_body or body)
-    args.library = None
-    args.today = TODAY
+    args = types.SimpleNamespace(
+        repo=prdir, main=None, base="library", head="claude/night-run",
+        pr_body=str(extra_body or body), library=None, today=TODAY)
     C.run_pr_mode(args, rep)
     return rep
 
@@ -482,6 +474,12 @@ print("== builder suite (run_builder_tests.py) ==")
 builder = subprocess.run([sys.executable, str(HERE / "run_builder_tests.py")])
 if builder.returncode != 0:
     FAIL.append("builder suite")
+
+print()
+print("== end-to-end dress rehearsal (run_e2e_test.py) ==")
+e2e = subprocess.run([sys.executable, str(HERE / "run_e2e_test.py")])
+if e2e.returncode != 0:
+    FAIL.append("e2e suite")
 
 print()
 print(f"{PASS} passed, {len(FAIL)} failed")

@@ -2,6 +2,10 @@
 # SECURITY: executable logic (builder, assets) is ALWAYS checked out from main
 # (§1 invariant 1). Library content is data, never code. The site commit carries
 # [skip ci] so the rebuild push cannot retrigger this workflow.
+# PLACEMENT: GitHub fires push triggers only from workflow files present on the
+# pushed branch, so setup.sh seeds a copy of this file onto library; the editor's
+# auto-merge also dispatches it explicitly (GITHUB_TOKEN pushes fire no events).
+# Keep this file a pure trigger — all engine logic is checked out from main.
 name: nightly-build-publish
 
 on:
