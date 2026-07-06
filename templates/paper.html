@@ -23,7 +23,7 @@
 <script defer src="../../assets/nb.js"></script>
 <script type="application/json" id="nb-meta">
 {
-  "protocol": "1.0",
+  "protocol": "1.1",
   "series": "SERIES-ID",
   "slug": "SLUG",
   "template": "paper",
@@ -40,43 +40,6 @@
   "model": "MODEL"
 }
 </script>
-<style>
-  .nb-abstract{
-    background:var(--wash); border:1px solid var(--hair);
-    border-radius:var(--radius); padding:16px 18px; margin:0 0 8px;
-  }
-  .nb-abstract .nb-abstract-label{
-    font-family:var(--mono); font-size:11px; letter-spacing:.06em;
-    text-transform:uppercase; color:var(--accent); margin-bottom:8px;
-  }
-  .nb-holdsup{
-    display:grid; grid-template-columns:1fr; gap:12px; margin:18px 0;
-  }
-  @media (min-width:641px){ .nb-holdsup{ grid-template-columns:1fr 1fr; } }
-  .nb-holdsup > div{
-    border:1px solid var(--hair); border-radius:var(--radius);
-    padding:14px 16px; background:var(--panel);
-  }
-  .nb-holdsup .nb-holdsup-label{
-    font-family:var(--mono); font-size:11px; letter-spacing:.06em;
-    text-transform:uppercase; display:block; margin-bottom:8px;
-  }
-  .nb-holdsup .good .nb-holdsup-label,
-  .nb-holdsup > div.good .nb-holdsup-label{ color:#2E7D4F; }
-  .nb-holdsup > div.careful .nb-holdsup-label{ color:#B07C1F; }
-  .nb-holdsup ul{ margin:0; padding-left:18px; font-family:var(--sans);
-    font-size:14.5px; }
-  .nb-holdsup li{ margin:6px 0; }
-  .nb-verdict{
-    border-left:3px solid var(--accent-2); background:var(--wash);
-    border-radius:0 var(--radius) var(--radius) 0;
-    padding:14px 16px; margin:14px 0;
-  }
-  .nb-verdict .nb-verdict-label{
-    font-family:var(--mono); font-size:11px; letter-spacing:.06em;
-    text-transform:uppercase; color:var(--accent-2); display:block; margin-bottom:4px;
-  }
-</style>
 </head>
 <body class="nb-edition">
 <article class="nb-reading">
@@ -86,7 +49,7 @@
   <h1 class="nb-title">TITLE</h1>
   <p class="nb-dekline">DEK — the paper's claim and whether it survives scrutiny.</p>
   <div class="nb-byline">
-    <span>N min read</span><span>N sources</span><span>YYYY-MM-DD</span><span>MODEL</span>
+    <span>N min read</span><span>YYYY-MM-DD</span>
   </div>
 </header>
 
@@ -136,11 +99,11 @@
 <section class="nb-sources" data-nb-section="sources" id="sources">
   <h2>Sources</h2>
   <ol>
-    <li id="s1">THE PAPER UNDER REVIEW. <a data-nb-source href="https://example.org/replace-1">link</a></li>
-    <li id="s2">PUBLISHER — TITLE. <a data-nb-source href="https://example.org/replace-2">link</a></li>
-    <li id="s3">PUBLISHER — TITLE. <a data-nb-source href="https://example.org/replace-3">link</a></li>
-    <li id="s4">PUBLISHER — TITLE. <a data-nb-source href="https://example.org/replace-4">link</a></li>
-    <li id="s5">PUBLISHER — TITLE. <a data-nb-source href="https://example.org/replace-5">link</a></li>
+    <li id="s1"><a data-nb-source href="https://example.org/replace-1">THE PAPER UNDER REVIEW</a></li>
+    <li id="s2"><a data-nb-source href="https://example.org/replace-2">PUBLISHER — TITLE</a></li>
+    <li id="s3"><a data-nb-source href="https://example.org/replace-3">PUBLISHER — TITLE</a></li>
+    <li id="s4"><a data-nb-source href="https://example.org/replace-4">PUBLISHER — TITLE</a></li>
+    <li id="s5"><a data-nb-source href="https://example.org/replace-5">PUBLISHER — TITLE</a></li>
   </ol>
 </section>
 

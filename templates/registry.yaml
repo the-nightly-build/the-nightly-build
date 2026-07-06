@@ -42,11 +42,3 @@ chronicle:
   cite_rule: per-section
   modes: [sequence, collection, open]
   furniture: [timeline-spine, echoes-today]
-
-deck:
-  class: shortread
-  slides: [8, 15]
-  sections: [slides, sources]
-  cite_rule: per-slide
-  modes: [collection, sequence, open]
-  furniture: [scroll-snap-slides, big-stat, print-one-per-page]

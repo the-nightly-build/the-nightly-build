@@ -25,7 +25,7 @@
 <script defer src="../../assets/nb.js"></script>
 <script type="application/json" id="nb-meta">
 {
-  "protocol": "1.0",
+  "protocol": "1.1",
   "series": "SERIES-ID",
   "slug": "SLUG",
   "template": "lesson",
@@ -42,43 +42,6 @@
   "model": "MODEL"
 }
 </script>
-<style>
-  .nb-objectives{
-    background:var(--wash); border:1px solid var(--hair);
-    border-radius:var(--radius); padding:16px 18px; margin:0 0 8px;
-  }
-  .nb-objectives .nb-objectives-label{
-    font-family:var(--mono); font-size:11px; letter-spacing:.06em;
-    text-transform:uppercase; color:var(--accent); margin-bottom:8px;
-  }
-  .nb-objectives ul{ margin:0; padding-left:20px; font-family:var(--sans);
-    font-size:14.5px; }
-  .nb-objectives li{ margin:4px 0; }
-  .nb-callout{
-    border-left:3px solid var(--accent); background:var(--wash);
-    border-radius:0 var(--radius) var(--radius) 0;
-    padding:12px 16px; margin:18px 0;
-  }
-  .nb-callout .nb-callout-term{
-    font-family:var(--mono); font-size:12px; color:var(--accent);
-    text-transform:uppercase; letter-spacing:.05em; display:block; margin-bottom:4px;
-  }
-  .nb-check-box{
-    border-top:1px dashed var(--line); border-bottom:1px dashed var(--line);
-    padding:6px 0 14px; margin:10px 0;
-  }
-  .nb-check-box ol{ font-family:var(--sans); font-size:15px; }
-  .nb-check-box li{ margin:10px 0; }
-  .nb-bridge{
-    border-left:3px solid var(--accent-2); background:var(--wash);
-    border-radius:0 var(--radius) var(--radius) 0;
-    padding:14px 16px; margin:14px 0;
-  }
-  .nb-bridge .nb-bridge-label{
-    font-family:var(--mono); font-size:11px; letter-spacing:.06em;
-    text-transform:uppercase; color:var(--accent-2); display:block; margin-bottom:4px;
-  }
-</style>
 </head>
 <body class="nb-edition">
 <article class="nb-reading">
@@ -88,7 +51,7 @@
   <h1 class="nb-title">TITLE</h1>
   <p class="nb-dekline">DEK — what the reader will be able to do after this edition.</p>
   <div class="nb-byline">
-    <span>N min read</span><span>N sources</span><span>YYYY-MM-DD</span><span>MODEL</span>
+    <span>N min read</span><span>YYYY-MM-DD</span>
   </div>
 </header>
 
@@ -142,10 +105,10 @@
 <section class="nb-sources" data-nb-section="sources" id="sources">
   <h2>Sources</h2>
   <ol>
-    <li id="s1">PUBLISHER — TITLE. <a data-nb-source href="https://example.org/replace-1">link</a></li>
-    <li id="s2">PUBLISHER — TITLE. <a data-nb-source href="https://example.org/replace-2">link</a></li>
-    <li id="s3">PUBLISHER — TITLE. <a data-nb-source href="https://example.org/replace-3">link</a></li>
-    <li id="s4">PUBLISHER — TITLE. <a data-nb-source href="https://example.org/replace-4">link</a></li>
+    <li id="s1"><a data-nb-source href="https://example.org/replace-1">PUBLISHER — TITLE</a></li>
+    <li id="s2"><a data-nb-source href="https://example.org/replace-2">PUBLISHER — TITLE</a></li>
+    <li id="s3"><a data-nb-source href="https://example.org/replace-3">PUBLISHER — TITLE</a></li>
+    <li id="s4"><a data-nb-source href="https://example.org/replace-4">PUBLISHER — TITLE</a></li>
   </ol>
 </section>
 

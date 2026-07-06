@@ -1,7 +1,7 @@
 # examples/ — a complete, working press
 
-A full press configuration, kept as living documentation: seven series — one
-per shipped template plus an **open desk** (`wildcard/`, where the agent
+A full press configuration, kept as living documentation: six series — one per
+shipped template plus an **open desk** (`wildcard/`, where the agent
 picks each night's topic and form within a beat) — the whole source policy
 (`required_docs`, `consult`, `sources_exclusive`), rhythm controls
 (`cadence`, `paused`, `selection`), a voice file, and commented-out advanced

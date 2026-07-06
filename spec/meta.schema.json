@@ -7,7 +7,7 @@
     "protocol": {"type": "string", "pattern": "^1\\."},
     "series": {"type": "string", "pattern": "^[a-z0-9-]{1,32}$"},
     "slug": {"type": "string", "pattern": "^[a-z0-9-]{1,64}$"},
-    "template": {"enum": ["dossier", "lesson", "brief", "paper", "chronicle", "deck"]},
+    "template": {"type": "string", "description": "a template id from the merged registry (shipped or press-defined)"},
     "title": {"type": "string", "minLength": 1, "maxLength": 200},
     "mode": {"enum": ["collection", "sequence", "rolling"]},
     "order": {"type": ["integer", "null"], "minimum": 1},

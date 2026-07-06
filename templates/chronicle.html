@@ -24,7 +24,7 @@
 <script defer src="../../assets/nb.js"></script>
 <script type="application/json" id="nb-meta">
 {
-  "protocol": "1.0",
+  "protocol": "1.1",
   "series": "SERIES-ID",
   "slug": "SLUG",
   "template": "chronicle",
@@ -41,29 +41,6 @@
   "model": "MODEL"
 }
 </script>
-<style>
-  .nb-timeline{
-    list-style:none; margin:16px 0; padding:0 0 0 22px;
-    border-left:2px solid var(--line); position:relative;
-  }
-  .nb-tl-event{ position:relative; margin:0 0 22px; }
-  .nb-tl-event::before{
-    content:""; position:absolute; left:-28px; top:6px;
-    width:10px; height:10px; border-radius:50%;
-    background:var(--bg); border:2px solid var(--accent);
-  }
-  .nb-tl-event.major::before{ background:var(--accent); }
-  .nb-tl-date{
-    font-family:var(--mono); font-size:12px; color:var(--accent);
-    letter-spacing:.04em; display:block; margin-bottom:2px;
-  }
-  .nb-tl-event h3{
-    font-family:var(--serif); font-size:18px; margin:0 0 6px; line-height:1.3;
-  }
-  .nb-tl-event p{ margin:0; color:var(--ink-soft); font-size:15.5px; }
-  .nb-tl-interlude{ margin:26px 0 26px -22px; padding-left:0; }
-  .nb-tl-interlude p{ font-style:italic; }
-</style>
 </head>
 <body class="nb-edition">
 <article class="nb-reading">
@@ -73,7 +50,7 @@
   <h1 class="nb-title">TITLE</h1>
   <p class="nb-dekline">DEK — the arc of the story in one italic sentence.</p>
   <div class="nb-byline">
-    <span>N min read</span><span>N sources</span><span>YYYY-MM-DD</span><span>MODEL</span>
+    <span>N min read</span><span>YYYY-MM-DD</span>
   </div>
 </header>
 
@@ -116,11 +93,11 @@
 <section class="nb-sources" data-nb-section="sources" id="sources">
   <h2>Sources</h2>
   <ol>
-    <li id="s1">PUBLISHER — TITLE. <a data-nb-source href="https://example.org/replace-1">link</a></li>
-    <li id="s2">PUBLISHER — TITLE. <a data-nb-source href="https://example.org/replace-2">link</a></li>
-    <li id="s3">PUBLISHER — TITLE. <a data-nb-source href="https://example.org/replace-3">link</a></li>
-    <li id="s4">PUBLISHER — TITLE. <a data-nb-source href="https://example.org/replace-4">link</a></li>
-    <li id="s5">PUBLISHER — TITLE. <a data-nb-source href="https://example.org/replace-5">link</a></li>
+    <li id="s1"><a data-nb-source href="https://example.org/replace-1">PUBLISHER — TITLE</a></li>
+    <li id="s2"><a data-nb-source href="https://example.org/replace-2">PUBLISHER — TITLE</a></li>
+    <li id="s3"><a data-nb-source href="https://example.org/replace-3">PUBLISHER — TITLE</a></li>
+    <li id="s4"><a data-nb-source href="https://example.org/replace-4">PUBLISHER — TITLE</a></li>
+    <li id="s5"><a data-nb-source href="https://example.org/replace-5">PUBLISHER — TITLE</a></li>
   </ol>
 </section>
 

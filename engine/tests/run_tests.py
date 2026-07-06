@@ -337,8 +337,6 @@ TPL_SERIES = {
                "items:\n  - {slug: attention, title: Attention}"),
     "histories": ("collection", "chronicle",
                   "items:\n  - {slug: unix, title: Unix}"),
-    "decks": ("collection", "deck",
-              "items:\n  - {slug: eu-chips, title: EU Chips}"),
 }
 for sid, (mode, template, items) in TPL_SERIES.items():
     d = pathlib.Path(tpl_repo) / "press" / "series" / sid
@@ -349,8 +347,7 @@ for sid, (mode, template, items) in TPL_SERIES.items():
 for name, fixture, sid, slug in [
         ("lesson", make_fixtures.lesson(), "crypto", "hashes"),
         ("paper", make_fixtures.paper(), "papers", "attention"),
-        ("chronicle", make_fixtures.chronicle(), "histories", "unix"),
-        ("deck", make_fixtures.deck(), "decks", "eu-chips")]:
+        ("chronicle", make_fixtures.chronicle(), "histories", "unix")]:
     rep = run_local(fixture, sid, slug=slug, repo=tpl_repo)
     expect(f"sample {name} edition is BLOCK-clean and WARN-free",
            rep, blocks=0,

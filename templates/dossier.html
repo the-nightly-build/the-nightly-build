@@ -25,7 +25,7 @@
 <script defer src="../../assets/nb.js"></script>
 <script type="application/json" id="nb-meta">
 {
-  "protocol": "1.0",
+  "protocol": "1.1",
   "series": "SERIES-ID",
   "slug": "SLUG",
   "template": "dossier",
@@ -42,25 +42,6 @@
   "model": "MODEL"
 }
 </script>
-<style>
-  body{ background:var(--bg); }
-  .nb-jumpnav{
-    display:flex; gap:6px; overflow-x:auto; -webkit-overflow-scrolling:touch;
-    padding:2px 0 12px; margin-bottom:8px; scrollbar-width:none;
-  }
-  .nb-jumpnav::-webkit-scrollbar{ display:none; }
-  .nb-jumpnav a{
-    flex:0 0 auto; display:inline-flex; align-items:center; min-height:40px;
-    padding:0 13px; border:1px solid var(--line); border-radius:999px;
-    font-family:var(--mono); font-size:12px; text-decoration:none;
-    color:var(--ink-soft); background:var(--panel); white-space:nowrap;
-  }
-  .nb-jumpnav a:hover{ color:var(--ink); border-color:var(--faint); }
-  .nb-section-n{
-    font-family:var(--mono); font-size:13px; color:var(--accent);
-    margin-right:8px; letter-spacing:0;
-  }
-</style>
 </head>
 <body class="nb-edition">
 <article class="nb-reading">
@@ -70,18 +51,10 @@
   <h1 class="nb-title">TITLE</h1>
   <p class="nb-dekline">DEK — one italic sentence framing why this matters now.</p>
   <div class="nb-byline">
-    <span>N min read</span><span>N sources</span><span>YYYY-MM-DD</span><span>MODEL</span>
+    <span>N min read</span><span>YYYY-MM-DD</span>
   </div>
 </header>
 
-<nav class="nb-jumpnav" aria-label="Sections">
-  <a href="#orientation">Orientation</a>
-  <a href="#foundations">Foundations</a>
-  <a href="#analysis">Analysis</a>
-  <a href="#debate">Debate</a>
-  <a href="#go-deeper">Go deeper</a>
-  <a href="#sources">Sources</a>
-</nav>
 
 <section data-nb-section="orientation" id="orientation">
   <h2><span class="nb-section-n">01</span>ORIENTATION HEADING</h2>
@@ -136,13 +109,13 @@
 <section class="nb-sources" data-nb-section="sources" id="sources">
   <h2>Sources</h2>
   <ol>
-    <li id="s1">PUBLISHER — TITLE. <a data-nb-source href="https://example.org/replace-1">link</a></li>
-    <li id="s2">PUBLISHER — TITLE. <a data-nb-source href="https://example.org/replace-2">link</a></li>
-    <li id="s3">PUBLISHER — TITLE. <a data-nb-source href="https://example.org/replace-3">link</a></li>
-    <li id="s4">PUBLISHER — TITLE. <a data-nb-source href="https://example.org/replace-4">link</a></li>
-    <li id="s5">PUBLISHER — TITLE. <a data-nb-source href="https://example.org/replace-5">link</a></li>
+    <li id="s1"><a data-nb-source href="https://example.org/replace-1">PUBLISHER — TITLE</a></li>
+    <li id="s2"><a data-nb-source href="https://example.org/replace-2">PUBLISHER — TITLE</a></li>
+    <li id="s3"><a data-nb-source href="https://example.org/replace-3">PUBLISHER — TITLE</a></li>
+    <li id="s4"><a data-nb-source href="https://example.org/replace-4">PUBLISHER — TITLE</a></li>
+    <li id="s5"><a data-nb-source href="https://example.org/replace-5">PUBLISHER — TITLE</a></li>
     <!-- Meet the series source floor. Mark required docs:
-         <a data-nb-source data-nb-required="DOC-ID" href="https://…">link</a> -->
+         <a data-nb-source data-nb-required="DOC-ID" href="https://…">PUBLISHER — TITLE</a> -->
   </ol>
 </section>
 
