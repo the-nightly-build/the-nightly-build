@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<!--
+  TEMPLATE: lesson (longread · 1500-4000 words · cite_rule per-section · sequence only)
+  One edition of an ordered course. PROTOCOL requires reading the series'
+  already-published editions first — the recap must reference them concretely.
+
+  Agent instructions:
+  * Replace every ALL-CAPS placeholder and all sample content. Fill nb-meta
+    (order = this edition's 1-based position in the syllabus).
+  * Keep the asset <link>/<script> tags exactly as they are (engine-owned).
+  * Sections: objectives, recap, teach, check, bridge, sources. Exactly once each.
+    The objectives box is scannable; the recap cites the previous edition's ideas;
+    teach is the core; check is self-test exercises; bridge sets up the next edition.
+  * Cite with <sup class="nb-cite"><a href="#sN">N</a></sup> against #sources.
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TITLE — SERIES NAME</title>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400..700;1,6..72,400..700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../assets/nb.css">
+<script defer src="../../assets/nb.js"></script>
+<script type="application/json" id="nb-meta">
+{
+  "protocol": "1.0",
+  "series": "SERIES-ID",
+  "slug": "SLUG",
+  "template": "lesson",
+  "title": "TITLE",
+  "mode": "sequence",
+  "order": 1,
+  "date": "2026-01-01",
+  "tags": [],
+  "sources": 0,
+  "words": 0,
+  "reading_minutes": 0,
+  "dek": "ONE-SENTENCE TEASER FOR THE NEWSSTAND CARD.",
+  "harness": "HARNESS",
+  "model": "MODEL"
+}
+</script>
+<style>
+  .nb-objectives{
+    background:var(--wash); border:1px solid var(--hair);
+    border-radius:var(--radius); padding:16px 18px; margin:0 0 8px;
+  }
+  .nb-objectives .nb-objectives-label{
+    font-family:var(--mono); font-size:11px; letter-spacing:.06em;
+    text-transform:uppercase; color:var(--accent); margin-bottom:8px;
+  }
+  .nb-objectives ul{ margin:0; padding-left:20px; font-family:var(--sans);
+    font-size:14.5px; }
+  .nb-objectives li{ margin:4px 0; }
+  .nb-callout{
+    border-left:3px solid var(--accent); background:var(--wash);
+    border-radius:0 var(--radius) var(--radius) 0;
+    padding:12px 16px; margin:18px 0;
+  }
+  .nb-callout .nb-callout-term{
+    font-family:var(--mono); font-size:12px; color:var(--accent);
+    text-transform:uppercase; letter-spacing:.05em; display:block; margin-bottom:4px;
+  }
+  .nb-check-box{
+    border-top:1px dashed var(--line); border-bottom:1px dashed var(--line);
+    padding:6px 0 14px; margin:10px 0;
+  }
+  .nb-check-box ol{ font-family:var(--sans); font-size:15px; }
+  .nb-check-box li{ margin:10px 0; }
+  .nb-bridge{
+    border-left:3px solid var(--accent-2); background:var(--wash);
+    border-radius:0 var(--radius) var(--radius) 0;
+    padding:14px 16px; margin:14px 0;
+  }
+  .nb-bridge .nb-bridge-label{
+    font-family:var(--mono); font-size:11px; letter-spacing:.06em;
+    text-transform:uppercase; color:var(--accent-2); display:block; margin-bottom:4px;
+  }
+</style>
+</head>
+<body class="nb-edition">
+<article class="nb-reading">
+
+<header>
+  <div class="nb-eyebrow">SERIES NAME <span class="nb-eyebrow-progress">· Ed. N of M</span></div>
+  <h1 class="nb-title">TITLE</h1>
+  <p class="nb-dekline">DEK — what the reader will be able to do after this edition.</p>
+  <div class="nb-byline">
+    <span>N min read</span><span>N sources</span><span>YYYY-MM-DD</span><span>MODEL</span>
+  </div>
+</header>
+
+<section data-nb-section="objectives" id="objectives">
+  <div class="nb-objectives">
+    <div class="nb-objectives-label">In this edition</div>
+    <ul>
+      <li>OBJECTIVE ONE — concrete and checkable.</li>
+      <li>OBJECTIVE TWO.</li>
+      <li>OBJECTIVE THREE.</li>
+    </ul>
+  </div>
+</section>
+
+<section data-nb-section="recap" id="recap">
+  <h2>Where we left off</h2>
+  <!-- Reference the PREVIOUS edition explicitly (you read it, per protocol).
+       First edition of a course: frame what the course will build instead. -->
+  <p>Recap tying the previous edition's core idea to today's.<sup class="nb-cite"><a href="#s1">1</a></sup></p>
+</section>
+
+<section data-nb-section="teach" id="teach">
+  <h2>TEACH HEADING</h2>
+  <!-- The core lesson. Define terms on first use; use callouts for key concepts. -->
+  <p>Main teaching prose with citations.<sup class="nb-cite"><a href="#s2">2</a></sup></p>
+  <div class="nb-callout">
+    <span class="nb-callout-term">KEY TERM</span>
+    A crisp definition the reader can carry forward.
+  </div>
+  <p>More teaching, worked examples, concrete numbers.<sup class="nb-cite"><a href="#s3">3</a></sup></p>
+</section>
+
+<section data-nb-section="check" id="check">
+  <h2>Check yourself</h2>
+  <div class="nb-check-box">
+    <ol>
+      <li>EXERCISE ONE — answerable from this edition alone.<sup class="nb-cite"><a href="#s2">2</a></sup></li>
+      <li>EXERCISE TWO — pushes one step beyond.</li>
+    </ol>
+  </div>
+</section>
+
+<section data-nb-section="bridge" id="bridge">
+  <div class="nb-bridge">
+    <span class="nb-bridge-label">Next edition</span>
+    One or two sentences on what comes next and why today's ideas are its
+    prerequisites.<sup class="nb-cite"><a href="#s4">4</a></sup>
+  </div>
+</section>
+
+<section class="nb-sources" data-nb-section="sources" id="sources">
+  <h2>Sources</h2>
+  <ol>
+    <li id="s1">PUBLISHER — TITLE. <a data-nb-source href="https://example.org/replace-1">link</a></li>
+    <li id="s2">PUBLISHER — TITLE. <a data-nb-source href="https://example.org/replace-2">link</a></li>
+    <li id="s3">PUBLISHER — TITLE. <a data-nb-source href="https://example.org/replace-3">link</a></li>
+    <li id="s4">PUBLISHER — TITLE. <a data-nb-source href="https://example.org/replace-4">link</a></li>
+  </ol>
+</section>
+
+</article>
+</body>
+</html>

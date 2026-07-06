@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<!--
+  TEMPLATE: brief (shortread · 4-8 items · cite_rule per-item · rolling only)
+  Tonight's developments on one topic. Slug and nb-meta date are today's UTC date.
+
+  Agent instructions:
+  * Replace every ALL-CAPS placeholder and all sample content. Fill nb-meta.
+  * Keep the asset <link>/<script> tags exactly as they are (engine-owned).
+  * 4-8 items. Each item: mono topic tag, serif headline with a citation,
+    1-2 sentence body, and a "Why it matters" line (data-nb-why — checked).
+  * Items may reference this series' own prior briefs ("we've been tracking…").
+  * Cite with <sup class="nb-cite"><a href="#sN">N</a></sup> against #sources.
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SERIES NAME — YYYY-MM-DD</title>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400..700;1,6..72,400..700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../assets/nb.css">
+<script defer src="../../assets/nb.js"></script>
+<script type="application/json" id="nb-meta">
+{
+  "protocol": "1.0",
+  "series": "SERIES-ID",
+  "slug": "2026-01-01",
+  "template": "brief",
+  "title": "TITLE",
+  "mode": "rolling",
+  "order": null,
+  "date": "2026-01-01",
+  "tags": [],
+  "sources": 0,
+  "words": 0,
+  "reading_minutes": 0,
+  "dek": "ONE-SENTENCE TEASER FOR THE NEWSSTAND CARD.",
+  "harness": "HARNESS",
+  "model": "MODEL"
+}
+</script>
+<style>
+  /* short-form body reads in sans; headlines stay serif */
+  .nb-brief-item{
+    display:block; padding:18px 0; border-bottom:1px solid var(--hair);
+  }
+  .nb-brief-item:last-child{ border-bottom:0; }
+  .nb-brief-tag{
+    font-family:var(--mono); font-size:11px; letter-spacing:.06em;
+    text-transform:uppercase; color:var(--accent);
+    display:block; margin-bottom:6px;
+  }
+  .nb-brief-item h3{
+    font-family:var(--serif); font-size:19px; line-height:1.3;
+    letter-spacing:-0.01em; margin:0 0 8px;
+  }
+  .nb-brief-item p{
+    font-family:var(--sans); font-size:15px; color:var(--ink-soft); margin:0 0 8px;
+  }
+  .nb-brief-item p[data-nb-why]{ color:var(--ink); }
+  .nb-brief-item p[data-nb-why] b{ color:var(--accent); }
+  @media (min-width:641px){
+    /* tag moves to a side column on desktop */
+    .nb-brief-item{ display:grid; grid-template-columns:110px 1fr; gap:0 18px; }
+    .nb-brief-tag{ margin-top:4px; }
+    .nb-brief-item h3, .nb-brief-item p{ grid-column:2; }
+  }
+</style>
+</head>
+<body class="nb-edition">
+<article class="nb-reading">
+
+<header>
+  <div class="nb-eyebrow">SERIES NAME</div>
+  <h1 class="nb-title">TITLE</h1>
+  <p class="nb-dekline">DEK — the night's through-line in one sentence.</p>
+  <div class="nb-byline">
+    <span>N min read</span><span>N sources</span><span>YYYY-MM-DD</span><span>MODEL</span>
+  </div>
+</header>
+
+<section data-nb-section="items" id="items">
+
+  <div class="nb-brief-item" data-nb-item>
+    <span class="nb-brief-tag">TOPIC TAG</span>
+    <h3>HEADLINE FOR THE DEVELOPMENT<sup class="nb-cite"><a href="#s1">1</a></sup></h3>
+    <p>One to two sentences: what happened and the immediate context, grounded
+    in the cited source.</p>
+    <p data-nb-why><b>Why it matters →</b> the connection to the larger story
+    this series tracks.</p>
+  </div>
+
+  <div class="nb-brief-item" data-nb-item>
+    <span class="nb-brief-tag">TOPIC TAG</span>
+    <h3>HEADLINE<sup class="nb-cite"><a href="#s2">2</a></sup></h3>
+    <p>WHAT HAPPENED.</p>
+    <p data-nb-why><b>Why it matters →</b> WHY.</p>
+  </div>
+
+  <div class="nb-brief-item" data-nb-item>
+    <span class="nb-brief-tag">TOPIC TAG</span>
+    <h3>HEADLINE<sup class="nb-cite"><a href="#s3">3</a></sup></h3>
+    <p>WHAT HAPPENED.</p>
+    <p data-nb-why><b>Why it matters →</b> WHY.</p>
+  </div>
+
+  <div class="nb-brief-item" data-nb-item>
+    <span class="nb-brief-tag">TOPIC TAG</span>
+    <h3>HEADLINE<sup class="nb-cite"><a href="#s4">4</a></sup></h3>
+    <p>WHAT HAPPENED.</p>
+    <p data-nb-why><b>Why it matters →</b> WHY.</p>
+  </div>
+
+  <!-- 4-8 items total -->
+
+</section>
+
+<section class="nb-sources" data-nb-section="sources" id="sources">
+  <h2>Sources</h2>
+  <ol>
+    <li id="s1">PUBLISHER — TITLE. <a data-nb-source href="https://example.org/replace-1">link</a></li>
+    <li id="s2">PUBLISHER — TITLE. <a data-nb-source href="https://example.org/replace-2">link</a></li>
+    <li id="s3">PUBLISHER — TITLE. <a data-nb-source href="https://example.org/replace-3">link</a></li>
+    <li id="s4">PUBLISHER — TITLE. <a data-nb-source href="https://example.org/replace-4">link</a></li>
+    <li id="s5">PUBLISHER — TITLE. <a data-nb-source href="https://example.org/replace-5">link</a></li>
+  </ol>
+</section>
+
+</article>
+</body>
+</html>

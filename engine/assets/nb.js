@@ -309,6 +309,24 @@
     });
   }
 
+  /* ------------------------------------------------------------- deck keys */
+
+  function bindDeck() {
+    var deck = document.querySelector(".nb-deck");
+    if (!deck) return;
+    document.addEventListener("keydown", function (ev) {
+      if (ev.key !== "ArrowRight" && ev.key !== "ArrowLeft") return;
+      var slide = deck.querySelector(".nb-slide");
+      if (!slide) return;
+      ev.preventDefault();
+      var dx = slide.getBoundingClientRect().width + 14;
+      deck.scrollBy({
+        left: ev.key === "ArrowRight" ? dx : -dx,
+        behavior: "smooth",
+      });
+    });
+  }
+
   /* ------------------------------------------------------------------ init */
 
   function init() {
@@ -322,6 +340,7 @@
 
     renderCharts();
     bindSearch();
+    bindDeck();
   }
 
   if (document.readyState === "loading") {
