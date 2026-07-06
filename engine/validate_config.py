@@ -23,12 +23,12 @@ except ImportError:  # pragma: no cover
 
 SERIES_ID_RE = re.compile(r"^[a-z0-9-]{1,32}$")
 SLUG_RE = re.compile(r"^[a-z0-9-]{1,64}$")
-MODES = {"collection", "sequence", "rolling"}
+MODES = {"collection", "sequence", "rolling", "open"}
 TEMPLATE_KEYS = {"class", "words", "items", "slides", "sections", "cite_rule",
                  "modes", "furniture"}
 CITE_RULES = {"per-section", "per-item", "per-slide"}
-SERIES_KEYS = {"name", "mode", "template", "prompt", "autopublish", "strict",
-               "min_sources", "words", "items", "tags", "consult",
+SERIES_KEYS = {"name", "mode", "template", "templates", "prompt", "autopublish",
+               "strict", "min_sources", "words", "items", "tags", "consult",
                "required_docs", "sources_exclusive", "cadence", "paused",
                "selection"}
 DAY_NAMES = ("mon", "tue", "wed", "thu", "fri", "sat", "sun")
@@ -146,13 +146,34 @@ def check_series(repo, registry, errors):
             elif mode != "collection":
                 errors.append(f"{where}: 'selection' only applies to "
                               f"collection mode")
-        template = cfg.get("template")
-        treg = registry.get(template)
-        if not treg:
-            errors.append(f"{where}: template '{template}' not in the registry")
-        elif mode in MODES and mode not in (treg.get("modes") or []):
-            errors.append(f"{where}: mode '{mode}' not allowed for template "
-                          f"'{template}' (allowed: {treg.get('modes')})")
+        templates = cfg.get("templates")
+        if templates is not None and mode != "open":
+            errors.append(f"{where}: 'templates' (a choice list) is only valid "
+                          f"in open mode; use 'template'")
+            templates = None
+        if templates is not None and (not isinstance(templates, list)
+                                      or not templates):
+            errors.append(f"{where}: 'templates' must be a non-empty list")
+            templates = None
+        if mode == "open" and templates and cfg.get("template"):
+            errors.append(f"{where}: use 'template' or 'templates', not both")
+        if mode == "open" and not templates and not cfg.get("template"):
+            errors.append(f"{where}: open mode requires 'template' or a "
+                          f"'templates' choice list")
+            allowed = []
+        else:
+            allowed = templates or [cfg.get("template")]
+        tregs = []
+        for template in allowed:
+            treg = registry.get(template)
+            if not treg:
+                errors.append(f"{where}: template '{template}' not in the registry")
+            else:
+                tregs.append(treg)
+                if mode in MODES and mode not in (treg.get("modes") or []):
+                    errors.append(f"{where}: mode '{mode}' not allowed for "
+                                  f"template '{template}' "
+                                  f"(allowed: {treg.get('modes')})")
         prompt = cfg.get("prompt")
         if prompt and not os.path.isfile(os.path.join(root, sid, prompt)):
             errors.append(f"{where}: prompt file '{prompt}' not found")
@@ -161,14 +182,14 @@ def check_series(repo, registry, errors):
                 errors.append(f"{where}: tag '{tag}' fragment '{frag}' not found")
         words = cfg.get("words")
         if words is not None:
-            reg_band = (treg or {}).get("words")
+            floors = [t["words"][0] for t in tregs if t.get("words")]
             if not (isinstance(words, list) and len(words) == 2
                     and all(isinstance(x, int) for x in words)
                     and words[0] <= words[1]):
                 errors.append(f"{where}: 'words' must be [low, high] integers")
-            elif reg_band and words[0] < reg_band[0]:
+            elif floors and words[0] < max(floors):
                 errors.append(f"{where}: words floor {words[0]} loosens the "
-                              f"registry floor {reg_band[0]} (may only tighten)")
+                              f"registry floor {max(floors)} (may only tighten)")
         items = cfg.get("items") or []
         if mode in ("collection", "sequence") and not items:
             errors.append(f"{where}: {mode} mode requires 'items'")

@@ -8,7 +8,7 @@ dossier:
   words: [2500, 6000]
   sections: [orientation, foundations, analysis, debate, go-deeper, sources]
   cite_rule: per-section
-  modes: [collection, sequence]
+  modes: [collection, sequence, open]
   furniture: [jump-nav, stat-strip, charts]
 
 lesson:
@@ -16,7 +16,7 @@ lesson:
   words: [1500, 4000]
   sections: [objectives, recap, teach, check, bridge, sources]
   cite_rule: per-section
-  modes: [sequence]
+  modes: [sequence, open]
   furniture: [objectives-box, callouts, self-check, next-bridge]
 
 brief:
@@ -24,7 +24,7 @@ brief:
   items: [4, 8]
   sections: [items, sources]
   cite_rule: per-item
-  modes: [rolling]
+  modes: [rolling, open]
   furniture: [tagged-items, why-it-matters]
 
 paper:
@@ -32,7 +32,7 @@ paper:
   words: [1200, 2500]
   sections: [abstract, findings, appraisal, verdict, sources]
   cite_rule: per-section
-  modes: [collection, rolling]
+  modes: [collection, rolling, open]
   furniture: [plain-abstract, holds-up-grid, verdict-box]
 
 chronicle:
@@ -40,7 +40,7 @@ chronicle:
   words: [2000, 4500]
   sections: [orientation, timeline, echoes, sources]
   cite_rule: per-section
-  modes: [sequence, collection]
+  modes: [sequence, collection, open]
   furniture: [timeline-spine, echoes-today]
 
 deck:
@@ -48,5 +48,5 @@ deck:
   slides: [8, 15]
   sections: [slides, sources]
   cite_rule: per-slide
-  modes: [collection, sequence]
+  modes: [collection, sequence, open]
   furniture: [scroll-snap-slides, big-stat, print-one-per-page]

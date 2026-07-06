@@ -491,6 +491,74 @@ for name, cond in [
         FAIL.append(name)
         print(f"  FAIL {name}")
 
+print("== open mode (the hands-off desk) ==")
+
+OPEN_YAML = """name: Wildcard
+mode: open
+templates: [dossier, chronicle]
+prompt: prompt.md
+autopublish: true
+strict: false
+min_sources: 8
+"""
+
+
+def open_repo(series_yaml=OPEN_YAML):
+    tmp = tempfile.mkdtemp()
+    for sub in ("press", "templates", "engine"):
+        shutil.copytree(pathlib.Path(TESTREPO) / sub, pathlib.Path(tmp) / sub)
+    d = pathlib.Path(tmp) / "press" / "series" / "wildcard"
+    d.mkdir()
+    (d / "series.yaml").write_text(series_yaml)
+    (d / "prompt.md").write_text("Anything about the AI stack.\n")
+    return tmp
+
+
+OPEN_ED = (VALID
+           .replace('"series": "semiconductors", "slug": "micron",',
+                    '"series": "wildcard", "slug": "the-cuda-moat",')
+           .replace('"mode": "collection"', '"mode": "open"')
+           .replace(' data-nb-required="mu-10k-2025"', ''))
+orepo = open_repo()
+olib = make_library({"wildcard": []})
+expect("open freestyle pick is BLOCK-clean",
+       run_local(OPEN_ED, "wildcard", slug="the-cuda-moat", repo=orepo,
+                 library=olib), blocks=0)
+expect("open duplicate slug blocked",
+       run_local(OPEN_ED, "wildcard", slug="the-cuda-moat", repo=orepo,
+                 library=make_library({"wildcard": ["the-cuda-moat"]})),
+       must_have=["B-MODE"])
+expect("open template outside the choice list blocked",
+       run_local(OPEN_ED, "wildcard", slug="the-cuda-moat",
+                 repo=open_repo(OPEN_YAML.replace(
+                     "templates: [dossier, chronicle]",
+                     "templates: [chronicle]")), library=olib),
+       must_have=["B-META-MATCH"])
+
+queue_repo = open_repo(OPEN_YAML + "items:\n"
+                       "  - {slug: commissioned-piece, title: On Commission}\n")
+expect("pending commission blocks a freestyle pick",
+       run_local(OPEN_ED, "wildcard", slug="the-cuda-moat", repo=queue_repo,
+                 library=olib), must_have=["B-MODE"])
+expect("publishing the commissioned item is BLOCK-clean",
+       run_local(OPEN_ED.replace("the-cuda-moat", "commissioned-piece"),
+                 "wildcard", slug="commissioned-piece", repo=queue_repo,
+                 library=olib), blocks=0)
+for name, cond in [
+    ("open series with a templates list validates", vc_rc(orepo) == 0),
+    ("'templates' on a non-open series rejected",
+     vc_rc(patched_repo("templates: [dossier]\n")) == 1),
+    ("open mode without any template rejected",
+     vc_rc(open_repo(OPEN_YAML.replace("templates: [dossier, chronicle]\n",
+                                       ""))) == 1),
+]:
+    if cond:
+        PASS += 1
+        print(f"  ok   {name}")
+    else:
+        FAIL.append(name)
+        print(f"  FAIL {name}")
+
 print("== PR mode (real git repo) ==")
 
 

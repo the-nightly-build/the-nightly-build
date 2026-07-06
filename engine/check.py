@@ -334,7 +334,7 @@ def validate_meta_fields(meta, rep):
     # B-META-MATCH) — user templates in press/templates/ are first-class
     need("template", str)
     need("title", str)
-    need("mode", str, enum=["collection", "sequence", "rolling"])
+    need("mode", str, enum=["collection", "sequence", "rolling", "open"])
     need("date", str, pattern=DATE_RE.pattern)
     need("dek", str)
     need("sources", int)
@@ -363,16 +363,39 @@ def check_edition(html_path, series_id, repo, library_dir, rep,
         rep.block("B-SERIES", f"templates/registry.yaml unreadable: {e}")
         return None
 
-    template_id = series.get("template")
-    treg = (registry or {}).get(template_id)
-    if not treg:
-        rep.block("B-SERIES",
-                  f"series template '{template_id}' not in templates/registry.yaml")
-        return None
-    if series.get("mode") not in (treg.get("modes") or []):
-        rep.block("B-SERIES",
-                  f"series mode '{series.get('mode')}' not allowed for template "
-                  f"'{template_id}' (allowed: {treg.get('modes')})")
+    mode_cfg = series.get("mode")
+    if mode_cfg == "open":
+        # open series pick a template per edition; nb-meta names the choice,
+        # resolved after the meta block parses
+        allowed_templates = (series.get("templates")
+                             or ([series["template"]] if series.get("template")
+                                 else []))
+        unknown = [t for t in allowed_templates if t not in (registry or {})]
+        if not allowed_templates or unknown:
+            rep.block("B-SERIES",
+                      f"open series templates {unknown or 'missing'} not in "
+                      f"templates/registry.yaml")
+            return None
+        for t in allowed_templates:
+            if "open" not in (registry[t].get("modes") or []):
+                rep.block("B-SERIES",
+                          f"mode 'open' not allowed for template '{t}' "
+                          f"(allowed: {registry[t].get('modes')})")
+        # placeholder registry entry; the real one is bound from nb-meta
+        # right after it parses (or the check returns early)
+        template_id, treg = None, {}
+    else:
+        allowed_templates = []
+        template_id = series.get("template")
+        treg = (registry or {}).get(template_id)
+        if not treg:
+            rep.block("B-SERIES",
+                      f"series template '{template_id}' not in templates/registry.yaml")
+            return None
+        if mode_cfg not in (treg.get("modes") or []):
+            rep.block("B-SERIES",
+                      f"series mode '{mode_cfg}' not allowed for template "
+                      f"'{template_id}' (allowed: {treg.get('modes')})")
 
     # --- file existence / size ---
     if not os.path.isfile(html_path):
@@ -404,6 +427,18 @@ def check_edition(html_path, series_id, repo, library_dir, rep,
         rep.block("B-META-PARSE", f"nb-meta JSON invalid: {e}")
         return None
     validate_meta_fields(meta, rep)
+
+    if mode_cfg == "open":
+        template_id = meta.get("template")
+        treg = (registry or {}).get(template_id)
+        if treg is None:
+            rep.block("B-META-MATCH",
+                      f"nb-meta template '{template_id}' not in templates/registry.yaml")
+            return None
+        if template_id not in allowed_templates:
+            rep.block("B-META-MATCH",
+                      f"nb-meta template '{template_id}' is not one of the "
+                      f"series' allowed templates {allowed_templates}")
 
     # --- path <-> meta agreement (B-META-MATCH) ---
     fname = os.path.basename(html_path)
@@ -491,6 +526,20 @@ def check_edition(html_path, series_id, repo, library_dir, rep,
         if pub is None:
             rep.note("library state not provided (--library); "
                      "already-published check skipped")
+    elif mode == "open":
+        item_cfg = next((it for it in items if it.get("slug") == slug), None)
+        if pub is None:
+            rep.note("library state not provided (--library); "
+                     "open-mode dedupe and commission checks skipped")
+        else:
+            if slug in pub:
+                rep.block("B-MODE", f"'{slug}' is already published")
+            pending = sorted(it.get("slug") for it in items
+                             if it.get("slug") not in pub)
+            if pending and slug not in pending:
+                rep.block("B-MODE",
+                          f"commissioned items pending: {pending} — publish a "
+                          f"commission before an open pick")
 
     # --- B-HTML: required sections ---
     required_sections = treg.get("sections") or []
