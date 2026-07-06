@@ -390,6 +390,12 @@ expect("PR modifying engine code", run_pr(mutate=modify_engine),
        must_have=["B-DIFF-SHAPE"])
 
 print()
+print("== builder suite (run_builder_tests.py) ==")
+builder = subprocess.run([sys.executable, str(HERE / "run_builder_tests.py")])
+if builder.returncode != 0:
+    FAIL.append("builder suite")
+
+print()
 print(f"{PASS} passed, {len(FAIL)} failed")
 if FAIL:
     print("FAILED:", FAIL)
