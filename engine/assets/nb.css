@@ -1,0 +1,314 @@
+/* The Nightly Build — site chrome + shared edition chrome.
+   All colors/fonts come from the theme token file (see themes/newspaper.css).
+   Mobile (≤640px) is the primary design surface. */
+
+*,*::before,*::after{ box-sizing:border-box; }
+html{ -webkit-text-size-adjust:100%; }
+body{
+  margin:0; background:var(--bg); color:var(--ink);
+  font-family:var(--sans); font-size:16px; line-height:1.55;
+}
+a{ color:inherit; }
+img{ max-width:100%; }
+
+.nb-wrap{ max-width:960px; margin:0 auto; padding:0 16px; }
+.nb-reading{ max-width:720px; margin:0 auto; padding:0 16px; }
+
+/* ---------------------------------------------------------------- masthead */
+.nb-masthead{ border-bottom:2px solid var(--ink); padding:14px 0 10px; }
+.nb-masthead-row{ display:flex; align-items:baseline; gap:12px; flex-wrap:wrap; }
+.nb-site-title{
+  font-family:var(--serif); font-size:clamp(22px,5vw,30px); font-weight:700;
+  letter-spacing:-0.015em; margin:0; text-decoration:none;
+}
+.nb-site-title .nb-period{ color:var(--accent); }
+.nb-masthead-date{
+  font-family:var(--mono); font-size:12px; color:var(--ink-soft);
+  text-transform:uppercase; letter-spacing:.04em;
+}
+.nb-masthead-tools{ margin-left:auto; display:flex; align-items:center; gap:8px; }
+
+/* appearance toggle: ◐ auto → ○ light → ● dark */
+.nb-appearance{
+  font-family:var(--mono); font-size:13px; line-height:1;
+  min-width:40px; min-height:40px; padding:0 10px;
+  background:var(--panel); color:var(--ink);
+  border:1px solid var(--line); border-radius:var(--radius); cursor:pointer;
+}
+.nb-appearance:hover{ border-color:var(--faint); }
+
+/* nav row: swipeable pills */
+.nb-nav{
+  display:flex; gap:6px; overflow-x:auto; -webkit-overflow-scrolling:touch;
+  padding:10px 0 2px; scrollbar-width:none;
+}
+.nb-nav::-webkit-scrollbar{ display:none; }
+.nb-nav a{
+  flex:0 0 auto; display:inline-flex; align-items:center; min-height:40px;
+  padding:0 14px; border:1px solid var(--line); border-radius:999px;
+  font-family:var(--mono); font-size:12.5px; text-decoration:none;
+  color:var(--ink-soft); background:var(--panel); white-space:nowrap;
+}
+.nb-nav a[aria-current]{ color:var(--ink); border-color:var(--ink); }
+.nb-nav a:hover{ color:var(--ink); }
+
+/* search */
+.nb-search{ position:relative; margin:10px 0 0; }
+.nb-search input{
+  width:100%; min-height:40px; padding:8px 12px;
+  background:var(--panel); color:var(--ink);
+  border:1px solid var(--line); border-radius:var(--radius);
+  font-family:var(--sans); font-size:15px;
+}
+.nb-search input:focus{ outline:2px solid var(--accent-2); outline-offset:1px; }
+.nb-search-results{
+  position:absolute; z-index:30; left:0; right:0; top:calc(100% + 4px);
+  background:var(--panel); border:1px solid var(--line); border-radius:var(--radius);
+  box-shadow:0 8px 24px rgba(0,0,0,.12); max-height:60vh; overflow-y:auto;
+}
+.nb-search-results:empty{ display:none; }
+.nb-search-results a{
+  display:block; padding:10px 12px; text-decoration:none;
+  border-bottom:1px solid var(--hair);
+}
+.nb-search-results a:last-child{ border-bottom:0; }
+.nb-search-results .t{ font-family:var(--serif); font-size:15.5px; }
+.nb-search-results .m{ font-family:var(--mono); font-size:11px; color:var(--faint); }
+.nb-search-empty{ padding:10px 12px; font-family:var(--mono); font-size:12px; color:var(--faint); }
+
+/* ------------------------------------------------------------- rule labels */
+.nb-rule-label{
+  display:flex; align-items:center; gap:10px; margin:26px 0 14px;
+  font-family:var(--mono); font-size:12px; letter-spacing:.05em;
+  text-transform:uppercase; color:var(--ink-soft);
+}
+.nb-rule-label::after{ content:""; flex:1; border-top:1px solid var(--line); }
+
+/* ------------------------------------------------------------------- cards */
+.nb-cards{ display:grid; grid-template-columns:1fr; gap:14px; }
+.nb-card{
+  display:block; text-decoration:none; background:var(--panel);
+  border:1px solid var(--line); border-radius:var(--radius); padding:16px;
+}
+.nb-card:hover{ border-color:var(--faint); }
+.nb-card .nb-card-context{
+  font-family:var(--mono); font-size:11.5px; color:var(--ink-soft);
+  text-transform:uppercase; letter-spacing:.04em; margin:8px 0 6px;
+}
+.nb-card h3{
+  font-family:var(--serif); font-size:20px; line-height:1.25;
+  letter-spacing:-0.01em; margin:0 0 6px;
+}
+.nb-card .nb-dek{
+  font-family:var(--serif); font-style:italic; color:var(--ink-soft);
+  font-size:15px; margin:0 0 10px;
+}
+.nb-card-meta{
+  display:flex; flex-wrap:wrap; gap:10px; align-items:center;
+  font-family:var(--mono); font-size:11.5px; color:var(--faint);
+}
+.nb-new-dot{ color:var(--accent); }
+.nb-badge{
+  display:inline-block; font-family:var(--mono); font-size:10.5px;
+  text-transform:uppercase; letter-spacing:.06em; color:var(--accent-2);
+  border:1px solid currentColor; border-radius:999px; padding:2px 9px;
+}
+.nb-card-lead h3{ font-size:26px; }
+/* non-lead deks clamp to one line on the mobile feed; full dek lives on the edition */
+.nb-card:not(.nb-card-lead) .nb-dek{
+  display:-webkit-box; -webkit-line-clamp:1; -webkit-box-orient:vertical;
+  overflow:hidden;
+}
+@media (min-width:641px){
+  .nb-cards{ grid-template-columns:repeat(2,1fr); }
+  .nb-card-lead{ grid-column:span 2; }
+  .nb-card:not(.nb-card-lead) .nb-dek{ -webkit-line-clamp:2; }
+}
+
+/* ------------------------------------------------------------ empty states */
+.nb-empty{
+  border:1px dashed var(--line); border-radius:var(--radius);
+  padding:36px 20px; text-align:center; color:var(--ink-soft);
+}
+.nb-empty h2{ font-family:var(--serif); margin:0 0 6px; color:var(--ink); }
+.nb-empty p{ font-size:14.5px; margin:0; }
+
+/* ----------------------------------------------------------- series strips */
+.nb-strip{
+  display:flex; align-items:center; gap:12px; padding:12px 4px;
+  border-bottom:1px solid var(--hair); text-decoration:none; min-height:44px;
+}
+.nb-strip .nb-strip-name{ font-family:var(--serif); font-size:17px; flex:1; min-width:0; }
+.nb-strip .nb-strip-info{
+  font-family:var(--mono); font-size:11.5px; color:var(--faint); white-space:nowrap;
+}
+.nb-progress{
+  flex:0 0 72px; height:4px; border-radius:2px; background:var(--hair); overflow:hidden;
+}
+.nb-progress b{ display:block; height:100%; background:var(--accent); }
+
+/* ---------------------------------------------------------- date navigator */
+.nb-dates{ display:flex; flex-wrap:wrap; gap:6px; }
+.nb-dates a{
+  font-family:var(--mono); font-size:12px; text-decoration:none;
+  color:var(--ink-soft); border:1px solid var(--line); border-radius:var(--radius);
+  padding:8px 10px; min-height:40px; display:inline-flex; align-items:center;
+}
+.nb-dates a:hover{ color:var(--ink); border-color:var(--faint); }
+.nb-dates a[aria-current]{ color:var(--ink); border-color:var(--ink); }
+.nb-month-label{
+  width:100%; font-family:var(--mono); font-size:11px; text-transform:uppercase;
+  letter-spacing:.05em; color:var(--faint); margin:10px 0 2px;
+}
+
+/* prev / next pager */
+.nb-pager{ display:flex; justify-content:space-between; gap:12px; margin:22px 0; }
+.nb-pager a{
+  font-family:var(--mono); font-size:12.5px; text-decoration:none;
+  color:var(--accent-2); min-height:40px; display:inline-flex; align-items:center;
+}
+
+/* ------------------------------------------------------------ series pages */
+.nb-seq{ list-style:none; margin:0; padding:0; counter-reset:ed; }
+.nb-seq li{ border-bottom:1px solid var(--hair); }
+.nb-seq a, .nb-seq .nb-seq-unpub{
+  display:flex; gap:14px; align-items:baseline; padding:14px 4px;
+  text-decoration:none; min-height:44px;
+}
+.nb-seq .nb-seq-n{
+  font-family:var(--mono); font-size:12px; color:var(--faint); flex:0 0 2em;
+}
+.nb-seq .nb-seq-t{ font-family:var(--serif); font-size:17px; flex:1; }
+.nb-seq .nb-seq-unpub{ color:var(--faint); }
+.nb-continue{
+  display:inline-flex; align-items:center; min-height:40px; padding:0 14px;
+  border-radius:999px; background:var(--accent); color:#fff;
+  font-family:var(--mono); font-size:12.5px; text-decoration:none;
+}
+.nb-series-head{ margin:20px 0 4px; }
+.nb-series-head h1{
+  font-family:var(--serif); font-size:clamp(24px,6vw,32px);
+  letter-spacing:-0.015em; margin:0 0 4px;
+}
+.nb-series-head .nb-series-sub{
+  font-family:var(--mono); font-size:12px; color:var(--ink-soft);
+  text-transform:uppercase; letter-spacing:.04em;
+}
+.nb-progress-wide{ height:5px; border-radius:3px; background:var(--hair);
+  overflow:hidden; margin:12px 0 4px; }
+.nb-progress-wide b{ display:block; height:100%; background:var(--accent); }
+
+/* -------------------------------------------------------- press-check mode */
+.nb-presscheck-banner{
+  background:var(--accent); color:#fff; font-family:var(--mono);
+  font-size:12px; letter-spacing:.06em; text-transform:uppercase;
+  text-align:center; padding:8px 12px;
+}
+.nb-draft-tag{
+  display:inline-block; font-family:var(--mono); font-size:10.5px;
+  text-transform:uppercase; letter-spacing:.06em; color:#fff;
+  background:var(--accent); border-radius:999px; padding:2px 9px;
+}
+
+/* ----------------------------------------------------------------- footer */
+.nb-footer{
+  margin:44px 0 0; padding:18px 0 34px; border-top:1px solid var(--line);
+  font-family:var(--mono); font-size:11.5px; color:var(--faint);
+}
+.nb-footer a{ color:var(--ink-soft); }
+
+/* ============================ edition chrome ============================ */
+/* Templates rely on these classes so every edition shares one visual system. */
+
+.nb-edition{ font-family:var(--serif); font-size:16px; line-height:1.65; }
+.nb-edition .nb-eyebrow{
+  font-family:var(--mono); font-size:12px; letter-spacing:.06em;
+  text-transform:uppercase; color:var(--accent); margin:26px 0 10px;
+}
+.nb-edition .nb-eyebrow .nb-eyebrow-progress{ color:var(--ink-soft); }
+.nb-edition h1.nb-title{
+  font-size:clamp(24px,6.5vw,32px); line-height:1.18; letter-spacing:-0.015em;
+  margin:0 0 10px;
+}
+.nb-edition .nb-dekline{
+  font-style:italic; color:var(--ink-soft); font-size:18px; margin:0 0 16px;
+}
+.nb-byline{
+  display:flex; flex-wrap:wrap; gap:12px; font-family:var(--mono);
+  font-size:11.5px; color:var(--ink-soft); padding-bottom:12px;
+  border-bottom:2px solid var(--ink); margin-bottom:26px;
+}
+.nb-edition h2{
+  font-size:22px; letter-spacing:-0.01em; margin:34px 0 10px; line-height:1.25;
+}
+.nb-edition h3{ font-size:18px; margin:24px 0 8px; }
+.nb-edition p{ margin:0 0 14px; }
+.nb-edition blockquote{
+  margin:18px 0; padding:2px 0 2px 16px; border-left:3px solid var(--accent);
+  color:var(--ink-soft); font-style:italic;
+}
+
+/* inline citations: small mono chips */
+sup.nb-cite{ line-height:0; }
+sup.nb-cite a{
+  font-family:var(--mono); font-size:10px; font-style:normal;
+  text-decoration:none; color:var(--accent-2);
+  border:1px solid var(--hair); border-radius:3px; padding:0 3px;
+}
+sup.nb-cite a:hover{ border-color:var(--accent-2); }
+
+/* sources list */
+.nb-sources ol{ padding-left:22px; font-family:var(--sans); font-size:13.5px; }
+.nb-sources li{ margin:0 0 8px; color:var(--ink-soft); }
+.nb-sources a{ color:var(--accent-2); word-break:break-all; }
+
+/* charts */
+figure.nb-chart{
+  margin:22px 0; padding:14px; background:var(--wash);
+  border:1px solid var(--hair); border-radius:var(--radius);
+}
+figure.nb-chart figcaption{
+  font-family:var(--mono); font-size:11.5px; color:var(--ink-soft); margin-bottom:8px;
+}
+figure.nb-chart canvas{ width:100%; max-height:260px; }
+figure.nb-chart noscript{
+  display:block; font-family:var(--mono); font-size:12px; color:var(--faint);
+}
+
+/* contextual nav injected into editions by nb.js */
+.nb-context-nav{
+  font-family:var(--mono); font-size:12px; margin:40px 0 30px;
+  border-top:1px solid var(--line); padding-top:14px;
+  display:flex; flex-direction:column; gap:10px;
+}
+.nb-context-nav a{
+  color:var(--accent-2); text-decoration:none; min-height:40px;
+  display:inline-flex; align-items:center;
+}
+.nb-context-nav .nb-context-row{
+  display:flex; justify-content:space-between; gap:12px; flex-wrap:wrap;
+}
+
+/* stat strips (dossier furniture, also used on site pages) */
+.nb-stat-strip{
+  display:grid; grid-template-columns:repeat(auto-fit,minmax(130px,1fr));
+  gap:1px; background:var(--line); border:1px solid var(--line);
+  border-radius:var(--radius); overflow:hidden; margin:20px 0;
+}
+.nb-stat{ background:var(--panel); padding:12px; }
+.nb-stat .nb-stat-n{
+  font-family:var(--mono); font-size:20px; color:var(--accent); display:block;
+}
+.nb-stat .nb-stat-l{
+  font-family:var(--mono); font-size:10.5px; color:var(--faint);
+  text-transform:uppercase; letter-spacing:.05em;
+}
+
+/* ------------------------------------------------------------- responsive */
+@media (max-width:640px){
+  body{ font-size:15.5px; }
+  figure.nb-chart canvas{ max-height:180px; }
+}
+@media print{
+  .nb-masthead, .nb-nav, .nb-search, .nb-context-nav, .nb-appearance{ display:none !important; }
+}

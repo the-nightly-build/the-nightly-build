@@ -1,0 +1,34 @@
+/* The Nightly Build — default theme: "modern digital newspaper".
+   The theme contract: define exactly these variables. Base tokens are LIGHT —
+   light is the fallback for every degraded case (no JS, no media queries, print).
+   Dark applies only when the system asks (auto) or the user forces it. */
+:root{  /* LIGHT — the base and universal fallback */
+  --bg:#FCFBF9; --panel:#FFFFFF; --wash:#F3F1EC;
+  --ink:#171614; --ink-soft:#57554F; --faint:#94918A;
+  --accent:#C63D17; --accent-2:#33608F;
+  --line:#E2DFD8; --hair:#ECEAE4;
+  --serif:"Newsreader",Georgia,serif;
+  --sans:"Inter",system-ui,sans-serif;
+  --mono:"IBM Plex Mono",monospace;
+  --radius:6px;
+}
+@media (prefers-color-scheme: dark){  /* auto: dark only when the system asks */
+  :root{
+    --bg:#111213; --panel:#1A1B1D; --wash:#202124;
+    --ink:#ECEAE6; --ink-soft:#A9A6A0; --faint:#6F6D68;
+    --accent:#E4572E; --accent-2:#7FA8D9;
+    --line:#2C2D30; --hair:#242528;
+  }
+}
+:root[data-mode="light"]{ /* manual override; beats the media query by specificity */
+  --bg:#FCFBF9; --panel:#FFFFFF; --wash:#F3F1EC;
+  --ink:#171614; --ink-soft:#57554F; --faint:#94918A;
+  --accent:#C63D17; --accent-2:#33608F;
+  --line:#E2DFD8; --hair:#ECEAE4; color-scheme:light;
+}
+:root[data-mode="dark"]{
+  --bg:#111213; --panel:#1A1B1D; --wash:#202124;
+  --ink:#ECEAE6; --ink-soft:#A9A6A0; --faint:#6F6D68;
+  --accent:#E4572E; --accent-2:#7FA8D9;
+  --line:#2C2D30; --hair:#242528; color-scheme:dark;
+}
