@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<!--
+  TEMPLATE: dossier (longread · 2500-6000 words · cite_rule per-section)
+  For companies, technologies, institutions, contested questions.
+
+  Agent instructions:
+  * Replace every ALL-CAPS placeholder and all sample content. Fill nb-meta.
+  * Keep the asset <link>/<script> tags exactly as they are (engine-owned).
+  * Every content section needs >=1 inline citation:
+      <sup class="nb-cite"><a href="#sN">N</a></sup>
+    pointing at a numbered source entry <li id="sN"> in #sources.
+  * Charts are optional but encouraged: keep them declarative (data-nb-chart).
+  * Sections: orientation, foundations, analysis, debate (steelman both sides),
+    go-deeper (equip independent research), sources. Exactly once each.
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TITLE — SERIES NAME</title>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400..700;1,6..72,400..700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../assets/nb.css">
+<script defer src="../../assets/nb.js"></script>
+<script type="application/json" id="nb-meta">
+{
+  "protocol": "1.0",
+  "series": "SERIES-ID",
+  "slug": "SLUG",
+  "template": "dossier",
+  "title": "TITLE",
+  "mode": "collection",
+  "order": null,
+  "date": "2026-01-01",
+  "tags": [],
+  "sources": 0,
+  "words": 0,
+  "reading_minutes": 0,
+  "dek": "ONE-SENTENCE TEASER FOR THE NEWSSTAND CARD.",
+  "harness": "HARNESS",
+  "model": "MODEL"
+}
+</script>
+<style>
+  body{ background:var(--bg); }
+  .nb-jumpnav{
+    display:flex; gap:6px; overflow-x:auto; -webkit-overflow-scrolling:touch;
+    padding:2px 0 12px; margin-bottom:8px; scrollbar-width:none;
+  }
+  .nb-jumpnav::-webkit-scrollbar{ display:none; }
+  .nb-jumpnav a{
+    flex:0 0 auto; display:inline-flex; align-items:center; min-height:40px;
+    padding:0 13px; border:1px solid var(--line); border-radius:999px;
+    font-family:var(--mono); font-size:12px; text-decoration:none;
+    color:var(--ink-soft); background:var(--panel); white-space:nowrap;
+  }
+  .nb-jumpnav a:hover{ color:var(--ink); border-color:var(--faint); }
+  .nb-section-n{
+    font-family:var(--mono); font-size:13px; color:var(--accent);
+    margin-right:8px; letter-spacing:0;
+  }
+</style>
+</head>
+<body class="nb-edition">
+<article class="nb-reading">
+
+<header>
+  <div class="nb-eyebrow">SERIES NAME</div>
+  <h1 class="nb-title">TITLE</h1>
+  <p class="nb-dekline">DEK — one italic sentence framing why this matters now.</p>
+  <div class="nb-byline">
+    <span>N min read</span><span>N sources</span><span>YYYY-MM-DD</span><span>MODEL</span>
+  </div>
+</header>
+
+<nav class="nb-jumpnav" aria-label="Sections">
+  <a href="#orientation">Orientation</a>
+  <a href="#foundations">Foundations</a>
+  <a href="#analysis">Analysis</a>
+  <a href="#debate">Debate</a>
+  <a href="#go-deeper">Go deeper</a>
+  <a href="#sources">Sources</a>
+</nav>
+
+<section data-nb-section="orientation" id="orientation">
+  <h2><span class="nb-section-n">01</span>ORIENTATION HEADING</h2>
+  <!-- What is this, why now, what will the reader be able to judge afterwards. -->
+  <p>Opening paragraph with a concrete, cited anchor claim.<sup class="nb-cite"><a href="#s1">1</a></sup></p>
+  <div class="nb-stat-strip">
+    <!-- 3-4 load-bearing numbers, each cited in nearby prose. -->
+    <div class="nb-stat"><span class="nb-stat-n">STAT</span><span class="nb-stat-l">LABEL</span></div>
+    <div class="nb-stat"><span class="nb-stat-n">STAT</span><span class="nb-stat-l">LABEL</span></div>
+    <div class="nb-stat"><span class="nb-stat-n">STAT</span><span class="nb-stat-l">LABEL</span></div>
+  </div>
+</section>
+
+<section data-nb-section="foundations" id="foundations">
+  <h2><span class="nb-section-n">02</span>FOUNDATIONS HEADING</h2>
+  <!-- The background a smart non-specialist needs. Define terms on first use. -->
+  <p>Foundational explanation with citations.<sup class="nb-cite"><a href="#s2">2</a></sup></p>
+</section>
+
+<section data-nb-section="analysis" id="analysis">
+  <h2><span class="nb-section-n">03</span>ANALYSIS HEADING</h2>
+  <!-- The original synthesis: position, economics, mechanism. Concrete numbers. -->
+  <p>Analytical core with citations.<sup class="nb-cite"><a href="#s3">3</a></sup></p>
+  <figure class="nb-chart">
+    <figcaption>Fig. 1 · CAPTION</figcaption>
+    <canvas></canvas>
+    <noscript>chart requires JS — data in caption and prose</noscript>
+    <script type="application/json" data-nb-chart>
+    {
+      "type": "line",
+      "labels": ["2022", "2023", "2024"],
+      "series": [ { "name": "SERIES NAME", "values": [1, 2, 3] } ],
+      "y": { "scale": "linear", "label": "UNITS" }
+    }
+    </script>
+  </figure>
+</section>
+
+<section data-nb-section="debate" id="debate">
+  <h2><span class="nb-section-n">04</span>DEBATE HEADING</h2>
+  <!-- Steelman BOTH sides of the live disagreement. Attribute views to sources. -->
+  <p>The strongest version of one side.<sup class="nb-cite"><a href="#s4">4</a></sup></p>
+  <p>The strongest version of the other.<sup class="nb-cite"><a href="#s5">5</a></sup></p>
+</section>
+
+<section data-nb-section="go-deeper" id="go-deeper">
+  <h2><span class="nb-section-n">05</span>Go deeper</h2>
+  <!-- Equip independent research: primary documents, filings, lectures, data. -->
+  <p>Where to go next and what to look for when you get there.<sup class="nb-cite"><a href="#s1">1</a></sup></p>
+</section>
+
+<section class="nb-sources" data-nb-section="sources" id="sources">
+  <h2>Sources</h2>
+  <ol>
+    <li id="s1">PUBLISHER — TITLE. <a data-nb-source href="https://example.org/replace-1">link</a></li>
+    <li id="s2">PUBLISHER — TITLE. <a data-nb-source href="https://example.org/replace-2">link</a></li>
+    <li id="s3">PUBLISHER — TITLE. <a data-nb-source href="https://example.org/replace-3">link</a></li>
+    <li id="s4">PUBLISHER — TITLE. <a data-nb-source href="https://example.org/replace-4">link</a></li>
+    <li id="s5">PUBLISHER — TITLE. <a data-nb-source href="https://example.org/replace-5">link</a></li>
+    <!-- Meet the series source floor. Mark required docs:
+         <a data-nb-source data-nb-required="DOC-ID" href="https://…">link</a> -->
+  </ol>
+</section>
+
+</article>
+</body>
+</html>
