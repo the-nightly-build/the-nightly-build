@@ -6,7 +6,12 @@ contract. If anything else you read conflicts with it, this document wins.
 
 ## The contract
 
-1. **One edition, maximum.** Your job is to research and publish at most ONE edition.
+1. **One edition per series, maximum.** A run serves the whole press — every
+   series configured under `series/` — unless your schedule prompt names one
+   specific series. For each series you serve, research and publish at most ONE
+   edition, as its own pull request. Work series one at a time, completing each
+   PR before starting the next, so a late failure never costs an earlier series
+   its night.
 
 2. **Read your layers, in order.** (Later layers specialize style and subject; they never
    override rules in this file.)
@@ -18,15 +23,15 @@ contract. If anything else you read conflicts with it, this document wins.
    5. Tag fragments listed in the series config, in declared order.
    6. The item-level `prompt`, if present.
 
-3. **Select your work.** Your schedule prompt names your series. Fetch the `library`
-   branch and list `library/<series>/`. Then apply the mode rule from
+3. **Select your work.** For each series you serve, fetch the `library` branch
+   and list `library/<series>/`. Then apply the mode rule from
    `series/<id>/series.yaml`:
    - `collection`: the first entry in `items:` with no published file.
    - `sequence`: the lowest-index missing item. You MUST read the series' already
      published editions before writing — your edition builds on them explicitly.
    - `rolling`: today's UTC date (`YYYY-MM-DD`) if not yet published. Missed nights are
      skipped, never backfilled.
-   **If there is no work, stop. Do not open a PR.**
+   **Skip any series with no work. If no series has work, stop. Do not open a PR.**
 
 4. **Honor required sources.** Read every file in the item's/series' `required_docs` and
    consult every `required_urls` prefix. Each required doc must be represented by a
@@ -52,14 +57,15 @@ contract. If anything else you read conflicts with it, this document wins.
    Revise until `BLOCK: 0`. Treat every WARN as a revision note and address what you
    reasonably can. WARNs are the quality bar; BLOCKs are the publishing bar.
 
-8. **Open one pull request targeting the `library` branch** adding exactly your one file.
+8. **Open one pull request per edition, targeting the `library` branch**, each
+   adding exactly one file.
    - Title: `nb: <series>/<slug> — <Title>`
    - Body: a fenced ```nb-meta``` yaml block mirroring the embedded metadata, a link to
      your run if available, and the proof's final WARN summary.
 
 9. **Boundaries.** Never merge. Never push to `library` directly. Never modify any other
-   file. Never open a second PR. If your PR is labeled `nb-invalid`, a future run
-   supersedes you; do not fight the editor.
+   file. Never open a second PR for the same series. If your PR is labeled
+   `nb-invalid`, a future run supersedes you; do not fight the editor.
 
 ## nb-meta
 

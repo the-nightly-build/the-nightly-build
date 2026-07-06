@@ -455,6 +455,28 @@ def modify_engine():
 expect("PR modifying engine code", run_pr(mutate=modify_engine),
        must_have=["B-DIFF-SHAPE"])
 
+print("== validate_config ==")
+vc = REPO / "engine" / "validate_config.py"
+rc_good = subprocess.run([sys.executable, str(vc), "--repo", str(REPO)],
+                         capture_output=True).returncode
+broken = tempfile.mkdtemp()
+for sub in ("series", "templates"):
+    shutil.copytree(REPO / sub, pathlib.Path(broken) / sub)
+shutil.copytree(REPO / "engine" / "assets", pathlib.Path(broken) / "engine" / "assets")
+shutil.copyfile(REPO / "site.yaml", pathlib.Path(broken) / "site.yaml")
+by = pathlib.Path(broken) / "series" / "semiconductors" / "series.yaml"
+by.write_text(by.read_text().replace("mode: collection", "mode: rolling"))
+rc_bad = subprocess.run([sys.executable, str(vc), "--repo", broken],
+                        capture_output=True).returncode
+for name, cond in [("valid repo config passes", rc_good == 0),
+                   ("illegal mode/template pairing fails", rc_bad == 1)]:
+    if cond:
+        PASS += 1
+        print(f"  ok   {name}")
+    else:
+        FAIL.append(name)
+        print(f"  FAIL {name}")
+
 print()
 print("== builder suite (run_builder_tests.py) ==")
 builder = subprocess.run([sys.executable, str(HERE / "run_builder_tests.py")])
