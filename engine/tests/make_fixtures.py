@@ -134,6 +134,9 @@ def dossier():
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Micron Technology</title>
 <link href="https://fonts.googleapis.com/css2?family=Newsreader&amp;display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../assets/nb.css">
+<script defer src="../../assets/nb.js"></script>
 <script type="application/json" id="nb-meta">
 {meta}
 </script>

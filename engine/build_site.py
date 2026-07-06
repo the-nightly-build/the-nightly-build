@@ -32,6 +32,7 @@ Dependencies: Python stdlib + PyYAML.
 """
 
 import argparse
+import hashlib
 import datetime as dt
 import html
 import json
@@ -291,6 +292,19 @@ def pretty_date(iso):
     return f"{WEEKDAYS[d.weekday()]}, {MONTHS[d.month - 1]} {d.day}, {d.year}"
 
 
+def asset_stamp(repo):
+    """Content hash of the shared assets: cache-busting version tag. A
+    returning reader must never see new markup with a stale stylesheet."""
+    h = hashlib.md5()
+    base = os.path.join(repo, "engine", "assets")
+    for name in ("nb.css", "nb.js"):
+        path = os.path.join(base, name)
+        if os.path.isfile(path):
+            with open(path, "rb") as fh:
+                h.update(fh.read())
+    return h.hexdigest()[:10]
+
+
 def page(site, title, body, depth=0, active=None):
     """One page chrome for every page: two-element bar + thin bottom footer."""
     rel = "../" * depth
@@ -309,11 +323,11 @@ def page(site, title, body, depth=0, active=None):
 <title>{esc(title)}</title>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="{FONTS}" rel="stylesheet">
-<link rel="stylesheet" href="{rel}assets/theme.css">
-<link rel="stylesheet" href="{rel}assets/nb.css">
+<link rel="stylesheet" href="{rel}assets/theme.css?v={site['stamp']}">
+<link rel="stylesheet" href="{rel}assets/nb.css?v={site['stamp']}">
 <link rel="alternate" type="application/atom+xml" href="{rel}feed.xml" title="{esc(site['title'])}">
 {APPEARANCE_BOOTSTRAP}
-<script defer src="{rel}assets/nb.js"></script>
+<script defer src="{rel}assets/nb.js?v={site['stamp']}"></script>
 </head>
 <body>
 <header class="nb-bar"><div class="nb-bar-in">
@@ -790,11 +804,22 @@ def copy_assets(repo, site_cfg, out):
     shutil.copyfile(theme_src, os.path.join(dst, "theme.css"))
 
 
-def copy_editions(editions, out, preview):
+EDITION_ASSET_RE = re.compile(
+    r'((?:href|src)="(?:\.\./)*assets/(?:nb\.css|nb\.js|theme\.css))(")')
+
+
+def copy_editions(editions, out, preview, stamp=""):
+    """Editions are canonical on the library branch; the SITE copy is a build
+    artifact, so its shared-asset links get the cache-busting stamp."""
     for ed in editions.values():
         dst = os.path.join(out, "library", ed["series"], f"{ed['slug']}.html")
         os.makedirs(os.path.dirname(dst), exist_ok=True)
-        shutil.copyfile(ed["file"], dst)
+        if stamp:
+            with open(ed["file"], "r", encoding="utf-8", errors="replace") as fh:
+                raw = fh.read()
+            write(dst, EDITION_ASSET_RE.sub(rf"\1?v={stamp}\2", raw))
+        else:
+            shutil.copyfile(ed["file"], dst)
 
 
 def build(repo, library_root, out, preview_root=None, base_url="", now=None):
@@ -808,6 +833,7 @@ def build(repo, library_root, out, preview_root=None, base_url="", now=None):
         "title": site_cfg["title"],
         "appearance": site_cfg["appearance"],
         "preview": bool(preview_root),
+        "stamp": asset_stamp(repo),
     }
 
     os.makedirs(out, exist_ok=True)
@@ -872,7 +898,7 @@ def build(repo, library_root, out, preview_root=None, base_url="", now=None):
               f"edition{'s' if len(eds) != 1 else ''}\n")
 
     copy_assets(repo, site_cfg, out)
-    copy_editions(editions, out, bool(preview_root))
+    copy_editions(editions, out, bool(preview_root), site["stamp"])
     return catalog
 
 

@@ -135,9 +135,14 @@ check("series feed scoped to series",
 check("assets copied", all(pathlib.Path(out, "assets", f).is_file()
                            for f in ("nb.js", "nb.css", "theme.css",
                                      "themes/newspaper.css")))
-check("editions copied verbatim",
-      read(out, "library", "semiconductors", "micron.html")
-      == make_fixtures.dossier())
+micron_copy = read(out, "library", "semiconductors", "micron.html")
+stamp_m = re.search(r"nb\.css\?v=([0-9a-f]+)", micron_copy)
+check("edition site copies get cache-busting asset stamps", bool(stamp_m))
+stamp = stamp_m.group(1) if stamp_m else ""
+check("edition content otherwise untouched",
+      micron_copy.replace("?v=" + stamp, "") == make_fixtures.dossier())
+check("chrome pages carry the same stamp",
+      f"assets/nb.css?v={stamp}" in newsstand)
 
 print("== email digest ==")
 email = read(out, "email-latest.html")
@@ -191,8 +196,9 @@ check("draft flagged in catalog",
 check("published edition not flagged draft",
       not any(e.get("draft") for e in pv_catalog["editions"]
               if e["slug"] == "micron"))
-check("draft edition file copied verbatim",
-      read(pv_out, "library", "semiconductors", "tsmc.html") == draft)
+check("draft edition file copied modulo the asset stamp",
+      re.sub(r"\?v=[0-9a-f]+", "",
+             read(pv_out, "library", "semiconductors", "tsmc.html")) == draft)
 check("published edition file untouched",
       "Press check" not in read(pv_out, "library", "semiconductors", "micron.html"))
 
