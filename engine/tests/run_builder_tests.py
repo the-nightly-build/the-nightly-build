@@ -8,6 +8,7 @@ builder, and assert on catalog.json and the rendered pages.
 Run: python3 engine/tests/run_builder_tests.py
 """
 import datetime as dt
+import json
 import pathlib
 import re
 import shutil
@@ -143,6 +144,11 @@ check("edition content otherwise untouched",
       micron_copy.replace("?v=" + stamp, "") == make_fixtures.dossier())
 check("chrome pages carry the same stamp",
       f"assets/nb.css?v={stamp}" in newsstand)
+index0 = json.loads(read(out, "search-index.json"))[0]
+check("search index text is clean prose",
+      "<" not in index0["text"] and not index0["text"].startswith("class="))
+check("sections page never says 'of None'",
+      "of None" not in read(out, "series", "index.html"))
 
 print("== email digest ==")
 email = read(out, "email-latest.html")

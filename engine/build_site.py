@@ -460,7 +460,9 @@ def desk_status(s, cfg):
     if mode in ("collection", "sequence"):
         if total and count >= total:
             return f"complete · {count} edition{'s' if count != 1 else ''}", True
-        pct = round(100 * count / total) if total else 0
+        if not total:   # published but not in press config (or no items yet)
+            return f"{count} published", False
+        pct = round(100 * count / total)
         return (f'<span class="nb-progress"><b style="width:{pct}%"></b></span>'
                 f"{count} of {total}", False)
     if mode == "rolling":
@@ -626,15 +628,17 @@ def render_search_page(site):
 
 
 TEXT_STRIP_RE = re.compile(
-    r"<script[\s\S]*?</script>|<style[\s\S]*?</style>|<[^>]+>", re.I)
+    r"<!--[\s\S]*?-->|<script[\s\S]*?</script>|<style[\s\S]*?</style>"
+    r"|<[^>]+>", re.I)
+BODY_RE = re.compile(r"<body[^>]*>([\s\S]*?)</body>", re.I)
 
 
 def edition_text(path):
     """Readable text of an edition, for the search index."""
     with open(path, "r", encoding="utf-8", errors="replace") as fh:
         raw = fh.read()
-    body = raw.split("<body", 1)[-1]
-    text = TEXT_STRIP_RE.sub(" ", body)
+    m = BODY_RE.search(raw)
+    text = TEXT_STRIP_RE.sub(" ", m.group(1) if m else raw)
     text = html.unescape(text)
     return re.sub(r"\s+", " ", text).strip()
 
