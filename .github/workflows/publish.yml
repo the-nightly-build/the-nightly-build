@@ -1,11 +1,72 @@
-# Phase 3: on push to library, check out engine from main, run build_site.py,
-# commit site/ with [skip ci], deploy Pages. Implemented in phase 3 per the handoff.
+# The press run: on every push to library, rebuild the site and deploy Pages.
+# SECURITY: executable logic (builder, assets) is ALWAYS checked out from main
+# (§1 invariant 1). Library content is data, never code. The site commit carries
+# [skip ci] so the rebuild push cannot retrigger this workflow.
 name: nightly-build-publish
+
 on:
   push:
     branches: [library]
+  workflow_dispatch:
+
+concurrency:
+  group: nightly-build-publish
+  cancel-in-progress: true
+
 jobs:
-  placeholder:
+  build:
+    if: ${{ !contains(github.event.head_commit.message, '[skip ci]') }}
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pages: write
+      id-token: write
     steps:
-      - run: echo "publish pipeline lands in phase 3 (build_site.py)"
+      - name: Checkout library (content)
+        uses: actions/checkout@v4
+
+      - name: Checkout engine + templates from main
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          path: _main
+
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - run: pip install pyyaml
+
+      - name: Configure Pages
+        id: pages
+        uses: actions/configure-pages@v5
+        with:
+          enablement: true
+
+      - name: Build the site
+        run: |
+          python3 _main/engine/build_site.py \
+            --repo _main --library . --out site \
+            --base-url "${{ steps.pages.outputs.base_url }}"
+
+      - name: Commit the built site back to library
+        run: |
+          git config user.name "nightly-build[bot]"
+          git config user.email "nightly-build-bot@users.noreply.github.com"
+          git add site
+          git diff --cached --quiet || git commit -m "site: rebuild [skip ci]"
+          git push
+
+      - uses: actions/upload-pages-artifact@v3
+        with: { path: site }
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
