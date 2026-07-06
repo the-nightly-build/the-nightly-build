@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<!--
+  TEMPLATE: chronicle (longread · 2000-4500 words · cite_rule per-section)
+  A history told along a timeline spine, closing with its echoes today.
+
+  Agent instructions:
+  * Replace every ALL-CAPS placeholder and all sample content. Fill nb-meta.
+  * Keep the asset <link>/<script> tags exactly as they are (engine-owned).
+  * Sections: orientation, timeline, echoes, sources. Exactly once each.
+  * Timeline events (li.nb-tl-event) carry mono date labels; add class "major"
+    for filled dots. Timeline event citations count as the timeline section's
+    citations. Interleave prose interludes (li.nb-tl-interlude) between eras.
+  * Cite with <sup class="nb-cite"><a href="#sN">N</a></sup> against #sources.
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TITLE — SERIES NAME</title>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400..700;1,6..72,400..700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../assets/theme.css">
+<link rel="stylesheet" href="../../assets/nb.css">
+<script defer src="../../assets/nb.js"></script>
+<script type="application/json" id="nb-meta">
+{
+  "protocol": "1.0",
+  "series": "SERIES-ID",
+  "slug": "SLUG",
+  "template": "chronicle",
+  "title": "TITLE",
+  "mode": "collection",
+  "order": null,
+  "date": "2026-01-01",
+  "tags": [],
+  "sources": 0,
+  "words": 0,
+  "reading_minutes": 0,
+  "dek": "ONE-SENTENCE TEASER FOR THE NEWSSTAND CARD.",
+  "harness": "HARNESS",
+  "model": "MODEL"
+}
+</script>
+<style>
+  .nb-timeline{
+    list-style:none; margin:16px 0; padding:0 0 0 22px;
+    border-left:2px solid var(--line); position:relative;
+  }
+  .nb-tl-event{ position:relative; margin:0 0 22px; }
+  .nb-tl-event::before{
+    content:""; position:absolute; left:-28px; top:6px;
+    width:10px; height:10px; border-radius:50%;
+    background:var(--bg); border:2px solid var(--accent);
+  }
+  .nb-tl-event.major::before{ background:var(--accent); }
+  .nb-tl-date{
+    font-family:var(--mono); font-size:12px; color:var(--accent);
+    letter-spacing:.04em; display:block; margin-bottom:2px;
+  }
+  .nb-tl-event h3{
+    font-family:var(--serif); font-size:18px; margin:0 0 6px; line-height:1.3;
+  }
+  .nb-tl-event p{ margin:0; color:var(--ink-soft); font-size:15.5px; }
+  .nb-tl-interlude{ margin:26px 0 26px -22px; padding-left:0; }
+  .nb-tl-interlude p{ font-style:italic; }
+</style>
+</head>
+<body class="nb-edition">
+<article class="nb-reading">
+
+<header>
+  <div class="nb-eyebrow">SERIES NAME</div>
+  <h1 class="nb-title">TITLE</h1>
+  <p class="nb-dekline">DEK — the arc of the story in one italic sentence.</p>
+  <div class="nb-byline">
+    <span>N min read</span><span>N sources</span><span>YYYY-MM-DD</span><span>MODEL</span>
+  </div>
+</header>
+
+<section data-nb-section="orientation" id="orientation">
+  <h2>ORIENTATION HEADING</h2>
+  <!-- Why this history matters now; the stakes; the cast. -->
+  <p>Framing prose with a cited anchor.<sup class="nb-cite"><a href="#s1">1</a></sup></p>
+</section>
+
+<section data-nb-section="timeline" id="timeline">
+  <h2>The timeline</h2>
+  <ol class="nb-timeline">
+    <li class="nb-tl-event major">
+      <span class="nb-tl-date">YYYY</span>
+      <h3>MAJOR EVENT TITLE<sup class="nb-cite"><a href="#s2">2</a></sup></h3>
+      <p>What happened and why it mattered.</p>
+    </li>
+    <li class="nb-tl-event">
+      <span class="nb-tl-date">YYYY</span>
+      <h3>EVENT TITLE<sup class="nb-cite"><a href="#s3">3</a></sup></h3>
+      <p>What happened.</p>
+    </li>
+    <li class="nb-tl-interlude">
+      <p>A prose interlude: what the era added up to, before the next turn.</p>
+    </li>
+    <li class="nb-tl-event major">
+      <span class="nb-tl-date">YYYY</span>
+      <h3>MAJOR EVENT TITLE<sup class="nb-cite"><a href="#s4">4</a></sup></h3>
+      <p>What happened and why it mattered.</p>
+    </li>
+  </ol>
+</section>
+
+<section data-nb-section="echoes" id="echoes">
+  <h2>Echoes today</h2>
+  <!-- Close the loop: where this history is still visibly at work now. -->
+  <p>The present-day resonance, cited.<sup class="nb-cite"><a href="#s5">5</a></sup></p>
+</section>
+
+<section class="nb-sources" data-nb-section="sources" id="sources">
+  <h2>Sources</h2>
+  <ol>
+    <li id="s1">PUBLISHER — TITLE. <a data-nb-source href="https://example.org/replace-1">link</a></li>
+    <li id="s2">PUBLISHER — TITLE. <a data-nb-source href="https://example.org/replace-2">link</a></li>
+    <li id="s3">PUBLISHER — TITLE. <a data-nb-source href="https://example.org/replace-3">link</a></li>
+    <li id="s4">PUBLISHER — TITLE. <a data-nb-source href="https://example.org/replace-4">link</a></li>
+    <li id="s5">PUBLISHER — TITLE. <a data-nb-source href="https://example.org/replace-5">link</a></li>
+  </ol>
+</section>
+
+</article>
+</body>
+</html>
