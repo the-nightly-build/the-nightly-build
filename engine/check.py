@@ -46,6 +46,9 @@ ALLOWED_EXTERNAL_PREFIXES = (
     "https://fonts.googleapis.com",
     "https://fonts.gstatic.com",
 )
+# The one executable script an edition may load: the engine-owned runtime
+# (§7.4 — contextual nav + chart renderer), by relative or root-absolute path.
+ENGINE_SCRIPT_RE = re.compile(r"^(?:(?:\.\./)+|/)assets/nb\.js$")
 DEFAULT_MIN_SOURCES = {"longread": 8, "shortread": 5}
 CITE_EXEMPT_SECTIONS = {"sources", "objectives", "slides", "items"}
 DECK_CITE_EXEMPT_KINDS = {"title", "divider"}
@@ -473,13 +476,16 @@ def check_edition(html_path, series_id, repo, library_dir, rep,
     # --- B-SANDBOX ---
     for a in ed.script_tags:
         stype = (a.get("type") or "").strip().lower()
+        src = a.get("src", "")
+        if src and ENGINE_SCRIPT_RE.match(src) and stype in ("", "text/javascript"):
+            continue  # the engine-owned runtime (assets/nb.js) is the one allowed load
         if stype != "application/json":
             rep.block("B-SANDBOX",
                       f"editions may not contain executable <script> (type={stype or 'none'})")
         elif a.get("id") != "nb-meta" and "data-nb-chart" not in a:
             rep.block("B-SANDBOX",
                       "JSON <script> blocks must be #nb-meta or data-nb-chart")
-        if a.get("src"):
+        if src:
             rep.block("B-SANDBOX", "editions may not load external scripts")
     if ed.forbidden_tags:
         rep.block("B-SANDBOX", f"forbidden tags present: {sorted(set(ed.forbidden_tags))}")

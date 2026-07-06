@@ -41,9 +41,10 @@ contract. If anything else you read conflicts with it, this document wins.
    - Fill every `data-nb-section` the registry requires for the template.
    - Embed the `nb-meta` JSON block (schema below).
    - Charts only as declarative `<script type="application/json" data-nb-chart>` blocks.
-   - No scripts other than those JSON blocks. No iframes/objects/embeds. No inline event
-     handlers. No `javascript:` URLs. External references only to the engine assets path
-     and Google Fonts.
+   - No scripts other than those JSON blocks and the template's own
+     `<script src="../../assets/nb.js">` (the engine runtime — keep it, never add
+     others). No iframes/objects/embeds. No inline event handlers. No `javascript:`
+     URLs. External references only to the engine assets path and Google Fonts.
    - File path: `library/<series>/<slug>.html`.
 
 7. **Run the proof and iterate:**
