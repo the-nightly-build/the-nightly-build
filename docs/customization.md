@@ -6,7 +6,12 @@ updates never touch it. Working examples of all of it live in `examples/`.
 ## Look: themes
 
 The entire visual system reads ~14 CSS variables from one token file. The
-theme contract is: define exactly those variables.
+theme contract is: define exactly those variables, in all four blocks (light,
+dark, and the two manual-override blocks — the test suite enforces parity).
+The shipped theme is "the lamp is always warm": pale day-sky paper with
+bronze accents; deep navy night with amber. Keep day accents deep — bright
+ambers fail contrast on light backgrounds (measured, not vibes: bronze
+#8A5C08 is 5.4:1 on the shipped paper; bright amber is 2:1).
 
 1. Copy `engine/assets/themes/newspaper.css` to `press/themes/<name>.css`.
 2. Edit the variables — light block, dark block, fonts, `--accent`, radius.

@@ -27,12 +27,18 @@ commission queue. Anything you add must be published (in any order, with its
 own prompt/sources if given) before the desk freestyles again. The proof
 enforces this, so "cover X next" is a one-line edit with a guarantee.
 
-## Rhythm
+## Rhythm and shelving
 
 ```yaml
 cadence: daily        # default · weekdays · weekends · [mon, thu]
 paused: true          # skip this series entirely; the archive stays up
+section: Foundations  # optional shelf on the Sections page (and in kickers)
 ```
+
+`section:` is the one level of hierarchy a paper ever needs: desks group
+under section headings on the Sections page, and front-page kickers read
+"Foundations — Landmark Papers". Without it, desks list flat. Completed and
+paused desks sink into "In the stacks" automatically.
 
 Cadence is why one nightly schedule is enough forever: the run itself asks
 `engine/duty.py` what is due tonight, so a weekly deep-dive desk and a daily
@@ -46,7 +52,7 @@ Per series: `words: [low, high]` (may tighten, never loosen below the
 template's registry floor), `min_sources`, `strict: true` (every WARN becomes
 a BLOCK), `autopublish: false` (a human merges instead of the editor), and
 the source policy — `required_docs`, `consult`, `sources_exclusive` — described
-in the [README](../README.md) and demonstrated in `examples/series/ai-rules/`.
+in the [README](../README.md) and demonstrated across `examples/series/`.
 
 ## Commissioning extras by hand
 
