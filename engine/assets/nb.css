@@ -116,10 +116,13 @@ section[data-nb-section], .nb-sources li[id], sup.nb-cite a[id], [id^="nb-"]{
   display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical;
   overflow:hidden; }
 .nb-lead-cell .nb-cell-dek{ font-size:16.5px; -webkit-line-clamp:4; }
-@media (max-width:639px){
-  .nb-item:not(.nb-lead-cell) .nb-cell-dek{ display:none; }
+/* story-cell deks are opt-in (site.yaml front: comfortable), desktop only */
+.nb-item:not(.nb-lead-cell) .nb-cell-dek{ display:none; }
+@media (min-width:640px){
+  .nb-front-comfortable .nb-item:not(.nb-lead-cell) .nb-cell-dek{
+    display:-webkit-box;
+  }
 }
-.nb-front-compact .nb-item:not(.nb-lead-cell) .nb-cell-dek{ display:none; }
 @media (min-width:640px){
   .nb-grid{ grid-template-columns:1fr 1fr; }
   /* the lead is child 1 and spans the row, so story cells start at child 2:

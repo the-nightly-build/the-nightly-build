@@ -77,7 +77,7 @@ def load_site_config(repo):
     cfg.setdefault("title", "The Nightly Build")
     cfg.setdefault("theme", "engine/assets/themes/newspaper.css")
     cfg.setdefault("appearance", "auto")
-    cfg.setdefault("front", "comfortable")
+    cfg.setdefault("front", "compact")
     return cfg
 
 
@@ -856,8 +856,8 @@ def build(repo, library_root, out, preview_root=None, base_url="", now=None):
         "appearance": site_cfg["appearance"],
         "preview": bool(preview_root),
         "stamp": asset_stamp(repo),
-        "body_class": (' class="nb-front-compact"'
-                       if site_cfg.get("front") == "compact" else ""),
+        "body_class": (' class="nb-front-comfortable"'
+                       if site_cfg.get("front") == "comfortable" else ""),
     }
 
     os.makedirs(out, exist_ok=True)

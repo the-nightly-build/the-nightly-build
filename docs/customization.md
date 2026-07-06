@@ -84,7 +84,7 @@ a series at the template and run a press check before scheduling it.
 title: "My Press"                       # masthead; the accent period is added
 theme: press/themes/mytheme.css         # default: the shipped newspaper theme
 appearance: auto                        # auto | light | dark
-front: comfortable                      # comfortable (deks on story cells) | compact
+front: compact                          # compact (default) | comfortable (deks on story cells)
 email:                                  # optional — see docs/delivery.md
   send_utc_hour: 12
 ```
