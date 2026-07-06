@@ -213,6 +213,12 @@ expect("stray json script block", run_local(
     mut("</article>",
         '<script type="application/json">{"x":1}</script></article>'),
     "semiconductors"), must_have=["B-SANDBOX"])
+expect("engine runtime script allowed", run_local(
+    mut("</head>", '<script defer src="../../assets/nb.js"></script></head>'),
+    "semiconductors"), must_not=["B-SANDBOX"], blocks=0)
+expect("non-engine relative script blocked", run_local(
+    mut("</head>", '<script src="../../assets/other.js"></script></head>'),
+    "semiconductors"), must_have=["B-SANDBOX"])
 
 print("== B-SOURCES-FORM / B-CITES-RESOLVE ==")
 expect("no sources at all", run_local(
@@ -295,6 +301,66 @@ sy.write_text(sy.read_text().replace("strict: false", "strict: true"))
 expect("strict promotes WARN to BLOCK", run_local(
     mut('"sources": 8', '"sources": 20'), "semiconductors", repo=strict_repo),
     must_have=["W-SELF-COUNT"], blocks=True)
+
+print("== templates: sample editions pass the proof ==")
+tpl_repo = tempfile.mkdtemp()
+shutil.copytree(REPO / "templates", pathlib.Path(tpl_repo) / "templates")
+TPL_SERIES = {
+    "crypto": ("sequence", "lesson",
+               "items:\n  - {slug: hashes, title: Hash Functions}\n"
+               "  - {slug: signatures, title: Signatures}"),
+    "papers": ("collection", "paper",
+               "items:\n  - {slug: attention, title: Attention}"),
+    "histories": ("collection", "chronicle",
+                  "items:\n  - {slug: unix, title: Unix}"),
+    "decks": ("collection", "deck",
+              "items:\n  - {slug: eu-chips, title: EU Chips}"),
+}
+for sid, (mode, template, items) in TPL_SERIES.items():
+    d = pathlib.Path(tpl_repo) / "series" / sid
+    d.mkdir(parents=True)
+    (d / "series.yaml").write_text(
+        f"name: {sid}\nmode: {mode}\ntemplate: {template}\n"
+        f"autopublish: true\nstrict: false\n{items}\n")
+for name, fixture, sid, slug in [
+        ("lesson", make_fixtures.lesson(), "crypto", "hashes"),
+        ("paper", make_fixtures.paper(), "papers", "attention"),
+        ("chronicle", make_fixtures.chronicle(), "histories", "unix"),
+        ("deck", make_fixtures.deck(), "decks", "eu-chips")]:
+    rep = run_local(fixture, sid, slug=slug, repo=tpl_repo)
+    expect(f"sample {name} edition is BLOCK-clean and WARN-free",
+           rep, blocks=0,
+           must_not=["W-LENGTH-LOW", "W-LENGTH-HIGH", "W-SOURCES-MIN",
+                     "W-CITE-DENSITY", "W-SELF-COUNT"])
+
+print("== templates: structural lint of the template files ==")
+registry = C.load_registry(str(REPO))
+for template_id, treg in registry.items():
+    src = (REPO / "templates" / f"{template_id}.html").read_text()
+    tpl = C.Edition()
+    tpl.feed(src)
+    tpl.close()
+    ok_sections = all(tpl.sections.count(s) == 1
+                      for s in treg.get("sections") or [])
+    try:
+        json.loads(tpl.meta_raw)
+        ok_meta = True
+    except Exception:
+        ok_meta = False
+    ok_scripts = all(
+        (a.get("type") or "").strip().lower() == "application/json"
+        or C.ENGINE_SCRIPT_RE.match(a.get("src", ""))
+        for a in tpl.script_tags)
+    ok_sandbox = (not tpl.forbidden_tags and not tpl.bad_event_attrs
+                  and not tpl.bad_js_urls and tpl.sources)
+    ok = ok_sections and ok_meta and ok_scripts and ok_sandbox
+    if ok:
+        PASS += 1
+        print(f"  ok   template {template_id}.html structure")
+    else:
+        FAIL.append(f"template {template_id}.html")
+        print(f"  FAIL template {template_id}.html: sections={ok_sections} "
+              f"meta={ok_meta} scripts={ok_scripts} sandbox={ok_sandbox}")
 
 print("== PR mode (real git repo) ==")
 
