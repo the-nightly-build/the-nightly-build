@@ -3,8 +3,8 @@
 # MAIL_* secrets must exist. Runs hourly because scheduled workflows live on
 # main (engine-space); the user-owned send hour lives in press/site.yaml, so
 # changing it never touches an engine file. The digest itself is built by the
-# press (site/email-latest.html on the library branch); this workflow only
-# gates and sends. When no fresh build exists, engine/duty.py decides whether
+# press and served on the Pages site (email-latest.html); this workflow fetches
+# it, gates, and sends. When no fresh build exists, engine/duty.py decides whether
 # last night was quiet by design (cadence, completion, pause) or a miss.
 # Misses get a short quiet-night notice for up to 14 days, so a broken press
 # is distinguishable from a resting one. workflow_dispatch = send now.
@@ -17,6 +17,7 @@ on:
 
 permissions:
   contents: read
+  pages: read
 
 jobs:
   deliver:
@@ -36,10 +37,11 @@ jobs:
         env:
           MAIL_TO: ${{ secrets.MAIL_TO }}
           FORCE: ${{ github.event_name == 'workflow_dispatch' }}
+          GH_TOKEN: ${{ github.token }}
         run: |
           pip install pyyaml --quiet
           python3 - <<'EOF' >> "$GITHUB_OUTPUT"
-          import datetime, json, os, pathlib, subprocess, yaml
+          import datetime, json, os, pathlib, subprocess, urllib.request, yaml
 
           def out(send, why, body="", subject=""):
               print(f"send={'true' if send else 'false'}")
@@ -63,20 +65,38 @@ jobs:
                   out(False, "email.send_utc_hour not set in press/site.yaml")
               if int(hour) != now.hour:
                   out(False, f"not the configured hour ({hour}:00 UTC)")
-          digest = pathlib.Path("_library/site/email-latest.html")
-          if not digest.is_file():
-              out(False, "no built digest on library yet")
+          base = subprocess.run(
+              ["gh", "api", f"repos/{os.environ['GITHUB_REPOSITORY']}/pages",
+               "--jq", ".html_url"],
+              capture_output=True, text=True).stdout.strip()
+          if not base:
+              out(False, "Pages not enabled yet")
+          base = base.rstrip("/") + "/"
+
+          def fetch(name):
+              try:
+                  with urllib.request.urlopen(base + name, timeout=15) as resp:
+                      return resp.read().decode()
+              except Exception:
+                  return None
+
+          catalog_raw = fetch("catalog.json")
+          if catalog_raw is None:
+              out(False, "no published site yet")
           try:
-              catalog = json.loads(
-                  pathlib.Path("_library/site/catalog.json").read_text())
+              catalog = json.loads(catalog_raw)
               latest = max(catalog["builds"])
               age = (now.date()
                      - datetime.date.fromisoformat(latest)).days
           except Exception:
               out(False, "catalog unreadable")
           if age <= 1 or force:
-              subject = pathlib.Path(
-                  "_library/site/email-latest-subject.txt").read_text().strip()
+              digest_html = fetch("email-latest.html")
+              if digest_html is None:
+                  out(False, "no built digest yet")
+              subject = (fetch("email-latest-subject.txt") or "").strip()
+              digest = pathlib.Path("_digest.html")
+              digest.write_text(digest_html)
               out(True, f"delivering build {latest}", str(digest), subject)
 
           # No fresh build. Quiet by design, or a missed night?
