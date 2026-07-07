@@ -1,12 +1,12 @@
 # The paperboy: delivers the latest build's email digest every morning.
 # Opt-in twice over: press/site.yaml must set email.send_utc_hour, AND the
 # MAIL_* secrets must exist. Runs hourly because scheduled workflows live on
-# main (engine-space) — the user-owned send hour lives in press/site.yaml, so
+# main (engine-space); the user-owned send hour lives in press/site.yaml, so
 # changing it never touches an engine file. The digest itself is built by the
 # press (site/email-latest.html on the library branch); this workflow only
 # gates and sends. When no fresh build exists, engine/duty.py decides whether
-# last night was quiet by design (cadence, completion, pause) or a miss —
-# misses get a short quiet-night notice for up to 14 days, so a broken press
+# last night was quiet by design (cadence, completion, pause) or a miss.
+# Misses get a short quiet-night notice for up to 14 days, so a broken press
 # is distinguishable from a resting one. workflow_dispatch = send now.
 name: nightly-build-morning-mail
 
@@ -31,7 +31,7 @@ jobs:
           ref: library
           path: _library
 
-      - name: Gate — configured hour, secrets, fresh build or missed night
+      - name: Gate on configured hour, secrets, fresh build or missed night
         id: gate
         env:
           MAIL_TO: ${{ secrets.MAIL_TO }}
@@ -87,12 +87,12 @@ jobs:
                    "--library", "_library", "--date", yesterday],
                   capture_output=True, text=True, check=True).stdout)
           except Exception:
-              out(False, "duty check failed — staying quiet")
+              out(False, "duty check failed; staying quiet")
           if not duty["due"]:
-              out(False, f"nothing was due last night (latest build {latest}) "
-                         f"— quiet by design")
+              out(False, f"nothing was due last night (latest build {latest}); "
+                         f"quiet by design")
           if age > 14:
-              out(False, f"stale {age} days — alert window passed, going silent")
+              out(False, f"stale {age} days; alert window passed, going silent")
           missed = ", ".join(e["series"] for e in duty["due"])
           q = pathlib.Path("_quiet.html")
           q.write_text(
@@ -102,7 +102,7 @@ jobs:
               f'last night</h2>'
               f'<p style="color:#444444;line-height:1.6">No new build was '
               f'published, but these series were due: <b>{missed}</b>. '
-              f'The night shift may have been skipped or may have failed — '
+              f'The night shift may have been skipped or may have failed; '
               f'check your schedule and the repo&rsquo;s Actions tab. '
               f'Latest build: {latest} ({age} nights ago).</p></div>\n')
           out(True, "quiet-night notice", str(q), f"Quiet night at {title}")

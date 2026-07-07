@@ -1,6 +1,6 @@
 [project]
 name = "nightly-build-engine"
 version = "0.1.0"
-description = "The Nightly Build — protocol engine (the proof + site builder)"
+description = "The Nightly Build protocol engine (the proof and site builder)"
 requires-python = ">=3.10"
 dependencies = ["pyyaml>=6.0"]

@@ -100,7 +100,7 @@ record beats a gamed one.
 
 Target the `library` branch. Add exactly one file: `library/<series>/<slug>.html`.
 
-- Title: `nb: <series>/<slug> — <Title>`
+- Title: `nb: <series>/<slug> - <Title>`
 - Body: a fenced ```nb-meta``` yaml block mirroring the embedded JSON (fields:
   series, slug, mode, template, date, title, order), your run URL if you have
   one, and the proof's final WARN summary.

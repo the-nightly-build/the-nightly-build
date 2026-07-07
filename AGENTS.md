@@ -4,7 +4,7 @@ This repository is The Nightly Build: scheduled AI agents research topics and pu
 cited HTML editions to a GitHub Pages library, gated by CI.
 
 - If you were invoked by a **schedule to produce an edition**: load
-  `skills/correspondent/SKILL.md`. If you cannot, follow `PROTOCOL.md` — it is
+  `skills/correspondent/SKILL.md`. If you cannot, follow `PROTOCOL.md`; it is
   self-sufficient.
 - If a **human is asking for setup, series configuration, or curation help**: load
   `skills/librarian/SKILL.md`.

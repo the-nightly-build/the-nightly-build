@@ -138,7 +138,7 @@ Schedule prompt template (fill `<repo>`; keep ≤ ~130 words):
 > `nb-meta` JSON block; run `python3 engine/check.py <file> --series <id>` and
 > revise until BLOCK=0; open ONE pull request per series targeting the
 > `library` branch adding ONLY `library/<series>/<slug>.html`, title
-> `nb: <series>/<slug> — <Title>`, body containing the nb-meta yaml block. If
+> `nb: <series>/<slug> - <Title>`, body containing the nb-meta yaml block. If
 > no series has work, exit without a PR. Never modify other files.
 
 ## 6. Curation verbs

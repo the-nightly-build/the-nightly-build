@@ -1,4 +1,4 @@
-# The Nightly Build — Agent Protocol
+# The Nightly Build Agent Protocol
 Protocol-Version: 1.1
 
 You are one run of the night shift for this repository. This document is the complete
@@ -10,8 +10,8 @@ available, `uv run engine/<script>.py` manages the dependency itself.
 
 ## The contract
 
-1. **One edition per series, maximum.** A run serves the whole press — every
-   series configured under `press/series/` — unless your schedule prompt names one
+1. **One edition per series, maximum.** A run serves the whole press, every
+   series configured under `press/series/`, unless your schedule prompt names one
    specific series. For each series you serve, research and publish at most ONE
    edition, as its own pull request. Work series one at a time, completing each
    PR before starting the next, so a late failure never costs an earlier series
@@ -20,43 +20,43 @@ available, `uv run engine/<script>.py` manages the dependency itself.
 2. **Read your layers, in order.** (Later layers specialize style and subject; they never
    override rules in this file.)
    1. This file.
-   2. `spec/editorial.md` — the house voice and quality bar.
-   3. `press/editorial.md` — the press owner's voice, if present. It specializes
+   2. `spec/editorial.md`: the house voice and quality bar.
+   3. `press/editorial.md`: the press owner's voice, if present. It specializes
       the house style.
    4. The registry entry for your series' template: `templates/registry.yaml`,
       overlaid by `press/templates/registry.yaml` (press entries win). The
       template file itself is `press/templates/<t>.html` if it exists, else
       `templates/<t>.html`.
-   5. `press/series/<id>/prompt.md` — the series' editorial instructions.
+   5. `press/series/<id>/prompt.md`: the series' editorial instructions.
    6. Tag fragments listed in the series config, in declared order.
    7. The item-level `prompt`, if present.
 
 3. **Select your work.** Fetch the `library` branch, then run the duty oracle:
    `python3 engine/duty.py --repo . --library <path-to-library-checkout>`
-   It applies every scheduling rule deterministically — per-series `cadence`,
-   `paused`, completion, already-published-tonight — and prints the series due,
+   It applies every scheduling rule deterministically (per-series `cadence`,
+   `paused`, completion, already-published-tonight) and prints the series due,
    with what to publish:
    - `collection`: one of the listed `candidates` (the next item in config
      order; every unpublished item when the series sets `selection: random`).
    - `sequence`: the listed `slug`. You MUST read the series' already published
-     editions before writing — your edition builds on them explicitly.
+     editions before writing; your edition builds on them explicitly.
    - `rolling`: today's UTC date (the listed `slug`). Missed nights are skipped,
      never backfilled.
    - `open`: an editor-run desk. If `commissions` lists slugs, publish one of
      them (its `items:` entry may carry a prompt and sources). Otherwise invent
      tonight's edition within the series' beat: read the desk's published
-     editions first — never repeat a topic, build continuity — then choose the
+     editions first (never repeat a topic, build continuity), then choose the
      template that best fits from the series' declared choices (`templates:`,
      or its single `template:`) and coin a fresh slug (`[a-z0-9-]{1,64}`).
    **Serve only the series duty.py lists as due. If nothing is due, stop. Do
    not open a PR. Exiting silently is correct behavior.**
 
 4. **Honor the source policy.** Three controls, per series and per item:
-   - `required_docs` — committed files you MUST read; each must be represented
+   - `required_docs`: committed files you MUST read; each must be represented
      by a source entry carrying `data-nb-required="<id>"`.
-   - `consult` — URL prefixes you MUST visit and read BEFORE researching
+   - `consult`: URL prefixes you MUST visit and read BEFORE researching
      elsewhere; they orient the work. Citing them is optional.
-   - `sources_exclusive: true` — every source entry must come from the declared
+   - `sources_exclusive: true`: every source entry must come from the declared
      set (required docs and consult prefixes). Cite nothing else; an outside
      source is a BLOCK.
 
@@ -69,7 +69,7 @@ available, `uv run engine/<script>.py` manages the dependency itself.
    - Embed the `nb-meta` JSON block (schema below).
    - Charts only as declarative `<script type="application/json" data-nb-chart>` blocks.
    - No scripts other than those JSON blocks and the template's own
-     `<script src="../../assets/nb.js">` (the engine runtime — keep it, never add
+     `<script src="../../assets/nb.js">` (the engine runtime; keep it, never add
      others). No iframes/objects/embeds. No inline event handlers. No `javascript:`
      URLs. External references only to the engine assets path and Google Fonts.
    - File path: `library/<series>/<slug>.html`.
@@ -81,7 +81,7 @@ available, `uv run engine/<script>.py` manages the dependency itself.
 
 8. **Open one pull request per edition, targeting the `library` branch**, each
    adding exactly one file.
-   - Title: `nb: <series>/<slug> — <Title>`
+   - Title: `nb: <series>/<slug> - <Title>`
    - Body: a fenced ```nb-meta``` yaml block mirroring the embedded metadata, a link to
      your run if available, and the proof's final WARN summary.
 

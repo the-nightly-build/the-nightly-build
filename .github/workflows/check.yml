@@ -4,7 +4,7 @@
 # uses GITHUB_TOKEN and only fires after the check passes.
 # PLACEMENT: GitHub fires pull_request triggers only from workflow files present on
 # the PR's base branch, so setup.sh seeds a copy of this file onto library. Keep this
-# file a pure trigger — all engine logic is checked out from main at run time.
+# file a pure trigger: all engine logic is checked out from main at run time.
 name: nightly-build-check
 
 on:
@@ -110,7 +110,7 @@ jobs:
 
       # Pushes made with GITHUB_TOKEN never fire push-triggered workflows
       # (recursion guard), so the merge above cannot start the press by
-      # itself — dispatch it explicitly. Human merges trigger it normally.
+      # itself, so dispatch it explicitly. Human merges trigger it normally.
       - name: Start the press
         env:
           GH_TOKEN: ${{ github.token }}
