@@ -17,6 +17,9 @@ abstract claims.
   providers. Secondary reporting is acceptable for context; never for contested figures.
 - Never fabricate, pad, or decorate citations. If you cannot source a claim, cut the
   claim or state the uncertainty explicitly.
+- Cite only what you have read. Open the source, find the passage that supports the
+  specific claim, and cite that. A citation is a pointer to something you verified, not a
+  decoration, and its URL must resolve.
 - On contested questions, steelman the opposing views — present the strongest version of
   each side, then let the reader navigate.
 

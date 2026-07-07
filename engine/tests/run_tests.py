@@ -1273,6 +1273,7 @@ def run_pr(extra_body=None, mutate=None):
         pr_body=str(extra_body or body),
         library=None,
         today=TODAY,
+        check_links=False,
     )
     C.run_pr_mode(args, rep)
     return rep
@@ -1345,6 +1346,28 @@ for name, cond in [
     ("illegal mode/template pairing fails", rc_bad == 1),
 ]:
     if cond:
+        PASS += 1
+        print(f"  ok   {name}")
+    else:
+        FAIL.append(name)
+        print(f"  FAIL {name}")
+
+print()
+print("== source link resolution classifier ==")
+# B-SOURCE-DEAD blocks only on definitive death; everything ambiguous passes,
+# so a real-but-restricted source (or an offline runner) never false-blocks.
+link_cases = [
+    ("404 is dead", C.classify_link(404, None) == "dead"),
+    ("410 is dead", C.classify_link(410, None) == "dead"),
+    ("domain that does not resolve is dead", C.classify_link(None, "dns") == "dead"),
+    ("200 exists", C.classify_link(200, None) == "ok"),
+    ("403 bot-block is not dead", C.classify_link(403, None) == "ok"),
+    ("500 is not dead", C.classify_link(500, None) == "ok"),
+    ("timeout is unverified, never dead", C.classify_link(None, "net") == "unverified"),
+    ("no links to probe returns empty", C.dead_source_links([]) == []),
+]
+for name, ok in link_cases:
+    if ok:
         PASS += 1
         print(f"  ok   {name}")
     else:

@@ -62,8 +62,11 @@ available, `uv run engine/<script>.py` manages the dependency itself.
      source is a BLOCK.
 
 5. **Research properly.** Use web access. Verify claims against primary sources. Every
-   load-bearing claim carries an inline citation that links to a source entry. Never
-   fabricate a citation. Meet the source floor for your series.
+   load-bearing claim carries an inline citation that links to a source entry. Read the
+   passage you rely on before you cite it: cite from the primary source you actually
+   opened, not from a search result or a summary of it. If you have not read a source, do
+   not cite it. Never fabricate a citation, and never cite a URL you have not confirmed
+   resolves. Meet the source floor for your series.
 
 6. **Render exactly one self-contained HTML file** from your series' template:
    - Fill every anchor section the registry requires exactly once. If the

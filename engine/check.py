@@ -25,12 +25,16 @@ branch carries no engine.
 """
 
 import argparse
+import concurrent.futures
 import datetime as _dt
 import json
 import os
 import re
+import socket
 import subprocess
 import sys
+import urllib.error
+import urllib.request
 from html.parser import HTMLParser
 
 try:
@@ -330,6 +334,62 @@ def published_slugs(library_dir, series_id):
     return set()  # library exists but series dir doesn't => nothing published
 
 
+DEAD_STATUSES = frozenset((404, 410))
+LINK_TIMEOUT_S = 6
+LINK_WORKERS = 8
+LINK_UA = (
+    "Mozilla/5.0 (compatible; NightlyBuild-proof/1.1; "
+    "+https://github.com/RyanSaxe/the-nightly-build)"
+)
+
+
+def classify_link(status, error):
+    """Decide whether a source link is provably dead.
+
+    Only a definitive 'this does not exist' counts: a 404/410 response, or a
+    domain that does not resolve (DNS). Everything else — a 200, a bot-blocking
+    403, a 5xx, a rate limit, a timeout, or no network at all — is 'unverified'
+    and never blocks, so a real-but-restricted source can never fail a
+    legitimate edition.
+    """
+    if status in DEAD_STATUSES:
+        return "dead"
+    if status is not None:
+        return "ok"  # got a response: the URL exists (or is merely restricted)
+    if error == "dns":
+        return "dead"  # the domain itself does not resolve
+    return "unverified"  # timeout, refused, offline — cannot say
+
+
+def _probe_link(href):
+    # GET one byte (Range) rather than HEAD: some servers 404/405 a HEAD they
+    # would serve. A browser-like UA keeps casual bot filters from lying to us.
+    req = urllib.request.Request(
+        href, headers={"User-Agent": LINK_UA, "Range": "bytes=0-0"}
+    )
+    try:
+        with urllib.request.urlopen(req, timeout=LINK_TIMEOUT_S) as resp:
+            return classify_link(resp.status, None)
+    except urllib.error.HTTPError as e:
+        return classify_link(e.code, None)
+    except urllib.error.URLError as e:
+        return classify_link(
+            None, "dns" if isinstance(e.reason, socket.gaierror) else "net"
+        )
+    except (TimeoutError, ValueError, OSError):
+        return classify_link(None, "net")
+
+
+def dead_source_links(hrefs):
+    if not hrefs:
+        return []
+    with concurrent.futures.ThreadPoolExecutor(max_workers=LINK_WORKERS) as pool:
+        verdicts = list(pool.map(_probe_link, hrefs))
+    return [
+        href for href, verdict in zip(hrefs, verdicts, strict=True) if verdict == "dead"
+    ]
+
+
 # --------------------------------------------------------------------------- #
 # Checks
 # --------------------------------------------------------------------------- #
@@ -401,7 +461,15 @@ def validate_meta_fields(meta, rep):
 
 
 def check_edition(
-    html_path, series_id, *, repo, library_dir, rep, pr_body_meta=None, today=None
+    html_path,
+    series_id,
+    *,
+    repo,
+    library_dir,
+    rep,
+    pr_body_meta=None,
+    today=None,
+    check_links=False,
 ):
     today = today or _dt.date.today()
 
@@ -705,11 +773,22 @@ def check_edition(
     # --- B-SOURCES-FORM ---
     if not ed.sources:
         rep.block("B-SOURCES-FORM", "no source entries (a[data-nb-source]) found")
+    well_formed = []
     for s in ed.sources:
         href = s["href"]
-        if not re.match(r"^https://[^\s]+$", href or ""):
+        if re.match(r"^https://[^\s]+$", href or ""):
+            well_formed.append(href)
+        else:
             rep.block(
                 "B-SOURCES-FORM", f"source href must be absolute https URL: {href!r}"
+            )
+
+    # --- B-SOURCE-DEAD: each cited URL must actually resolve (editor gate) ---
+    if check_links:
+        for href in dead_source_links(well_formed):
+            rep.block(
+                "B-SOURCE-DEAD",
+                f"source link does not resolve (404 or no such domain): {href}",
             )
 
     # --- B-CITES-RESOLVE ---
@@ -939,6 +1018,7 @@ def run_pr_mode(args, rep):
         rep=rep,
         pr_body_meta=pr_body_meta,
         today=args.today and _dt.date.fromisoformat(args.today),
+        check_links=args.check_links,
     )
 
 
@@ -1001,6 +1081,14 @@ def main(argv=None):
         "(CI mode, or a local preflight before opening the PR)",
     )
     p.add_argument("--today", help="override today's date (tests)")
+    p.add_argument(
+        "--check-links",
+        action=argparse.BooleanOptionalAction,
+        default=True,
+        help="verify each source URL resolves (on by default, needs network). "
+        "Blocks only on a 404/410 or a domain that does not resolve; restricted, "
+        "slow, or unreachable sources never block. Use --no-check-links offline.",
+    )
     p.add_argument("--json", action="store_true")
     args = p.parse_args(argv)
 

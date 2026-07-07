@@ -140,6 +140,7 @@ def night_shift_run(branch, series, *, slug, html, today, from_ref="library"):
             str(body),
             "--today",
             today,
+            "--no-check-links",  # e2e runs offline and deterministic
             "--json",
         ],
         cwd=root,
