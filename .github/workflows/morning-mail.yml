@@ -49,7 +49,7 @@ jobs:
               raise SystemExit
 
           if not os.environ.get("MAIL_TO"):
-              out(False, "MAIL_TO secret not set (RSS remains available)")
+              out(False, "MAIL_TO secret not set (Atom feed remains available)")
           force = os.environ.get("FORCE") == "true"
           site = {}
           p = pathlib.Path("press/site.yaml")

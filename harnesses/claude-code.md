@@ -31,16 +31,27 @@ per series): create extra Routines and append one line to the prompt:
 `Work ONLY series <series-id>.`
 
 > You are the night shift for The Nightly Build repo `<repo>`. Read
-> `PROTOCOL.md` on main and follow it exactly. Fallback summary: for every
-> series configured under `press/series/` on main, list `library/<series>/` on the
-> `library` branch; if the series has an unpublished next item per its
-> `series.yaml`, research it deeply with cited sources; render ONE
-> self-contained HTML file from the series template with the embedded
-> `nb-meta` JSON block; run `python3 engine/check.py <file> --series <id>` and
-> revise until BLOCK=0; open ONE pull request per series targeting the
-> `library` branch adding ONLY `library/<series>/<slug>.html`, title
-> `nb: <series>/<slug> - <Title>`, body containing the nb-meta yaml block. If
-> no series has work, exit without a PR. Never modify other files.
+> `PROTOCOL.md` on main and follow it exactly. Runtime: needs Python 3.9+ and
+> PyYAML; if a script reports it missing, `pip install pyyaml` (or use
+> `uv run`). Work from the `main` checkout (it carries the engine and
+> `press/`) with the `library` branch checked out separately at `<checkout>`,
+> then run `python3 engine/duty.py --repo . --library <checkout>` for tonight's
+> due series. For each: research deeply with cited primary sources; render ONE
+> self-contained HTML file from the series' template (whichever it declares),
+> setting the nb-meta `form` label and using `templates/FURNITURE.md`; run
+> `python3 engine/check.py library/<series>/<slug>.html --series <id> --repo .
+> --library <checkout>` and revise until `BLOCK: 0`; then write the PR body to
+> a file and re-run check with `--pr-body <file>` so it passes too. Open ONE
+> PR per series targeting `library`, adding ONLY
+> `library/<series>/<slug>.html`, title `nb: <series>/<slug> - <Title>`, body
+> containing the nb-meta yaml block. Nothing due: exit without a PR. Never
+> merge, push to `library`, or modify other files.
+
+**First build now (don't wait for tonight).** Once the Routine exists and the
+repo is connected, trigger it once immediately (the routine's Run now) so
+today's edition researches, publishes, and deploys within roughly half an
+hour. It then runs on its own every night. Setting up in the morning means a
+paper by lunch and a fresh one every day after.
 
 ## 3. Model
 
@@ -60,6 +71,7 @@ comparison corpus.
   clean PRs auto-merge, then `nightly-build-publish` rebuilds the site.
 - First-run troubleshooting: repo not connected at claude.ai/code; the Routine
   lacks network access (enable web tools); the Routine ran but found no work
-  (correct exit; check whether everything is already published); Pages not
-  enabled (`./setup.sh`); Actions disabled (GitHub turns workflows
-  off on forks until you enable them once in the fork's Actions tab).
+  (correct exit; check whether everything is already published); the site
+  404s (GitHub Pages needs a public repo on the free plan, or Pro; make the
+  repo public, then `./setup.sh` to enable it); Actions disabled (GitHub turns
+  workflows off on forks until you enable them once in the fork's Actions tab).

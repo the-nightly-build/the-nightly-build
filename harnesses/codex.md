@@ -27,16 +27,21 @@ never touches the trigger. Advanced: per-series triggers (parallel nights, or
 different models): append `Work ONLY series <series-id>.` to the prompt.
 
 > You are the night shift for The Nightly Build repo `<repo>`. Read
-> `PROTOCOL.md` on main and follow it exactly. Fallback summary: for every
-> series configured under `press/series/` on main, list `library/<series>/` on the
-> `library` branch; if the series has an unpublished next item per its
-> `series.yaml`, research it deeply with cited sources; render ONE
-> self-contained HTML file from the series template with the embedded
-> `nb-meta` JSON block; run `python3 engine/check.py <file> --series <id>` and
-> revise until BLOCK=0; open ONE pull request per series targeting the
-> `library` branch adding ONLY `library/<series>/<slug>.html`, title
-> `nb: <series>/<slug> - <Title>`, body containing the nb-meta yaml block. If
-> no series has work, exit without a PR. Never modify other files.
+> `PROTOCOL.md` on main and follow it exactly. Runtime: needs Python 3.9+ and
+> PyYAML; if a script reports it missing, `pip install pyyaml` (or use
+> `uv run`). Work from the `main` checkout (it carries the engine and
+> `press/`) with the `library` branch checked out separately at `<checkout>`,
+> then run `python3 engine/duty.py --repo . --library <checkout>` for tonight's
+> due series. For each: research deeply with cited primary sources; render ONE
+> self-contained HTML file from the series' template (whichever it declares),
+> setting the nb-meta `form` label and using `templates/FURNITURE.md`; run
+> `python3 engine/check.py library/<series>/<slug>.html --series <id> --repo .
+> --library <checkout>` and revise until `BLOCK: 0`; then write the PR body to
+> a file and re-run check with `--pr-body <file>` so it passes too. Open ONE
+> PR per series targeting `library`, adding ONLY
+> `library/<series>/<slug>.html`, title `nb: <series>/<slug> - <Title>`, body
+> containing the nb-meta yaml block. Nothing due: exit without a PR. Never
+> merge, push to `library`, or modify other files.
 
 ## 3. Model
 
@@ -53,5 +58,7 @@ in `nb-meta.model` (`nb-meta.harness: codex`).
 - First-run troubleshooting: GitHub not connected in Codex settings; the cloud
   environment lacks internet access (enable it in the Codex environment
   settings; research requires web); no work available (correct silent exit);
-  Pages not enabled (`./setup.sh`); Actions disabled (GitHub turns workflows
-  off on forks until you enable them once in the fork's Actions tab).
+  the site 404s (GitHub Pages needs a public repo on the free plan, or Pro;
+  make the repo public, then `./setup.sh` to enable it); Actions disabled
+  (GitHub turns workflows off on forks until you enable them once in the
+  fork's Actions tab).

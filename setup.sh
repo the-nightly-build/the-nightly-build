@@ -122,7 +122,8 @@ else
 	if gh api -X POST "repos/$repo/pages" -f build_type=workflow >/dev/null 2>&1; then
 		ok "GitHub Pages enabled (workflow deploy)"
 	else
-		warn "could not enable Pages via API. Enable it manually:"
+		warn "could not enable Pages via API (a private repo on the free plan"
+		warn "  has no Pages: make it public, or use Pro). Then enable it at:"
 		warn "  https://github.com/$repo/settings/pages, Source: GitHub Actions"
 	fi
 fi

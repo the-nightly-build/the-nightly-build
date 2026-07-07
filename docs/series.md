@@ -55,8 +55,9 @@ paused desks sink into "In the stacks" automatically.
 
 Per series: `words: [low, high]` (may tighten, never loosen below the
 template's registry floor), `min_sources`, `strict: true` (every WARN
-becomes a BLOCK), `autopublish: false` (a human merges instead of the
-editor), and the source policy: `required_docs`, `consult`, and
+becomes a BLOCK), `autopublish: true` (the editor auto-merges a clean PR;
+the default is a human merge), and the source policy: `required_docs`,
+`consult`, and
 `sources_exclusive`, described in the [README](../README.md) and
 demonstrated across `examples/series/`.
 

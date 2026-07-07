@@ -74,15 +74,17 @@ Start from `press/templates/<template>.html` if it exists, else
 `templates/<template>.html` (for an open desk, `<template>` is the choice you
 made in step 2 — record it honestly in nb-meta). Design before you write:
 
-- **article** is enforced prose: the registry anchors (orientation,
-  go-deeper, sources) appear exactly once, and between them YOU name 2–6
-  sections for this topic (lowercase-hyphen `data-nb-section` labels, each
-  cited). The outline is editorial judgment — shape it to the material,
-  never to habit. Fixed-section templates (user-defined ones) keep their
-  declared structure exactly.
-- **brief** is enforced structure: 4–8 tagged items, each cited, each with
-  a why-it-matters line, each headline linking directly to its primary
-  source.
+- Your template's registry entry defines its geometry; the two shipped
+  templates are the two citation shapes. **article** is enforced prose: the
+  anchor sections (orientation, go-deeper, sources) appear exactly once, and
+  where it declares `flex_sections` you name that many more between them
+  (lowercase-hyphen `data-nb-section` labels, each cited). The outline is
+  editorial judgment — shape it to the material, never to habit. **brief** is
+  enforced structure: 4–8 tagged items, each cited, each with a why-it-matters
+  line, each headline linking to its primary source.
+- A custom `press/templates/` template follows its own entry the same way: a
+  fixed outline if it declares no `flex_sections`, an agent-named middle if it
+  does. Read the entry; do not assume article or brief.
 - Set nb-meta `form` to one or two words naming what you wrote ("Dossier",
   "Chronicle", "Explainer", "Essay"...). You read the desk's catalog in
   step 2 — reuse its existing label when tonight's piece is the same form.

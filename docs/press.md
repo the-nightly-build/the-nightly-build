@@ -27,12 +27,18 @@ press/
 
 ## The fork lifecycle
 
-1. Fork with GitHub's "Copy the main branch only" box checked.
+1. Fork with GitHub's "Copy the main branch only" box checked. Keep the fork
+   **public** if you want the published site: GitHub Pages needs a public repo
+   on the free plan (a private repo needs Pro).
 2. Set up: say "set me up" to your agent, or run `./setup.sh` by hand. It
    scaffolds your empty `press/`, creates the empty `library` branch, seeds
-   its trigger workflows, and enables Pages and auto-merge. Enable workflows
-   once in your fork's Actions tab.
-3. Publish forever. The night shift adds editions to `library` via one-file
+   its trigger workflows, clears the library branch to deploy, and enables
+   Pages and auto-merge. Enable workflows once in your fork's Actions tab.
+3. Connect and schedule (cloud harnesses): authorize the night shift to reach
+   your repo per your adapter in `harnesses/`, schedule one nightly run, and
+   optionally trigger it once now so today's first edition publishes instead
+   of waiting for tonight.
+4. Publish forever. The night shift adds editions to `library` via one-file
    PRs. `main` only changes when you change configuration or pull an engine
    update.
 

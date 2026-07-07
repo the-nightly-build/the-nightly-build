@@ -6,9 +6,10 @@ updates never touch it. Working examples live in `examples/`.
 ## Look: themes
 
 The entire visual system reads about 14 CSS variables from one token file.
-The theme contract: define exactly those variables, in all four blocks
-(light, dark, and the two manual-override blocks). The test suite enforces
-parity across the blocks.
+The theme contract: define the color tokens in all four blocks (light, dark,
+and the two manual-override blocks); the font and radius tokens live in the
+base block and are inherited. The test suite enforces parity across the
+blocks.
 
 The shipped theme pairs a pale day-sky paper with bronze accents in light
 mode and a deep navy night with amber in dark mode. Keep day accents deep
@@ -84,9 +85,10 @@ Registry entries come in two styles:
 - Flexible outline: declare anchor `sections` plus
   `flex_sections: [min, max]`, and the agent names that many additional
   sections per edition. Either way the cite rule applies to every labeled
-  section.
+  section, except a few exempt ones (`sources`, `objectives`, `items`,
+  `slides`).
 
-Worked example: the classic lesson template, five fixed sections for an
+Worked example: the classic lesson template, six fixed sections for an
 ordered course, rebuilt as a press template.
 
 1. Declare it in `press/templates/registry.yaml`:
@@ -101,7 +103,8 @@ lesson:
 ```
 
 Rules: `sections` must include `sources`. Bands are `[low, high]`.
-`cite_rule` is `per-section` or `per-item` (needs `data-nb-item` markers).
+`cite_rule` is `per-section`, `per-item` (needs `data-nb-item` markers), or
+`per-slide` (needs `data-nb-slide` markers).
 Entries here overlay the shipped registry, so reusing a shipped id
 redefines it. The test suite exercises this exact lesson entry, so the
 walkthrough cannot drift from what the proof enforces.

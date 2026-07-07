@@ -109,7 +109,7 @@ Embed in `<head>`:
 ```html
 <script type="application/json" id="nb-meta">
 {
-  "protocol": "1.0",
+  "protocol": "1.1",
   "series": "semiconductors",
   "slug": "micron",
   "template": "article",
