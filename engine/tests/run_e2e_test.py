@@ -11,7 +11,7 @@ and the site is rebuilt from the merged library (as publish.yml does).
 Night 1 (2026-07-05): collection edition + rolling brief  → multi-edition build
 Night 2 (2026-07-06): rolling brief                       → feeds/pages update
 
-The cloud half — a real Routine on a fork for two nights — is a human-run
+The cloud half — a real scheduled run on a fork for two nights — is a human-run
 verification; see the phase 6 runbook.
 
 Run: python3 engine/tests/run_e2e_test.py

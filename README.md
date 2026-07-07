@@ -37,10 +37,12 @@ source count. The reader's front page and a single edition, on a phone:
 3. Rehearse. Ask your agent for a "press check": a full research run
    rendered to a locally served site, with no PR, so you can tune prompts
    before scheduling anything.
-4. Connect and schedule. Point your harness at the repo (see `harnesses/`),
-   schedule one nightly job for the whole press, and trigger it once now for
-   today's first edition. Each run derives its work list from the repo, so you
-   never touch the schedule again.
+4. Connect and schedule. Pick a path in [docs/scheduling.md](docs/scheduling.md):
+   a provider's native scheduler (Claude Routines and Jules Scheduled Tasks are
+   included in a plan you may already pay for) or the universal GitHub Actions
+   cron that runs any headless agent. Schedule one nightly job for the whole
+   press and trigger it once now for today's first edition. Each run derives its
+   work list from the repo, so you never touch the schedule again.
 5. Read. The night shift opens one PR per series, CI validates and (for
    `autopublish` series, which the examples enable) merges, the site rebuilds,
    and the morning email or Atom feed delivers it.
@@ -118,6 +120,7 @@ contains a complete working configuration as documentation.
 
 - [Your press: ownership, forks, updates](docs/press.md)
 - [Series: modes, open desks, cadence, commissioning](docs/series.md)
+- [Scheduling: native schedulers, the universal Actions cron, costs](docs/scheduling.md)
 - [Customization: themes, voice, your own templates](docs/customization.md)
 - [Delivery: feeds, morning email, the catalog API](docs/delivery.md)
 

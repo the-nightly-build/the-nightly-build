@@ -180,7 +180,7 @@ printf '%s\n' "
 Next steps:
   1. Configure a series, or ask your agent to set you up (the Librarian skill).
   2. Rehearse:   run a press check; see skills/correspondent/SKILL.md.
-  3. Schedule:   pick your harness in harnesses/ (claude-code.md, jules.md, codex.md)
-                 and paste the filled schedule prompt it gives you.
+  3. Schedule:   pick a path in docs/scheduling.md (a native scheduler, or the
+                 universal GitHub Actions cron) and use the schedule prompt there.
   4. Morning:    your site lives at the Pages URL for $repo.
 "
