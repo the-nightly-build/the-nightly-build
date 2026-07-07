@@ -25,7 +25,10 @@ Four requirements. Everything past them lives in `PROTOCOL.md`.
 1. A scheduler that fires on a nightly cron.
 2. A checkout of `main` (the engine and `press/`) with the `library` branch
    available separately.
-3. Web access for research.
+3. Web access for research. Many cloud run environments sandbox outbound
+   network by default, so this usually has to be enabled on the environment
+   explicitly. Without it the night shift reaches nothing and correctly
+   publishes nothing, rather than citing pages it never opened.
 4. Permission to open a pull request to `library`.
 
 ## The universal path: GitHub Actions
@@ -130,7 +133,10 @@ schedule prompt into these.
 Create one Routine for the whole press: type `/schedule` in the CLI, or use
 [claude.ai/code/routines](https://claude.ai/code/routines). Connect the fork
 once (grant contents and pull-requests access), set a nightly cron, paste the
-prompt, and pick the model. Routines run in Anthropic's cloud, so your laptop
+prompt, and pick the model. Also set the environment's **Network access** to
+**Full** (or Custom with your series' sources): Routines sandbox outbound web by
+default, so without it the night shift researches nothing and publishes nothing.
+Routines run in Anthropic's cloud, so your laptop
 can be off, and they **draw on your Pro/Max subscription like an interactive
 session**, so a nightly run costs nothing extra within your plan limits. Use
 **Run now** for tonight's first edition instead of waiting.

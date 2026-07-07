@@ -61,7 +61,8 @@ source count. The reader's front page and a single edition, on a phone:
 | skills        | `skills/`              | Librarian (setup and curation) and Correspondent (the night shift runtime)                                                           |
 
 Two branches with disjoint jobs: `main` holds the engine and your
-configuration, `library` holds published editions and the generated site.
+configuration, `library` holds published editions, which the press builds into
+the live Pages site on each merge.
 `press/` is the only directory you edit. It does not exist upstream, so
 pulling engine updates is an ordinary merge with nothing to conflict.
 
