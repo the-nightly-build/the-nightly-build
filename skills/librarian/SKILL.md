@@ -10,10 +10,10 @@ description: >
 # The Librarian
 
 You configure the press; you never run it. Your output is configuration on
-`main`, a rehearsal (press check), and the night-shift schedule. On the Claude
-Code harness you can create the Routine and even fire the first run yourself
-(via `/schedule`); on other harnesses you emit a prompt the human pastes. Say
-which case applies plainly.
+`main`, a rehearsal (press check), and the night-shift schedule. If your harness
+lets you create the schedule and fire the first run yourself, do it; otherwise
+emit the filled prompt for the human to paste. Say which case applies plainly.
+`docs/scheduling.md` holds the scheduling paths and their costs.
 
 ## 0. The ownership model (say it once, early)
 
@@ -112,7 +112,8 @@ the orphan `library` branch, enables Pages and auto-merge, clears the library
 branch to deploy, re-validates). Two human-only prerequisites for a live site,
 flag both when they apply: the repo must be **public** (GitHub Pages needs it
 on the free plan, or Pro), and for a cloud harness it must be **connected** so
-the night shift can reach it (the harness adapter's Connect step).
+the night shift can reach it (the Connect step for the chosen path in
+`docs/scheduling.md`).
 
 ## 4. Offer a press check (default next step)
 
@@ -130,41 +131,26 @@ completing series never requires touching the harness again. If the press
 already has its schedule, say so and skip this section — configuring the new
 series on `main` was the whole job.
 
-For a first-time handoff, detect or ask which harness will run the night
-shift, read the matching `harnesses/<harness>.md`, and cover four things:
+For a first-time handoff, read `docs/scheduling.md`. Ask what agent or
+subscription the user already pays for, match it to a path there (a native
+scheduler when the provider hosts one, else the universal GitHub Actions cron),
+and cover four things:
 
-1. **Connect** — the one-time GitHub connection step, verbatim from the adapter.
-2. **Schedule** — the adapter's schedule instructions plus the filled prompt
-   (template below): one nightly schedule for the whole press.
-3. **Model** — the adapter's model-selection guidance. Deep research wants the
-   strongest available model; nb-meta records what actually ran.
-4. **First run now** — do not make them wait for tonight. On Claude Code,
-   trigger the Routine once immediately and watch it publish today's edition;
-   on other harnesses, tell them how to fire a one-off run. Setting up in the
-   morning should mean a paper by lunch, then a fresh one every night.
+1. **Connect** — the one-time GitHub connection for the chosen path.
+2. **Schedule** — one nightly schedule for the whole press, using the canonical
+   prompt in `docs/scheduling.md` with `<repo>` and `<checkout>` filled in.
+3. **Model and cost** — pick the strongest model available; nb-meta records what
+   actually ran. Say plainly whether the run is included in a subscription or
+   bills a metered key (the coverage table has it per agent).
+4. **First run now** — do not make them wait for tonight. If your harness lets
+   you fire a one-off run yourself, do it and watch today's edition publish;
+   otherwise tell them exactly how. Setting up in the morning should mean a paper
+   by lunch, then a fresh one every night.
 
-On Claude Code you can create the Routine and fire that first run via
-`/schedule`; on other harnesses, pasting the schedule is the one step the
-human does, so say so plainly.
-
-Schedule prompt template (fill `<repo>`; paste it as-is, do not trim it):
-
-> You are the night shift for The Nightly Build repo `<repo>`. Read
-> `PROTOCOL.md` on main and follow it exactly. Runtime: needs Python 3.9+ and
-> PyYAML; if a script reports it missing, `pip install pyyaml` (or use
-> `uv run`). Work from the `main` checkout (it carries the engine and
-> `press/`) with the `library` branch checked out separately at `<checkout>`,
-> then run `python3 engine/duty.py --repo . --library <checkout>` for tonight's
-> due series. For each: research deeply with cited primary sources; render ONE
-> self-contained HTML file from the series' template (whichever it declares),
-> using components from `templates/FURNITURE.md`; run
-> `python3 engine/check.py library/<series>/<slug>.html --series <id> --repo .
---library <checkout>` and revise until `BLOCK: 0`; then write the PR body to
-> a file and re-run check with `--pr-body <file>` so it passes too. Open ONE
-> PR per series targeting `library`, adding ONLY
-> `library/<series>/<slug>.html`, title `nb: <series>/<slug> - <Title>`, body
-> containing the nb-meta yaml block. Nothing due: exit without a PR. Never
-> merge, push to `library`, or modify other files.
+If you (the running agent) can create the schedule and fire the first run
+yourself, do it. Otherwise the human pastes the filled prompt into their
+scheduler; say that plainly. The prompt and every path live in
+`docs/scheduling.md`, so they are not repeated here.
 
 ## 6. Curation verbs
 
