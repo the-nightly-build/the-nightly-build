@@ -28,7 +28,7 @@ python3 -c 'import yaml' 2>/dev/null ||
 	die "PyYAML is required: pip install pyyaml (with uv: uv pip install pyyaml)"
 
 # 1b. This repo is a press; the canonical repo is engine-only ------------------
-UPSTREAM_REPO="RyanSaxe/the-nightly-build"
+UPSTREAM_REPO="${UPSTREAM_REPO:-the-nightly-build/the-nightly-build}"
 if [ "$repo" = "$UPSTREAM_REPO" ]; then
 	die "this is the engine repo; it runs no press. Fork it, then run setup there."
 fi

@@ -59,6 +59,9 @@ WORDS_PER_MINUTE = 230
 FEED_LIMIT = 50
 FEED_CONTENT_LIMIT = 10  # newest N entries carry full content
 FEED_CONTENT_MAX = 150_000  # per-entry cap after stripping, bytes
+UPSTREAM_REPOSITORY = os.getenv(
+    "UPSTREAM_REPOSITORY", "the-nightly-build/the-nightly-build"
+)
 META_RE = re.compile(r'<script[^>]*\bid="nb-meta"[^>]*>(.*?)</script>', re.S | re.I)
 
 esc = html.escape
@@ -398,7 +401,7 @@ def page(site, title, *, body, depth=0, active=None):
 </main>
 <footer class="nb-footer"><div class="nb-footer-in">
   <a href="{rel}feed.xml">RSS</a>
-  <a href="https://github.com/RyanSaxe/the-nightly-build">GitHub</a>
+  <a href="https://github.com/{UPSTREAM_REPOSITORY}">GitHub</a>
   <button class="nb-appearance" type="button">◐ auto</button>
 </div></footer>
 </body></html>"""

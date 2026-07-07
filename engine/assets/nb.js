@@ -286,7 +286,7 @@
         '<div class="nb-footer-in"><a href="' +
         ROOT +
         'feed.xml">RSS</a>' +
-        '<a href="https://github.com/RyanSaxe/the-nightly-build">GitHub</a>' +
+        '<a href="https://github.com/the-nightly-build/the-nightly-build">GitHub</a>' +
         '<button class="nb-appearance" type="button">◐ auto</button></div>';
       document.body.appendChild(foot);
     });
