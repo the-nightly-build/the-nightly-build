@@ -1,7 +1,8 @@
 # The press run: on every push to library, rebuild the site and deploy Pages.
 # SECURITY: executable logic (builder, assets) is ALWAYS checked out from main
-# (§1 invariant 1). Library content is data, never code. The site commit carries
-# [skip ci] so the rebuild push cannot retrigger this workflow.
+# (§1 invariant 1). Library content is data, never code.
+# The built site is served from the Pages artifact; it is NOT committed back to
+# the library branch, so a protected library never blocks the deploy.
 # PLACEMENT: GitHub fires push triggers only from workflow files present on the
 # pushed branch, so setup.sh seeds a copy of this file onto library; the editor's
 # auto-merge also dispatches it explicitly (GITHUB_TOKEN pushes fire no events).
@@ -22,7 +23,7 @@ jobs:
     if: ${{ !contains(github.event.head_commit.message, '[skip ci]') }}
     runs-on: ubuntu-latest
     permissions:
-      contents: write
+      contents: read
       pages: write
       id-token: write
     steps:
@@ -50,14 +51,6 @@ jobs:
           python3 _main/engine/build_site.py \
             --repo _main --library . --out site \
             --base-url "${{ steps.pages.outputs.base_url }}"
-
-      - name: Commit the built site back to library
-        run: |
-          git config user.name "nightly-build[bot]"
-          git config user.email "nightly-build-bot@users.noreply.github.com"
-          git add site
-          git diff --cached --quiet || git commit -m "site: rebuild [skip ci]"
-          git push
 
       - uses: actions/upload-pages-artifact@v3
         with: { path: site }
