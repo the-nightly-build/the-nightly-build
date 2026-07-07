@@ -3,7 +3,7 @@ import globals from "globals";
 
 export default [
   {
-    ignores: ["node_modules/", "press-check/", ".venv/"],
+    ignores: ["node_modules/", "press/", "press-check/", ".venv/"],
   },
   js.configs.recommended,
   {

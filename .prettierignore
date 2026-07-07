@@ -1,3 +1,6 @@
+# The reader's own press config lives on main and is theirs, not ours.
+press/
+
 # Generated / vendored / tool-owned — never format these.
 docs/agent-only/
 press-check/

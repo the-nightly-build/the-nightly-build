@@ -8,9 +8,10 @@
     "MD033": { "allowed_elements": ["p", "img"] },
   },
   "globs": ["**/*.md"],
-  // docs/agent-only is gitignored local scratch; these tools don't read .gitignore.
+  // press/ is the reader's own config; docs/agent-only is gitignored scratch.
   "ignores": [
     "node_modules",
+    "press",
     "press-check",
     ".venv",
     ".byor",
