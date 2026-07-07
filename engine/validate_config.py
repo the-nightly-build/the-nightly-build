@@ -100,6 +100,50 @@ def check_site(repo, errors):
         errors.append(f"{label}/site.yaml: 'appearance' must be auto | light | dark")
     if site.get("front", "comfortable") not in ("comfortable", "compact"):
         errors.append(f"{label}/site.yaml: 'front' must be comfortable | compact")
+    check_site_assets(site.get("assets"), errors=errors)
+
+
+def check_site_assets(assets, *, errors):
+    # Trusted external libraries a press loads on every page. Owner-authored on
+    # main, so they must be https and Subresource-Integrity-pinned: the SRI hash
+    # is what lets the browser refuse a tampered CDN response.
+    if assets is None:
+        return
+    prefix = "press/site.yaml"
+    if not isinstance(assets, dict):
+        errors.append(f"{prefix}: 'assets' must be a mapping of scripts/styles")
+        return
+    unknown = set(assets) - {"scripts", "styles"}
+    if unknown:
+        errors.append(f"{prefix}: assets: unknown keys {sorted(unknown)}")
+    for kind in ("scripts", "styles"):
+        items = assets.get(kind)
+        if items is None:
+            continue
+        if not isinstance(items, list):
+            errors.append(f"{prefix}: assets.{kind} must be a list")
+            continue
+        for i, item in enumerate(items):
+            where = f"{prefix}: assets.{kind}[{i}]"
+            if not isinstance(item, dict):
+                errors.append(f"{where}: must be a mapping with 'url' and 'integrity'")
+                continue
+            extra = set(item) - {"url", "integrity", "defer"}
+            if extra:
+                errors.append(f"{where}: unknown keys {sorted(extra)}")
+            url = item.get("url")
+            if not isinstance(url, str) or not url.startswith("https://"):
+                errors.append(f"{where}: 'url' must be an https URL")
+            integrity = item.get("integrity")
+            if not isinstance(integrity, str) or not re.match(
+                r"^sha(256|384|512)-.+", integrity
+            ):
+                errors.append(
+                    f"{where}: 'integrity' is required and must be an SRI hash "
+                    f"(sha256-, sha384-, or sha512-...)"
+                )
+            if "defer" in item and not isinstance(item.get("defer"), bool):
+                errors.append(f"{where}: 'defer' must be true or false")
 
 
 def check_registry(repo, errors):

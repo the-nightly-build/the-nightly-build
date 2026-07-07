@@ -87,6 +87,36 @@ def load_site_config(repo):
     return cfg
 
 
+def render_assets_html(assets):
+    """Head tags for a press's declared trusted external assets.
+
+    Presses may load popular libraries (a syntax highlighter, a math
+    typesetter) to power their furniture. These are owner-authored in
+    site.yaml on main (never an agent edition), pinned and Subresource-
+    Integrity-hashed, and validate_config requires the hash. The builder
+    injects them into every generated page and edition here, on the trusted
+    post-merge path; editions themselves stay script-free, so the edition
+    sandbox is unchanged and auto-merge stays as safe as ever.
+    """
+    if not assets:
+        return ""
+    parts = []
+    for st in assets.get("styles") or []:
+        parts.append(
+            f'<link rel="stylesheet" href="{esc(st["url"])}" '
+            f'integrity="{esc(st["integrity"])}" '
+            'crossorigin="anonymous" referrerpolicy="no-referrer">'
+        )
+    for sc in assets.get("scripts") or []:
+        defer = "" if sc.get("defer") is False else " defer"
+        parts.append(
+            f'<script src="{esc(sc["url"])}" '
+            f'integrity="{esc(sc["integrity"])}" '
+            f'crossorigin="anonymous" referrerpolicy="no-referrer"{defer}></script>'
+        )
+    return "\n".join(parts)
+
+
 def load_series_configs(repo):
     root = os.path.join(repo, "press", "series")
     out = {}
@@ -373,6 +403,7 @@ def page(site, title, *, body, depth=0, active=None):
         current = ' aria-current="page"' if label == active else ""
         nav_parts.append(f'<a href="{rel + href}"{current}>{label}</a>')
     nav = "".join(nav_parts)
+    press_assets = f"\n{site['assets_html']}" if site.get("assets_html") else ""
     return f"""<!DOCTYPE html>
 <html lang="en"{mode_attr}>
 <head>
@@ -385,7 +416,7 @@ def page(site, title, *, body, depth=0, active=None):
 <link rel="stylesheet" href="{rel}assets/nb.css?v={site["stamp"]}">
 <link rel="alternate" type="application/atom+xml" href="{rel}feed.xml" title="{esc(site["title"])}">
 {APPEARANCE_BOOTSTRAP}
-<script defer src="{rel}assets/nb.js?v={site["stamp"]}"></script>
+<script defer src="{rel}assets/nb.js?v={site["stamp"]}"></script>{press_assets}
 </head>
 <body{site["body_class"]}>
 <header class="nb-bar"><div class="nb-bar-in">
@@ -993,20 +1024,26 @@ EDITION_ASSET_RE = re.compile(
 )
 
 
-def copy_editions(editions, out, *, stamp=""):
-    """Copy editions into the site, stamping their shared-asset links.
+def copy_editions(editions, out, *, stamp="", assets_html=""):
+    """Copy editions into the site, stamping their shared-asset links and
+    injecting the press's declared trusted assets into each edition's head.
 
     The canonical files on the library branch stay byte-exact; only the
-    generated site copy gets ?v=<stamp> on nb.css, nb.js, and theme.css
-    so cached assets can never mismatch the markup.
+    generated site copy gets ?v=<stamp> on nb.css, nb.js, and theme.css so
+    cached assets can never mismatch the markup, and the press assets so
+    library-backed furniture (a highlighter, say) works in every edition.
     """
     for ed in editions.values():
         dst = os.path.join(out, "library", ed["series"], f"{ed['slug']}.html")
         os.makedirs(os.path.dirname(dst), exist_ok=True)
-        if stamp:
+        if stamp or assets_html:
             with open(ed["file"], encoding="utf-8", errors="replace") as fh:
                 raw = fh.read()
-            write(dst, EDITION_ASSET_RE.sub(rf"\1?v={stamp}\2", raw))
+            if stamp:
+                raw = EDITION_ASSET_RE.sub(rf"\1?v={stamp}\2", raw)
+            if assets_html:
+                raw = raw.replace("</head>", f"{assets_html}\n</head>", 1)
+            write(dst, raw)
         else:
             shutil.copyfile(ed["file"], dst)
 
@@ -1022,6 +1059,7 @@ def build(repo, library_root, *, out, preview_root=None, base_url="", now=None):
         "title": site_cfg["title"],
         "appearance": site_cfg["appearance"],
         "stamp": asset_stamp(repo),
+        "assets_html": render_assets_html(site_cfg.get("assets")),
         "body_class": (
             ' class="nb-front-comfortable"'
             if site_cfg.get("front") == "comfortable"
@@ -1146,7 +1184,7 @@ def build(repo, library_root, *, out, preview_root=None, base_url="", now=None):
         )
 
     copy_assets(repo, site_cfg, out=out)
-    copy_editions(editions, out, stamp=site["stamp"])
+    copy_editions(editions, out, stamp=site["stamp"], assets_html=site["assets_html"])
     return catalog
 
 

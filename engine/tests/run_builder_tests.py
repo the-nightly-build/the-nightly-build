@@ -21,6 +21,7 @@ import xml.etree.ElementTree as ET
 import _bootstrap
 import build_site as B
 import make_fixtures
+import validate_config as V
 
 REPO = _bootstrap.REPO
 
@@ -353,6 +354,60 @@ check("fresh-fork empty state", "The presses are ready" in empty_index)
 check(
     "empty build still renders a sections page",
     'class="nb-desk' in read(empty_out, "series", "index.html"),
+)
+
+print("== press trusted external assets ==")
+# validate_config requires https + SRI on every declared asset
+no_sri = []
+V.check_site_assets({"scripts": [{"url": "https://cdn.example/x.js"}]}, errors=no_sri)
+check("asset without integrity is rejected", any("integrity" in e for e in no_sri))
+not_https = []
+V.check_site_assets(
+    {"scripts": [{"url": "http://cdn.example/x.js", "integrity": "sha384-AAA"}]},
+    errors=not_https,
+)
+check("non-https asset url is rejected", any("https" in e for e in not_https))
+ok_assets = []
+V.check_site_assets(
+    {
+        "scripts": [
+            {"url": "https://cdn.example/x.js", "integrity": "sha384-A", "defer": True}
+        ],
+        "styles": [{"url": "https://cdn.example/x.css", "integrity": "sha512-B"}],
+    },
+    errors=ok_assets,
+)
+check("pinned + SRI assets validate", ok_assets == [])
+
+# render emits SRI + crossorigin, and nothing when nothing is declared
+tag_html = B.render_assets_html(
+    {"scripts": [{"url": "https://cdn.example/x.js", "integrity": "sha384-A"}]}
+)
+check(
+    "rendered asset carries integrity + crossorigin",
+    'integrity="sha384-A"' in tag_html and 'crossorigin="anonymous"' in tag_html,
+)
+check("no assets renders nothing", B.render_assets_html(None) == "")
+
+# a real build injects the declared asset into chrome pages AND editions
+assets_repo = tempfile.mkdtemp()
+shutil.copytree(TESTREPO, assets_repo, dirs_exist_ok=True)
+site_yaml = pathlib.Path(assets_repo) / "press" / "site.yaml"
+site_yaml.write_text(
+    site_yaml.read_text()
+    + "assets:\n  scripts:\n    - url: https://cdn.example/hi.js\n"
+    + "      integrity: sha384-TESTHASH\n"
+)
+assets_out = tempfile.mkdtemp()
+B.build(assets_repo, make_full_library(), out=assets_out, now=NOW)
+injected = 'src="https://cdn.example/hi.js"'
+check(
+    "declared asset injected into chrome page",
+    injected in read(assets_out, "index.html"),
+)
+check(
+    "declared asset injected into edition copy",
+    injected in read(assets_out, "library", "semiconductors", "micron.html"),
 )
 
 print()

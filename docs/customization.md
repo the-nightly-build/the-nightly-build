@@ -60,6 +60,45 @@ Then instruct a desk in its `prompt.md`: "use `<div class=\"rs-margin-note\">`
 for asides." Editions carry the markup, your theme carries the look, and
 engine updates never touch either.
 
+### Furniture that needs a JavaScript library
+
+CSS covers most furniture. When a component needs a real library — a syntax
+highlighter, a math typesetter, a diagram renderer — declare it in
+`press/site.yaml` under `assets`, and the build injects it into every page:
+
+```yaml
+# press/site.yaml
+assets:
+  scripts:
+    - url: https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-core.min.js
+      integrity: sha384-…
+    - url: https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js
+      integrity: sha384-…
+  styles: [] # same shape, for a library that ships CSS
+```
+
+With Prism loaded, a code component is pure markup — the edition writes
+`<pre><code class="language-python">…escaped code…</code></pre>` and Prism
+highlights it; your theme colors the `.token` classes. The
+`examples/` press does exactly this for its `rs-code` furniture.
+
+This does not weaken the security model, because the trust boundary is
+**authorship**, not the presence of JavaScript:
+
+- Assets are declared in `site.yaml`, which lives on `main` and changes only
+  through your normal review — never through an auto-merged edition PR. An
+  untrusted night-shift run cannot add one.
+- Every asset must be **https and Subresource-Integrity-pinned**
+  (`validate_config` enforces the hash), so the browser refuses a tampered CDN
+  response. Pin an exact version.
+- Editions themselves stay script-free. The library the edition uses reads and
+  displays markup; it never runs edition-authored code. The edition sandbox
+  (no `<script>`, no event handlers) is unchanged, so auto-merge is as safe as
+  ever.
+
+Readers with JavaScript off still get the raw content (plain monospace code, an
+unrendered figure), the same graceful fallback the built-in charts use.
+
 ## Voice: press/editorial.md
 
 Your paper's voice, composed into every edition's instructions after the

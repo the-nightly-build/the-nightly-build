@@ -89,6 +89,13 @@ read-only permissions and no secrets. Auto-merge is squash-only, into
 `library` only, for BLOCK-clean PRs only. Mail credentials exist only as
 Actions secrets on the trusted post-merge path.
 
+A press may load libraries to power its furniture (a syntax highlighter, say)
+by declaring them in `press/site.yaml`. That surface preserves the boundary:
+the list is owner-authored on `main`, never by an auto-merged edition; every
+entry is version-pinned and Subresource-Integrity-hashed; and editions stay
+script-free, so the sandbox above is unchanged. See
+[docs/customization.md](docs/customization.md).
+
 ## Development
 
 The engine is Python 3.10+ with one runtime dependency, PyYAML. Scripts carry
