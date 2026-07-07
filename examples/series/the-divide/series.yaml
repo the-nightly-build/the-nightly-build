@@ -1,0 +1,15 @@
+# An open desk on the custom `divide` template (templates/registry.yaml +
+# templates/divide.html). Each edition takes ONE genuinely contested question
+# and argues every side at its strongest from named, vetted sources. The
+# template enforces at least two sides, each its own section; `strict` promotes
+# every WARN to a BLOCK, so the per-side citation checks become hard gates.
+# A one-sided or thinly-sourced edition cannot publish.
+name: The Divide
+mode: open
+section: "Opinion"
+template: divide # a single custom template; open desks may also list `templates:`
+prompt: prompt.md
+autopublish: true
+strict: true # the integrity desk runs strict on purpose
+min_sources: 10 # both sides, sourced to primaries; aim well past this
+cadence: [mon, wed, fri]

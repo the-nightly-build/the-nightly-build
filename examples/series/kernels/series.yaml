@@ -1,0 +1,38 @@
+# A sequence: an ordered course. The night shift reads the published lessons
+# before writing the next, and recaps must reference them concretely. A sequence
+# grows by appending items; published lessons never reorder.
+name: Kernels
+mode: sequence
+section: "Foundations"
+template: article
+prompt: prompt.md
+autopublish: true
+strict: false
+words: [1800, 4500] # a lesson needs room to build an idea, show code, and check it
+min_sources: 8
+cadence: [sun] # a weekly deep lesson
+tags: # shared angle fragments, pulled in when a lesson carries the tag
+  hardware: ../_tags/hardware.md
+  benchmarks: ../_tags/benchmarks.md
+items:
+  - slug: the-gpu-execution-model
+    title: "The GPU Execution Model: Threads, Warps, and Memory"
+    tags: [hardware]
+  - slug: your-first-cuda-kernel
+    title: "Your First CUDA Kernel"
+    tags: [hardware]
+  - slug: memory-coalescing
+    title: "Memory Coalescing and the Cost of a Load"
+    tags: [hardware]
+  - slug: tiling-and-shared-memory
+    title: "Tiling: A Matrix Multiply That Uses Shared Memory"
+    tags: [hardware]
+  - slug: enter-triton
+    title: "Enter Triton: Blocks Without the Boilerplate"
+    tags: [hardware]
+  - slug: a-triton-softmax
+    title: "A Fused Softmax in Triton"
+    tags: [hardware, benchmarks]
+  - slug: flash-attention
+    title: "FlashAttention: Why Fusion Wins"
+    tags: [hardware, benchmarks]

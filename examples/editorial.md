@@ -5,10 +5,20 @@ instructions immediately after the house style (`spec/editorial.md`), and it
 specializes that style: tone, register, language, assumed background, the
 habits you want and the ones you want gone. Engine updates never touch it.
 
-The upstream press writes with these preferences:
+This press reads like a professional newspaper, not a feed. Its preferences:
 
-- Plain, confident, lightly wry. The facts carry the weight; skip the
-  breathlessness.
-- Assume a technical generalist: comfortable with numbers, new to each field.
-- When a claim is contested, say who contests it and why, by name.
-- Sentence-case headings. Short sentences over long ones. No bullet padding.
+- Pristine prose in the register of the FT or the Economist: precise,
+  composed, quietly confident. The reporting carries the weight; adjectives do
+  not.
+- Assume a reader fluent in machine learning and the AI industry. Do not
+  re-explain gradient descent, attention, transformers, or what a GPU is.
+  Spend the words on what is new, contested, or hard, and stay readable to any
+  sharp technical reader who lands on the page.
+- Calibrated confidence, always shown. Separate reported fact, estimate, and
+  the paper's own synthesis. State what is unknown plainly. Never a bold claim
+  without a citation a reader can follow to its basis.
+- A headline may earn attention; the body earns trust. Hook with a real fact
+  or a live tension, never with a promise the piece does not pay off.
+- No AI slop. No influencer cadence, no empty punch lines ("that's the whole
+  point", "here's the kicker"), no gratuitous em-dashes, no self-referential
+  filler, no hype. If a sentence would survive being cut, cut it.

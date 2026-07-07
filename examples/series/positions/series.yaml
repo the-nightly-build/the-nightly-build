@@ -1,0 +1,16 @@
+# An open desk that rotates a fixed watchlist. There is no item list because the
+# engine does not rotate a collection (a collection publishes each item once and
+# completes); an open desk runs forever, and the beat in prompt.md holds the
+# rotation. Daily cadence over seven names means each comes up about once a week.
+name: Positions
+mode: open
+section: "Markets"
+template: article
+prompt: prompt.md
+autopublish: true
+strict: false
+words: [1500, 4000]
+min_sources: 8
+cadence: daily
+consult:
+  - https://www.sec.gov/
