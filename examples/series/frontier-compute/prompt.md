@@ -2,7 +2,7 @@
 
 Deep dossiers on the companies that physically make the AI era possible: who
 holds leverage over whom, why that leverage is hard to replicate, and what
-would break it. Label these editions `Dossier`.
+would break it. Each edition is a dossier.
 
 Shape the outline to the company, not to a template. A monopoly, a cyclical
 commodity maker, and a shared bottleneck each want a different spine; the only

@@ -33,14 +33,14 @@ TEMPLATE_KEYS = {
     "class",
     "words",
     "items",
-    "slides",
     "sections",
     "flex_sections",
     "cite_rule",
+    "cite_exempt",
+    "require_why",
     "modes",
-    "furniture",
 }
-CITE_RULES = {"per-section", "per-item", "per-slide"}
+CITE_RULES = {"per-section", "per-item"}
 SERIES_KEYS = {
     "name",
     "mode",
@@ -129,7 +129,15 @@ def check_registry(repo, errors):
             errors.append(f"{where}: cite_rule must be one of {sorted(CITE_RULES)}")
         if not set(entry.get("modes") or []) <= MODES:
             errors.append(f"{where}: modes must be a subset of {sorted(MODES)}")
-        for band_key in ("words", "items", "slides", "flex_sections"):
+        cite_exempt = entry.get("cite_exempt")
+        if cite_exempt is not None and not (
+            isinstance(cite_exempt, list)
+            and all(isinstance(x, str) for x in cite_exempt)
+        ):
+            errors.append(f"{where}: 'cite_exempt' must be a list of section names")
+        if not isinstance(entry.get("require_why", False), bool):
+            errors.append(f"{where}: 'require_why' must be true or false")
+        for band_key in ("words", "items", "flex_sections"):
             band = entry.get(band_key)
             if band is not None and not (
                 isinstance(band, list)

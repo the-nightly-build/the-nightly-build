@@ -5,7 +5,7 @@ and how the claims have aged against everything published since. Label these
 editions `Appraisal`. The paper under review is always source #1, read in full
 before any commentary on it.
 
-The form fixes the spine: open with the plain-abstract furniture, then a
+The appraisal fixes the spine: open with the plain-abstract furniture, then a
 section on what the paper actually demonstrated (with its real numbers), then
 the holds-up grid weighing strengths against caveats, and close on a verdict
 box before go-deeper.

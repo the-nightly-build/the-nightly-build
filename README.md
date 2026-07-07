@@ -8,28 +8,20 @@ scheduled agent researches and publishes cited editions to your own GitHub
 Pages site every night. Git is the entire protocol: any agent that can open
 a pull request can be your night shift.
 
-Editions are original research artifacts, not summaries. Two templates ship
-with the engine: `article` (prose in sections, with an outline the agent
-designs per topic) and `brief` (a cited item list). Genres like dossiers,
-chronicles, lessons, and appraisals are forms: prompt patterns plus shared
-furniture, labeled per edition on the front page. You can define your own
-forms in prose, and your own templates when you want structure enforced.
-Over weeks the nightly output accumulates into a permanent, searchable
-library that you own and that GitHub serves for free.
+Editions are original research artifacts, not summaries: each is a deeply
+researched, fully cited piece, shaped to fit its topic. You describe what you
+want covered and how deep to go; the night shift does the research, holds the
+sourcing and quality bar, and publishes. Over weeks the output accumulates into
+a permanent, searchable library that you own and that GitHub serves for free.
 
 ## What it looks like
 
-One 800px column, a ruled front-page table, warm light and dark themes, and
-editions labeled by the form the agent chose. Rendered from the example
-configuration; regenerate after look changes.
+One clean column, a ruled index, and every card carrying its reading time and
+source count. The reader's front page and a single edition, on a phone:
 
 <p>
-<img src="assets/screenshots/front-light.png" width="49%" alt="The front page in light mode">
-<img src="assets/screenshots/front-dark.png" width="49%" alt="The front page in dark mode">
-</p>
-<p>
-<img src="assets/screenshots/edition-dark.png" width="62%" alt="An edition in dark mode">
-<img src="assets/screenshots/front-phone.png" width="36%" alt="The front page on a phone">
+<img src="assets/screenshots/front-phone.png" width="48%" alt="The front page on a phone">
+<img src="assets/screenshots/article-phone.png" width="48%" alt="An edition on a phone">
 </p>
 
 ## Quickstart
@@ -77,7 +69,7 @@ Series live in `press/series/<id>/` as a `series.yaml` plus a prompt file.
 Four modes: `collection` (an item list, published front to back or at
 random), `sequence` (an ordered course), `rolling` (one edition per date),
 and `open` (you describe a beat, the agent picks each night's topic and
-form). Cadence, pausing, sections, source requirements, and quality bands
+genre). Cadence, pausing, sections, source requirements, and quality bands
 are one-line settings. See [docs/series.md](docs/series.md).
 
 Sources can be constrained per series: `required_docs` are committed files

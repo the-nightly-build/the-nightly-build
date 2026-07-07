@@ -132,7 +132,7 @@ def article():
 
     meta = """{
   "protocol": "1.0", "series": "semiconductors", "slug": "micron",
-  "template": "article", "form": "Dossier",
+  "template": "article",
   "title": "Micron Technology: The Scarcest Commodity in AI",
   "mode": "collection", "order": null, "date": "2026-07-06", "tags": ["equity"],
   "sources": 8, "words": 5400, "reading_minutes": 15,
@@ -209,11 +209,10 @@ def _count_words(body_html):
     return len(re.findall(r"\S+", text))
 
 
-def _meta(series, slug, *, template, title, mode, order, words, n_sources, form=None):
-    form_field = f'"form": "{form}", ' if form else ""
+def _meta(series, slug, *, template, title, mode, order, words, n_sources):
     return f"""{{
   "protocol": "1.0", "series": "{series}", "slug": "{slug}",
-  "template": "{template}", {form_field}"title": "{title}",
+  "template": "{template}", "title": "{title}",
   "mode": "{mode}", "order": {order}, "date": "2026-07-06", "tags": [],
   "sources": {n_sources}, "words": {words},
   "reading_minutes": {max(1, round(words / 230))},
@@ -280,7 +279,6 @@ def chronicle():
         "histories",
         "unix",
         template="article",
-        form="Chronicle",
         title="A History of Unix",
         mode="collection",
         order="null",
@@ -293,5 +291,5 @@ def chronicle():
 if __name__ == "__main__":
     (FIX / "valid-article.html").write_text(article())
     (FIX / "valid-brief.html").write_text(brief())
-    (FIX / "valid-chronicle-form.html").write_text(chronicle())
+    (FIX / "valid-chronicle.html").write_text(chronicle())
     print("fixtures written:", sorted(p.name for p in FIX.iterdir()))

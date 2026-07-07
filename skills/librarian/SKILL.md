@@ -41,9 +41,9 @@ Ask before writing. Keep it short — one round of questions, then a proposal:
 - What do they want to learn or track?
 - Shape: one-off deep dives (**collection**), an ordered course (**sequence**),
   ongoing briefings (**rolling**), or an editor-run desk (**open** — they
-  describe a beat, the night shift picks each night's topic and form)?
+  describe a beat, the night shift picks each night's topic and genre)?
   Nearly everything is the `article` template; the genre (dossier, chronicle,
-  lesson, appraisal, essay...) is a form the series prompt describes, not an
+  lesson, appraisal, essay...) is something the series prompt describes, not an
   engine setting. `brief` is for itemized nightly roundups. For structure the
   proof should enforce, a series can point at a custom `press/templates/`
   template (see §6).
@@ -92,10 +92,9 @@ Then write:
 - `press/series/<id>/series.yaml` — crib from `examples/series/` for
   the canonical shapes. Defaults: `autopublish: true`, `strict: false`.
 - `press/series/<id>/prompt.md` — the series' editorial instructions: subject
-  frame, emphases, recurring angles, and the desk's FORM: the outline
-  conventions it keeps, the furniture that carries it (see
-  `templates/FURNITURE.md`), and the label it reuses in nb-meta `form`
-  ("Chronicle", "Lesson"...). Crib the form briefs from
+  frame, emphases, recurring angles, and the desk's GENRE: the outline
+  conventions it keeps and the furniture that carries it (see
+  `templates/FURNITURE.md`). Crib the genre briefs from
   `examples/series/*/prompt.md`. It specializes the voice layers; it never
   contradicts PROTOCOL.md.
 - Tag fragments under `press/series/_tags/` if shared angles apply.
@@ -147,7 +146,7 @@ On Claude Code you can create the Routine and fire that first run via
 `/schedule`; on other harnesses, pasting the schedule is the one step the
 human does, so say so plainly.
 
-Schedule prompt template (fill `<repo>`; keep ≤ ~130 words):
+Schedule prompt template (fill `<repo>`; paste it as-is, do not trim it):
 
 > You are the night shift for The Nightly Build repo `<repo>`. Read
 > `PROTOCOL.md` on main and follow it exactly. Runtime: needs Python 3.9+ and
@@ -157,7 +156,7 @@ Schedule prompt template (fill `<repo>`; keep ≤ ~130 words):
 > then run `python3 engine/duty.py --repo . --library <checkout>` for tonight's
 > due series. For each: research deeply with cited primary sources; render ONE
 > self-contained HTML file from the series' template (whichever it declares),
-> setting the nb-meta `form` label and using `templates/FURNITURE.md`; run
+> using components from `templates/FURNITURE.md`; run
 > `python3 engine/check.py library/<series>/<slug>.html --series <id> --repo .
 > --library <checkout>` and revise until `BLOCK: 0`; then write the PR body to
 > a file and re-run check with `--pr-body <file>` so it passes too. Open ONE
@@ -192,18 +191,22 @@ edition). Re-validate after every change.
   `press/site.yaml` `theme:` at it. Never edit engine CSS.
 - *"Change the voice"* — edit `press/editorial.md`. Series-specific tone goes
   in that series' prompt instead.
-- *"Make a new form"* — usually no new template: write the form into the
-  series `prompt.md` (outline conventions, furniture, the nb-meta `form`
-  label) and rely on `article`'s flex sections. That is how the examples run
-  chronicles, lessons, and appraisals.
+- *"Make a new genre"* — usually no new template: write the genre into the
+  series `prompt.md` (outline conventions, furniture) and rely on `article`'s
+  flex sections. That is how the examples run chronicles, lessons, and
+  appraisals.
 - *"Make a new template"* — for structure the proof should ENFORCE: add an
   entry to `press/templates/registry.yaml` (class, band, `sections` anchors
   incl. `sources`, optional `flex_sections: [min, max]` for an agent-named
   middle, cite_rule, modes) and a `press/templates/<id>.html` scaffold (crib
   a shipped template's head and chrome; keep the asset links and sandbox
-  rules). Omit `flex_sections` for a fully fixed outline — the
-  build-your-own walkthrough in `docs/customization.md` rebuilds the classic
-  lesson template this way. Validate, then press check before scheduling.
+  rules). Omit `flex_sections` for a fully fixed outline. Two optional fields
+  declare requirements the engine reads from the entry (never from a template
+  name): `cite_exempt: [names]` for sections that carry no citations (on top
+  of the always-exempt `sources`) and `require_why: true` to require a
+  `data-nb-why` line on each item. The build-your-own walkthrough in
+  `docs/customization.md` rebuilds the classic lesson template this way.
+  Validate, then press check before scheduling.
 - *"Give my paper its own furniture"* — add component classes to the press
   theme CSS (it restyles the whole library on every publish) and instruct
   the desks to use them in `prompt.md`; see `docs/customization.md`.

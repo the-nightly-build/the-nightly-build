@@ -1,7 +1,8 @@
 /* The Nightly Build — default theme: "the lamp is always warm".
    Day: pale sky paper with bronze accents. Night: deep navy sky with amber —
-   the same pigment at two hours. The theme contract: define exactly these
-   variables, in all four blocks below. Base tokens are LIGHT — light is the
+   the same pigment at two hours. The theme contract: define the color tokens
+   in all four blocks below; the font and radius tokens live in the base block
+   and are inherited. Base tokens are LIGHT — light is the
    fallback for every degraded case (no JS, no media queries, print). Dark
    applies only when the system asks (auto) or the reader forces it.
    Accent contrast is measured, not guessed: bronze #8A5C08 is 5.4:1 on this

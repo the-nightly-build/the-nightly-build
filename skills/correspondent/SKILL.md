@@ -85,9 +85,6 @@ made in step 2 — record it honestly in nb-meta). Design before you write:
 - A custom `press/templates/` template follows its own entry the same way: a
   fixed outline if it declares no `flex_sections`, an agent-named middle if it
   does. Read the entry; do not assume article or brief.
-- Set nb-meta `form` to one or two words naming what you wrote ("Dossier",
-  "Chronicle", "Explainer", "Essay"...). You read the desk's catalog in
-  step 2 — reuse its existing label when tonight's piece is the same form.
 - `templates/FURNITURE.md` is the component catalog (stat strips,
   timelines, pull quotes, position blocks, claim cards, charts...). Any
   component works in any template; use one when it carries information

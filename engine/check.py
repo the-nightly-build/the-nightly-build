@@ -53,8 +53,7 @@ ALLOWED_EXTERNAL_PREFIXES = (
 # (§7.4 — contextual nav + chart renderer), by relative or root-absolute path.
 ENGINE_SCRIPT_RE = re.compile(r"^(?:(?:\.\./)+|/)assets/nb\.js$")
 DEFAULT_MIN_SOURCES = {"longread": 8, "shortread": 5}
-CITE_EXEMPT_SECTIONS = {"sources", "objectives", "slides", "items"}
-DECK_CITE_EXEMPT_KINDS = {"title", "divider"}
+DEFAULT_CITE_EXEMPT = ("sources",)  # a template extends this via registry cite_exempt
 SELF_COUNT_TOLERANCE = 0.20
 
 
@@ -125,7 +124,7 @@ class Edition(HTMLParser):
 
     Collects everything the checks need in one HTMLParser walk:
     sections, script tags, sandbox violations, citations, source
-    entries, slides, and word counts. html.parser is tolerant by
+    entries, and word counts. html.parser is tolerant by
     design, so malformed markup degrades into text instead of raising;
     the structural checks downstream catch what matters.
     """
@@ -139,7 +138,6 @@ class Edition(HTMLParser):
         self.sections = []  # data-nb-section values in order
         self.section_cites = {}  # section -> inline cite count
         self.items = []  # per data-nb-item: {"cites": int, "why": bool}
-        self.slides = []  # per data-nb-slide: {"kind": str, "cites": int}
         self.ids = set()
         self.source_container_ids = set()
         self.sources = []  # {"href":, "required":}
@@ -205,9 +203,6 @@ class Edition(HTMLParser):
         if "data-nb-item" in a:
             self.items.append({"cites": 0, "why": False})
             el["item"] = len(self.items) - 1
-        if "data-nb-slide" in a:
-            self.slides.append({"kind": a.get("data-kind", ""), "cites": 0})
-            el["slide"] = len(self.slides) - 1
         if "data-nb-why" in a:
             cur = self._current("item")
             if cur is not None:
@@ -229,9 +224,6 @@ class Edition(HTMLParser):
                 it = self._current("item")
                 if it is not None:
                     self.items[it["item"]]["cites"] += 1
-                sl = self._current("slide")
-                if sl is not None:
-                    self.slides[sl["slide"]]["cites"] += 1
             if "data-nb-source" in a:
                 self.sources.append(
                     {
@@ -400,15 +392,6 @@ def validate_meta_fields(meta, rep):
     need("mode", str, enum=["collection", "sequence", "rolling", "open"])
     need("date", str, pattern=DATE_RE.pattern)
     need("dek", str)
-    form = meta.get("form")
-    if form is not None:
-        if not isinstance(form, str):
-            rep.block("B-META-PARSE", "nb-meta 'form' must be a string")
-        elif len(form) > 24 or len(form.split()) > 2:
-            rep.warn(
-                "W-FORM-LABEL",
-                f"form label '{form}' should be one or two short words",
-            )
     need("sources", int)
     need("harness", str)
     need("model", str)
@@ -767,16 +750,13 @@ def check_edition(
         lo, hi = treg["items"]
         n = len(ed.items)
         if n < lo:
-            rep.warn("W-LENGTH-LOW", f"brief expects {lo}-{hi} items; found {n}")
+            rep.warn(
+                "W-LENGTH-LOW", f"{template_id} expects {lo}-{hi} items; found {n}"
+            )
         elif n > hi:
-            rep.warn("W-LENGTH-HIGH", f"brief expects {lo}-{hi} items; found {n}")
-    if treg.get("slides"):
-        lo, hi = treg["slides"]
-        n = len(ed.slides)
-        if n < lo:
-            rep.warn("W-LENGTH-LOW", f"deck expects {lo}-{hi} slides; found {n}")
-        elif n > hi:
-            rep.warn("W-LENGTH-HIGH", f"deck expects {lo}-{hi} slides; found {n}")
+            rep.warn(
+                "W-LENGTH-HIGH", f"{template_id} expects {lo}-{hi} items; found {n}"
+            )
 
     # source floor
     floor = series.get("min_sources") or DEFAULT_MIN_SOURCES.get(
@@ -788,8 +768,9 @@ def check_edition(
     # cite density
     rule = treg.get("cite_rule")
     if rule == "per-section":
+        exempt = set(DEFAULT_CITE_EXEMPT) | set(treg.get("cite_exempt") or ())
         for s in dict.fromkeys(ed.sections):
-            if s in CITE_EXEMPT_SECTIONS:
+            if s in exempt:
                 continue
             if ed.section_cites.get(s, 0) == 0:
                 rep.warn("W-CITE-DENSITY", f"section '{s}' has no inline citations")
@@ -797,15 +778,9 @@ def check_edition(
         for i, it in enumerate(ed.items, 1):
             if it["cites"] == 0:
                 rep.warn("W-CITE-DENSITY", f"item #{i} has no inline citations")
-    elif rule == "per-slide":
-        for i, sl in enumerate(ed.slides, 1):
-            if sl["kind"] in DECK_CITE_EXEMPT_KINDS:
-                continue
-            if sl["cites"] == 0:
-                rep.warn("W-CITE-DENSITY", f"slide #{i} has no citations")
 
-    # brief: why-it-matters
-    if template_id == "brief":
+    # per-item "why it matters", when the template's registry entry requires it
+    if treg.get("require_why"):
         for i, it in enumerate(ed.items, 1):
             if not it["why"]:
                 rep.warn(

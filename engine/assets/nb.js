@@ -590,7 +590,7 @@
     var meta = editionMeta();
     if (meta) {
       injectChrome().then(bindChrome);
-      if (meta.template !== "deck") buildToc(meta);
+      buildToc(meta);
       normalizeByline();
       linkEyebrow(meta);
       normalizeSources();

@@ -17,7 +17,8 @@ if you customize: contrast is measured, and bronze #8A5C08 reads at 5.4:1
 on the shipped paper while bright amber fails at 2:1.
 
 1. Copy `engine/assets/themes/newspaper.css` to `press/themes/<name>.css`.
-2. Edit the variables in all four blocks.
+2. Edit the color variables in all four blocks (fonts and radius live only in
+   the base block).
 3. Point `press/site.yaml` at it: `theme: press/themes/<name>.css`.
 
 The builder republishes the chosen theme as `assets/theme.css` on every
@@ -76,8 +77,8 @@ entry > press/series/<id>/prompt.md > tag fragments > item prompt
 User templates are first class: the proof enforces whatever a registry
 entry declares, so a template you define gets the same validation, CI, and
 site treatment as the shipped two. Reach for one when a desk needs
-structure enforced rather than described; for most genres, a form written
-into the series prompt on `article` is enough (see [series.md](series.md)).
+structure enforced rather than described; for most genres, describing it in
+the series prompt on `article` is enough (see [series.md](series.md)).
 
 Registry entries come in two styles:
 
@@ -85,8 +86,8 @@ Registry entries come in two styles:
 - Flexible outline: declare anchor `sections` plus
   `flex_sections: [min, max]`, and the agent names that many additional
   sections per edition. Either way the cite rule applies to every labeled
-  section, except a few exempt ones (`sources`, `objectives`, `items`,
-  `slides`).
+  section except `sources` (always exempt) and any you list in the template's
+  `cite_exempt` (for a non-cited section like an objectives box).
 
 Worked example: the classic lesson template, six fixed sections for an
 ordered course, rebuilt as a press template.
@@ -99,12 +100,17 @@ lesson:
   words: [1500, 4000]
   sections: [objectives, recap, teach, check, bridge, sources]
   cite_rule: per-section
+  cite_exempt: [objectives]   # the goals box carries no citations
   modes: [sequence]
 ```
 
 Rules: `sections` must include `sources`. Bands are `[low, high]`.
-`cite_rule` is `per-section`, `per-item` (needs `data-nb-item` markers), or
-`per-slide` (needs `data-nb-slide` markers).
+`cite_rule` is `per-section` or `per-item` (needs `data-nb-item` markers).
+Two optional fields let a template declare requirements the engine would
+otherwise not know: `cite_exempt: [names]` (sections that need no citations,
+on top of the always-exempt `sources`) and `require_why: true` (each
+`data-nb-item` must carry a `data-nb-why` line, as `brief` does). The engine
+reads these from the entry, so any template can use them.
 Entries here overlay the shipped registry, so reusing a shipped id
 redefines it. The test suite exercises this exact lesson entry, so the
 walkthrough cannot drift from what the proof enforces.
@@ -114,7 +120,7 @@ walkthrough cannot drift from what the proof enforces.
 eyebrow, title, dek, byline), then lay out one
 `<section data-nb-section="...">` per declared section. The objectives
 box, check box, and bridge components in `templates/FURNITURE.md` carry
-the form. Template files shadow shipped ones by filename. The sandbox
+the lesson. Template files shadow shipped ones by filename. The sandbox
 applies unchanged: no scripts beyond the JSON blocks and the engine
 runtime, citations as `sup.nb-cite` anchors into numbered source entries.
 

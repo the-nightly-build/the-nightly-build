@@ -21,4 +21,5 @@ brief:
   items: [4, 8]
   sections: [items, sources]
   cite_rule: per-item
+  require_why: true   # each item needs a "why it matters" line (data-nb-why)
   modes: [rolling, open]

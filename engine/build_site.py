@@ -411,17 +411,17 @@ def kicker_text(ed, series_cfgs):
     return f"{section} — {name}" if section else name
 
 
-def form_label(meta):
-    # falls back to the template id so editions published under template ids
-    # that no longer ship keep a sensible newsstand label
-    form = str(meta.get("form") or "").strip()
-    return form if form else str(meta.get("template", "")).capitalize()
+def source_label(meta):
+    n = meta.get("sources")
+    if not isinstance(n, int) or n <= 0:
+        return ""
+    return f"{n} source" if n == 1 else f"{n} sources"
 
 
 def item_meta_row(ed):
     return (
         f'<div class="nb-meta"><span>{ed["reading_minutes"]} min read</span>'
-        f"<span>{esc(form_label(ed['meta']))}</span></div>"
+        f"<span>{esc(source_label(ed['meta']))}</span></div>"
     )
 
 
@@ -828,7 +828,6 @@ def build_search_index(editions, series_cfgs):
                 "dek": meta.get("dek", ""),
                 "tags": meta.get("tags") or [],
                 "template": meta.get("template"),
-                "form": meta.get("form"),
                 "date": meta.get("date"),
                 "reading_minutes": ed["reading_minutes"],
                 "path": f"/library/{ed['series']}/{ed['slug']}.html",
@@ -933,7 +932,7 @@ def render_email(site_title, date, *, eds, series_cfgs, base_url):
   <div style="border-top:1px solid #D9E2EE;padding:18px 0 14px">
     <div style="font-family:monospace;font-size:11px;letter-spacing:1px;
                 text-transform:uppercase;color:#8A5C08">
-      {esc(form_label(meta))} · {esc(cfg.get("name", ed["series"]))}</div>
+      {esc(cfg.get("name", ed["series"]))}</div>
     <div style="font-family:Georgia,serif;font-size:20px;line-height:1.3;
                 margin:6px 0 4px">
       <a href="{esc(url)}" style="color:#161D28;text-decoration:none">

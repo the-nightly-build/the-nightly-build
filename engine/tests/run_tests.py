@@ -599,7 +599,7 @@ for sid, (mode, template, items) in TPL_SERIES.items():
         f"autopublish: true\nstrict: false\n{items}\n"
     )
 for name, fixture, sid, slug in [
-    ("chronicle-form article", make_fixtures.chronicle(), "histories", "unix"),
+    ("chronicle-shaped article", make_fixtures.chronicle(), "histories", "unix"),
 ]:
     rep = run_local(fixture, sid, slug=slug, repo=tpl_repo)
     expect(
@@ -662,12 +662,17 @@ ut_tpl.mkdir()
     "  modes: [collection]\n"
     "fieldnotes:\n  class: shortread\n  words: [200, 3000]\n"
     "  sections: [sources]\n  flex_sections: [2, 3]\n"
-    "  cite_rule: per-section\n  modes: [collection]\n"
+    "  cite_rule: per-section\n  cite_exempt: [context]\n  modes: [collection]\n"
     # the exact registry entry from the docs/customization.md walkthrough,
     # so the tutorial cannot drift from what the proof enforces
     "lesson:\n  class: longread\n  words: [1500, 4000]\n"
     "  sections: [objectives, recap, teach, check, bridge, sources]\n"
-    "  cite_rule: per-section\n  modes: [sequence]\n"
+    "  cite_rule: per-section\n  cite_exempt: [objectives]\n  modes: [sequence]\n"
+    # a per-item template NOT named 'brief', to prove require_why is
+    # registry-driven rather than hardcoded to the shipped brief template
+    "digest:\n  class: shortread\n  items: [2, 4]\n"
+    "  sections: [entries, sources]\n  cite_rule: per-item\n"
+    "  require_why: true\n  modes: [collection]\n"
 )
 (ut_tpl / "memo.html").write_text(
     "<!DOCTYPE html><html><body>"
@@ -689,6 +694,12 @@ ut_tpl.mkdir()
     )
     + "</body></html>"
 )
+(ut_tpl / "digest.html").write_text(
+    "<!DOCTYPE html><html><body>"
+    '<section data-nb-section="entries"></section>'
+    '<section data-nb-section="sources"></section>'
+    "</body></html>"
+)
 ut_series = pathlib.Path(ut_repo) / "press" / "series" / "memos"
 ut_series.mkdir()
 (ut_series / "series.yaml").write_text(
@@ -700,6 +711,12 @@ fn_series.mkdir()
 (fn_series / "series.yaml").write_text(
     "name: Field Notes\nmode: collection\ntemplate: fieldnotes\n"
     "items:\n  - {slug: first-notes, title: First Notes}\n"
+)
+dg_series = pathlib.Path(ut_repo) / "press" / "series" / "digests"
+dg_series.mkdir()
+(dg_series / "series.yaml").write_text(
+    "name: Digests\nmode: collection\ntemplate: digest\n"
+    "items:\n  - {slug: first-digest, title: First Digest}\n"
 )
 crypto_series = pathlib.Path(ut_repo) / "press" / "series" / "crypto"
 crypto_series.mkdir()
@@ -752,7 +769,7 @@ LESSON = f"""<!DOCTYPE html>
 <html lang="en"><head><meta charset="utf-8"><title>Hash Functions</title>
 <script type="application/json" id="nb-meta">
 {{"protocol": "1.0", "series": "crypto", "slug": "hashes",
-  "template": "lesson", "form": "Lesson", "title": "Hash Functions",
+  "template": "lesson", "title": "Hash Functions",
   "mode": "sequence", "order": 1, "date": "2026-07-06", "tags": [],
   "sources": 5, "words": 1560, "reading_minutes": 7, "dek": "Hashes.",
   "harness": "test-fixture", "model": "claude-fable-5"}}
@@ -774,7 +791,7 @@ expect(
 print("== flex sections (agent-named outline) ==")
 
 
-def flex_edition(sections, form="Field Notes"):
+def flex_edition(sections):
     body = "".join(
         f'<section data-nb-section="{name}"><p>{make_fixtures.LOREM * 7}'
         f"{cite}</p></section>"
@@ -786,7 +803,7 @@ def flex_edition(sections, form="Field Notes"):
 {{"protocol": "1.0", "series": "notes", "slug": "first-notes",
   "template": "fieldnotes", "title": "First Notes", "mode": "collection",
   "order": null, "date": "2026-07-06", "tags": [], "sources": 5,
-  "words": 460, "reading_minutes": 2, "dek": "Notes.", "form": "{form}",
+  "words": 460, "reading_minutes": 2, "dek": "Notes.",
   "harness": "test-fixture", "model": "claude-fable-5"}}
 </script>
 </head><body>{body}
@@ -811,7 +828,6 @@ expect(
         repo=ut_repo,
     ),
     blocks=0,
-    must_not=["W-FORM-LABEL"],
 )
 expect(
     "too few flex sections blocks",
@@ -855,18 +871,67 @@ expect(
     must_have=["W-CITE-DENSITY"],
 )
 expect(
-    "long form label warns",
+    "cite_exempt exempts a registry-declared section (not just sources)",
     run_local(
-        flex_edition(
-            [("the-lab", CITE1), ("the-bet", CITE2)],
-            form="A Very Long Form Label",
-        ),
+        flex_edition([("context", ""), ("the-bet", CITE2)]),
         "notes",
         slug="first-notes",
         repo=ut_repo,
     ),
     blocks=0,
-    must_have=["W-FORM-LABEL"],
+    must_not=["W-CITE-DENSITY"],
+)
+
+print("== require_why is registry-driven, not tied to the 'brief' template ==")
+
+
+def digest_edition(withhold_why):
+    items = "".join(
+        f"<div data-nb-item><span>t{i}</span>"
+        f'<h3>Item {i}<sup class="nb-cite"><a href="#s{i}">{i}</a></sup></h3>'
+        f"<p>{make_fixtures.LOREM}</p>"
+        + (
+            ""
+            if (withhold_why and i == 1)
+            else "<p data-nb-why><b>Why</b> it matters.</p>"
+        )
+        + "</div>"
+        for i in (1, 2)
+    )
+    return f"""<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><title>First Digest</title>
+<script type="application/json" id="nb-meta">
+{{"protocol": "1.0", "series": "digests", "slug": "first-digest",
+  "template": "digest", "title": "First Digest", "mode": "collection",
+  "order": null, "date": "2026-07-06", "tags": [], "sources": 5, "words": 60,
+  "reading_minutes": 1, "dek": "A digest.",
+  "harness": "test-fixture", "model": "claude-fable-5"}}
+</script>
+</head><body>
+<section data-nb-section="entries">{items}</section>
+<section data-nb-section="sources"><ol>{
+        "".join(
+            f'<li id="s{i}"><a data-nb-source href="https://example.org/d{i}">x</a></li>'
+            for i in range(1, 6)
+        )
+    }</ol></section>
+</body></html>"""
+
+
+expect(
+    "a full digest passes (require_why satisfied)",
+    run_local(
+        digest_edition(withhold_why=False), "digests", slug="first-digest", repo=ut_repo
+    ),
+    blocks=0,
+    must_not=["W-WHY-MISSING"],
+)
+expect(
+    "require_why warns for a non-brief template missing a why line",
+    run_local(
+        digest_edition(withhold_why=True), "digests", slug="first-digest", repo=ut_repo
+    ),
+    must_have=["W-WHY-MISSING"],
 )
 
 ut_rc = subprocess.run(

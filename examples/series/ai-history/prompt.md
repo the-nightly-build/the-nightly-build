@@ -1,7 +1,7 @@
 # A History of Artificial Intelligence
 
-Tell the history of AI as a story of ideas colliding with hardware and money.
-Label these editions `Chronicle`.
+Tell the history of AI as a story of ideas colliding with hardware and money,
+told as a chronicle.
 
 Each edition hangs on a timeline spine (the nb-timeline furniture): a dozen or
 so dated events, the major turns marked, prose interludes between eras where

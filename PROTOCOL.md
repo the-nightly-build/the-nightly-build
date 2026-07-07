@@ -72,9 +72,6 @@ available, `uv run engine/<script>.py` manages the dependency itself.
      needs citations per the template's cite rule.
    - `templates/FURNITURE.md` is the catalog of shared components; any
      component may be used in any template.
-   - Set nb-meta `form` to one or two words naming what you wrote
-     ("Dossier", "Chronicle", "Explainer"...). Reuse this series' existing
-     form labels when the form repeats; the label shows on the front page.
    - Embed the `nb-meta` JSON block (schema below).
    - Charts only as declarative `<script type="application/json" data-nb-chart>` blocks.
    - No scripts other than those JSON blocks and the template's own
@@ -113,7 +110,6 @@ Embed in `<head>`:
   "series": "semiconductors",
   "slug": "micron",
   "template": "article",
-  "form": "Dossier",
   "title": "Micron Technology: The Scarcest Commodity in AI",
   "mode": "collection",
   "order": null,
@@ -130,8 +126,8 @@ Embed in `<head>`:
 
 Field notes: `mode` is one of `collection | sequence | rolling | open`. `order` is the
 1-based item index for `sequence` mode, else null. `date` is the UTC date of your run.
-For `open` mode, `template` must be one of the series' declared choices. `form` is
-optional free text, one or two words. `sources` and `words` are your
+For `open` mode, `template` must be one of the series' declared choices. `sources`
+and `words` are your
 self-measurements (the proof recounts; >20% deviation is a WARN).
 `harness`/`model` are honest provenance.
 

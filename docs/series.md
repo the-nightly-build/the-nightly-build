@@ -15,18 +15,17 @@ examples of everything below live in `examples/series/`.
 | `open` | a beat in prompt.md | a topic the agent picks within the beat, in the template it judges fits best | never, until paused |
 
 Open mode is the hands-off paper. You describe a beat, the night shift
-reads the desk's back catalog, picks something new, and chooses its form
+reads the desk's back catalog, picks something new, and chooses its template
 from the series' declared `templates:` list (or its single `template:`).
 For several varied reads a day without curating items, run several open
 desks with distinct beats. One edition per series per night is the
 invariant, so desks are how a paper gets breadth.
 
-Genres are forms, not settings. Nearly every desk runs on the `article`
-template; what makes its editions dossiers, chronicles, lessons, or
-appraisals is the series prompt: the outline conventions it keeps, the
-furniture that carries them (`templates/FURNITURE.md`), and the one-or-two
-word label the desk reuses in nb-meta `form`, which the front page shows.
-Every desk in `examples/` demonstrates a form this way.
+Genre lives in the prompt, not the engine. Nearly every desk runs on the
+`article` template; what makes its editions dossiers, chronicles, lessons, or
+appraisals is the series prompt: the outline conventions it keeps and the
+furniture that carries them (`templates/FURNITURE.md`). Every desk in
+`examples/` demonstrates a genre this way.
 
 Commissioning: an open desk may still carry `items:`. That list is its
 commission queue. Anything you add must be published, in any order, before

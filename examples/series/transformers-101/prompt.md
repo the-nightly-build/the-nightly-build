@@ -2,7 +2,7 @@
 
 A course for a smart reader with no ML background who wants to actually
 understand how modern AI models work, not analogies that dissolve on contact.
-Label these editions `Lesson`.
+Each edition is a lesson.
 
 Each lesson follows the teaching furniture: open with the objectives box (what
 the reader will be able to do afterwards), recap the previous lesson concretely
