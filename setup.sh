@@ -1,14 +1,15 @@
-#!/usr/bin/env zsh
+#!/usr/bin/env sh
 # The Nightly Build setup.sh
 # Idempotent bootstrap: creates the library branch, enables Pages + auto-merge,
 # validates configuration. Safe to re-run; callable by the Librarian skill.
-set -euo pipefail
+# POSIX sh so it runs on any shell (dash, bash, zsh, ...), not just zsh.
+set -eu
 
-say() { print -- "→ $1"; }
-ok() { print -- "✓ $1"; }
-warn() { print -- "⚠ $1"; }
+say() { printf '→ %s\n' "$1"; }
+ok() { printf '✓ %s\n' "$1"; }
+warn() { printf '⚠ %s\n' "$1"; }
 die() {
-	print -- "✗ $1" >&2
+	printf '✗ %s\n' "$1" >&2
 	exit 1
 }
 
@@ -28,12 +29,12 @@ python3 -c 'import yaml' 2>/dev/null ||
 
 # 1b. This repo is a press; the canonical repo is engine-only ------------------
 UPSTREAM_REPO="RyanSaxe/the-nightly-build"
-if [[ "$repo" == "$UPSTREAM_REPO" ]]; then
+if [ "$repo" = "$UPSTREAM_REPO" ]; then
 	die "this is the engine repo; it runs no press. Fork it, then run setup there."
 fi
 
 # 1c. Scaffold press/ (your side of the repo) ---------------------------------
-if [[ ! -d press ]]; then
+if [ ! -d press ]; then
 	say "scaffolding press/ (your side of the repo)"
 	mkdir -p press/series press/themes press/templates
 	cat >press/site.yaml <<'YAML'
@@ -173,9 +174,9 @@ else
 fi
 
 # 6. Status ------------------------------------------------------------------
-print
+echo
 ok "The presses are ready."
-print -- "
+printf '%s\n' "
 Next steps:
   1. Configure a series, or ask your agent to set you up (the Librarian skill).
   2. Rehearse:   run a press check; see skills/correspondent/SKILL.md.
