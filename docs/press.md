@@ -46,7 +46,7 @@ press/
 ## Updating the engine
 
 ```sh
-git remote add upstream https://github.com/RyanSaxe/the-nightly-build.git   # once
+git remote add upstream https://github.com/the-nightly-build/the-nightly-build.git   # once
 git fetch upstream
 git merge upstream/main
 ./setup.sh    # re-syncs the trigger workflows onto library
