@@ -1,0 +1,14 @@
+# Press template registry. Overlays templates/registry.yaml (an entry here of
+# the same id replaces the shipped one). This example adds one template:
+# `divide`, an enforced two-sided format. Its point is that the proof, not a
+# promise, guarantees the shape: flex_sections [2, 2] means exactly two sides
+# (left vs right) or the edition BLOCKs, and per-section cite_rule means each
+# side (and the crux) must be sourced. Run the desk `strict: true` and those
+# citation checks become BLOCKs too — one-sided or uncited never publishes.
+divide:
+  class: longread
+  words: [1200, 3500]
+  sections: [orientation, crux, what-would-change-my-mind, sources]
+  flex_sections: [2, 2] # exactly two sides, rendered left vs right
+  cite_rule: per-section
+  modes: [open]

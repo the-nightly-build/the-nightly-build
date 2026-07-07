@@ -1,0 +1,176 @@
+<!doctype html>
+<!--
+  TEMPLATE: divide (longread · 1200-3500 words · cite_rule per-section)
+  A both-sides format for one genuinely contested question. The proof enforces
+  the integrity the genre promises:
+  * Anchors, exactly once each: orientation (name the question and why it is
+    live now), crux (what the sides actually disagree about, once the cases
+    are on the table), what-would-change-my-mind (the evidence that would move
+    a fair reader), and sources.
+  * Between orientation and crux: EXACTLY two SIDE sections inside rs-divide,
+    rendered left vs right across a spine. flex_sections [2,2] BLOCKs a one- or
+    three-sided edition. Run the desk strict and an uncited side BLOCKs too.
+  * Each side is four slots, in order: camp (rs-side-camp, who holds it), thesis
+    (rs-side-thesis, one sentence), argument (prose, cited), champion
+    (rs-side-champion, the vetted holder + why it has standing, cited). State
+    each side at its strongest. Steelman; never strawman.
+  * Every section needs >=1 citation: <sup class="nb-cite"><a href="#sN">N</a></sup>.
+
+  Replace every ALL-CAPS placeholder and all sample content; fill nb-meta; keep
+  the asset <link>/<script> tags exactly as they are (engine-owned).
+-->
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>TITLE — The Divide</title>
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400..700;1,6..72,400..700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="../../assets/theme.css" />
+    <link rel="stylesheet" href="../../assets/nb.css" />
+    <script defer src="../../assets/nb.js"></script>
+    <script type="application/json" id="nb-meta">
+      {
+        "protocol": "1.1",
+        "series": "the-divide",
+        "slug": "SLUG",
+        "template": "divide",
+        "title": "TITLE",
+        "mode": "open",
+        "order": null,
+        "date": "2026-01-01",
+        "tags": [],
+        "sources": 0,
+        "words": 0,
+        "reading_minutes": 0,
+        "dek": "ONE-SENTENCE TEASER FOR THE NEWSSTAND CARD.",
+        "harness": "HARNESS",
+        "model": "MODEL"
+      }
+    </script>
+  </head>
+  <body class="nb-edition">
+    <article class="nb-reading">
+      <header>
+        <div class="nb-eyebrow">The Divide</div>
+        <h1 class="nb-title">
+          TITLE — THE CONTESTED QUESTION, STATED NEUTRALLY
+        </h1>
+        <p class="nb-dekline">
+          DEK — one italic sentence framing the disagreement, taking no side.
+        </p>
+        <div class="nb-byline">
+          <span>N min read</span><span>YYYY-MM-DD</span>
+        </div>
+      </header>
+
+      <section data-nb-section="orientation" id="orientation">
+        <h2>The question</h2>
+        <p>
+          What is being argued, who is arguing it, and why it matters now. End
+          by naming the sides you will present, without tipping your hand.<sup
+            class="nb-cite"
+            ><a href="#s1">1</a></sup
+          >
+        </p>
+      </section>
+
+      <!-- The two cases, rendered left vs right across a spine. EXACTLY two
+           <section>s inside rs-divide (flex_sections [2,2]); label each for its
+           side. Each side is four slots in order: camp, thesis, argument
+           (cited), champion (the vetted holder + standing, cited). -->
+      <div class="rs-divide">
+        <section
+          class="rs-side rs-left"
+          data-nb-section="the-case-for-X"
+          id="the-case-for-X"
+        >
+          <h3 class="rs-side-camp">WHO HOLDS THIS SIDE</h3>
+          <p class="rs-side-thesis">The position in one sentence.</p>
+          <p>
+            Its strongest form, in their actual cited words.<sup class="nb-cite"
+              ><a href="#s2">2</a></sup
+            >
+          </p>
+          <p class="rs-side-champion">
+            <span class="rs-side-outlet">OUTLET</span> — standing here because
+            REASON.<sup class="nb-cite"><a href="#s2">2</a></sup>
+          </p>
+        </section>
+
+        <section
+          class="rs-side rs-right"
+          data-nb-section="the-case-for-Y"
+          id="the-case-for-Y"
+        >
+          <h3 class="rs-side-camp">WHO HOLDS THIS SIDE</h3>
+          <p class="rs-side-thesis">The opposing position, one sentence.</p>
+          <p>
+            Its strongest form, cited to a named holder.<sup class="nb-cite"
+              ><a href="#s3">3</a></sup
+            >
+          </p>
+          <p class="rs-side-champion">
+            <span class="rs-side-outlet">OUTLET</span> — standing here because
+            REASON.<sup class="nb-cite"><a href="#s3">3</a></sup>
+          </p>
+        </section>
+      </div>
+
+      <section data-nb-section="crux" id="crux">
+        <h2>The crux</h2>
+        <p>
+          What the sides actually disagree about once the rhetoric is stripped:
+          a fact not yet known, a value in tension, a forecast that time will
+          settle.<sup class="nb-cite"><a href="#s4">4</a></sup>
+        </p>
+      </section>
+
+      <section
+        data-nb-section="what-would-change-my-mind"
+        id="what-would-change-my-mind"
+      >
+        <h2>What would change your mind</h2>
+        <p>
+          The concrete evidence that would move a fair reader toward one side: a
+          ruling, a benchmark, a shipped result, a disclosure. Name it, and when
+          it might arrive.<sup class="nb-cite"><a href="#s5">5</a></sup>
+        </p>
+      </section>
+
+      <section class="nb-sources" data-nb-section="sources" id="sources">
+        <h2>Sources</h2>
+        <ol>
+          <li id="s1">
+            <a data-nb-source href="https://example.org/replace-1"
+              >PUBLISHER — TITLE</a
+            >
+          </li>
+          <li id="s2">
+            <a data-nb-source href="https://example.org/replace-2"
+              >PUBLISHER — TITLE</a
+            >
+          </li>
+          <li id="s3">
+            <a data-nb-source href="https://example.org/replace-3"
+              >PUBLISHER — TITLE</a
+            >
+          </li>
+          <li id="s4">
+            <a data-nb-source href="https://example.org/replace-4"
+              >PUBLISHER — TITLE</a
+            >
+          </li>
+          <li id="s5">
+            <a data-nb-source href="https://example.org/replace-5"
+              >PUBLISHER — TITLE</a
+            >
+          </li>
+        </ol>
+      </section>
+    </article>
+  </body>
+</html>
