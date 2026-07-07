@@ -1,0 +1,33 @@
+# Validates the reader's press/ config whenever it changes, so a broken press
+# is caught on push instead of at 2am when the night shift runs. This is FOR
+# users: it fires only when a press/ exists and changes (their fork), never on
+# the engine repo upstream (which has no press/). Informational, not required.
+name: Validate press
+
+on:
+  push:
+    branches: [main]
+    paths: ["press/**"]
+  pull_request:
+    branches: [main]
+    paths: ["press/**"]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: validate-press-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+          python-version: "3.12"
+      # Skip if the change deleted press/ entirely; nothing to validate.
+      - if: hashFiles('press/**') != ''
+        run: uv run python engine/validate_config.py --repo .
