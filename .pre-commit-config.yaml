@@ -1,0 +1,76 @@
+# Local hooks run the same tools as the CI gate, so local == CI.
+# Setup: uv sync (Python), npm install (web), and shellcheck + shfmt on PATH
+# (brew install shellcheck shfmt). Install with: uv run pre-commit install
+default_install_hook_types: [pre-commit, pre-push]
+
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      # Byte-exact test fixtures must not be reflowed.
+      - id: trailing-whitespace
+        exclude: ^engine/tests/fixtures/
+      - id: end-of-file-fixer
+        exclude: ^engine/tests/fixtures/
+      - id: check-merge-conflict
+      - id: check-added-large-files
+      - id: check-yaml
+      - id: check-json
+        exclude: \.jsonc$
+
+  - repo: local
+    hooks:
+      - id: ruff-check
+        name: ruff check
+        entry: uv run ruff check --fix
+        language: system
+        types: [python]
+      - id: ruff-format
+        name: ruff format
+        entry: uv run ruff format
+        language: system
+        types: [python]
+      - id: ty
+        name: ty type check
+        entry: uv run ty check
+        language: system
+        types: [python]
+        pass_filenames: false
+      - id: prettier
+        name: prettier
+        entry: npx prettier --write --ignore-unknown
+        language: system
+        files: \.(js|css|html|md|ya?ml|json|jsonc)$
+      - id: eslint
+        name: eslint
+        entry: npx eslint
+        language: system
+        files: \.js$
+      - id: stylelint
+        name: stylelint
+        entry: npx stylelint
+        language: system
+        files: \.css$
+      - id: markdownlint
+        name: markdownlint
+        entry: npx markdownlint-cli2
+        language: system
+        files: \.md$
+        pass_filenames: false
+      - id: shellcheck
+        name: shellcheck
+        entry: shellcheck
+        language: system
+        types: [shell]
+      - id: shfmt
+        name: shfmt
+        entry: shfmt -w
+        language: system
+        types: [shell]
+      - id: tests
+        name: engine test suite
+        entry: python3 engine/tests/run_tests.py
+        language: system
+        pass_filenames: false
+        always_run: true
+        stages: [pre-push]
