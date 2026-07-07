@@ -618,7 +618,14 @@ for name, fixture, sid, slug in [
 print("== templates: structural lint of the template files ==")
 registry = C.load_registry(str(REPO))
 for template_id, treg in registry.items():
-    src = (REPO / "templates" / f"{template_id}.html").read_text()
+    tpl_path = C.find_template(str(REPO), template_id)
+    if tpl_path is None:
+        FAIL.append(f"template {template_id}.html")
+        print(
+            f"  FAIL template {template_id}.html: no file in templates/ or press/templates/"
+        )
+        continue
+    src = pathlib.Path(tpl_path).read_text()
     tpl = C.Edition()
     tpl.feed(src)
     tpl.close()
