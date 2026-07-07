@@ -35,6 +35,7 @@ TEMPLATE_KEYS = {
     "items",
     "slides",
     "sections",
+    "flex_sections",
     "cite_rule",
     "modes",
     "furniture",
@@ -128,7 +129,7 @@ def check_registry(repo, errors):
             errors.append(f"{where}: cite_rule must be one of {sorted(CITE_RULES)}")
         if not set(entry.get("modes") or []) <= MODES:
             errors.append(f"{where}: modes must be a subset of {sorted(MODES)}")
-        for band_key in ("words", "items", "slides"):
+        for band_key in ("words", "items", "slides", "flex_sections"):
             band = entry.get(band_key)
             if band is not None and not (
                 isinstance(band, list)

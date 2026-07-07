@@ -400,6 +400,15 @@ def validate_meta_fields(meta, rep):
     need("mode", str, enum=["collection", "sequence", "rolling", "open"])
     need("date", str, pattern=DATE_RE.pattern)
     need("dek", str)
+    form = meta.get("form")
+    if form is not None:
+        if not isinstance(form, str):
+            rep.block("B-META-PARSE", "nb-meta 'form' must be a string")
+        elif len(form) > 24 or len(form.split()) > 2:
+            rep.warn(
+                "W-FORM-LABEL",
+                f"form label '{form}' should be one or two short words",
+            )
     need("sources", int)
     need("harness", str)
     need("model", str)
@@ -661,6 +670,19 @@ def check_edition(
                 "B-HTML",
                 f"section '{s}' appears {counts[s]} times; must be exactly once",
             )
+    flex_band = treg.get("flex_sections")
+    if flex_band:
+        extras = [s for s in ed.sections if s not in required_sections]
+        dupes = sorted({s for s in extras if extras.count(s) > 1})
+        if dupes:
+            rep.block("B-HTML", f"duplicate section labels: {dupes}")
+        low, high = flex_band
+        if not (low <= len(extras) <= high):
+            rep.block(
+                "B-HTML",
+                f"{len(extras)} sections beyond the anchors; this template "
+                f"expects between {low} and {high}",
+            )
 
     # --- B-SANDBOX ---
     for a in ed.script_tags:
@@ -766,7 +788,7 @@ def check_edition(
     # cite density
     rule = treg.get("cite_rule")
     if rule == "per-section":
-        for s in required_sections:
+        for s in dict.fromkeys(ed.sections):
             if s in CITE_EXEMPT_SECTIONS:
                 continue
             if ed.section_cites.get(s, 0) == 0:

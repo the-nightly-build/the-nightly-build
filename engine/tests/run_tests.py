@@ -636,10 +636,19 @@ ut_tpl.mkdir()
     "memo:\n  class: shortread\n  words: [200, 3000]\n"
     "  sections: [note, sources]\n  cite_rule: per-section\n"
     "  modes: [collection]\n"
+    "fieldnotes:\n  class: shortread\n  words: [200, 3000]\n"
+    "  sections: [sources]\n  flex_sections: [2, 3]\n"
+    "  cite_rule: per-section\n  modes: [collection]\n"
 )
 (ut_tpl / "memo.html").write_text(
     "<!DOCTYPE html><html><body>"
     '<section data-nb-section="note"></section>'
+    '<section data-nb-section="sources"></section>'
+    "</body></html>"
+)
+(ut_tpl / "fieldnotes.html").write_text(
+    "<!DOCTYPE html><html><body>"
+    '<section data-nb-section="YOUR-LABEL"></section>'
     '<section data-nb-section="sources"></section>'
     "</body></html>"
 )
@@ -648,6 +657,12 @@ ut_series.mkdir()
 (ut_series / "series.yaml").write_text(
     "name: Memos\nmode: collection\ntemplate: memo\nautopublish: true\n"
     "strict: false\nitems:\n  - {slug: first, title: First Memo}\n"
+)
+fn_series = pathlib.Path(ut_repo) / "press" / "series" / "notes"
+fn_series.mkdir()
+(fn_series / "series.yaml").write_text(
+    "name: Field Notes\nmode: collection\ntemplate: fieldnotes\n"
+    "items:\n  - {slug: first-notes, title: First Notes}\n"
 )
 
 MEMO = f"""<!DOCTYPE html>
@@ -684,6 +699,105 @@ expect(
     ),
     must_have=["B-HTML"],
 )
+
+print("== flex sections (agent-named outline) ==")
+
+
+def flex_edition(sections, form="Field Notes"):
+    body = "".join(
+        f'<section data-nb-section="{name}"><p>{make_fixtures.LOREM * 7}'
+        f"{cite}</p></section>"
+        for name, cite in sections
+    )
+    return f"""<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><title>First Notes</title>
+<script type="application/json" id="nb-meta">
+{{"protocol": "1.0", "series": "notes", "slug": "first-notes",
+  "template": "fieldnotes", "title": "First Notes", "mode": "collection",
+  "order": null, "date": "2026-07-06", "tags": [], "sources": 5,
+  "words": 460, "reading_minutes": 2, "dek": "Notes.", "form": "{form}",
+  "harness": "test-fixture", "model": "claude-fable-5"}}
+</script>
+</head><body>{body}
+<section data-nb-section="sources"><ol>{
+        "".join(
+            f'<li id="s{i}"><a data-nb-source href="https://example.org/n{i}">x</a></li>'
+            for i in range(1, 6)
+        )
+    }</ol></section>
+</body></html>"""
+
+
+CITE1 = '<sup class="nb-cite"><a href="#s1">1</a></sup>'
+CITE2 = '<sup class="nb-cite"><a href="#s2">2</a></sup>'
+CITE3 = '<sup class="nb-cite"><a href="#s3">3</a></sup>'
+expect(
+    "flex template passes with agent-named sections in band",
+    run_local(
+        flex_edition([("the-lab", CITE1), ("the-bet", CITE2)]),
+        "notes",
+        slug="first-notes",
+        repo=ut_repo,
+    ),
+    blocks=0,
+    must_not=["W-FORM-LABEL"],
+)
+expect(
+    "too few flex sections blocks",
+    run_local(
+        flex_edition([("only-one", CITE1)]),
+        "notes",
+        slug="first-notes",
+        repo=ut_repo,
+    ),
+    must_have=["B-HTML"],
+)
+expect(
+    "too many flex sections blocks",
+    run_local(
+        flex_edition([("a1", CITE1), ("a2", CITE2), ("a3", CITE3), ("a4", CITE1)]),
+        "notes",
+        slug="first-notes",
+        repo=ut_repo,
+    ),
+    must_have=["B-HTML"],
+)
+expect(
+    "duplicate flex labels block",
+    run_local(
+        flex_edition([("twice", CITE1), ("twice", CITE2)]),
+        "notes",
+        slug="first-notes",
+        repo=ut_repo,
+    ),
+    must_have=["B-HTML"],
+)
+expect(
+    "uncited flex section warns on cite density",
+    run_local(
+        flex_edition([("cited", CITE1), ("uncited", "")]),
+        "notes",
+        slug="first-notes",
+        repo=ut_repo,
+    ),
+    blocks=0,
+    must_have=["W-CITE-DENSITY"],
+)
+expect(
+    "long form label warns",
+    run_local(
+        flex_edition(
+            [("the-lab", CITE1), ("the-bet", CITE2)],
+            form="A Very Long Form Label",
+        ),
+        "notes",
+        slug="first-notes",
+        repo=ut_repo,
+    ),
+    blocks=0,
+    must_have=["W-FORM-LABEL"],
+)
+
 ut_rc = subprocess.run(
     [sys.executable, str(REPO / "engine" / "validate_config.py"), "--repo", ut_repo],
     capture_output=True,
