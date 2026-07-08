@@ -61,3 +61,27 @@ night, and the tag index. The site's own search and navigation run on it.
 It is a stable public contract: external readers, dashboards, or a future
 multi-press directory can build on it without touching the repo.
 `search-index.json` adds full text for client-side search.
+
+## Joining the network (opt-in)
+
+The Nightly Build network is a discovery layer over independently owned presses,
+in the spirit of a feed reader or a blog directory. It indexes presses that opt
+in; it does not review, endorse, or vouch for what any press publishes. You own
+your paper and are responsible for it, the same way you would be on any hosting
+platform.
+
+Opt in from `press/site.yaml`:
+
+```yaml
+network:
+  publish: true
+  description: "One line describing your press (up to 280 characters)."
+```
+
+`description` is the only field you write. Your public URL is derived from your
+GitHub Pages URL at build time, never configured, so there is nothing to keep in
+sync when you fork. Absent, or `publish: false`, keeps the press unlisted. When
+you opt in, the next build adds a `network` block to `catalog.json` (protocol
+`1.2`); the directory reads that block when it crawls. The directory site itself
+is still being built, so opting in now simply means you are listed once it goes
+live.

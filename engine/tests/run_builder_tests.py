@@ -9,7 +9,9 @@ suite when any palette block misses a token.
 Run: python3 engine/tests/run_builder_tests.py
 """
 
+import contextlib
 import datetime as dt
+import io
 import json
 import pathlib
 import re
@@ -93,6 +95,72 @@ check(
     detail=str(catalog["builds"]),
 )
 check("tags index", catalog["tags"].get("equity") == ["semiconductors/micron"])
+
+print("== catalog protocol 1.2 (network + chrome fields) ==")
+check("protocol is 1.2", catalog["protocol"] == "1.2")
+check("footer defaults to None when unset", catalog["footer"] is None)
+check("upstream repo credited in catalog", catalog["upstream"] == B.UPSTREAM_REPOSITORY)
+check("no network block when the press has not opted in", "network" not in catalog)
+check(
+    "repository derived from a Pages project URL",
+    B.derive_self_repository(None, "https://alice.github.io/my-press")
+    == "alice/my-press",
+)
+check(
+    "explicit repository wins over derivation",
+    B.derive_self_repository("Alice/My-Press", "https://x.github.io/y")
+    == "Alice/My-Press",
+)
+check("repository is None when underivable", B.derive_self_repository(None, "") is None)
+
+# A press that opts into the network, built with a Pages URL.
+net_repo = pathlib.Path(tempfile.mkdtemp()) / "repo"
+shutil.copytree(TESTREPO, net_repo)
+pathlib.Path(net_repo, "press", "site.yaml").write_text(
+    'title: "Alice\'s Nightly Build"\n'
+    'footer: "Read it with your coffee."\n'
+    "network:\n"
+    "  publish: true\n"
+    '  description: "Books, law, and the quiet parts of the news."\n'
+)
+net_catalog = B.build(
+    net_repo,
+    make_full_library(),
+    out=tempfile.mkdtemp(),
+    base_url="https://alice.github.io/my-press",
+    now=NOW,
+)
+check(
+    "custom footer flows to the catalog",
+    net_catalog["footer"] == "Read it with your coffee.",
+)
+check("repository derived at build time", net_catalog["repository"] == "alice/my-press")
+check(
+    "network block emitted with a derived URL when publish is true",
+    net_catalog.get("network")
+    == {
+        "publish": True,
+        "description": "Books, law, and the quiet parts of the news.",
+        "url": "https://alice.github.io/my-press/",
+    },
+    detail=str(net_catalog.get("network")),
+)
+
+# publish: true with no resolvable base URL warns rather than listing no URL.
+warn_buf = io.StringIO()
+with contextlib.redirect_stderr(warn_buf):
+    warn_catalog = B.build(
+        net_repo, make_full_library(), out=tempfile.mkdtemp(), now=NOW
+    )
+check(
+    "publish without a base URL warns",
+    "WARN" in warn_buf.getvalue() and "base URL" in warn_buf.getvalue(),
+    detail=warn_buf.getvalue(),
+)
+check(
+    "network URL is empty without a base URL",
+    warn_catalog["network"]["url"] == "",
+)
 
 newsstand = read(out, "index.html")
 check("newsstand leads with the night's date", "Monday, July 6, 2026" in newsstand)

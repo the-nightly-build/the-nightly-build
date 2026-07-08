@@ -21,6 +21,7 @@ import types
 import _bootstrap
 import check as C
 import make_fixtures
+import validate_config as V
 import yaml
 
 HERE = _bootstrap.HERE
@@ -1352,6 +1353,64 @@ rc_bad = subprocess.run(
 for name, cond in [
     ("shipped examples validate as a press", rc_good == 0),
     ("illegal mode/template pairing fails", rc_bad == 1),
+]:
+    if cond:
+        PASS += 1
+        print(f"  ok   {name}")
+    else:
+        FAIL.append(name)
+        print(f"  FAIL {name}")
+
+
+def vc_site_errors(yaml_text):
+    d = pathlib.Path(tempfile.mkdtemp())
+    (d / "press").mkdir()
+    (d / "press" / "site.yaml").write_text(yaml_text)
+    errs = []
+    V.check_site(str(d), errs)
+    return errs
+
+
+def vc_network_errors(network):
+    errs = []
+    V.check_site_network(network, errors=errs)
+    return errs
+
+
+for name, cond in [
+    (
+        "footer: a valid imprint passes",
+        vc_site_errors('title: "x"\nfooter: "Filed."\n') == [],
+    ),
+    (
+        "footer: over 80 chars fails",
+        vc_site_errors(f'title: "x"\nfooter: "{"a" * 81}"\n') != [],
+    ),
+    ("footer: empty string fails", vc_site_errors('title: "x"\nfooter: ""\n') != []),
+    (
+        "network: opted-in block validates",
+        vc_network_errors({"publish": True, "description": "hi"}) == [],
+    ),
+    (
+        "network: publish false needs no description",
+        vc_network_errors({"publish": False}) == [],
+    ),
+    (
+        "network: publish true without description fails",
+        vc_network_errors({"publish": True}) != [],
+    ),
+    (
+        "network: a url key is rejected as redundant",
+        vc_network_errors({"publish": True, "description": "hi", "url": "x"}) != [],
+    ),
+    (
+        "network: non-bool publish fails",
+        vc_network_errors({"publish": "yes", "description": "hi"}) != [],
+    ),
+    (
+        "network: description over 280 chars fails",
+        vc_network_errors({"publish": True, "description": "a" * 281}) != [],
+    ),
 ]:
     if cond:
         PASS += 1

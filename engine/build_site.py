@@ -54,7 +54,7 @@ except ImportError:
     sys.stderr.write("build_site.py requires PyYAML (pip install pyyaml)\n")
     sys.exit(2)
 
-PROTOCOL = "1.1"
+PROTOCOL = "1.2"
 WORDS_PER_MINUTE = 230
 FEED_LIMIT = 50
 FEED_CONTENT_LIMIT = 10  # newest N entries carry full content
@@ -247,7 +247,21 @@ def assign_positions(editions, series_cfgs):
 # --------------------------------------------------------------------------- #
 
 
-def build_catalog(site_cfg, series_cfgs, *, editions, generated):
+def derive_self_repository(explicit, base_url):
+    # The press's own "owner/repo", used by chrome for the "star this press"
+    # link. Prefer an explicit value (GITHUB_REPOSITORY in CI); otherwise parse
+    # a GitHub Pages project URL of the form https://<owner>.github.io/<repo>/.
+    # A user/organization Pages site (no repo path) yields None, and chrome
+    # simply omits the star link in that rare case.
+    if explicit:
+        return explicit
+    match = re.match(r"https?://([^./]+)\.github\.io/([^/]+)", base_url or "")
+    return f"{match.group(1)}/{match.group(2)}" if match else None
+
+
+def build_catalog(
+    site_cfg, series_cfgs, *, editions, generated, base_url="", repository=None
+):
     by_series = {}
     for ed in editions.values():
         by_series.setdefault(ed["series"], []).append(ed)
@@ -309,15 +323,33 @@ def build_catalog(site_cfg, series_cfgs, *, editions, generated):
             tags.setdefault(t, []).append(f"{ed['series']}/{ed['slug']}")
     tags = {t: sorted(v) for t, v in sorted(tags.items())}
 
-    return {
+    catalog = {
         "generated": generated.strftime("%Y-%m-%dT%H:%M:%SZ"),
         "protocol": PROTOCOL,
         "site_title": site_cfg["title"],
+        "footer": site_cfg.get("footer"),
+        "repository": repository,
+        "upstream": UPSTREAM_REPOSITORY,
         "series": series_entries,
         "editions": edition_entries,
         "builds": builds,
         "tags": tags,
     }
+    network = site_cfg.get("network") or {}
+    if network.get("publish") is True:
+        # The public URL is the Pages base URL, never configured. Without one the
+        # press cannot be listed, so warn rather than emit an unreachable entry.
+        if not base_url:
+            sys.stderr.write(
+                "WARN: network.publish is true but no base URL was resolved; "
+                "the press cannot be listed without a public URL\n"
+            )
+        catalog["network"] = {
+            "publish": True,
+            "description": (network.get("description") or "").strip(),
+            "url": f"{base_url.rstrip('/')}/" if base_url else "",
+        }
+    return catalog
 
 
 # --------------------------------------------------------------------------- #
@@ -1051,12 +1083,28 @@ def copy_editions(editions, out, *, stamp="", assets_html=""):
             shutil.copyfile(ed["file"], dst)
 
 
-def build(repo, library_root, *, out, preview_root=None, base_url="", now=None):
+def build(
+    repo,
+    library_root,
+    *,
+    out,
+    preview_root=None,
+    base_url="",
+    repository=None,
+    now=None,
+):
     now = now or dt.datetime.now(dt.timezone.utc)
     site_cfg = load_site_config(repo)
     series_cfgs = load_series_configs(repo)
     editions = collect_editions(series_cfgs, library_root, preview_root=preview_root)
-    catalog = build_catalog(site_cfg, series_cfgs, editions=editions, generated=now)
+    catalog = build_catalog(
+        site_cfg,
+        series_cfgs,
+        editions=editions,
+        generated=now,
+        base_url=base_url,
+        repository=derive_self_repository(repository, base_url),
+    )
 
     site = {
         "title": site_cfg["title"],
@@ -1212,6 +1260,12 @@ def main(argv=None):
         default="",
         help="absolute site base URL (no trailing slash) for feeds",
     )
+    p.add_argument(
+        "--repository",
+        default=os.getenv("GITHUB_REPOSITORY"),
+        help="this press's owner/repo (defaults to $GITHUB_REPOSITORY) for the "
+        "'star this press' chrome link; falls back to parsing the Pages URL",
+    )
     p.add_argument("--now", help="override the build timestamp (tests), ISO-8601 UTC")
     args = p.parse_args(argv)
 
@@ -1227,6 +1281,7 @@ def main(argv=None):
         out=args.out,
         preview_root=args.preview,
         base_url=args.base_url.rstrip("/"),
+        repository=args.repository,
         now=now,
     )
     n = len(catalog["editions"])
