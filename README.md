@@ -61,7 +61,8 @@ source count. The reader's front page and a single edition, on a phone:
 | skills        | `skills/`              | Librarian (setup and curation) and Correspondent (the night shift runtime)                                                           |
 
 Two branches with disjoint jobs: `main` holds the engine and your
-configuration, `library` holds published editions and the generated site.
+configuration, `library` holds published editions, which the press builds into
+the live Pages site on each merge.
 `press/` is the only directory you edit. It does not exist upstream, so
 pulling engine updates is an ordinary merge with nothing to conflict.
 
@@ -88,6 +89,15 @@ assets path and Google Fonts. The editor validates untrusted PRs with
 read-only permissions and no secrets. Auto-merge is squash-only, into
 `library` only, for BLOCK-clean PRs only. Mail credentials exist only as
 Actions secrets on the trusted post-merge path.
+
+Anyone can open a pull request to a public press, but no stranger can publish
+through one. The editor runs on the `pull_request` event, so a PR from a fork
+receives a read-only token and cannot merge itself; only a branch pushed to the
+press's own repository (the night shift, holding that repository's token) opens
+a same-repo PR that auto-merge can act on. The guarantee is the token split
+between fork and same-repo PRs, not edition validation, so the trigger is
+`pull_request` and never `pull_request_target`, and a test enforces that so it
+cannot silently regress.
 
 A press may load libraries to power its furniture (a syntax highlighter, say)
 by declaring them in `press/site.yaml`. That surface preserves the boundary:

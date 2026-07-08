@@ -9,7 +9,9 @@ suite when any palette block misses a token.
 Run: python3 engine/tests/run_builder_tests.py
 """
 
+import contextlib
 import datetime as dt
+import io
 import json
 import pathlib
 import re
@@ -94,6 +96,73 @@ check(
 )
 check("tags index", catalog["tags"].get("equity") == ["semiconductors/micron"])
 
+print("== catalog protocol 1.2 (network + chrome fields) ==")
+check("protocol is 1.2", catalog["protocol"] == "1.2")
+check("footer defaults to None when unset", catalog["footer"] is None)
+check("upstream repo credited in catalog", catalog["upstream"] == B.UPSTREAM_REPOSITORY)
+check("no network block when the press has not opted in", "network" not in catalog)
+check(
+    "repository derived from a Pages project URL",
+    B.derive_self_repository(None, "https://alice.github.io/my-press")
+    == "alice/my-press",
+)
+check(
+    "explicit repository wins over derivation",
+    B.derive_self_repository("Alice/My-Press", "https://x.github.io/y")
+    == "Alice/My-Press",
+)
+check("repository is None when underivable", B.derive_self_repository(None, "") is None)
+
+# A press that opts into the network, built with a Pages URL.
+net_repo = pathlib.Path(tempfile.mkdtemp()) / "repo"
+shutil.copytree(TESTREPO, net_repo)
+pathlib.Path(net_repo, "press", "site.yaml").write_text(
+    'title: "Alice\'s Nightly Build"\n'
+    'footer: "Read it with your coffee."\n'
+    "network:\n"
+    "  publish: true\n"
+    '  description: "Books, law, and the quiet parts of the news."\n'
+)
+net_out = tempfile.mkdtemp()
+net_catalog = B.build(
+    net_repo,
+    make_full_library(),
+    out=net_out,
+    base_url="https://alice.github.io/my-press",
+    now=NOW,
+)
+check(
+    "custom footer flows to the catalog",
+    net_catalog["footer"] == "Read it with your coffee.",
+)
+check("repository derived at build time", net_catalog["repository"] == "alice/my-press")
+check(
+    "network block emitted with a derived URL when publish is true",
+    net_catalog.get("network")
+    == {
+        "publish": True,
+        "description": "Books, law, and the quiet parts of the news.",
+        "url": "https://alice.github.io/my-press/",
+    },
+    detail=str(net_catalog.get("network")),
+)
+
+# publish: true with no resolvable base URL warns rather than listing no URL.
+warn_buf = io.StringIO()
+with contextlib.redirect_stderr(warn_buf):
+    warn_catalog = B.build(
+        net_repo, make_full_library(), out=tempfile.mkdtemp(), now=NOW
+    )
+check(
+    "publish without a base URL warns",
+    "WARN" in warn_buf.getvalue() and "base URL" in warn_buf.getvalue(),
+    detail=warn_buf.getvalue(),
+)
+check(
+    "network URL is empty without a base URL",
+    warn_catalog["network"]["url"] == "",
+)
+
 newsstand = read(out, "index.html")
 check("newsstand leads with the night's date", "Monday, July 6, 2026" in newsstand)
 check(
@@ -112,6 +181,36 @@ check("a second cell shows its own source count", ">5 sources</span>" in newssta
 check("newsstand links the previous night", 'href="builds/2026-07-05/"' in newsstand)
 check("no press-check banner on a real build", "Press check" not in newsstand)
 check("menu says Today", ">Today</a>" in newsstand)
+
+# Reader chrome: ecosystem links and the footer imprint. The default build has
+# no repository (star link omitted) and no footer (default imprint), linked to
+# the canonical repo; the network build carries both.
+check(
+    "default imprint credits the canonical repo",
+    f'class="nb-imprint" href="https://github.com/{B.UPSTREAM_REPOSITORY}"'
+    in newsstand,
+    detail="default imprint missing",
+)
+check("footer drops the old GitHub link", ">GitHub</a>" not in newsstand)
+check(
+    "make-your-own-press recruits to canonical",
+    f'href="https://github.com/{B.UPSTREAM_REPOSITORY}" target="_blank" '
+    'rel="noopener noreferrer">Make your own press' in newsstand,
+)
+check(
+    "star link omitted when the repository is unknown",
+    "Star this press" not in newsstand,
+)
+net_front = read(net_out, "index.html")
+check(
+    "custom footer renders as an unlinked imprint",
+    '<span class="nb-imprint">Read it with your coffee.</span>' in net_front,
+)
+check(
+    "star link targets this press when the repository is known",
+    'href="https://github.com/alice/my-press" target="_blank" '
+    'rel="noopener noreferrer">Star this press on GitHub' in net_front,
+)
 
 check(
     "build page links the previous night",

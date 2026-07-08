@@ -100,7 +100,16 @@ def check_site(repo, errors):
         errors.append(f"{label}/site.yaml: 'appearance' must be auto | light | dark")
     if site.get("front", "comfortable") not in ("comfortable", "compact"):
         errors.append(f"{label}/site.yaml: 'front' must be comfortable | compact")
+    footer = site.get("footer")
+    if footer is not None and (
+        not isinstance(footer, str) or not footer.strip() or len(footer) > 80
+    ):
+        errors.append(
+            f"{label}/site.yaml: 'footer' must be a non-empty string "
+            f"of at most 80 characters"
+        )
     check_site_assets(site.get("assets"), errors=errors)
+    check_site_network(site.get("network"), errors=errors)
 
 
 def check_site_assets(assets, *, errors):
@@ -144,6 +153,37 @@ def check_site_assets(assets, *, errors):
                 )
             if "defer" in item and not isinstance(item.get("defer"), bool):
                 errors.append(f"{where}: 'defer' must be true or false")
+
+
+def check_site_network(network, *, errors):
+    # Opt-in to the discovery network. The public site URL is derived at build
+    # time (from the Pages base URL), never configured, so the only
+    # owner-authored field is the one-line description; a 'url' key is
+    # intentionally not accepted, which the unknown-key check enforces.
+    if network is None:
+        return
+    prefix = "press/site.yaml"
+    if not isinstance(network, dict):
+        errors.append(f"{prefix}: 'network' must be a mapping of publish/description")
+        return
+    unknown = set(network) - {"publish", "description"}
+    if unknown:
+        errors.append(f"{prefix}: network: unknown keys {sorted(unknown)}")
+    publish = network.get("publish", False)
+    if not isinstance(publish, bool):
+        errors.append(f"{prefix}: network.publish must be true or false")
+    description = network.get("description")
+    if description is not None and (
+        not isinstance(description, str)
+        or not description.strip()
+        or len(description.strip()) > 280
+    ):
+        errors.append(
+            f"{prefix}: network.description must be a non-empty string "
+            f"of at most 280 characters"
+        )
+    if publish is True and description is None:
+        errors.append(f"{prefix}: network.description is required when publish is true")
 
 
 def check_registry(repo, errors):

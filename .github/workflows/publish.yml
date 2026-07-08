@@ -50,7 +50,8 @@ jobs:
         run: |
           python3 _main/engine/build_site.py \
             --repo _main --library . --out site \
-            --base-url "${{ steps.pages.outputs.base_url }}"
+            --base-url "${{ steps.pages.outputs.base_url }}" \
+            --repository "${{ github.repository }}"
 
       - uses: actions/upload-pages-artifact@v3
         with: { path: site }

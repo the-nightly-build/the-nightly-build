@@ -155,7 +155,9 @@ sup.nb-cite a[id],
   right: -10px;
   top: calc(100% + 9px);
   z-index: 60;
+  width: max-content;
   min-width: 200px;
+  max-width: calc(100vw - 24px);
   background: var(--panel);
   border: 1px solid var(--line);
   border-radius: var(--radius);
@@ -181,6 +183,22 @@ sup.nb-cite a[id],
 .nb-menu-panel a:hover,
 .nb-menu-panel a[aria-current] {
   color: var(--accent);
+}
+
+.nb-menu-nav a:last-child {
+  border-bottom: 0;
+}
+
+.nb-menu-eco {
+  border-top: 1px solid var(--line);
+  margin-top: 5px;
+  padding-top: 5px;
+}
+
+.nb-menu-eco a {
+  color: var(--ink-soft);
+  font-size: 13px;
+  white-space: nowrap;
 }
 
 /* ------------------------------------------------------------- front page */

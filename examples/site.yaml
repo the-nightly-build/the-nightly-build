@@ -2,6 +2,7 @@ title: "The Nightly Build"
 theme: press/themes/newsroom.css # keeps the default palette; carries this press's furniture (themes/newsroom.css)
 appearance: auto # auto | light | dark. auto follows the system; base/no-JS fallback is light.
 front: comfortable # show deks on front-page story cells (compact hides them)
+footer: "Filed while you slept." # left imprint on every page; unset -> "A Nightly Build press"
 
 # Trusted external libraries this press loads on every page, to power its
 # furniture. Here: Prism, which syntax-highlights the code blocks in the
@@ -28,3 +29,10 @@ assets:
 # docs/delivery.md). Without this block, the Atom feed is the push channel.
 # email:
 #   send_utc_hour: 12
+
+# Opt in to the discovery network. The public URL is derived from your GitHub
+# Pages URL at build time, never set here, so description is the only field you
+# write. Absent, or publish: false, keeps the press unlisted.
+# network:
+#   publish: true
+#   description: "AI, markets, engineering, and whatever I cannot stop thinking about."

@@ -54,7 +54,7 @@ except ImportError:
     sys.stderr.write("build_site.py requires PyYAML (pip install pyyaml)\n")
     sys.exit(2)
 
-PROTOCOL = "1.1"
+PROTOCOL = "1.2"
 WORDS_PER_MINUTE = 230
 FEED_LIMIT = 50
 FEED_CONTENT_LIMIT = 10  # newest N entries carry full content
@@ -247,7 +247,21 @@ def assign_positions(editions, series_cfgs):
 # --------------------------------------------------------------------------- #
 
 
-def build_catalog(site_cfg, series_cfgs, *, editions, generated):
+def derive_self_repository(explicit, base_url):
+    # The press's own "owner/repo", used by chrome for the "star this press"
+    # link. Prefer an explicit value (GITHUB_REPOSITORY in CI); otherwise parse
+    # a GitHub Pages project URL of the form https://<owner>.github.io/<repo>/.
+    # A user/organization Pages site (no repo path) yields None, and chrome
+    # simply omits the star link in that rare case.
+    if explicit:
+        return explicit
+    match = re.match(r"https?://([^./]+)\.github\.io/([^/]+)", base_url or "")
+    return f"{match.group(1)}/{match.group(2)}" if match else None
+
+
+def build_catalog(
+    site_cfg, series_cfgs, *, editions, generated, base_url="", repository=None
+):
     by_series = {}
     for ed in editions.values():
         by_series.setdefault(ed["series"], []).append(ed)
@@ -309,15 +323,33 @@ def build_catalog(site_cfg, series_cfgs, *, editions, generated):
             tags.setdefault(t, []).append(f"{ed['series']}/{ed['slug']}")
     tags = {t: sorted(v) for t, v in sorted(tags.items())}
 
-    return {
+    catalog = {
         "generated": generated.strftime("%Y-%m-%dT%H:%M:%SZ"),
         "protocol": PROTOCOL,
         "site_title": site_cfg["title"],
+        "footer": site_cfg.get("footer"),
+        "repository": repository,
+        "upstream": UPSTREAM_REPOSITORY,
         "series": series_entries,
         "editions": edition_entries,
         "builds": builds,
         "tags": tags,
     }
+    network = site_cfg.get("network") or {}
+    if network.get("publish") is True:
+        # The public URL is the Pages base URL, never configured. Without one the
+        # press cannot be listed, so warn rather than emit an unreachable entry.
+        if not base_url:
+            sys.stderr.write(
+                "WARN: network.publish is true but no base URL was resolved; "
+                "the press cannot be listed without a public URL\n"
+            )
+        catalog["network"] = {
+            "publish": True,
+            "description": (network.get("description") or "").strip(),
+            "url": f"{base_url.rstrip('/')}/" if base_url else "",
+        }
+    return catalog
 
 
 # --------------------------------------------------------------------------- #
@@ -394,6 +426,37 @@ def asset_stamp(repo):
     return h.hexdigest()[:10]
 
 
+def chrome_eco_links(site):
+    # Ecosystem links under the hamburger nav (identical markup in nb.js). All
+    # open in a new tab. "Star this press" points at the press's own repo and is
+    # omitted when the repo is unknown; "Make your own press" recruits to the
+    # canonical repo. No network link yet: the directory site is not live.
+    ext = 'target="_blank" rel="noopener noreferrer"'
+    links = []
+    if site.get("repository"):
+        links.append(
+            f'<a href="https://github.com/{site["repository"]}" {ext}>'
+            f"Star this press on GitHub ↗</a>"
+        )
+    links.append(
+        f'<a href="https://github.com/{site["upstream"]}" {ext}>'
+        f"Make your own press ↗</a>"
+    )
+    return "".join(links)
+
+
+def chrome_imprint(site):
+    # Footer left side. Custom footer text renders as plain unlinked text; the
+    # default credits the engine and links to the canonical repo.
+    ext = 'target="_blank" rel="noopener noreferrer"'
+    if site.get("footer"):
+        return f'<span class="nb-imprint">{esc(site["footer"])}</span>'
+    return (
+        f'<a class="nb-imprint" href="https://github.com/{site["upstream"]}" {ext}>'
+        f"A Nightly Build press</a>"
+    )
+
+
 def page(site, title, *, body, depth=0, active=None):
     rel = "../" * depth
     mode_attr = (
@@ -406,6 +469,8 @@ def page(site, title, *, body, depth=0, active=None):
         current = ' aria-current="page"' if label == active else ""
         nav_parts.append(f'<a href="{rel + href}"{current}>{label}</a>')
     nav = "".join(nav_parts)
+    eco = chrome_eco_links(site)
+    imprint = chrome_imprint(site)
     press_assets = f"\n{site['assets_html']}" if site.get("assets_html") else ""
     return f"""<!DOCTYPE html>
 <html lang="en"{mode_attr}>
@@ -425,14 +490,13 @@ def page(site, title, *, body, depth=0, active=None):
 <header class="nb-bar"><div class="nb-bar-in">
   <a class="nb-wordmark" href="{rel}">{esc(site["title"])}<span class="nb-period">.</span></a>
   <details class="nb-menu"><summary aria-label="Menu"><span class="nb-burger"></span></summary>
-  <nav class="nb-menu-panel">{nav}</nav></details>
+  <nav class="nb-menu-panel"><div class="nb-menu-nav">{nav}</div><div class="nb-menu-eco">{eco}</div></nav></details>
 </div></header>
 <main class="nb-shell">
 {body}
 </main>
 <footer class="nb-footer"><div class="nb-footer-in">
-  <a href="{rel}feed.xml">RSS</a>
-  <a href="https://github.com/{UPSTREAM_REPOSITORY}">GitHub</a>
+  {imprint}
   <button class="nb-appearance" type="button">◐ auto</button>
 </div></footer>
 </body></html>"""
@@ -1051,18 +1115,38 @@ def copy_editions(editions, out, *, stamp="", assets_html=""):
             shutil.copyfile(ed["file"], dst)
 
 
-def build(repo, library_root, *, out, preview_root=None, base_url="", now=None):
+def build(
+    repo,
+    library_root,
+    *,
+    out,
+    preview_root=None,
+    base_url="",
+    repository=None,
+    now=None,
+):
     now = now or dt.datetime.now(dt.timezone.utc)
     site_cfg = load_site_config(repo)
     series_cfgs = load_series_configs(repo)
     editions = collect_editions(series_cfgs, library_root, preview_root=preview_root)
-    catalog = build_catalog(site_cfg, series_cfgs, editions=editions, generated=now)
+    repository = derive_self_repository(repository, base_url)
+    catalog = build_catalog(
+        site_cfg,
+        series_cfgs,
+        editions=editions,
+        generated=now,
+        base_url=base_url,
+        repository=repository,
+    )
 
     site = {
         "title": site_cfg["title"],
         "appearance": site_cfg["appearance"],
         "stamp": asset_stamp(repo),
         "assets_html": render_assets_html(site_cfg.get("assets")),
+        "footer": site_cfg.get("footer"),
+        "repository": repository,
+        "upstream": UPSTREAM_REPOSITORY,
         "body_class": (
             ' class="nb-front-comfortable"'
             if site_cfg.get("front") == "comfortable"
@@ -1212,6 +1296,12 @@ def main(argv=None):
         default="",
         help="absolute site base URL (no trailing slash) for feeds",
     )
+    p.add_argument(
+        "--repository",
+        default=os.getenv("GITHUB_REPOSITORY"),
+        help="this press's owner/repo (defaults to $GITHUB_REPOSITORY) for the "
+        "'star this press' chrome link; falls back to parsing the Pages URL",
+    )
     p.add_argument("--now", help="override the build timestamp (tests), ISO-8601 UTC")
     args = p.parse_args(argv)
 
@@ -1227,6 +1317,7 @@ def main(argv=None):
         out=args.out,
         preview_root=args.preview,
         base_url=args.base_url.rstrip("/"),
+        repository=args.repository,
         now=now,
     )
     n = len(catalog["editions"])

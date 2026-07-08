@@ -21,6 +21,8 @@ import types
 import _bootstrap
 import check as C
 import make_fixtures
+import validate_config as V
+import yaml
 
 HERE = _bootstrap.HERE
 REPO = _bootstrap.REPO
@@ -1359,6 +1361,64 @@ for name, cond in [
         FAIL.append(name)
         print(f"  FAIL {name}")
 
+
+def vc_site_errors(yaml_text):
+    d = pathlib.Path(tempfile.mkdtemp())
+    (d / "press").mkdir()
+    (d / "press" / "site.yaml").write_text(yaml_text)
+    errs = []
+    V.check_site(str(d), errs)
+    return errs
+
+
+def vc_network_errors(network):
+    errs = []
+    V.check_site_network(network, errors=errs)
+    return errs
+
+
+for name, cond in [
+    (
+        "footer: a valid imprint passes",
+        vc_site_errors('title: "x"\nfooter: "Filed."\n') == [],
+    ),
+    (
+        "footer: over 80 chars fails",
+        vc_site_errors(f'title: "x"\nfooter: "{"a" * 81}"\n') != [],
+    ),
+    ("footer: empty string fails", vc_site_errors('title: "x"\nfooter: ""\n') != []),
+    (
+        "network: opted-in block validates",
+        vc_network_errors({"publish": True, "description": "hi"}) == [],
+    ),
+    (
+        "network: publish false needs no description",
+        vc_network_errors({"publish": False}) == [],
+    ),
+    (
+        "network: publish true without description fails",
+        vc_network_errors({"publish": True}) != [],
+    ),
+    (
+        "network: a url key is rejected as redundant",
+        vc_network_errors({"publish": True, "description": "hi", "url": "x"}) != [],
+    ),
+    (
+        "network: non-bool publish fails",
+        vc_network_errors({"publish": "yes", "description": "hi"}) != [],
+    ),
+    (
+        "network: description over 280 chars fails",
+        vc_network_errors({"publish": True, "description": "a" * 281}) != [],
+    ),
+]:
+    if cond:
+        PASS += 1
+        print(f"  ok   {name}")
+    else:
+        FAIL.append(name)
+        print(f"  FAIL {name}")
+
 print()
 print("== source link resolution classifier ==")
 # B-SOURCE-DEAD blocks only on definitive death; everything ambiguous passes,
@@ -1374,6 +1434,37 @@ link_cases = [
     ("no links to probe returns empty", C.dead_source_links([]) == []),
 ]
 for name, ok in link_cases:
+    if ok:
+        PASS += 1
+        print(f"  ok   {name}")
+    else:
+        FAIL.append(name)
+        print(f"  FAIL {name}")
+
+print()
+print("== workflow trigger safety (fork-token guarantee) ==")
+# The editor auto-merges edition PRs, so the only thing stopping a stranger from
+# force-publishing to a fork is GitHub's rule that a pull_request run from a fork
+# gets a read-only token. That holds only while check.yml uses `pull_request`;
+# `pull_request_target` would hand fork PRs a writable token and break it. Lock
+# the trigger so a future edit cannot silently regress the guarantee.
+check_yml_text = (REPO / ".github" / "workflows" / "check.yml").read_text()
+check_yml_on = yaml.safe_load(check_yml_text)
+# PyYAML parses the bare key `on` as the boolean True (YAML 1.1); accept either.
+check_yml_triggers = check_yml_on.get("on", check_yml_on.get(True)) or {}
+trigger_names = (
+    set(check_yml_triggers)
+    if isinstance(check_yml_triggers, dict)
+    else {check_yml_triggers}
+)
+wf_cases = [
+    ("check.yml triggers on pull_request", "pull_request" in trigger_names),
+    (
+        "check.yml never uses pull_request_target",
+        "pull_request_target" not in trigger_names,
+    ),
+]
+for name, ok in wf_cases:
     if ok:
         PASS += 1
         print(f"  ok   {name}")
