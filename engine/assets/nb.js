@@ -256,6 +256,34 @@
     if (document.querySelector(".nb-bar")) return Promise.resolve();
     return catalog().then(function (cat) {
       var title = (cat && cat.site_title) || "The Nightly Build";
+      var upstream =
+        (cat && cat.upstream) || "the-nightly-build/the-nightly-build";
+      var repo = cat && cat.repository;
+      var ext = 'target="_blank" rel="noopener noreferrer"';
+      /* Ecosystem links under the nav (mirrors build_site.chrome_eco_links).
+         Star this press is omitted when the repo is unknown; no network link
+         yet, since the directory site is not live. */
+      var eco = repo
+        ? '<a href="https://github.com/' +
+          repo +
+          '" ' +
+          ext +
+          ">Star this press on GitHub ↗</a>"
+        : "";
+      eco +=
+        '<a href="https://github.com/' +
+        upstream +
+        '" ' +
+        ext +
+        ">Make your own press ↗</a>";
+      var imprint =
+        cat && cat.footer
+          ? '<span class="nb-imprint">' + escHtml(cat.footer) + "</span>"
+          : '<a class="nb-imprint" href="https://github.com/' +
+            upstream +
+            '" ' +
+            ext +
+            ">A Nightly Build press</a>";
       var bar = document.createElement("header");
       bar.className = "nb-bar";
       bar.innerHTML =
@@ -266,7 +294,7 @@
         '<span class="nb-period">.</span></a>' +
         '<details class="nb-menu"><summary aria-label="Menu">' +
         '<span class="nb-burger"></span></summary>' +
-        '<nav class="nb-menu-panel">' +
+        '<nav class="nb-menu-panel"><div class="nb-menu-nav">' +
         '<a href="' +
         ROOT +
         '">Today</a>' +
@@ -278,15 +306,16 @@
         'search/">Search</a>' +
         '<a href="' +
         ROOT +
-        'feed.xml">RSS</a></nav></details></div>';
+        'feed.xml">RSS</a></div>' +
+        '<div class="nb-menu-eco">' +
+        eco +
+        "</div></nav></details></div>";
       document.body.insertBefore(bar, document.body.firstChild);
       var foot = document.createElement("footer");
       foot.className = "nb-footer";
       foot.innerHTML =
-        '<div class="nb-footer-in"><a href="' +
-        ROOT +
-        'feed.xml">RSS</a>' +
-        '<a href="https://github.com/the-nightly-build/the-nightly-build">GitHub</a>' +
+        '<div class="nb-footer-in">' +
+        imprint +
         '<button class="nb-appearance" type="button">◐ auto</button></div>';
       document.body.appendChild(foot);
     });

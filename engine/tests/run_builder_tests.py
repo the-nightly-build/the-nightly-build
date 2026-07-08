@@ -123,10 +123,11 @@ pathlib.Path(net_repo, "press", "site.yaml").write_text(
     "  publish: true\n"
     '  description: "Books, law, and the quiet parts of the news."\n'
 )
+net_out = tempfile.mkdtemp()
 net_catalog = B.build(
     net_repo,
     make_full_library(),
-    out=tempfile.mkdtemp(),
+    out=net_out,
     base_url="https://alice.github.io/my-press",
     now=NOW,
 )
@@ -180,6 +181,36 @@ check("a second cell shows its own source count", ">5 sources</span>" in newssta
 check("newsstand links the previous night", 'href="builds/2026-07-05/"' in newsstand)
 check("no press-check banner on a real build", "Press check" not in newsstand)
 check("menu says Today", ">Today</a>" in newsstand)
+
+# Reader chrome: ecosystem links and the footer imprint. The default build has
+# no repository (star link omitted) and no footer (default imprint), linked to
+# the canonical repo; the network build carries both.
+check(
+    "default imprint credits the canonical repo",
+    f'class="nb-imprint" href="https://github.com/{B.UPSTREAM_REPOSITORY}"'
+    in newsstand,
+    detail="default imprint missing",
+)
+check("footer drops the old GitHub link", ">GitHub</a>" not in newsstand)
+check(
+    "make-your-own-press recruits to canonical",
+    f'href="https://github.com/{B.UPSTREAM_REPOSITORY}" target="_blank" '
+    'rel="noopener noreferrer">Make your own press' in newsstand,
+)
+check(
+    "star link omitted when the repository is unknown",
+    "Star this press" not in newsstand,
+)
+net_front = read(net_out, "index.html")
+check(
+    "custom footer renders as an unlinked imprint",
+    '<span class="nb-imprint">Read it with your coffee.</span>' in net_front,
+)
+check(
+    "star link targets this press when the repository is known",
+    'href="https://github.com/alice/my-press" target="_blank" '
+    'rel="noopener noreferrer">Star this press on GitHub' in net_front,
+)
 
 check(
     "build page links the previous night",

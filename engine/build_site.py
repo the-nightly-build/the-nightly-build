@@ -426,6 +426,37 @@ def asset_stamp(repo):
     return h.hexdigest()[:10]
 
 
+def chrome_eco_links(site):
+    # Ecosystem links under the hamburger nav (identical markup in nb.js). All
+    # open in a new tab. "Star this press" points at the press's own repo and is
+    # omitted when the repo is unknown; "Make your own press" recruits to the
+    # canonical repo. No network link yet: the directory site is not live.
+    ext = 'target="_blank" rel="noopener noreferrer"'
+    links = []
+    if site.get("repository"):
+        links.append(
+            f'<a href="https://github.com/{site["repository"]}" {ext}>'
+            f"Star this press on GitHub ↗</a>"
+        )
+    links.append(
+        f'<a href="https://github.com/{site["upstream"]}" {ext}>'
+        f"Make your own press ↗</a>"
+    )
+    return "".join(links)
+
+
+def chrome_imprint(site):
+    # Footer left side. Custom footer text renders as plain unlinked text; the
+    # default credits the engine and links to the canonical repo.
+    ext = 'target="_blank" rel="noopener noreferrer"'
+    if site.get("footer"):
+        return f'<span class="nb-imprint">{esc(site["footer"])}</span>'
+    return (
+        f'<a class="nb-imprint" href="https://github.com/{site["upstream"]}" {ext}>'
+        f"A Nightly Build press</a>"
+    )
+
+
 def page(site, title, *, body, depth=0, active=None):
     rel = "../" * depth
     mode_attr = (
@@ -438,6 +469,8 @@ def page(site, title, *, body, depth=0, active=None):
         current = ' aria-current="page"' if label == active else ""
         nav_parts.append(f'<a href="{rel + href}"{current}>{label}</a>')
     nav = "".join(nav_parts)
+    eco = chrome_eco_links(site)
+    imprint = chrome_imprint(site)
     press_assets = f"\n{site['assets_html']}" if site.get("assets_html") else ""
     return f"""<!DOCTYPE html>
 <html lang="en"{mode_attr}>
@@ -457,14 +490,13 @@ def page(site, title, *, body, depth=0, active=None):
 <header class="nb-bar"><div class="nb-bar-in">
   <a class="nb-wordmark" href="{rel}">{esc(site["title"])}<span class="nb-period">.</span></a>
   <details class="nb-menu"><summary aria-label="Menu"><span class="nb-burger"></span></summary>
-  <nav class="nb-menu-panel">{nav}</nav></details>
+  <nav class="nb-menu-panel"><div class="nb-menu-nav">{nav}</div><div class="nb-menu-eco">{eco}</div></nav></details>
 </div></header>
 <main class="nb-shell">
 {body}
 </main>
 <footer class="nb-footer"><div class="nb-footer-in">
-  <a href="{rel}feed.xml">RSS</a>
-  <a href="https://github.com/{UPSTREAM_REPOSITORY}">GitHub</a>
+  {imprint}
   <button class="nb-appearance" type="button">◐ auto</button>
 </div></footer>
 </body></html>"""
@@ -1097,13 +1129,14 @@ def build(
     site_cfg = load_site_config(repo)
     series_cfgs = load_series_configs(repo)
     editions = collect_editions(series_cfgs, library_root, preview_root=preview_root)
+    repository = derive_self_repository(repository, base_url)
     catalog = build_catalog(
         site_cfg,
         series_cfgs,
         editions=editions,
         generated=now,
         base_url=base_url,
-        repository=derive_self_repository(repository, base_url),
+        repository=repository,
     )
 
     site = {
@@ -1111,6 +1144,9 @@ def build(
         "appearance": site_cfg["appearance"],
         "stamp": asset_stamp(repo),
         "assets_html": render_assets_html(site_cfg.get("assets")),
+        "footer": site_cfg.get("footer"),
+        "repository": repository,
+        "upstream": UPSTREAM_REPOSITORY,
         "body_class": (
             ' class="nb-front-comfortable"'
             if site_cfg.get("front") == "comfortable"
