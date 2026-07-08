@@ -261,8 +261,8 @@
       var repo = cat && cat.repository;
       var ext = 'target="_blank" rel="noopener noreferrer"';
       /* Ecosystem links under the nav (mirrors build_site.chrome_eco_links).
-         Star this press is omitted when the repo is unknown; no network link
-         yet, since the directory site is not live. */
+         Star this press is omitted when the repo is unknown; the last link
+         points at the discovery site. */
       var eco = repo
         ? '<a href="https://github.com/' +
           repo +
@@ -276,6 +276,10 @@
         '" ' +
         ext +
         ">Make your own press ↗</a>";
+      eco +=
+        '<a href="https://the-nightly-build.github.io/" ' +
+        ext +
+        ">The Nightly Build Network ↗</a>";
       var imprint =
         cat && cat.footer
           ? '<span class="nb-imprint">' + escHtml(cat.footer) + "</span>"

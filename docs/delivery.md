@@ -80,8 +80,13 @@ network:
 
 `description` is the only field you write. Your public URL is derived from your
 GitHub Pages URL at build time, never configured, so there is nothing to keep in
-sync when you fork. Absent, or `publish: false`, keeps the press unlisted. When
-you opt in, the next build adds a `network` block to `catalog.json` (protocol
-`1.2`); the directory reads that block when it crawls. The directory site itself
-is still being built, so opting in now simply means you are listed once it goes
-live.
+sync when you fork. Absent, or `publish: false`, keeps the press unlisted.
+
+When you opt in, the next build adds a `network` block to `catalog.json`
+(protocol `1.2`). The directory at
+[the-nightly-build.github.io](https://the-nightly-build.github.io/) crawls daily:
+it lists public forks of the canonical repo, reads each opted-in press's catalog,
+and indexes it. Inclusion is automatic, with no approval step, usually within a
+day of opting in. One consequence of fork-graph discovery: fork the **canonical**
+repo, not another press, or the crawler will not find you. Your editions are
+never copied; the directory links out to your own site.

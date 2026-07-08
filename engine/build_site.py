@@ -62,6 +62,7 @@ FEED_CONTENT_MAX = 150_000  # per-entry cap after stripping, bytes
 UPSTREAM_REPOSITORY = os.getenv(
     "UPSTREAM_REPOSITORY", "the-nightly-build/the-nightly-build"
 )
+NETWORK_URL = os.getenv("NETWORK_URL", "https://the-nightly-build.github.io/")
 META_RE = re.compile(r'<script[^>]*\bid="nb-meta"[^>]*>(.*?)</script>', re.S | re.I)
 
 esc = html.escape
@@ -430,7 +431,7 @@ def chrome_eco_links(site):
     # Ecosystem links under the hamburger nav (identical markup in nb.js). All
     # open in a new tab. "Star this press" points at the press's own repo and is
     # omitted when the repo is unknown; "Make your own press" recruits to the
-    # canonical repo. No network link yet: the directory site is not live.
+    # canonical repo; "The Nightly Build Network" links to the discovery site.
     ext = 'target="_blank" rel="noopener noreferrer"'
     links = []
     if site.get("repository"):
@@ -442,6 +443,7 @@ def chrome_eco_links(site):
         f'<a href="https://github.com/{site["upstream"]}" {ext}>'
         f"Make your own press ↗</a>"
     )
+    links.append(f'<a href="{NETWORK_URL}" {ext}>The Nightly Build Network ↗</a>')
     return "".join(links)
 
 

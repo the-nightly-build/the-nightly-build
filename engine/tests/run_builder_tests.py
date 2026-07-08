@@ -201,6 +201,11 @@ check(
     "star link omitted when the repository is unknown",
     "Star this press" not in newsstand,
 )
+check(
+    "hamburger links to the network directory",
+    f'href="{B.NETWORK_URL}" target="_blank" '
+    'rel="noopener noreferrer">The Nightly Build Network' in newsstand,
+)
 net_front = read(net_out, "index.html")
 check(
     "custom footer renders as an unlinked imprint",
