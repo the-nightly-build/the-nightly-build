@@ -28,3 +28,9 @@ assets:
 # docs/delivery.md). Without this block, the Atom feed is the push channel.
 # email:
 #   send_utc_hour: 12
+
+# Listed on The Nightly Build Network. The public URL is derived from this
+# press's GitHub Pages URL at build time, so description is the only field set.
+network:
+  publish: true
+  description: "AI, markets, engineering, and whatever I cannot stop thinking about."
