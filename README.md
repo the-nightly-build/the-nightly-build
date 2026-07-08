@@ -90,6 +90,15 @@ read-only permissions and no secrets. Auto-merge is squash-only, into
 `library` only, for BLOCK-clean PRs only. Mail credentials exist only as
 Actions secrets on the trusted post-merge path.
 
+Anyone can open a pull request to a public press, but no stranger can publish
+through one. The editor runs on the `pull_request` event, so a PR from a fork
+receives a read-only token and cannot merge itself; only a branch pushed to the
+press's own repository (the night shift, holding that repository's token) opens
+a same-repo PR that auto-merge can act on. The guarantee is the token split
+between fork and same-repo PRs, not edition validation, so the trigger is
+`pull_request` and never `pull_request_target`, and a test enforces that so it
+cannot silently regress.
+
 A press may load libraries to power its furniture (a syntax highlighter, say)
 by declaring them in `press/site.yaml`. That surface preserves the boundary:
 the list is owner-authored on `main`, never by an auto-merged edition; every
