@@ -11,10 +11,10 @@ available, `uv run engine/<script>.py` manages the dependency itself.
 
 ## The contract
 
-1. **One edition per series, maximum.** A run serves the whole press, every
+1. **One article per series, maximum.** A run serves the whole paper, every
    series configured under `press/series/`, unless your schedule prompt names one
    specific series. For each series you serve, research and publish at most ONE
-   edition, as its own pull request. Work series one at a time, completing each
+   article, as its own pull request. Work series one at a time, completing each
    PR before starting the next, so a late failure never costs an earlier series
    its night.
 
@@ -22,10 +22,10 @@ available, `uv run engine/<script>.py` manages the dependency itself.
    override rules in this file.)
    1. This file.
    2. `spec/editorial.md`: the house voice and quality bar.
-   3. `press/editorial.md`: the press owner's voice, if present. It specializes
+   3. `press/editorial.md`: the author's voice, if present. It specializes
       the house style.
    4. The registry entry for your series' template: `templates/registry.yaml`,
-      overlaid by `press/templates/registry.yaml` (press entries win). The
+      overlaid by `press/templates/registry.yaml` (your entries win). The
       template file itself is `press/templates/<t>.html` if it exists, else
       `templates/<t>.html`.
    5. `press/series/<id>/prompt.md`: the series' editorial instructions.
@@ -40,13 +40,13 @@ available, `uv run engine/<script>.py` manages the dependency itself.
    - `collection`: one of the listed `candidates` (the next item in config
      order; every unpublished item when the series sets `selection: random`).
    - `sequence`: the listed `slug`. You MUST read the series' already published
-     editions before writing; your edition builds on them explicitly.
+     articles before writing; your article builds on them explicitly.
    - `rolling`: today's UTC date (the listed `slug`). Missed nights are skipped,
      never backfilled.
-   - `open`: an editor-run desk. If `commissions` lists slugs, publish one of
+   - `open`: an editor-run section. If `commissions` lists slugs, publish one of
      them (its `items:` entry may carry a prompt and sources). Otherwise invent
-     tonight's edition within the series' beat: read the desk's published
-     editions first (never repeat a topic, build continuity), then choose the
+     tonight's article within the series' beat: read the section's published
+     articles first (never repeat a topic, build continuity), then choose the
      template that best fits from the series' declared choices (`templates:`,
      or its single `template:`) and coin a fresh slug (`[a-z0-9-]{1,64}`).
      **Serve only the series duty.py lists as due. If nothing is due, stop. Do
@@ -89,7 +89,7 @@ available, `uv run engine/<script>.py` manages the dependency itself.
    Revise until `BLOCK: 0`. Treat every WARN as a revision note and address what you
    reasonably can. WARNs are the quality bar; BLOCKs are the publishing bar.
 
-8. **Open one pull request per edition, targeting the `library` branch**, each
+8. **Open one pull request per article, targeting the `library` branch**, each
    adding exactly one file.
    - Title: `nb: <series>/<slug> - <Title>`
    - Body: a fenced `nb-meta` yaml block mirroring the embedded metadata, a link to
@@ -137,5 +137,5 @@ self-measurements (the proof recounts; >20% deviation is a WARN).
 
 ## Quality creed
 
-Editions teach rather than summarize. Every load-bearing claim carries a citation the
+Articles teach rather than summarize. Every load-bearing claim carries a citation the
 reader can follow. The goal is to equip the reader to go deeper on their own.
