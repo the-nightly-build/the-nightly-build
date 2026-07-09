@@ -1,9 +1,9 @@
-/* The Nightly Build — site chrome + shared edition chrome.
+/* The Nightly Build — site chrome + shared article chrome.
    The system: ONE content column (800px) for everything — bar content,
    front page, prose, furniture, footer. The bar is two elements (wordmark +
    menu) at every width. All color through the theme tokens (themes/*.css).
-   Edition-facing classes (.nb-edition and below) are an append-only API:
-   published editions are frozen HTML — restyle values, never rename. */
+   Article-facing classes (.nb-article and below) are an append-only API:
+   published articles are frozen HTML — restyle values, never rename. */
 
 *,
 *::before,
@@ -44,8 +44,8 @@ img {
   width: 100%;
 }
 
-/* editions: article fills the viewport so the footer sits at the bottom */
-.nb-edition article {
+/* articles: article fills the viewport so the footer sits at the bottom */
+.nb-article article {
   flex: 1;
   width: 100%;
 }
@@ -202,7 +202,7 @@ sup.nb-cite a[id],
 }
 
 /* ------------------------------------------------------------- front page */
-.nb-editionline {
+.nb-articleline {
   display: flex;
   align-items: baseline;
   gap: 8px 16px;
@@ -214,7 +214,7 @@ sup.nb-cite a[id],
   color: var(--ink-soft);
 }
 
-.nb-editionline-facts {
+.nb-articleline-facts {
   color: var(--faint);
 }
 
@@ -764,11 +764,11 @@ sup.nb-cite a[id],
   color: var(--ink);
 }
 
-/* ============================ edition chrome ============================ */
+/* ============================ article chrome ============================ */
 
-/* Everything below styles published editions — append-only API. */
+/* Everything below styles published articles — append-only API. */
 
-.nb-edition {
+.nb-article {
   font-family: var(--serif);
   font-size: 16px;
   line-height: 1.65;
@@ -780,7 +780,7 @@ sup.nb-cite a[id],
   padding: 0 20px;
 }
 
-.nb-edition .nb-eyebrow {
+.nb-article .nb-eyebrow {
   font-family: var(--sans);
   font-size: 11.5px;
   font-weight: 600;
@@ -790,20 +790,20 @@ sup.nb-cite a[id],
   margin: 24px 0 10px;
 }
 
-.nb-edition .nb-eyebrow a {
+.nb-article .nb-eyebrow a {
   color: inherit;
   text-decoration: none;
 }
 
-.nb-edition .nb-eyebrow a:hover {
+.nb-article .nb-eyebrow a:hover {
   color: var(--accent-2);
 }
 
-.nb-edition .nb-eyebrow .nb-eyebrow-progress {
+.nb-article .nb-eyebrow .nb-eyebrow-progress {
   color: var(--ink-soft);
 }
 
-.nb-edition h1.nb-title {
+.nb-article h1.nb-title {
   font-size: clamp(26px, 6.5vw, 34px);
   line-height: 1.12;
   letter-spacing: -0.016em;
@@ -812,7 +812,7 @@ sup.nb-cite a[id],
   font-variation-settings: "opsz" 60;
 }
 
-.nb-edition .nb-dekline {
+.nb-article .nb-dekline {
   font-style: italic;
   color: var(--ink-soft);
   font-size: 17.5px;
@@ -840,7 +840,7 @@ sup.nb-cite a[id],
   margin-left: auto;
 }
 
-.nb-edition h2 {
+.nb-article h2 {
   font-size: 22px;
   letter-spacing: -0.01em;
   margin: 34px 0 10px;
@@ -848,16 +848,16 @@ sup.nb-cite a[id],
   font-weight: 600;
 }
 
-.nb-edition h3 {
+.nb-article h3 {
   font-size: 18px;
   margin: 24px 0 8px;
 }
 
-.nb-edition p {
+.nb-article p {
   margin: 0 0 14px;
 }
 
-.nb-edition blockquote {
+.nb-article blockquote {
   margin: 18px 0;
   padding: 2px 0 2px 16px;
   border-left: 3px solid var(--accent);
@@ -877,24 +877,24 @@ sup.nb-cite a[id],
 } /* superseded by the runtime Contents */
 
 @media (width >=1080px) {
-  .nb-edition {
+  .nb-article {
     font-size: 18.5px;
   }
 
-  .nb-edition h1.nb-title {
+  .nb-article h1.nb-title {
     font-size: clamp(32px, 3.2vw, 42px);
   }
 
-  .nb-edition .nb-dekline {
+  .nb-article .nb-dekline {
     font-size: 19px;
   }
 
-  .nb-edition h2 {
+  .nb-article h2 {
     font-size: 25px;
   }
 }
 
-/* contents (built by nb.js from the edition's own sections) */
+/* contents (built by nb.js from the article's own sections) */
 .nb-toc {
   margin: -13px 0 24px;
   border-bottom: 1px solid var(--hair);

@@ -7,7 +7,7 @@
 
 Every page shares one 800px content column and the shared assets under
 engine/assets, so a stylesheet or theme change restyles the entire back
-catalog on the next build. Edition copies get content-hash stamped asset
+catalog on the next build. Article copies get content-hash stamped asset
 links; the canonical files on the library branch stay byte-exact.
 
 Output layout:
@@ -24,7 +24,7 @@ Output layout:
       catalog.json                     machine-readable library state
       feed.xml, series/<id>/feed.xml   Atom; newest entries carry full content
       assets/                          copied from main's engine/assets
-      library/<series>/<slug>.html     editions, asset links stamped
+      library/<series>/<slug>.html     articles, asset links stamped
 
 Invocations:
 
@@ -54,7 +54,7 @@ except ImportError:
     sys.stderr.write("build_site.py requires PyYAML (pip install pyyaml)\n")
     sys.exit(2)
 
-PROTOCOL = "1.2"
+PROTOCOL = "1.3"
 WORDS_PER_MINUTE = 230
 FEED_LIMIT = 50
 FEED_CONTENT_LIMIT = 10  # newest N entries carry full content
@@ -96,10 +96,10 @@ def render_assets_html(assets):
 
     Presses may load popular libraries (a syntax highlighter, a math
     typesetter) to power their furniture. These are owner-authored in
-    site.yaml on main (never an agent edition), pinned and Subresource-
+    site.yaml on main (never an agent article), pinned and Subresource-
     Integrity-hashed, and validate_config requires the hash. The builder
-    injects them into every generated page and edition here, on the trusted
-    post-merge path; editions themselves stay script-free, so the edition
+    injects them into every generated page and article here, on the trusted
+    post-merge path; articles themselves stay script-free, so the article
     sandbox is unchanged and auto-merge stays as safe as ever.
     """
     if not assets:
@@ -145,7 +145,7 @@ def read_meta(path):
         return None
 
 
-def editions_dir(root, sid):
+def articles_dir(root, sid):
     # Accepts a full library checkout or a bare library/ folder.
     for base in (os.path.join(root, "library", sid), os.path.join(root, sid)):
         if os.path.isdir(base):
@@ -154,7 +154,7 @@ def editions_dir(root, sid):
 
 
 def scan_library(root):
-    """Yield (series_id, slug, file_path) for every edition under root.
+    """Yield (series_id, slug, file_path) for every article under root.
 
     Accepts a library checkout (contains library/) or a bare library folder
     (itself named 'library') — never an arbitrary directory, or a repo
@@ -184,15 +184,15 @@ def reading_minutes(meta):
     return max(1, round(words / WORDS_PER_MINUTE)) if words else 1
 
 
-def collect_editions(series_cfgs, library_root, *, preview_root=None):
-    """Load every edition under the library root, preview drafts included.
+def collect_articles(series_cfgs, library_root, *, preview_root=None):
+    """Load every article under the library root, preview drafts included.
 
-    Returns {(series_id, slug): edition dict} where each dict carries the
+    Returns {(series_id, slug): article dict} where each dict carries the
     parsed nb-meta, the source file path, reading minutes, and a draft
     flag. A preview draft with the same (series, slug) as a published
-    edition replaces it, which is how press-check promotion previews work.
+    article replaces it, which is how press-check promotion previews work.
     """
-    editions = {}
+    articles = {}
     sources = [(library_root, False)]
     if preview_root:
         sources.append((preview_root, True))
@@ -204,7 +204,7 @@ def collect_editions(series_cfgs, library_root, *, preview_root=None):
             if meta is None:
                 sys.stderr.write(f"warning: skipping {path} (no parseable nb-meta)\n")
                 continue
-            editions[(sid, slug)] = {
+            articles[(sid, slug)] = {
                 "meta": meta,
                 "series": sid,
                 "slug": slug,
@@ -212,12 +212,12 @@ def collect_editions(series_cfgs, library_root, *, preview_root=None):
                 "draft": is_draft,
                 "reading_minutes": reading_minutes(meta),
             }
-    assign_positions(editions, series_cfgs)
-    return editions
+    assign_positions(articles, series_cfgs)
+    return articles
 
 
-def assign_positions(editions, series_cfgs):
-    """Assign each edition its 1-based position in the series' canonical order.
+def assign_positions(articles, series_cfgs):
+    """Assign each article its 1-based position in the series' canonical order.
 
     Sequences order by nb-meta order, collections by config item order
     with unknown slugs last, open desks by publication date, rolling
@@ -225,7 +225,7 @@ def assign_positions(editions, series_cfgs):
     'Ed. N of M' labels, so it must be stable across rebuilds.
     """
     by_series = {}
-    for ed in editions.values():
+    for ed in articles.values():
         by_series.setdefault(ed["series"], []).append(ed)
     for sid, eds in by_series.items():
         cfg = series_cfgs.get(sid, {})
@@ -260,9 +260,9 @@ def derive_self_repository(explicit, base_url):
     return f"{match.group(1)}/{match.group(2)}" if match else None
 
 
-def build_catalog(site_cfg, series_cfgs, *, editions, generated, repository=None):
+def build_catalog(site_cfg, series_cfgs, *, articles, generated, repository=None):
     by_series = {}
-    for ed in editions.values():
+    for ed in articles.values():
         by_series.setdefault(ed["series"], []).append(ed)
 
     series_entries = []
@@ -282,7 +282,7 @@ def build_catalog(site_cfg, series_cfgs, *, editions, generated, repository=None
             if cfg.get(key):
                 entry[key] = cfg[key]
         series_entries.append(entry)
-    # editions published for series no longer configured still belong to the site
+    # articles published for series no longer configured still belong to the site
     for sid in sorted(set(by_series) - set(series_cfgs)):
         eds = by_series[sid]
         series_entries.append(
@@ -296,9 +296,9 @@ def build_catalog(site_cfg, series_cfgs, *, editions, generated, repository=None
             }
         )
 
-    edition_entries = []
+    article_entries = []
     for ed in sorted(
-        editions.values(),
+        articles.values(),
         key=lambda e: (e["meta"].get("date", ""), e["series"], e["slug"]),
         reverse=True,
     ):
@@ -308,16 +308,16 @@ def build_catalog(site_cfg, series_cfgs, *, editions, generated, repository=None
         entry["reading_minutes"] = ed["reading_minutes"]
         if ed["draft"]:
             entry["draft"] = True
-        edition_entries.append(entry)
+        article_entries.append(entry)
 
     builds = {}
-    for ed in editions.values():
+    for ed in articles.values():
         d = ed["meta"].get("date") or "unknown"
         builds.setdefault(d, []).append(f"{ed['series']}/{ed['slug']}")
     builds = {d: sorted(v) for d, v in sorted(builds.items(), reverse=True)}
 
     tags = {}
-    for ed in editions.values():
+    for ed in articles.values():
         for t in ed["meta"].get("tags") or []:
             tags.setdefault(t, []).append(f"{ed['series']}/{ed['slug']}")
     tags = {t: sorted(v) for t, v in sorted(tags.items())}
@@ -331,7 +331,7 @@ def build_catalog(site_cfg, series_cfgs, *, editions, generated, repository=None
         "upstream": UPSTREAM_REPOSITORY,
         "network_url": NETWORK_URL,
         "series": series_entries,
-        "editions": edition_entries,
+        "articles": article_entries,
         "builds": builds,
         "tags": tags,
     }
@@ -411,7 +411,7 @@ def pretty_date(iso):
 def asset_stamp(repo):
     """Return a short content hash of the shared assets for cache busting.
 
-    Every generated page and edition copy links assets with ?v=<stamp>,
+    Every generated page and article copy links assets with ?v=<stamp>,
     so a returning reader can never pair cached old CSS with newer
     markup. The stamp changes exactly when nb.css or nb.js change.
     """
@@ -548,7 +548,7 @@ def lead_cell(ed, series_cfgs, *, depth=0):
 
 
 def night_body(eds, series_cfgs, *, depth, date):
-    """Render one night as an edition line plus a single ruled table.
+    """Render one night as an article line plus a single ruled table.
 
     The longest read leads as the table's full-width first cell and the
     rest of the night fills the two-column grid beneath it. Every visual
@@ -557,8 +557,8 @@ def night_body(eds, series_cfgs, *, depth, date):
     eds = sorted(eds, key=lambda e: -e["reading_minutes"])
     total = sum(e["reading_minutes"] for e in eds)
     body = (
-        f'<div class="nb-editionline"><span>{esc(pretty_date(date))}</span>'
-        f'<span class="nb-editionline-facts">{total} min read</span></div>'
+        f'<div class="nb-articleline"><span>{esc(pretty_date(date))}</span>'
+        f'<span class="nb-articleline-facts">{total} min read</span></div>'
     )
     if not eds:
         return body + '<div class="nb-empty"><p>No articles this night.</p></div>'
@@ -568,8 +568,8 @@ def night_body(eds, series_cfgs, *, depth, date):
     return body + f'<div class="nb-grid">{cells}</div>'
 
 
-def render_newsstand(site, catalog, *, series_cfgs, editions):
-    if not editions:
+def render_newsstand(site, catalog, *, series_cfgs, articles):
+    if not articles:
         body = (
             '<div class="nb-empty" style="margin-top:26px">'
             "<h2>The presses are ready</h2>"
@@ -579,7 +579,7 @@ def render_newsstand(site, catalog, *, series_cfgs, editions):
         return page(site, site["title"], body=body, active="Today")
     dates = sorted(catalog["builds"])
     latest = dates[-1]
-    tonight = [ed for ed in editions.values() if ed["meta"].get("date") == latest]
+    tonight = [ed for ed in articles.values() if ed["meta"].get("date") == latest]
     body = night_body(tonight, series_cfgs, depth=0, date=latest)
     if len(dates) > 1:
         prev = dates[-2]
@@ -590,8 +590,8 @@ def render_newsstand(site, catalog, *, series_cfgs, editions):
     return page(site, site["title"], body=body, active="Today")
 
 
-def render_build_page(site, date, *, dates, editions, series_cfgs):
-    eds = [e for e in editions.values() if e["meta"].get("date") == date]
+def render_build_page(site, date, *, dates, articles, series_cfgs):
+    eds = [e for e in articles.values() if e["meta"].get("date") == date]
     body = night_body(eds, series_cfgs, depth=2, date=date)
     ordered = sorted(dates)
     i = ordered.index(date)
@@ -642,7 +642,7 @@ def desk_status(s, cfg):
     """Return (status_html, is_resting) for one desk on the Sections page.
 
     Finite desks show progress or read complete, rolling desks show
-    their cadence, open desks count published editions. Resting desks
+    their cadence, open desks count published articles. Resting desks
     (complete or paused) collect under the In-the-stacks disclosure
     instead of their section.
     """
@@ -666,9 +666,9 @@ def desk_status(s, cfg):
     return f"{count} published", False
 
 
-def render_series_index(site, catalog, *, series_cfgs, editions):
+def render_series_index(site, catalog, *, series_cfgs, articles):
     latest_by_series = {}
-    for ed in editions.values():
+    for ed in articles.values():
         cur = latest_by_series.get(ed["series"])
         if cur is None or ed["meta"].get("date", "") > cur["meta"].get("date", ""):
             latest_by_series[ed["series"]] = ed
@@ -702,8 +702,8 @@ def render_series_index(site, catalog, *, series_cfgs, editions):
     facts = (
         f"{max(len(groups), 1)} section{'s' if len(groups) != 1 else ''} · "
         f"{ndesks} series · "
-        f"{len(catalog['editions'])} article"
-        f"{'s' if len(catalog['editions']) != 1 else ''}"
+        f"{len(catalog['articles'])} article"
+        f"{'s' if len(catalog['articles']) != 1 else ''}"
     )
     body = (
         '<div class="nb-pagehead"><h1>Sections</h1>'
@@ -853,11 +853,11 @@ def render_tags_index(site, catalog):
     return page(site, f"Tags — {site['title']}", body=body, depth=1)
 
 
-def render_tag_page(site, tag, *, refs, editions, series_cfgs):
+def render_tag_page(site, tag, *, refs, articles, series_cfgs):
     eds = [
-        editions[tuple(r.split("/", 1))]
+        articles[tuple(r.split("/", 1))]
         for r in refs
-        if tuple(r.split("/", 1)) in editions
+        if tuple(r.split("/", 1)) in articles
     ]
     body = (
         f'<div class="nb-pagehead"><h1>#{esc(tag)}</h1>'
@@ -895,8 +895,8 @@ TEXT_STRIP_RE = re.compile(
 BODY_RE = re.compile(r"<body[^>]*>([\s\S]*?)</body>", re.I)
 
 
-def edition_text(path):
-    # Readable text of an edition, for the search index.
+def article_text(path):
+    # Readable text of an article, for the search index.
     with open(path, encoding="utf-8", errors="replace") as fh:
         raw = fh.read()
     m = BODY_RE.search(raw)
@@ -905,10 +905,10 @@ def edition_text(path):
     return re.sub(r"\s+", " ", text).strip()
 
 
-def build_search_index(editions, series_cfgs):
+def build_search_index(articles, series_cfgs):
     out = []
     for ed in sorted(
-        editions.values(),
+        articles.values(),
         key=lambda e: (e["meta"].get("date", ""), e["slug"]),
         reverse=True,
     ):
@@ -927,7 +927,7 @@ def build_search_index(editions, series_cfgs):
                 "date": meta.get("date"),
                 "reading_minutes": ed["reading_minutes"],
                 "path": f"/library/{ed['series']}/{ed['slug']}.html",
-                "text": edition_text(ed["file"]),
+                "text": article_text(ed["file"]),
             }
         )
     return out
@@ -942,7 +942,7 @@ HREF_RE = re.compile(r'((?:href|src)=")([^"]+)(")', re.I)
 
 
 def feed_content_html(path, base_url):
-    """Return the edition body as a feed-safe HTML fragment.
+    """Return the article body as a feed-safe HTML fragment.
 
     Scripts, styles, and comments are stripped so feed readers get
     content, not code. When a base URL is known, relative hrefs are
@@ -1079,33 +1079,33 @@ def copy_assets(repo, site_cfg, *, out):
         shutil.rmtree(dst)
     shutil.copytree(src, dst)
     # the configured theme is also published under the stable name assets/theme.css
-    # so a site.yaml theme swap restyles every already-published edition
+    # so a site.yaml theme swap restyles every already-published article
     theme_src = os.path.join(repo, site_cfg["theme"])
     shutil.copyfile(theme_src, os.path.join(dst, "theme.css"))
 
 
-EDITION_ASSET_RE = re.compile(
+ARTICLE_ASSET_RE = re.compile(
     r'((?:href|src)="(?:\.\./)*assets/(?:nb\.css|nb\.js|theme\.css))(")'
 )
 
 
-def copy_editions(editions, out, *, stamp="", assets_html=""):
-    """Copy editions into the site, stamping their shared-asset links and
-    injecting the press's declared trusted assets into each edition's head.
+def copy_articles(articles, out, *, stamp="", assets_html=""):
+    """Copy articles into the site, stamping their shared-asset links and
+    injecting the press's declared trusted assets into each article's head.
 
     The canonical files on the library branch stay byte-exact; only the
     generated site copy gets ?v=<stamp> on nb.css, nb.js, and theme.css so
     cached assets can never mismatch the markup, and the press assets so
-    library-backed furniture (a highlighter, say) works in every edition.
+    library-backed furniture (a highlighter, say) works in every article.
     """
-    for ed in editions.values():
+    for ed in articles.values():
         dst = os.path.join(out, "library", ed["series"], f"{ed['slug']}.html")
         os.makedirs(os.path.dirname(dst), exist_ok=True)
         if stamp or assets_html:
             with open(ed["file"], encoding="utf-8", errors="replace") as fh:
                 raw = fh.read()
             if stamp:
-                raw = EDITION_ASSET_RE.sub(rf"\1?v={stamp}\2", raw)
+                raw = ARTICLE_ASSET_RE.sub(rf"\1?v={stamp}\2", raw)
             if assets_html:
                 raw = raw.replace("</head>", f"{assets_html}\n</head>", 1)
             write(dst, raw)
@@ -1126,12 +1126,12 @@ def build(
     now = now or dt.datetime.now(dt.timezone.utc)
     site_cfg = load_site_config(repo)
     series_cfgs = load_series_configs(repo)
-    editions = collect_editions(series_cfgs, library_root, preview_root=preview_root)
+    articles = collect_articles(series_cfgs, library_root, preview_root=preview_root)
     repository = derive_self_repository(repository, base_url)
     catalog = build_catalog(
         site_cfg,
         series_cfgs,
-        editions=editions,
+        articles=articles,
         generated=now,
         repository=repository,
     )
@@ -1155,7 +1155,7 @@ def build(
     write(os.path.join(out, "catalog.json"), json.dumps(catalog, indent=2) + "\n")
     write(
         os.path.join(out, "index.html"),
-        render_newsstand(site, catalog, series_cfgs=series_cfgs, editions=editions),
+        render_newsstand(site, catalog, series_cfgs=series_cfgs, articles=articles),
     )
     write(
         os.path.join(out, "builds", "index.html"),
@@ -1168,16 +1168,16 @@ def build(
                 site,
                 date,
                 dates=list(catalog["builds"]),
-                editions=editions,
+                articles=articles,
                 series_cfgs=series_cfgs,
             ),
         )
     write(
         os.path.join(out, "series", "index.html"),
-        render_series_index(site, catalog, series_cfgs=series_cfgs, editions=editions),
+        render_series_index(site, catalog, series_cfgs=series_cfgs, articles=articles),
     )
     by_series = {}
-    for ed in editions.values():
+    for ed in articles.values():
         by_series.setdefault(ed["series"], []).append(ed)
     for s in catalog["series"]:
         sid = s["id"]
@@ -1194,19 +1194,19 @@ def build(
     write(os.path.join(out, "search", "index.html"), render_search_page(site))
     write(
         os.path.join(out, "search-index.json"),
-        json.dumps(build_search_index(editions, series_cfgs)) + "\n",
+        json.dumps(build_search_index(articles, series_cfgs)) + "\n",
     )
     write(os.path.join(out, "tags", "index.html"), render_tags_index(site, catalog))
     for tag, refs in catalog["tags"].items():
         write(
             os.path.join(out, "tags", tag, "index.html"),
             render_tag_page(
-                site, tag, refs=refs, editions=editions, series_cfgs=series_cfgs
+                site, tag, refs=refs, articles=articles, series_cfgs=series_cfgs
             ),
         )
 
     all_sorted = sorted(
-        editions.values(),
+        articles.values(),
         key=lambda e: (e["meta"].get("date", ""), e["slug"]),
         reverse=True,
     )
@@ -1237,7 +1237,7 @@ def build(
     # email digests: one per build (permanent) + the latest at a stable path
     # for the morning-mail workflow
     for date in catalog["builds"]:
-        eds = [e for e in editions.values() if e["meta"].get("date") == date]
+        eds = [e for e in articles.values() if e["meta"].get("date") == date]
         write(
             os.path.join(out, "builds", date, "email.html"),
             render_email(
@@ -1250,7 +1250,7 @@ def build(
         )
     latest = max(catalog["builds"], default=None)
     if latest:
-        eds = [e for e in editions.values() if e["meta"].get("date") == latest]
+        eds = [e for e in articles.values() if e["meta"].get("date") == latest]
         write(
             os.path.join(out, "email-latest.html"),
             render_email(
@@ -1268,7 +1268,7 @@ def build(
         )
 
     copy_assets(repo, site_cfg, out=out)
-    copy_editions(editions, out, stamp=site["stamp"], assets_html=site["assets_html"])
+    copy_articles(articles, out, stamp=site["stamp"], assets_html=site["assets_html"])
     return catalog
 
 
@@ -1280,7 +1280,7 @@ def main(argv=None):
         help="main checkout (engine, templates, series, site.yaml)",
     )
     p.add_argument(
-        "--library", default=".", help="library checkout (published editions)"
+        "--library", default=".", help="library checkout (published articles)"
     )
     p.add_argument("--out", default="site", help="output directory")
     p.add_argument(
@@ -1317,7 +1317,7 @@ def main(argv=None):
         repository=args.repository,
         now=now,
     )
-    n = len(catalog["editions"])
+    n = len(catalog["articles"])
     print(
         f"site built: {args.out} ({n} article{'s' if n != 1 else ''}, "
         f"{len(catalog['builds'])} builds)"

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Generate the fixture editions and fixture repos used by every suite.
+"""Generate the fixture articles and fixture repos used by every suite.
 
 The suites never read the repo's shipped configuration because forks
 replace it during setup, and the tests must stay green on any fork.
@@ -230,7 +230,7 @@ def _page(title, *, meta, body):
 <script type="application/json" id="nb-meta">
 {meta}
 </script>
-</head><body class="nb-edition">
+</head><body class="nb-article">
 {body}
 </body></html>"""
 

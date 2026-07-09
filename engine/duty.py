@@ -60,7 +60,7 @@ def published_state(library: str, series_id: str) -> tuple[set[str], set[str]]:
     """Return (published slugs, published nb-meta dates) for one series.
 
     Slugs drive dedupe and completion checks. The nb-meta dates exist
-    for rerun safety: an edition published tonight idles its series even
+    for rerun safety: an article published tonight idles its series even
     when its slug is topical rather than dated.
     """
     base = series_dir_in_library(library, series_id)

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Test suite for the proof, with zero framework dependencies.
 
-Strategy: build valid fixture editions, then derive each failure case by
+Strategy: build valid fixture articles, then derive each failure case by
 mutating a valid one and asserting that the exact finding code appears.
 Valid cases must stay BLOCK-clean, and PR mode runs against a real
 throwaway git repository so the diff-shape rules face actual git output.
@@ -52,7 +52,7 @@ def run_local(
         bf = pathlib.Path(tmp) / "prbody.txt"
         bf.write_text(pr_body)
         body_meta = C.resolve_pr_body(str(bf), rep)
-    C.check_edition(
+    C.check_article(
         str(f),
         series,
         repo=repo,
@@ -281,7 +281,7 @@ expect(
 
 print("== PR-body preflight (local --pr-body) ==")
 GOOD_BODY = (
-    "Autonomous night-shift edition.\n\n"
+    "Autonomous night-shift article.\n\n"
     "```nb-meta\n"
     "series: semiconductors\n"
     "slug: micron\n"
@@ -293,7 +293,7 @@ GOOD_BODY = (
     "```\n"
 )
 expect(
-    "preflight passes when the PR body matches the edition",
+    "preflight passes when the PR body matches the article",
     run_local(VALID, "semiconductors", pr_body=GOOD_BODY),
     blocks=0,
     must_not=["B-META-MATCH"],
@@ -304,7 +304,7 @@ expect(
     must_have=["B-META-MATCH"],
 )
 expect(
-    "preflight catches a PR body that disagrees with the edition",
+    "preflight catches a PR body that disagrees with the article",
     run_local(
         VALID, "semiconductors", pr_body=GOOD_BODY.replace("Micron Technology", "TSMC")
     ),
@@ -587,7 +587,7 @@ expect(
     blocks=True,
 )
 
-print("== templates: sample editions pass the proof ==")
+print("== templates: sample articles pass the proof ==")
 tpl_repo = tempfile.mkdtemp()
 shutil.copytree(REPO / "templates", pathlib.Path(tpl_repo) / "templates")
 TPL_SERIES = {
@@ -605,7 +605,7 @@ for name, fixture, sid, slug in [
 ]:
     rep = run_local(fixture, sid, slug=slug, repo=tpl_repo)
     expect(
-        f"sample {name} edition is BLOCK-clean and WARN-free",
+        f"sample {name} article is BLOCK-clean and WARN-free",
         rep,
         blocks=0,
         must_not=[
@@ -628,7 +628,7 @@ for template_id, treg in registry.items():
         )
         continue
     src = pathlib.Path(tpl_path).read_text()
-    tpl = C.Edition()
+    tpl = C.Article()
     tpl.feed(src)
     tpl.close()
     ok_sections = all(tpl.sections.count(s) == 1 for s in treg.get("sections") or [])
@@ -754,7 +754,7 @@ MEMO = f"""<!DOCTYPE html>
 }</ol></section>
 </body></html>"""
 expect(
-    "edition from a user-defined template passes the proof",
+    "article from a user-defined template passes the proof",
     run_local(MEMO, "memos", slug="first", repo=ut_repo),
     blocks=0,
 )
@@ -800,7 +800,7 @@ expect(
 print("== flex sections (agent-named outline) ==")
 
 
-def flex_edition(sections):
+def flex_article(sections):
     body = "".join(
         f'<section data-nb-section="{name}"><p>{make_fixtures.LOREM * 7}'
         f"{cite}</p></section>"
@@ -831,7 +831,7 @@ CITE3 = '<sup class="nb-cite"><a href="#s3">3</a></sup>'
 expect(
     "flex template passes with agent-named sections in band",
     run_local(
-        flex_edition([("the-lab", CITE1), ("the-bet", CITE2)]),
+        flex_article([("the-lab", CITE1), ("the-bet", CITE2)]),
         "notes",
         slug="first-notes",
         repo=ut_repo,
@@ -841,7 +841,7 @@ expect(
 expect(
     "too few flex sections blocks",
     run_local(
-        flex_edition([("only-one", CITE1)]),
+        flex_article([("only-one", CITE1)]),
         "notes",
         slug="first-notes",
         repo=ut_repo,
@@ -851,7 +851,7 @@ expect(
 expect(
     "too many flex sections blocks",
     run_local(
-        flex_edition([("a1", CITE1), ("a2", CITE2), ("a3", CITE3), ("a4", CITE1)]),
+        flex_article([("a1", CITE1), ("a2", CITE2), ("a3", CITE3), ("a4", CITE1)]),
         "notes",
         slug="first-notes",
         repo=ut_repo,
@@ -861,7 +861,7 @@ expect(
 expect(
     "duplicate flex labels block",
     run_local(
-        flex_edition([("twice", CITE1), ("twice", CITE2)]),
+        flex_article([("twice", CITE1), ("twice", CITE2)]),
         "notes",
         slug="first-notes",
         repo=ut_repo,
@@ -871,7 +871,7 @@ expect(
 expect(
     "uncited flex section warns on cite density",
     run_local(
-        flex_edition([("cited", CITE1), ("uncited", "")]),
+        flex_article([("cited", CITE1), ("uncited", "")]),
         "notes",
         slug="first-notes",
         repo=ut_repo,
@@ -882,7 +882,7 @@ expect(
 expect(
     "cite_exempt exempts a registry-declared section (not just sources)",
     run_local(
-        flex_edition([("context", ""), ("the-bet", CITE2)]),
+        flex_article([("context", ""), ("the-bet", CITE2)]),
         "notes",
         slug="first-notes",
         repo=ut_repo,
@@ -894,7 +894,7 @@ expect(
 print("== require_why is registry-driven, not tied to the 'brief' template ==")
 
 
-def digest_edition(withhold_why):
+def digest_article(withhold_why):
     items = "".join(
         f"<div data-nb-item><span>t{i}</span>"
         f'<h3>Item {i}<sup class="nb-cite"><a href="#s{i}">{i}</a></sup></h3>'
@@ -930,7 +930,7 @@ def digest_edition(withhold_why):
 expect(
     "a full digest passes (require_why satisfied)",
     run_local(
-        digest_edition(withhold_why=False), "digests", slug="first-digest", repo=ut_repo
+        digest_article(withhold_why=False), "digests", slug="first-digest", repo=ut_repo
     ),
     blocks=0,
     must_not=["W-WHY-MISSING"],
@@ -938,7 +938,7 @@ expect(
 expect(
     "require_why warns for a non-brief template missing a why line",
     run_local(
-        digest_edition(withhold_why=True), "digests", slug="first-digest", repo=ut_repo
+        digest_article(withhold_why=True), "digests", slug="first-digest", repo=ut_repo
     ),
     must_have=["W-WHY-MISSING"],
 )
@@ -1198,7 +1198,7 @@ for name, cond in [
         duty_of(d_open, "wildcard")["commissions"] == ["commissioned-piece"],
     ),
     (
-        "an edition published tonight idles its series (rerun safety)",
+        "an article published tonight idles its series (rerun safety)",
         duty_of(d_tonight, "semiconductors")["reason"] == "already published tonight",
     ),
     (
@@ -1256,7 +1256,7 @@ git("add", "-A", cwd=prdir)
 git("commit", "-qm", "nb: semiconductors/micron", cwd=prdir)
 
 body = pathlib.Path(prdir, "prbody.txt")
-body.write_text("""Nightly edition.
+body.write_text("""Nightly article.
 
 ```nb-meta
 series: semiconductors
@@ -1443,7 +1443,7 @@ for name, ok in link_cases:
 
 print()
 print("== workflow trigger safety (fork-token guarantee) ==")
-# The editor auto-merges edition PRs, so the only thing stopping a stranger from
+# The editor auto-merges article PRs, so the only thing stopping a stranger from
 # force-publishing to a fork is GitHub's rule that a pull_request run from a fork
 # gets a read-only token. That holds only while check.yml uses `pull_request`;
 # `pull_request_target` would hand fork PRs a writable token and break it. Lock

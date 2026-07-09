@@ -4,11 +4,11 @@ End-to-end dress rehearsal for The Nightly Build (handoff §13.6, local half).
 
 Simulates two nights against a REAL git repo laid out exactly like production:
 main (engine + config) and an orphan library branch. Each "night shift run"
-branches off library, adds one edition, is validated in PR mode (the identical
+branches off library, adds one article, is validated in PR mode (the identical
 invocation check.yml makes), gated by the autopublish helper, squash-merged,
 and the site is rebuilt from the merged library (as publish.yml does).
 
-Night 1 (2026-07-05): collection edition + rolling brief  → multi-edition build
+Night 1 (2026-07-05): collection article + rolling brief  → multi-article build
 Night 2 (2026-07-06): rolling brief                       → feeds/pages update
 
 The cloud half — a real scheduled run on a fork for two nights — is a human-run
@@ -101,7 +101,7 @@ def library_state():
 
 
 def night_shift_run(branch, series, *, slug, html, today, from_ref="library"):
-    # one agent run: branch off library, add one edition, validate as CI does
+    # one agent run: branch off library, add one article, validate as CI does
     git("checkout", "-q", from_ref, cwd=root)
     git("checkout", "-qb", branch, cwd=root)
     d = pathlib.Path(root, "library", series)
@@ -113,14 +113,14 @@ def night_shift_run(branch, series, *, slug, html, today, from_ref="library"):
     body = scratch / f"prbody-{branch.replace('/', '-')}.txt"
     meta = json.loads(html.split('id="nb-meta">')[1].split("</script>")[0])
     body.write_text(
-        "Nightly edition.\n\n```nb-meta\n"
+        "Nightly article.\n\n```nb-meta\n"
         f"series: {series}\nslug: {slug}\nmode: {meta['mode']}\n"
         f'template: {meta["template"]}\ndate: "{meta["date"]}"\n'
         f'title: "{meta["title"]}"\norder: {meta["order"] or "null"}\n```\n'
     )
 
     # exactly the editor's invocation: engine + configs from the main
-    # checkout, git diff + edition file from the PR checkout
+    # checkout, git diff + article file from the PR checkout
     proof = run(
         [
             sys.executable,
@@ -209,11 +209,11 @@ editor_merge("nb/n1-brief")
 catalog1 = press_run("2026-07-05T09:00:00+00:00")
 front1 = (sitedir / "index.html").read_text()
 check(
-    "front page shows a multi-edition build",
+    "front page shows a multi-article build",
     "nb-lead-cell" in front1 and 'class="nb-grid"' in front1,
 )
 check(
-    "night 1 build page lists both editions",
+    "night 1 build page lists both articles",
     catalog1["builds"]["2026-07-05"]
     == ["ai-briefs/2026-07-05", "semiconductors/micron"],
 )

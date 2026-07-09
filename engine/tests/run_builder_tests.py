@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Test suite for the press, with zero framework dependencies.
 
-Strategy: assemble temp library checkouts from fixture editions, run the
+Strategy: assemble temp library checkouts from fixture articles, run the
 builder, and assert on catalog.json and the rendered pages. Chrome
 assertions pin the markup contract, and the theme parity check fails the
 suite when any palette block misses a token.
@@ -40,7 +40,7 @@ def check(name, condition, *, detail=""):
         print(f"  FAIL {name} {detail}")
 
 
-def write_edition(root, series, *, slug, html):
+def write_article(root, series, *, slug, html):
     d = pathlib.Path(root) / "library" / series
     d.mkdir(parents=True, exist_ok=True)
     (d / f"{slug}.html").write_text(html)
@@ -48,11 +48,11 @@ def write_edition(root, series, *, slug, html):
 
 def make_full_library():
     lib = tempfile.mkdtemp()
-    write_edition(lib, "semiconductors", slug="micron", html=make_fixtures.article())
-    write_edition(
+    write_article(lib, "semiconductors", slug="micron", html=make_fixtures.article())
+    write_article(
         lib, "ai-briefs", slug="2026-07-05", html=make_fixtures.brief("2026-07-05")
     )
-    write_edition(
+    write_article(
         lib, "ai-briefs", slug="2026-07-06", html=make_fixtures.brief("2026-07-06")
     )
     return lib
@@ -76,13 +76,13 @@ check(
     "rolling series count, no total", briefs["count"] == 2 and briefs["total"] is None
 )
 check(
-    "editions carry path + position + reading time",
+    "articles carry path + position + reading time",
     all(
         "path" in e and "position" in e and "reading_minutes" in e
-        for e in catalog["editions"]
+        for e in catalog["articles"]
     ),
 )
-check("editions newest-first", catalog["editions"][0]["date"] == "2026-07-06")
+check("articles newest-first", catalog["articles"][0]["date"] == "2026-07-06")
 check(
     "builds grouped by nb-meta date",
     catalog["builds"]
@@ -94,8 +94,8 @@ check(
 )
 check("tags index", catalog["tags"].get("equity") == ["semiconductors/micron"])
 
-print("== catalog protocol 1.2 (network + chrome fields) ==")
-check("protocol is 1.2", catalog["protocol"] == "1.2")
+print("== catalog protocol 1.3 (network + chrome fields) ==")
+check("protocol is 1.3", catalog["protocol"] == "1.3")
 check("footer defaults to None when unset", catalog["footer"] is None)
 check("upstream repo credited in catalog", catalog["upstream"] == B.UPSTREAM_REPOSITORY)
 check("network directory url in catalog", catalog["network_url"] == B.NETWORK_URL)
@@ -169,7 +169,7 @@ newsstand = read(out, "index.html")
 check("newsstand leads with the night's date", "Monday, July 6, 2026" in newsstand)
 check(
     "newsstand totals the night's reading",
-    "min read</span>" in newsstand and "nb-editionline" in newsstand,
+    "min read</span>" in newsstand and "nb-articleline" in newsstand,
 )
 check(
     "lead cell is the longest read (the article, 15 min)",
@@ -178,7 +178,7 @@ check(
 )
 check("newsstand has appearance toggle", 'class="nb-appearance"' in newsstand)
 check("stories carry section kickers", 'class="nb-kicker"' in newsstand)
-check("cells show the edition's source count", ">8 sources</span>" in newsstand)
+check("cells show the article's source count", ">8 sources</span>" in newsstand)
 check("a second cell shows its own source count", ">5 sources</span>" in newsstand)
 check("newsstand links the previous night", 'href="builds/2026-07-05/"' in newsstand)
 check("no press-check banner on a real build", "Press check" not in newsstand)
@@ -251,13 +251,13 @@ check(
 )
 
 check(
-    "tag page lists tagged edition",
+    "tag page lists tagged article",
     "Micron Technology" in read(out, "tags", "equity", "index.html"),
 )
 
 feed = ET.fromstring(read(out, "feed.xml"))
 NS = "{http://www.w3.org/2005/Atom}"
-check("global atom feed has all editions", len(feed.findall(f"{NS}entry")) == 3)
+check("global atom feed has all articles", len(feed.findall(f"{NS}entry")) == 3)
 first_entry = feed.findall(f"{NS}entry")[0]
 content_el = first_entry.find(f"{NS}content")
 content_text = content_el.text or "" if content_el is not None else ""
@@ -275,10 +275,10 @@ check(
 )
 micron_copy = read(out, "library", "semiconductors", "micron.html")
 stamp_m = re.search(r"nb\.css\?v=([0-9a-f]+)", micron_copy)
-check("edition site copies get cache-busting asset stamps", bool(stamp_m))
+check("article site copies get cache-busting asset stamps", bool(stamp_m))
 stamp = stamp_m.group(1) if stamp_m else ""
 check(
-    "edition content otherwise untouched",
+    "article content otherwise untouched",
     micron_copy.replace("?v=" + stamp, "") == make_fixtures.article(),
 )
 check("chrome pages carry the same stamp", f"assets/nb.css?v={stamp}" in newsstand)
@@ -295,7 +295,7 @@ check(
 print("== email digest ==")
 email = read(out, "email-latest.html")
 check(
-    "email digest exists with edition titles",
+    "email digest exists with article titles",
     "Micron Technology" in email and "Daily brief for 2026-07-06" in email,
 )
 check("email digest is latest build only", "2026-07-05" not in email)
@@ -322,7 +322,7 @@ seq_lib = tempfile.mkdtemp()
 seq_ed = make_fixtures.article().replace(
     '"mode": "collection", "order": null', '"mode": "sequence", "order": 1'
 )
-write_edition(seq_lib, "semiconductors", slug="micron", html=seq_ed)
+write_article(seq_lib, "semiconductors", slug="micron", html=seq_ed)
 seq_out = tempfile.mkdtemp()
 B.build(seq_repo, seq_lib, out=seq_out, now=NOW)
 seq_page = read(seq_out, "series", "semiconductors", "index.html")
@@ -348,7 +348,7 @@ draft = (
         "TSMC: The Foundry at the Center of the World",
     )
 )
-write_edition(pc, "semiconductors", slug="tsmc", html=draft)
+write_article(pc, "semiconductors", slug="tsmc", html=draft)
 pv_out = tempfile.mkdtemp()
 pv_catalog = B.build(TESTREPO, lib, out=pv_out, preview_root=pc, now=NOW)
 pv_index = read(pv_out, "index.html")
@@ -362,19 +362,19 @@ check(
 )
 check(
     "draft flagged in catalog",
-    any(e.get("draft") for e in pv_catalog["editions"] if e["slug"] == "tsmc"),
+    any(e.get("draft") for e in pv_catalog["articles"] if e["slug"] == "tsmc"),
 )
 check(
-    "published edition not flagged draft",
-    not any(e.get("draft") for e in pv_catalog["editions"] if e["slug"] == "micron"),
+    "published article not flagged draft",
+    not any(e.get("draft") for e in pv_catalog["articles"] if e["slug"] == "micron"),
 )
 check(
-    "draft edition file copied modulo the asset stamp",
+    "draft article file copied modulo the asset stamp",
     re.sub(r"\?v=[0-9a-f]+", "", read(pv_out, "library", "semiconductors", "tsmc.html"))
     == draft,
 )
 check(
-    "published edition file untouched",
+    "published article file untouched",
     "Press check" not in read(pv_out, "library", "semiconductors", "micron.html"),
 )
 
@@ -398,7 +398,7 @@ open_ed = (
     .replace('"mode": "collection"', '"mode": "open"')
 )
 open_lib = tempfile.mkdtemp()
-write_edition(open_lib, "wildcard", slug="the-cuda-moat", html=open_ed)
+write_article(open_lib, "wildcard", slug="the-cuda-moat", html=open_ed)
 open_out = tempfile.mkdtemp()
 open_catalog = B.build(open_repo, open_lib, out=open_out, now=NOW)
 wc = next(s for s in open_catalog["series"] if s["id"] == "wildcard")
@@ -495,7 +495,7 @@ check(
 )
 check("no assets renders nothing", B.render_assets_html(None) == "")
 
-# a real build injects the declared asset into chrome pages AND editions
+# a real build injects the declared asset into chrome pages AND articles
 assets_repo = tempfile.mkdtemp()
 shutil.copytree(TESTREPO, assets_repo, dirs_exist_ok=True)
 site_yaml = pathlib.Path(assets_repo) / "press" / "site.yaml"
@@ -512,7 +512,7 @@ check(
     injected in read(assets_out, "index.html"),
 )
 check(
-    "declared asset injected into edition copy",
+    "declared asset injected into article copy",
     injected in read(assets_out, "library", "semiconductors", "micron.html"),
 )
 

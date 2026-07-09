@@ -5,8 +5,8 @@
  *      localStorage("nb-appearance"). Base/no-JS fallback is light (see theme).
  *   2. Declarative charts: renders <script type="application/json"
  *      data-nb-chart> blocks with version-pinned Chart.js from cdnjs — the
- *      ONLY third-party script, loaded here, never by editions.
- *   3. Edition chrome, retrofitted onto every edition ever published:
+ *      ONLY third-party script, loaded here, never by articles.
+ *   3. Article chrome, retrofitted onto every article ever published:
  *      collapsible Contents, citation source-sheets with backrefs, byline
  *      normalization, desk-linked eyebrow, sequence prev/next from
  *      catalog.json, external links in new tabs.
@@ -242,15 +242,15 @@
     return catalogPromise;
   }
 
-  function editionUrl(entry) {
+  function articleUrl(entry) {
     /* catalog paths are site-root-relative ("/library/…"); resolve against ROOT */
     return ROOT + entry.path.replace(/^\//, "");
   }
 
-  /* ---------------------------------------------------------- edition chrome */
+  /* ---------------------------------------------------------- article chrome */
 
-  /* Editions are standalone frozen files: the bar and footer that site pages
-     get from the builder are injected here, so every edition ever published
+  /* Articles are standalone frozen files: the bar and footer that site pages
+     get from the builder are injected here, so every article ever published
      wears the current chrome. Site title comes from catalog.json. */
   function injectChrome() {
     if (document.querySelector(".nb-bar")) return Promise.resolve();
@@ -324,7 +324,7 @@
     });
   }
 
-  function editionMeta() {
+  function articleMeta() {
     var el = document.getElementById("nb-meta");
     if (!el) return null;
     try {
@@ -485,7 +485,7 @@
     if (meta.mode !== "sequence" || !meta.order) return;
     catalog().then(function (cat) {
       if (!cat) return;
-      var sibs = (cat.editions || []).filter(function (e) {
+      var sibs = (cat.articles || []).filter(function (e) {
         return e.series === meta.series && e.order;
       });
       var prev = sibs.find(function (e) {
@@ -498,7 +498,7 @@
       function link(e, arrow) {
         return (
           '<a href="' +
-          editionUrl(e) +
+          articleUrl(e) +
           '">' +
           (arrow === "l" ? "← " : "") +
           e.title +
@@ -631,7 +631,7 @@
     }
 
     function renderRecent() {
-      /* empty query: the newest editions under month labels, not a dump */
+      /* empty query: the newest articles under month labels, not a dump */
       var recent = docs.slice(0, 20);
       if (count) count.textContent = "";
       var seen = null;
@@ -664,7 +664,7 @@
         tokens.length && d.text ? snippet(d, tokens) : escHtml(e.dek || "");
       return (
         '<a class="nb-item" href="' +
-        editionUrl(e) +
+        articleUrl(e) +
         '">' +
         '<div class="nb-kicker">' +
         escHtml(kicker) +
@@ -757,7 +757,7 @@
     bindChrome();
     renderCharts();
 
-    var meta = editionMeta();
+    var meta = articleMeta();
     if (meta) {
       injectChrome().then(bindChrome);
       buildToc();

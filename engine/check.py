@@ -3,7 +3,7 @@
 # requires-python = ">=3.9"
 # dependencies = ["pyyaml"]
 # ///
-"""Validate an edition against the protocol and series config: the proof.
+"""Validate an article against the protocol and series config: the proof.
 
 Findings come in two tiers. BLOCK findings are integrity failures and CI
 refuses to publish on any of them. WARN findings are quality calibration:
@@ -19,7 +19,7 @@ Invocations:
         python3 engine/check.py --pr --repo . --main <main checkout> \
             --base <ref> --head <ref> [--pr-body FILE] [--library DIR]
 
-In PR mode --repo is the PR checkout, used for the diff and the edition
+In PR mode --repo is the PR checkout, used for the diff and the article
 file. Configs and templates load from --main because the orphan library
 branch carries no engine.
 """
@@ -53,7 +53,7 @@ ALLOWED_EXTERNAL_PREFIXES = (
     "https://fonts.googleapis.com",
     "https://fonts.gstatic.com",
 )
-# The one executable script an edition may load: the engine-owned runtime
+# The one executable script an article may load: the engine-owned runtime
 # (§7.4 — contextual nav + chart renderer), by relative or root-absolute path.
 ENGINE_SCRIPT_RE = re.compile(r"^(?:(?:\.\./)+|/)assets/nb\.js$")
 DEFAULT_MIN_SOURCES = {"longread": 8, "shortread": 5}
@@ -123,8 +123,8 @@ VOID = {
 }
 
 
-class Edition(HTMLParser):
-    """Single-pass structural parse of one edition file.
+class Article(HTMLParser):
+    """Single-pass structural parse of one article file.
 
     Collects everything the checks need in one HTMLParser walk:
     sections, script tags, sandbox violations, citations, source
@@ -350,7 +350,7 @@ def classify_link(status, error):
     domain that does not resolve (DNS). Everything else — a 200, a bot-blocking
     403, a 5xx, a rate limit, a timeout, or no network at all — is 'unverified'
     and never blocks, so a real-but-restricted source can never fail a
-    legitimate edition.
+    legitimate article.
     """
     if status in DEAD_STATUSES:
         return "dead"
@@ -460,7 +460,7 @@ def validate_meta_fields(meta, rep):
         rep.block("B-META-PARSE", "nb-meta 'order' must be a positive integer or null")
 
 
-def check_edition(
+def check_article(
     html_path,
     series_id,
     *,
@@ -492,7 +492,7 @@ def check_edition(
 
     mode_cfg = series.get("mode")
     if mode_cfg == "open":
-        # open series pick a template per edition; nb-meta names the choice,
+        # open series pick a template per article; nb-meta names the choice,
         # resolved after the meta block parses
         allowed_templates = series.get("templates") or (
             [series["template"]] if series.get("template") else []
@@ -542,7 +542,7 @@ def check_edition(
     with open(html_path, encoding="utf-8", errors="replace") as fh:
         raw = fh.read()
 
-    ed = Edition()
+    ed = Article()
     ed.feed(raw)
     ed.close()
 
@@ -744,14 +744,14 @@ def check_edition(
         if stype != "application/json":
             rep.block(
                 "B-SANDBOX",
-                f"editions may not contain executable <script> (type={stype or 'none'})",
+                f"articles may not contain executable <script> (type={stype or 'none'})",
             )
         elif a.get("id") != "nb-meta" and "data-nb-chart" not in a:
             rep.block(
                 "B-SANDBOX", "JSON <script> blocks must be #nb-meta or data-nb-chart"
             )
         if src:
-            rep.block("B-SANDBOX", "editions may not load external scripts")
+            rep.block("B-SANDBOX", "articles may not load external scripts")
     if ed.forbidden_tags:
         rep.block(
             "B-SANDBOX", f"forbidden tags present: {sorted(set(ed.forbidden_tags))}"
@@ -1010,7 +1010,7 @@ def run_pr_mode(args, rep):
     rep.strict = bool(series_cfg and series_cfg.get("strict"))
     pr_body_meta = resolve_pr_body(args.pr_body, rep)
     fs_path = os.path.join(args.repo, path)
-    check_edition(
+    check_article(
         fs_path,
         series_id,
         repo=cfg_repo,
@@ -1060,7 +1060,7 @@ def emit(rep, as_json):
 
 def main(argv=None):
     p = argparse.ArgumentParser(description="The Nightly Build proof")
-    p.add_argument("file", nargs="?", help="edition HTML file (local mode)")
+    p.add_argument("file", nargs="?", help="article HTML file (local mode)")
     p.add_argument("--series", help="series id (local mode)")
     p.add_argument(
         "--repo",
@@ -1077,7 +1077,7 @@ def main(argv=None):
     p.add_argument("--head", default="HEAD", help="PR head ref (pr mode)")
     p.add_argument(
         "--pr-body",
-        help="PR body file; cross-checks its nb-meta against the edition "
+        help="PR body file; cross-checks its nb-meta against the article "
         "(CI mode, or a local preflight before opening the PR)",
     )
     p.add_argument("--today", help="override today's date (tests)")
@@ -1104,7 +1104,7 @@ def main(argv=None):
             p.error("local mode requires FILE and --series")
         series, _ = load_series(args.repo, args.series)
         rep.strict = bool(series and series.get("strict"))
-        check_edition(
+        check_article(
             args.file,
             args.series,
             repo=args.repo,
