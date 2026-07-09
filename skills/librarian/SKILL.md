@@ -4,12 +4,12 @@ description: >
   Setup and curation for The Nightly Build. Use when a human asks to be set up,
   to add/change/remove a series ("make me a course on X", "add a watchlist",
   "track Y nightly"), to adjust series settings, or to schedule the night shift.
-  Not for producing editions — that is the correspondent skill.
+  Not for producing articles — that is the correspondent skill.
 ---
 
 # The Librarian
 
-You configure the press; you never run it. Your output is configuration on
+You configure the paper; you never run it. Your output is configuration on
 `main`, a rehearsal (press check), and the night-shift schedule. If your harness
 lets you create the schedule and fire the first run yourself, do it; otherwise
 emit the filled prompt for the human to paste. Say which case applies plainly.
@@ -21,7 +21,7 @@ emit the filled prompt for the human to paste. Say which case applies plainly.
 upstream-owned. Users only ever edit `press/` — that's what makes engine
 updates conflict-free (see §7).
 
-**Fresh press?** The shipped `press/` contents are the **upstream project's
+**Fresh paper?** The shipped `press/` contents are the **upstream project's
 own dogfood assignments**, not starter content. Reset them before the
 interview — don't offer to keep them, and never let them reach a schedule:
 
@@ -40,7 +40,7 @@ Ask before writing. Keep it short — one round of questions, then a proposal:
 
 - What do they want to learn or track?
 - Shape: one-off deep dives (**collection**), an ordered course (**sequence**),
-  ongoing briefings (**rolling**), or an editor-run desk (**open** — they
+  ongoing briefings (**rolling**), or an editor-run section (**open** — they
   describe a beat, the night shift picks each night's topic and genre)?
   Nearly everything is the `article` template; the genre (dossier, chronicle,
   lesson, appraisal, essay...) is something the series prompt describes, not an
@@ -52,22 +52,22 @@ Ask before writing. Keep it short — one round of questions, then a proposal:
   (`[mon, thu]`) — a weekly deep dive plus a daily brief is a classic paper.
 
 **The hands-off paper** (they say "just give me ~N good reads a day about X
-and surprise me"): propose a masthead of open desks instead of enumerating
-items — e.g. a daily rolling brief, plus open desks with distinct beats
+and surprise me"): propose a masthead of open sections instead of enumerating
+items — e.g. a daily rolling brief, plus open sections with distinct beats
 (deep dives, explainers, history, papers, a wildcard), each with a template
-choice list and a cadence so the nightly mix varies. One edition per desk per
-night is the invariant, so "six things a day" = six desks. They govern later
-with words, not YAML: commissioning drops an item into a desk's queue,
-steering edits the desk's `prompt.md`.
+choice list and a cadence so the nightly mix varies. One article per section per
+night is the invariant, so "six things a day" = six sections. They govern later
+with words, not YAML: commissioning drops an item into a section's queue,
+steering edits the section's `prompt.md`.
 
 - **Voice** (two questions, written into `press/editorial.md`): how should the
   paper sound — register, wit, language? And what should it assume they
-  already know? This is a press-wide layer composed into every edition.
+  already know? This is a paper-wide layer composed into every article.
 - Depth and per-series emphases; those go in the series prompt, not the voice
   file.
 - Must-read documents or must-check sites? These become `required_docs`
   (committed files, must be read and cited) and `consult` (URL prefixes read
-  first; citing optional). If they want editions built ONLY from their
+  first; citing optional). If they want articles built ONLY from their
   sources, set `sources_exclusive: true` — outside citations then BLOCK.
 
 **Paywalled sources warning (always give it when required_docs come up):**
@@ -84,7 +84,7 @@ mode per `templates/registry.yaml` — open series may declare a `templates:`
 choice list instead), name, cadence if not nightly, and — for
 collection/sequence — the full item list (slugs `[a-z0-9-]{1,64}`, titles,
 tags, per-item prompts). For a sequence, draft the complete ordered syllabus
-with the user before writing anything. For an open desk, the beat description
+with the user before writing anything. For an open section, the beat description
 in `prompt.md` IS the config — invest the interview time there. Show the
 plan; get a yes.
 
@@ -93,7 +93,7 @@ Then write:
 - `press/series/<id>/series.yaml` — crib from `examples/series/` for
   the canonical shapes. Defaults: `autopublish: true`, `strict: false`.
 - `press/series/<id>/prompt.md` — the series' editorial instructions: subject
-  frame, emphases, recurring angles, and the desk's GENRE: the outline
+  frame, emphases, recurring angles, and the section's GENRE: the outline
   conventions it keeps and the furniture that carries it (see
   `templates/FURNITURE.md`). Crib the genre briefs from
   `examples/series/*/prompt.md`. It specializes the voice layers; it never
@@ -117,7 +117,7 @@ the night shift can reach it (the Connect step for the chosen path in
 
 ## 4. Offer a press check (default next step)
 
-Before any scheduling, offer a rehearsal: _"want to see what the first edition
+Before any scheduling, offer a rehearsal: _"want to see what the first article
 would look like tonight?"_ Follow `skills/correspondent/SKILL.md` § Press
 check. It consumes the same usage as a real run — it IS one, minus
 publication — and it is the editorial loop for tuning the prompt: read the
@@ -125,9 +125,9 @@ draft, adjust `prompt.md`, re-run, compare.
 
 ## 5. Harness handoff
 
-**One schedule per press, ever.** The schedule prompt is press-level: each
+**One schedule per paper, ever.** The schedule prompt is paper-level: each
 night the run derives its work list from the repo, so adding, retiring, or
-completing series never requires touching the harness again. If the press
+completing series never requires touching the harness again. If the paper
 already has its schedule, say so and skip this section — configuring the new
 series on `main` was the whole job.
 
@@ -137,13 +137,13 @@ scheduler when the provider hosts one, else the universal GitHub Actions cron),
 and cover four things:
 
 1. **Connect** — the one-time GitHub connection for the chosen path.
-2. **Schedule** — one nightly schedule for the whole press, using the canonical
+2. **Schedule** — one nightly schedule for the whole paper, using the canonical
    prompt in `docs/scheduling.md` with `<repo>` and `<checkout>` filled in.
 3. **Model and cost** — pick the strongest model available; nb-meta records what
    actually ran. Say plainly whether the run is included in a subscription or
    bills a metered key (the coverage table has it per agent).
 4. **First run now** — do not make them wait for tonight. If your harness lets
-   you fire a one-off run yourself, do it and watch today's edition publish;
+   you fire a one-off run yourself, do it and watch today's article publish;
    otherwise tell them exactly how. Setting up in the morning should mean a paper
    by lunch, then a fresh one every night.
 
@@ -155,21 +155,21 @@ scheduler; say that plainly. The prompt and every path live in
 ## 6. Curation verbs
 
 On request: add/remove/reorder items (reordering a sequence only reorders the
-_unpublished_ tail — published editions are permanent); **pause/resume** a
+_unpublished_ tail — published articles are permanent); **pause/resume** a
 series (`paused: true` — the archive stays up, the proof refuses new
-editions); **change its rhythm** (`cadence:`); **commission** ("have the
-wildcard desk cover X next") — append an item to an open desk's `items:`
+articles); **change its rhythm** (`cadence:`); **commission** ("have the
+wildcard section cover X next") — append an item to an open section's `items:`
 queue, which the night shift must clear before freestyling again; **steer an
-open desk** ("less policy for a while") — edit its `prompt.md` beat;
-**extra editions on demand** ("write me a piece on X right now") — make sure
+open section** ("less policy for a while") — edit its `prompt.md` beat;
+**extra articles on demand** ("write me a piece on X right now") — make sure
 the topic has a home first (a commission, a new item, or a new series —
-the proof rejects editions for unconfigured series), then hand off to the
+the proof rejects articles for unconfigured series), then hand off to the
 correspondent's _Commissioned work_ flow; let a
 collection surprise them (`selection: random`); adjust `words:` bands (may
 tighten, never loosen below the registry floor) and `min_sources`; flip
 `autopublish` (false ⇒ the editor approves, a human merges) and `strict`
 (true ⇒ WARNs become BLOCKs — warn that a missed night then beats a thin
-edition). Re-validate after every change.
+article). Re-validate after every change.
 
 **Customization verbs:**
 
@@ -194,9 +194,9 @@ edition). Re-validate after every change.
   `data-nb-why` line on each item. The build-your-own walkthrough in
   `docs/customization.md` rebuilds the classic lesson template this way.
   Validate, then press check before scheduling.
-- _"Give my paper its own furniture"_ — add component classes to the press
+- _"Give my paper its own furniture"_ — add component classes to the paper's
   theme CSS (it restyles the whole library on every publish) and instruct
-  the desks to use them in `prompt.md`; see `docs/customization.md`.
+  the sections to use them in `prompt.md`; see `docs/customization.md`.
 
 ## 7. Update my engine (plain git)
 
@@ -217,6 +217,6 @@ back catalog re-renders with the new engine immediately.
 ## Boundaries
 
 Never push to `library`. Never edit files under `library/`. The escape hatch
-for a bad published edition is deleting its file on `library` (the night shift
+for a bad published article is deleting its file on `library` (the night shift
 rewrites it next run) — that is a human decision, offer it, don't do it
 unprompted.

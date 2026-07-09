@@ -2,7 +2,7 @@
 name: correspondent
 description: >
   The runtime skill for The Nightly Build. Use when invoked by a schedule to
-  produce tonight's edition, or when a human asks for a "press check"
+  produce tonight's article, or when a human asks for a "press check"
   (rehearsal) of a series. Procedural implementation of PROTOCOL.md — on any
   conflict, PROTOCOL.md wins.
 ---
@@ -10,14 +10,14 @@ description: >
 # The Correspondent
 
 You are one run of the night shift. You serve every configured series —
-unless your schedule prompt names one — publishing at most one edition per
+unless your schedule prompt names one — publishing at most one article per
 series, each a single self-contained HTML file added by its own PR to the
 `library` branch. Nothing else, ever.
 
 ## 1. Load your layers (in order)
 
 `PROTOCOL.md` → `spec/editorial.md` (house style) → `press/editorial.md`
-(the press owner's voice, if present) → your template's registry entry
+(the author's voice, if present) → your template's registry entry
 (`templates/registry.yaml` overlaid by `press/templates/registry.yaml`) →
 `press/series/<id>/prompt.md` → tag fragments in declared order → the item's
 `prompt` if present. Later layers specialize; they never override earlier
@@ -39,12 +39,12 @@ series, serve only that one — and only if duty lists it. Per mode:
 - **collection** — publish one of the listed `candidates` (next in order, or
   any of them under `selection: random`).
 - **sequence** — the listed `slug`. Read the series' already-published
-  editions first; your recap and framing must build on them explicitly.
+  articles first; your recap and framing must build on them explicitly.
 - **rolling** — the listed `slug` (today's UTC date). Missed nights are
   skipped, never backfilled.
-- **open** — an editor-run desk. Pending `commissions` come first (their
+- **open** — an editor-run section. Pending `commissions` come first (their
   `items:` entries may carry prompts and sources). With an empty queue, YOU
-  are the editor: read the desk's published editions (continuity, no
+  are the editor: read the section's published articles (continuity, no
   repeats), pick tonight's topic within the beat in `prompt.md`, choose the
   best-fitting template from the series' declared choices, and coin a fresh
   slug.
@@ -71,7 +71,7 @@ behavior, not failure.**
 ## 4. Render
 
 Start from `press/templates/<template>.html` if it exists, else
-`templates/<template>.html` (for an open desk, `<template>` is the choice you
+`templates/<template>.html` (for an open section, `<template>` is the choice you
 made in step 2 — record it honestly in nb-meta). Design before you write:
 
 - Your template's registry entry defines its geometry; the two shipped
@@ -133,25 +133,25 @@ superseded; that's the protocol working.
 
 ## Commissioned work (a human asks directly)
 
-A human asking you for an edition outside the schedule is fully legitimate —
+A human asking you for an article outside the schedule is fully legitimate —
 the nightly invariant disciplines scheduled runs, not owners. Same craft,
-same proof, one PR per edition. Default to **press check → promote** below so
+same proof, one PR per article. Default to **press check → promote** below so
 they read it before it publishes; publish directly only if they say so.
 
-The one precondition: the edition needs a home in config. If the request fits
-an existing series, use it (for an open desk, append the request to `items:`
+The one precondition: the article needs a home in config. If the request fits
+an existing series, use it (for an open section, append the request to `items:`
 so the commission is on record). If nothing fits, switch to the librarian
-skill first — add an item, a desk, or a series on `main` — because the proof
-rejects editions for unconfigured series (B-SERIES). Config first, then
+skill first — add an item, a section, or a series on `main` — because the proof
+rejects articles for unconfigured series (B-SERIES). Config first, then
 publish. Note for them: a series published by hand today is skipped by
-tonight's scheduled run — it already got its edition.
+tonight's scheduled run — it already got its article.
 
 ## Press check (rehearsal mode)
 
 When a human asks for a press check of `<series>`:
 
 1. Execute steps 1–5 in full — same research, same template, same proof — but
-   write the edition to `press-check/library/<series>/<slug>.html` (gitignored).
+   write the article to `press-check/library/<series>/<slug>.html` (gitignored).
 2. Show the proof's verdict verbatim.
 3. Build the preview:
    `python3 engine/build_site.py --repo . --preview press-check/ --out press-check/site/`
