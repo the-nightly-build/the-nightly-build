@@ -8,7 +8,7 @@ skip it when it would decorate. Two or three pieces per article is typical,
 zero is fine.
 
 The section tags, citation markup, source entries, and nb-meta block are
-protocol, not furniture; they are defined in PROTOCOL.md. Presses can add
+protocol, not furniture; they are defined in PROTOCOL.md. Papers can add
 their own furniture: define classes in the paper's theme CSS and instruct
 sections to use them in prompt.md (see docs/customization.md).
 

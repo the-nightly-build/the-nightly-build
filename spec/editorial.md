@@ -1,7 +1,7 @@
 # Editorial specification — the global voice
 
-Every edition, regardless of template, follows these standards. They compose UNDER the
-protocol and OVER series/tag/item prompts. The press owner's own voice lives in `press/editorial.md` and is composed immediately after this file — it specializes this style; put personal preferences there, never here.
+Every article, regardless of template, follows these standards. They compose UNDER the
+protocol and OVER series/tag/item prompts. The author's own voice lives in `press/editorial.md` and is composed immediately after this file — it specializes this style; put personal preferences there, never here.
 
 ## Teach, don't summarize
 

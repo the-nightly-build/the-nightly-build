@@ -168,7 +168,7 @@ def series_duty(
         return True, {
             **entry,
             "commissions": [],
-            "reason": "open desk — invent tonight's topic within "
+            "reason": "open section — invent tonight's topic within "
             "the beat; do not repeat a published slug",
         }
     return False, {**entry, "reason": f"unknown mode {mode!r}"}
