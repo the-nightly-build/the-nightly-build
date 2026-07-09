@@ -278,7 +278,8 @@
         '" ' +
         ext +
         ">Start your own ↗</a>";
-      eco += '<a href="' + directory + '" ' + ext + ">The whole newspaper ↗</a>";
+      eco +=
+        '<a href="' + directory + '" ' + ext + ">The whole newspaper ↗</a>";
       var imprint =
         cat && cat.footer
           ? '<span class="nb-imprint">' + escHtml(cat.footer) + "</span>"
