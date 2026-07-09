@@ -22,25 +22,25 @@ on the shipped paper while bright amber fails at 2:1.
 3. Point `press/site.yaml` at it: `theme: press/themes/<name>.css`.
 
 The builder republishes the chosen theme as `assets/theme.css` on every
-publish, so a theme change restyles the whole library, every past edition
+publish, so a theme change restyles the whole library, every past article
 included. Base tokens are light, the universal fallback; dark applies via
 `prefers-color-scheme` or the reader's toggle. Keep it that way in custom
 themes.
 
 Fonts load from Google Fonts, the only allowed external origin besides the
-engine's own assets. Swapping families changes the chrome and new editions
-immediately; editions published earlier keep their frozen font links and
+engine's own assets. Swapping families changes the chrome and new articles
+immediately; articles published earlier keep their frozen font links and
 fall back to system faces for any family they did not load.
 
 ## Your own furniture
 
-Editions compose pre-designed components from the shared catalog,
+Articles compose pre-designed components from the shared catalog,
 `templates/FURNITURE.md`: stat strips, timelines, pull quotes, position
 blocks, claim cards, and more. Any component works in any template.
 
 You can extend the catalog without touching the engine. The builder
 republishes your theme CSS across the whole library on every publish, so a
-class defined there restyles past editions too. Define a component below
+class defined there restyles past articles too. Define a component below
 the token blocks, on your own prefix (`nb-` is reserved):
 
 ```css
@@ -56,8 +56,8 @@ the token blocks, on your own prefix (`nb-` is reserved):
 }
 ```
 
-Then instruct a desk in its `prompt.md`: "use `<div class=\"rs-margin-note\">`
-for asides." Editions carry the markup, your theme carries the look, and
+Then instruct a section in its `prompt.md`: "use `<div class=\"rs-margin-note\">`
+for asides." Articles carry the markup, your theme carries the look, and
 engine updates never touch either.
 
 ### Furniture that needs a JavaScript library
@@ -77,22 +77,22 @@ assets:
   styles: [] # same shape, for a library that ships CSS
 ```
 
-With Prism loaded, a code component is pure markup — the edition writes
+With Prism loaded, a code component is pure markup — the article writes
 `<pre><code class="language-python">…escaped code…</code></pre>` and Prism
 highlights it; your theme colors the `.token` classes. The
-`examples/` press does exactly this for its `rs-code` furniture.
+`examples/` paper does exactly this for its `rs-code` furniture.
 
 This does not weaken the security model, because the trust boundary is
 **authorship**, not the presence of JavaScript:
 
 - Assets are declared in `site.yaml`, which lives on `main` and changes only
-  through your normal review — never through an auto-merged edition PR. An
+  through your normal review — never through an auto-merged article PR. An
   untrusted night-shift run cannot add one.
 - Every asset must be **https and Subresource-Integrity-pinned**
   (`validate_config` enforces the hash), so the browser refuses a tampered CDN
   response. Pin an exact version.
-- Editions themselves stay script-free. The library the edition uses reads and
-  displays markup; it never runs edition-authored code. The edition sandbox
+- Articles themselves stay script-free. The library the article uses reads and
+  displays markup; it never runs article-authored code. The article sandbox
   (no `<script>`, no event handlers) is unchanged, so auto-merge is as safe as
   ever.
 
@@ -101,7 +101,7 @@ unrendered figure), the same graceful fallback the built-in charts use.
 
 ## Voice: press/editorial.md
 
-Your paper's voice, composed into every edition's instructions after the
+Your paper's voice, composed into every article's instructions after the
 house style (`spec/editorial.md`) and before any series prompt. Register,
 language, assumed background, banned habits: anything that should hold
 across every series. Series-specific emphasis belongs in that series'
@@ -119,7 +119,7 @@ entry > press/series/<id>/prompt.md > tag fragments > item prompt
 
 User templates are first class: the proof enforces whatever a registry
 entry declares, so a template you define gets the same validation, CI, and
-site treatment as the shipped two. Reach for one when a desk needs
+site treatment as the shipped two. Reach for one when a section needs
 structure enforced rather than described; for most genres, describing it in
 the series prompt on `article` is enough (see [series.md](series.md)).
 
@@ -128,12 +128,12 @@ Registry entries come in two styles:
 - Fixed outline: declare `sections` and each must appear exactly once.
 - Flexible outline: declare anchor `sections` plus
   `flex_sections: [min, max]`, and the agent names that many additional
-  sections per edition. Either way the cite rule applies to every labeled
+  sections per article. Either way the cite rule applies to every labeled
   section except `sources` (always exempt) and any you list in the template's
   `cite_exempt` (for a non-cited section like an objectives box).
 
 Worked example: the classic lesson template, six fixed sections for an
-ordered course, rebuilt as a press template.
+ordered course, rebuilt as your own template.
 
 1. Declare it in `press/templates/registry.yaml`:
 
@@ -173,7 +173,7 @@ ordered course, rebuilt as a press template.
 ## site.yaml reference
 
 ```yaml
-title: "My Press" # masthead; the accent period is added
+title: "My Paper" # masthead; the accent period is added
 theme: press/themes/mytheme.css # default: the shipped newspaper theme
 appearance: auto # auto | light | dark
 front: compact # compact (default) | comfortable (deks on story cells)

@@ -42,7 +42,7 @@ name: nightly-build
 on:
   schedule:
     - cron: "0 6 * * *" # 06:00 UTC nightly; pick your hour
-  workflow_dispatch: {} # run tonight's first edition on demand
+  workflow_dispatch: {} # run tonight's first article on demand
 permissions:
   contents: write # push the work branch
   pull-requests: write # open the PR to library
@@ -65,7 +65,7 @@ jobs:
 ```
 
 The trigger lives on `main` (or in a separate repo). Never put it on the
-`library` PR path: the editor validates untrusted edition PRs with read-only
+`library` PR path: the editor validates untrusted article PRs with read-only
 permissions and no secrets, and that boundary is the security model. A scheduled
 workflow on `main` holding your API key is the trusted side of the same line the
 morning mailer already sits on.
@@ -93,7 +93,7 @@ and `<checkout>` filled in. Do not trim it.
 > Nothing due: exit without a PR. Never merge, push to `library`, or modify
 > other files.
 
-One schedule runs the whole press. Each night the run derives its work list from
+One schedule runs the whole paper. Each night the run derives its work list from
 the repo, so adding, retiring, or completing a series never touches the
 schedule. To run series on different models or in parallel, add a second
 schedule and append one line: `Work ONLY series <series-id>.`
@@ -130,7 +130,7 @@ schedule prompt into these.
 
 ### Claude Code (Routines)
 
-Create one Routine for the whole press: type `/schedule` in the CLI, or use
+Create one Routine for the whole paper: type `/schedule` in the CLI, or use
 [claude.ai/code/routines](https://claude.ai/code/routines). Connect the fork
 once (grant contents and pull-requests access), set a nightly cron, paste the
 prompt, and pick the model. Also set the environment's **Network access** to
@@ -139,7 +139,7 @@ default, so without it the night shift researches nothing and publishes nothing.
 Routines run in Anthropic's cloud, so your laptop
 can be off, and they **draw on your Pro/Max subscription like an interactive
 session**, so a nightly run costs nothing extra within your plan limits. Use
-**Run now** for tonight's first edition instead of waiting.
+**Run now** for tonight's first article instead of waiting.
 
 ### Jules (Scheduled Tasks)
 

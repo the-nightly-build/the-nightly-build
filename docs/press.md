@@ -1,4 +1,4 @@
-# Your press: ownership, forks, updates
+# Your paper: ownership, forks, updates
 
 ## The layout rule
 
@@ -9,20 +9,20 @@ so upstream can never ship a change that collides with it.
 Everything else is the engine. You have no reason to touch it, but it is
 your fork and you can (see below).
 
-`examples/` is a complete working press configuration kept as
+`examples/` is a complete working paper configuration kept as
 documentation. The engine never reads it. Copy from it into `press/`.
 
-The upstream repository is engine-only. It runs no press and publishes no
+The upstream repository is engine-only. It runs no paper and publishes no
 library. The maintainer dogfoods by copying it like any other user.
 
 ```text
 press/
   site.yaml          masthead title, theme, appearance, front density, email
-  editorial.md       your voice, composed into every edition's instructions
+  editorial.md       your voice, composed into every article's instructions
   series/<id>/       series.yaml + prompt.md + sources/ per series
   series/_tags/      reusable prompt fragments shared across series
   themes/            custom design token files
-  templates/         your own edition templates (see customization.md)
+  templates/         your own article templates (see customization.md)
 ```
 
 ## The fork lifecycle
@@ -38,8 +38,8 @@ press/
    your repo and schedule one nightly run per the path you pick in
    [scheduling.md](scheduling.md) (a native scheduler, often included in your
    plan, or the universal GitHub Actions cron). Optionally trigger it once now
-   so today's first edition publishes instead of waiting for tonight.
-4. Publish forever. The night shift adds editions to `library` via one-file
+   so today's first article publishes instead of waiting for tonight.
+4. Publish forever. The night shift adds articles to `library` via one-file
    PRs. `main` only changes when you change configuration or pull an engine
    update.
 

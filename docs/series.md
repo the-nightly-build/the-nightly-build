@@ -15,21 +15,21 @@ examples of everything below live in `examples/series/`.
 | `open`       | a beat in prompt.md           | a topic the agent picks within the beat, in the template it judges fits best | never, until paused       |
 
 Open mode is the hands-off paper. You describe a beat, the night shift
-reads the desk's back catalog, picks something new, and chooses its template
+reads the section's back catalog, picks something new, and chooses its template
 from the series' declared `templates:` list (or its single `template:`).
 For several varied reads a day without curating items, run several open
-desks with distinct beats. One edition per series per night is the
-invariant, so desks are how a paper gets breadth.
+sections with distinct beats. One article per series per night is the
+invariant, so sections are how a paper gets breadth.
 
-Genre lives in the prompt, not the engine. Nearly every desk runs on the
-`article` template; what makes its editions dossiers, chronicles, lessons, or
+Genre lives in the prompt, not the engine. Nearly every section runs on the
+`article` template; what makes its articles dossiers, chronicles, lessons, or
 appraisals is the series prompt: the outline conventions it keeps and the
-furniture that carries them (`templates/FURNITURE.md`). Every desk in
+furniture that carries them (`templates/FURNITURE.md`). Every section in
 `examples/` demonstrates a genre this way.
 
-Commissioning: an open desk may still carry `items:`. That list is its
+Commissioning: an open section may still carry `items:`. That list is its
 commission queue. Anything you add must be published, in any order, before
-the desk freestyles again. The proof enforces this, so "cover X next" is a
+the section freestyles again. The proof enforces this, so "cover X next" is a
 one-line edit with a guarantee.
 
 ## Rhythm and shelving
@@ -41,14 +41,14 @@ section: Foundations # optional shelf on the Sections page and in kickers
 ```
 
 Cadence is why one nightly schedule is enough forever: the run asks
-`engine/duty.py` what is due tonight, so a weekly deep-dive desk and a
+`engine/duty.py` what is due tonight, so a weekly deep-dive section and a
 daily brief coexist under the same schedule. Pausing is the vacation
-switch: the proof refuses new editions for a paused series.
+switch: the proof refuses new articles for a paused series.
 
-`section:` is the one level of hierarchy a paper needs. Desks group under
-section headings on the Sections page, and front-page kickers show the
-section before the desk name. Without it, desks list flat. Completed and
-paused desks sink into "In the stacks" automatically.
+`section:` is the one level of hierarchy a paper needs. Series group under
+their `section:` heading on the Sections page, and front-page kickers show the
+`section:` heading before the series' name. Without it, series list flat. Completed and
+paused series sink into "In the stacks" automatically.
 
 ## Quality and sources
 
@@ -62,26 +62,26 @@ demonstrated across `examples/series/`.
 
 ## Commissioning extras by hand
 
-"One edition per series per night" disciplines the night shift, not you.
+"One article per series per night" disciplines the night shift, not you.
 Any PR to `library` that adds one file and passes the proof is a legitimate
-edition, whoever commissioned it. Ask your agent for three extra pieces
+article, whoever commissioned it. Ask your agent for three extra pieces
 this afternoon and tonight's build is simply bigger. The recommended flow
 is press check, then promote, so you read the rehearsal before it
 publishes. The editor applies the same validation either way.
 
 Two rules of the road:
 
-- Every edition needs a home. The proof rejects editions for series that do
+- Every article needs a home. The proof rejects articles for series that do
   not exist in `press/series/`, so a brand-new topic means a config change
   on `main` first. Usually that is a one-line commission into an open
-  desk's queue or a new item in a collection. A new series is the last
+  section's queue or a new item in a collection. A new series is the last
   resort.
-- Extras count as tonight's edition. A series that publishes by hand today
+- Extras count as tonight's article. A series that publishes by hand today
   is skipped by tonight's scheduled run.
 
 ## Governing without YAML
 
 Day to day you steer by talking to your agent: "pause frontier-compute",
-"make the wildcard desk weekly", "commission a deep dive on ASML", "less
+"make the wildcard section weekly", "commission a deep dive on ASML", "less
 policy in the brief for a while" (a prompt.md edit). Every change is one
 small diff on `main`, validated by `python3 engine/validate_config.py`.
