@@ -83,6 +83,9 @@ network:
 
 Your identity in the directory is your GitHub account (one fork per user), and your
 public URL is derived from your GitHub Pages URL at build time, never configured.
+Want a custom domain? Set it as your GitHub Pages custom domain: GitHub redirects
+your `github.io` URL to it, and the directory (which links through `github.io`)
+follows that redirect automatically. No URL is ever set in `press/site.yaml`.
 Inclusion is automatic, with no approval step, usually within a day. Fork the
 **canonical** repo, not another fork, or the crawler will not find you. Your
 articles are never copied; the directory links out to your own site.
