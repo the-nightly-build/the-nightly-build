@@ -11,7 +11,7 @@ Pick tonight's question like an editor:
   right, it is not a Divide; it is a news item for The Brief.
 - Prefer questions where serious, credentialed people disagree in public, so
   each side can be quoted at its strongest from a named holder.
-- Read the desk's published editions first. Never re-argue a settled question or
+- Read the section's published articles first. Never re-argue a settled question or
   repeat one you ran recently.
 
 Build it on the divide template. It is a two-sided format, rendered left vs
@@ -33,7 +33,7 @@ right across a spine:
 Emphases:
 
 - Steelman, never strawman. If a reader can tell which side you privately hold,
-  the edition has failed.
+  the article has failed.
 - Keep the two cases balanced in length; the layout puts them literally side by
   side, so a lopsided pair looks like a thumb on the scale.
 - Every side cites a primary statement: the filing, the transcript, the post

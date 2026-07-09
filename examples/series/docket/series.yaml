@@ -1,6 +1,6 @@
-# An open desk: the beat in prompt.md is the assignment. Each edition tracks one
+# An open section: the beat in prompt.md is the assignment. Each article tracks one
 # legal matter, chosen by the night shift, on the article template. Its genre is
-# carried by a press-owned furniture piece, the case docket (rs-docket, defined
+# carried by a paper-owned furniture piece, the case docket (rs-docket, defined
 # in themes/broadsheet.css).
 name: Docket
 mode: open

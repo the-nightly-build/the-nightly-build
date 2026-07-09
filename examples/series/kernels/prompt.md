@@ -2,7 +2,7 @@
 
 A course in writing fast GPU kernels, from the execution model up to
 FlashAttention, for an engineer who knows deep learning but has never written
-CUDA or Triton. Each edition is one lesson that builds on the last. Triton is
+CUDA or Triton. Each article is one lesson that builds on the last. Triton is
 OpenAI's open-source GPU language and the layer PyTorch's `torch.compile` lowers
 to, so the payoff is code the reader could actually run.
 
@@ -12,7 +12,7 @@ lesson concretely (you read it, per protocol), teach the core, then close with
 the check-yourself box (nb-check-box) and a bridge (nb-bridge) to the next
 lesson.
 
-Show real code with the rs-code furniture. This press loads Prism (declared in
+Show real code with the rs-code furniture. This site loads Prism (declared in
 `site.yaml`), so you write plain code in a language-tagged block and it is
 highlighted for you: `language-python` for Triton, `language-cpp` for CUDA C.
 Escape `<`, `>`, and `&`. Keep listings short and honest.

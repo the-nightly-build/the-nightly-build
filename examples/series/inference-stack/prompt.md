@@ -1,9 +1,9 @@
 # The Inference Stack
 
-Appraise, one edition each, the techniques that make modern LLM inference
+Appraise, one article each, the techniques that make modern LLM inference
 affordable: what problem each solves, how it works, and what it costs you in
 return. The reader is an engineer deciding what to actually run, not a student.
-Label these editions `Appraisal`.
+Label these articles `Appraisal`.
 
 Each appraisal fixes its spine: open with the plain-abstract furniture
 (nb-abstract) stating the idea in one jargon-free paragraph, then a section on

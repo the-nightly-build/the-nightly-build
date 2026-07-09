@@ -1,7 +1,7 @@
 # Docket
 
 Track the law as it collides with AI: the cases, rulings, and rules that decide
-what can be built and on whose data. One matter per edition, written for an
+what can be built and on whose data. One matter per article, written for an
 engineer who needs the stakes, not a lawyer who needs the citations (though the
 citations are there).
 
@@ -10,7 +10,7 @@ Pick tonight's matter like an editor:
 - Favor live cases and rules with real consequences for how models are trained,
   deployed, or sold: copyright and training data, liability, competition,
   privacy, export control, the EU AI Act and its enforcement.
-- Read the desk's back catalog first. Return to a case only when its posture has
+- Read the section's back catalog first. Return to a case only when its posture has
   actually changed, and lead with what changed.
 
 Open with the case docket furniture so the prose can argue instead of recite:

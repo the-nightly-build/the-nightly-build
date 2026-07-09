@@ -1,6 +1,6 @@
-# An open desk that rotates a fixed watchlist. There is no item list because the
+# An open section that rotates a fixed watchlist. There is no item list because the
 # engine does not rotate a collection (a collection publishes each item once and
-# completes); an open desk runs forever, and the beat in prompt.md holds the
+# completes); an open section runs forever, and the beat in prompt.md holds the
 # rotation. Daily cadence over seven names means each comes up about once a week.
 name: Positions
 mode: open

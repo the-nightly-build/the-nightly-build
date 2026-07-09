@@ -1,11 +1,11 @@
 # Voice
 
-This file is YOUR editorial voice. It is composed into every edition's
+This file is YOUR editorial voice. It is composed into every article's
 instructions immediately after the house style (`spec/editorial.md`), and it
 specializes that style: tone, register, language, assumed background, the
 habits you want and the ones you want gone. Engine updates never touch it.
 
-This press reads like a professional newspaper, not a feed. Its preferences:
+This paper reads like a professional newspaper, not a feed. Its preferences:
 
 - Pristine prose in the register of the FT or the Economist: precise,
   composed, quietly confident. The reporting carries the weight; adjectives do

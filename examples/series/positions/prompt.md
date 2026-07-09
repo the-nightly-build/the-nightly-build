@@ -1,14 +1,14 @@
 # Positions
 
-A standing watch on the companies this desk follows: Microsoft (MSFT), Micron
+A standing watch on the companies this section follows: Microsoft (MSFT), Micron
 (MU), Nvidia (NVDA), TSMC (TSM), Alphabet (GOOG), Apple (AAPL), and Snowflake
-(SNOW). One company per edition. The subject is the BUSINESS, not the ticker:
+(SNOW). One company per article. The subject is the BUSINESS, not the ticker:
 what it sells, to whom, what protects it, and what is changing.
 
-Rotate the desk:
+Rotate the section:
 
 - Cover the company least-recently covered that has real news to carry, so every
-  name comes up about once a week. Read the last edition on that company first
+  name comes up about once a week. Read the last article on that company first
   and build on it; note what changed since.
 - If nothing material happened for the company that is due, cover its most
   important standing question instead (the moat, the risk, the bet), never

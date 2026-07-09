@@ -1,11 +1,11 @@
-/* Newsroom — this press's theme.
+/* Newsroom — this paper's theme.
    The color tokens below are the shipped newspaper palette, UNCHANGED: this
-   press keeps the default look on purpose, so anyone copying this example sees
+   paper keeps the default look on purpose, so anyone copying this example sees
    the familiar paper and re-skins only if they want to (edit the tokens in all
    four blocks; fonts and radius live in the base block). The file exists only
-   because a press's custom furniture has to live in its theme CSS — the engine
+   because a paper's custom furniture has to live in its theme CSS — the engine
    publishes this file as assets/theme.css on every build, restyling the whole
-   library. This press's components are defined below the tokens on the `rs-`
+   library. This paper's components are defined below the tokens on the `rs-`
    prefix (`nb-` is the engine's): rs-code, rs-docket, rs-side. */
 :root {
   /* DAY — the base and universal fallback */
@@ -73,14 +73,14 @@
 }
 
 /* ============================================================= *
- * This press's furniture (prefix rs-). Documented in each desk's
+ * This paper's furniture (prefix rs-). Documented in each section's
  * prompt.md. These extend templates/FURNITURE.md without touching
  * the engine, and ride this theme file to the whole library.
  * ============================================================= */
 
 /* Code block — a real listing with a header (file · language) and an optional
-   cited caption. This is the furniture that proves a press can use a real JS
-   library with no engine change: the edition writes plain
+   cited caption. This is the furniture that proves a site can use a real JS
+   library with no engine change: the article writes plain
    <pre><code class="language-python">, Prism (declared in site.yaml, loaded on
    every page) highlights it into .token spans, and this file colors them. No-JS
    readers still get clean monospace. Token colors are set for light and
