@@ -1,7 +1,7 @@
 # An open section on the custom `divide` template (templates/registry.yaml +
 # templates/divide.html). Each article takes ONE genuinely contested question
 # and argues every side at its strongest from named, vetted sources. The
-# template enforces at least two sides, each its own section; `strict` promotes
+# template enforces exactly two sides, each its own section; `strict` promotes
 # every WARN to a BLOCK, so the per-side citation checks become hard gates.
 # A one-sided or thinly-sourced article cannot publish.
 name: The Divide

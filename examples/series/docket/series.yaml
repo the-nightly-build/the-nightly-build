@@ -1,7 +1,7 @@
 # An open section: the beat in prompt.md is the assignment. Each article tracks one
 # legal matter, chosen by the night shift, on the article template. Its genre is
 # carried by a paper-owned furniture piece, the case docket (rs-docket, defined
-# in themes/broadsheet.css).
+# in themes/newsroom.css).
 name: Docket
 mode: open
 section: "AI & the Law"

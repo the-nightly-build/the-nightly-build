@@ -6,9 +6,9 @@ and custom furniture. It keeps the shipped palette on purpose, so it is a
 starting point, not a look to undo.
 
 - `the-divide/` is an **open section** on a **custom template** (`divide`, defined
-  in `templates/registry.yaml` and `templates/divide.html`). It argues one
-  contested question from every side. The template enforces at least two sides,
-  each its own section, and the section runs `strict: true` so the per-side
+  in `examples/templates/registry.yaml` and `examples/templates/divide.html`). It
+  argues one contested question from every side. The template enforces exactly two
+  sides, each its own section, and the section runs `strict: true` so the per-side
   citation checks become hard BLOCKs. This is the reason to build a template:
   structure the proof guarantees rather than the prose promises.
 - `the-brief/` is a **rolling** nightly brief on the `brief` template, slugged
@@ -25,10 +25,9 @@ starting point, not a look to undo.
 Between them they exercise all four modes, both shipped templates plus a custom
 one, three custom furniture components (`rs-code` with CSS-only syntax
 highlighting, `rs-docket`, `rs-side`), the source policy (`consult` live,
-`required_docs` and `sources_exclusive` shown as documented options), rhythm
-controls (`cadence`, `paused`, `selection`), word-band and source-floor
-calibration, tag fragments, a voice file, and commented advanced options in
-every `series.yaml`.
+`required_docs` and `sources_exclusive` shown as documented options), `cadence`
+scheduling, word-band and source-floor calibration, tag fragments, and a voice
+file.
 
 Custom furniture has to live in a paper theme file, because that is the only
 CSS the engine publishes for a site. `themes/newsroom.css` keeps the shipped
