@@ -9,9 +9,7 @@ suite when any palette block misses a token.
 Run: python3 engine/tests/run_builder_tests.py
 """
 
-import contextlib
 import datetime as dt
-import io
 import json
 import pathlib
 import re
@@ -141,12 +139,11 @@ check(
 )
 check("repository derived at build time", net_catalog["repository"] == "alice/my-press")
 check(
-    "network block emitted with a derived URL when publish is true",
+    "network block is publish + description only, no URL",
     net_catalog.get("network")
     == {
         "publish": True,
         "description": "Books, law, and the quiet parts of the news.",
-        "url": "https://alice.github.io/my-press/",
     },
     detail=str(net_catalog.get("network")),
 )
@@ -166,22 +163,6 @@ check(
     "opt-out emits only publish:false",
     out_catalog.get("network") == {"publish": False},
     detail=str(out_catalog.get("network")),
-)
-
-# publish: true with no resolvable base URL warns rather than listing no URL.
-warn_buf = io.StringIO()
-with contextlib.redirect_stderr(warn_buf):
-    warn_catalog = B.build(
-        net_repo, make_full_library(), out=tempfile.mkdtemp(), now=NOW
-    )
-check(
-    "publish without a base URL warns",
-    "WARN" in warn_buf.getvalue() and "base URL" in warn_buf.getvalue(),
-    detail=warn_buf.getvalue(),
-)
-check(
-    "network URL is empty without a base URL",
-    warn_catalog["network"]["url"] == "",
 )
 
 newsstand = read(out, "index.html")

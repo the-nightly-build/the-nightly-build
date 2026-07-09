@@ -260,9 +260,7 @@ def derive_self_repository(explicit, base_url):
     return f"{match.group(1)}/{match.group(2)}" if match else None
 
 
-def build_catalog(
-    site_cfg, series_cfgs, *, editions, generated, base_url="", repository=None
-):
+def build_catalog(site_cfg, series_cfgs, *, editions, generated, repository=None):
     by_series = {}
     for ed in editions.values():
         by_series.setdefault(ed["series"], []).append(ed)
@@ -337,23 +335,18 @@ def build_catalog(
         "builds": builds,
         "tags": tags,
     }
-    # Listing on the network is opt-out: a press is published unless it sets
-    # network.publish: false. The public URL is the Pages base URL, derived at
-    # build time and never configured. The block is always emitted so the crawler
-    # reads an explicit signal (a 1.1 catalog, lacking it, is simply not indexed).
+    # Listing on the directory is opt-out: a paper is listed unless it sets
+    # network.publish: false. The block carries only that signal and an optional
+    # description; the public URL is never in the catalog. The directory derives
+    # each paper's URL from GitHub identity, so no catalog field can point a
+    # reader off the paper's own site.
     network = site_cfg.get("network") or {}
     if network.get("publish") is False:
         catalog["network"] = {"publish": False}
     else:
-        if not base_url:
-            sys.stderr.write(
-                "WARN: this press is listed on the network but no base URL was "
-                "resolved; it cannot be listed without a public URL\n"
-            )
         catalog["network"] = {
             "publish": True,
             "description": (network.get("description") or "").strip(),
-            "url": f"{base_url.rstrip('/')}/" if base_url else "",
         }
     return catalog
 
@@ -1140,7 +1133,6 @@ def build(
         series_cfgs,
         editions=editions,
         generated=now,
-        base_url=base_url,
         repository=repository,
     )
 
