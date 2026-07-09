@@ -77,7 +77,7 @@ are responsible for it, the same way you would be on any hosting platform.
 description for your card:
 
 ```yaml
-network:
+directory:
   description: "One line describing your paper (up to 280 characters)."
 ```
 
@@ -93,6 +93,6 @@ articles are never copied; the directory links out to your own site.
 **To opt out**, set:
 
 ```yaml
-network:
+directory:
   publish: false
 ```

@@ -143,7 +143,7 @@ contains a complete working configuration as documentation.
 
 Published sites are listed automatically on
 [the-nightly-build.github.io](https://the-nightly-build.github.io/), a shared
-front page over every paper (set `network.publish: false` to opt out). See
+front page over every paper (set `directory.publish: false` to opt out). See
 [docs/delivery.md](docs/delivery.md).
 
 MIT licensed. No accounts, no backend, no analytics. `catalog.json` and the
