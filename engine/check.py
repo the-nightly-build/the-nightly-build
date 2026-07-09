@@ -137,6 +137,7 @@ class Article(HTMLParser):
         super().__init__(convert_charrefs=True)
         self.stack = []  # list of dicts per open element
         self.meta_raw = None
+        self.meta_count = 0  # number of #nb-meta blocks; >1 is a violation
         self.chart_raw = []  # raw JSON strings of data-nb-chart blocks
         self.script_tags = []  # (attrs_dict) for every <script>
         self.sections = []  # data-nb-section values in order
@@ -180,8 +181,11 @@ class Article(HTMLParser):
             if v.strip().lower().startswith("javascript:"):
                 self.bad_js_urls.append((tag, v))
 
-        if tag in ("iframe", "object", "embed"):
+        if tag in ("iframe", "object", "embed", "form"):
             self.forbidden_tags.append(tag)
+        if tag == "meta" and a.get("http-equiv", "").strip().lower() == "refresh":
+            # a meta-refresh redirects the reader off-site the instant the page loads
+            self.forbidden_tags.append("meta[http-equiv=refresh]")
 
         if tag == "script":
             self.script_tags.append(a)
@@ -251,7 +255,11 @@ class Article(HTMLParser):
                 kind, buf = self._capture
                 raw = "".join(buf)
                 if kind == "meta":
-                    self.meta_raw = raw
+                    self.meta_count += 1
+                    if self.meta_raw is None:
+                        # keep the FIRST block — the browser (getElementById) and
+                        # build_site/duty (first regex match) all read the first
+                        self.meta_raw = raw
                 else:
                     self.chart_raw.append(raw)
                 self._capture = None
@@ -552,6 +560,13 @@ def check_article(
             "B-META-PARSE", 'no <script type="application/json" id="nb-meta"> block'
         )
         return None
+    if ed.meta_count > 1:
+        # The browser + build read the first #nb-meta; validating a second one
+        # would let the proof approve metadata that never ships. One only.
+        rep.block(
+            "B-META-PARSE", f"exactly one #nb-meta block allowed, found {ed.meta_count}"
+        )
+        return None
     try:
         meta = json.loads(ed.meta_raw)
         if not isinstance(meta, dict):
@@ -763,7 +778,13 @@ def check_article(
     for kind, url in ed.external_refs:
         if kind == "script":
             continue  # already blocked above
-        if not url.startswith(ALLOWED_EXTERNAL_PREFIXES) and "://" in url:
+        # Normalize the way a browser resolves a URL before matching the
+        # allowlist: strip URL-spec whitespace (tab/newline/cr) and fold
+        # backslashes to slashes, so "//host", "/\host", or "ht\ntps://host"
+        # cannot slip an off-origin load past the check.
+        u = re.sub(r"[\t\n\r]", "", (url or "").strip()).replace("\\", "/")
+        is_external = "://" in u or u.startswith("//")
+        if is_external and not u.startswith(ALLOWED_EXTERNAL_PREFIXES):
             rep.block("B-SANDBOX", f"external {kind} reference not on allowlist: {url}")
     for i, raw_chart in enumerate(ed.chart_raw, 1):
         err = chart_spec_error(raw_chart)

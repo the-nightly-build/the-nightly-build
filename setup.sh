@@ -156,20 +156,24 @@ if gh api -X PATCH "repos/$repo" -F allow_auto_merge=true >/dev/null 2>&1; then
 else
 	warn "could not enable auto-merge. Flip it at https://github.com/$repo/settings"
 fi
+# enforce_admins:true is deliberate: the night shift holds your (admin) token,
+# so the required 'validate' check must bind admins too, or a prompt-injected
+# run could merge past the proof. Auto-merge still works (it merges only after
+# 'validate' passes). See docs/scheduling.md § Security.
 if gh api -X PUT "repos/$repo/branches/library/protection" --input - >/dev/null 2>&1 <<'JSON'; then
 {
   "required_status_checks": { "strict": false, "contexts": ["validate"] },
-  "enforce_admins": false,
+  "enforce_admins": true,
   "required_pull_request_reviews": null,
   "restrictions": null,
   "allow_force_pushes": false,
   "allow_deletions": false
 }
 JSON
-	ok "library branch protected (requires the editor's check)"
+	ok "library branch protected (the editor's check gates every merge, incl. admins)"
 else
 	warn "could not protect library (needs admin / paid plan on private repos)"
-	warn "  recommended: require the 'validate' check at"
+	warn "  recommended: require the 'validate' check (enforce for admins) at"
 	warn "  https://github.com/$repo/settings/branches"
 fi
 

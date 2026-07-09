@@ -397,6 +397,59 @@ expect(
     must_have=["B-SANDBOX"],
 )
 
+expect(
+    "protocol-relative stylesheet blocked",
+    run_local(
+        mut(
+            "https://fonts.googleapis.com/css2?family=Newsreader&amp;display=swap",
+            "//cdn.evil.example/style.css",
+        ),
+        "semiconductors",
+    ),
+    must_have=["B-SANDBOX"],
+)
+expect(
+    "backslash-obfuscated external ref blocked",
+    run_local(
+        mut(
+            "https://fonts.googleapis.com/css2?family=Newsreader&amp;display=swap",
+            "/\\cdn.evil.example/style.css",
+        ),
+        "semiconductors",
+    ),
+    must_have=["B-SANDBOX"],
+)
+expect(
+    "meta-refresh redirect blocked",
+    run_local(
+        mut(
+            "</head>",
+            '<meta http-equiv="refresh" content="0;url=//evil.example"></head>',
+        ),
+        "semiconductors",
+    ),
+    must_have=["B-SANDBOX"],
+)
+expect(
+    "form blocked",
+    run_local(
+        mut("</article>", '<form action="//evil.example"></form></article>'),
+        "semiconductors",
+    ),
+    must_have=["B-SANDBOX"],
+)
+expect(
+    "duplicate nb-meta blocked",
+    run_local(
+        mut(
+            "</head>",
+            '<script type="application/json" id="nb-meta">{"x":1}</script></head>',
+        ),
+        "semiconductors",
+    ),
+    must_have=["B-META-PARSE"],
+)
+
 print("== B-SOURCES-FORM / B-CITES-RESOLVE ==")
 expect(
     "no sources at all",

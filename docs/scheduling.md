@@ -70,6 +70,31 @@ permissions and no secrets, and that boundary is the security model. A scheduled
 workflow on `main` holding your API key is the trusted side of the same line the
 morning mailer already sits on.
 
+### Security: the night shift is untrusted by design
+
+The night shift researches by reading arbitrary web pages, so it can be
+prompt-injected by a page it visits, and no instruction reliably prevents that.
+The system is built to contain a compromised run, not to trust it:
+
+- Every article is validated by the proof (`engine/check.py`) and sandboxed: no
+  scripts beyond the engine runtime, no iframes or forms, no meta-refresh, and
+  external references only to the engine assets and Google Fonts. `setup.sh`
+  protects the `library` branch with `enforce_admins: true`, so the `validate`
+  check gates every merge, including runs that use your own token. A hijacked
+  run can do no more than open a PR the proof rejects.
+- The blast radius is your own fork only. A successful injection can alter your
+  `main` (the engine, or the `assets:` list in `press/site.yaml`, which loads
+  owner-authored JavaScript into every page), but never another user's paper or
+  the canonical repo, and it lands in your own commit history where you can see
+  it.
+
+For a stricter boundary, run the schedule under a least-privilege identity: a
+fine-grained token or a bot collaborator that can push feature branches and open
+PRs but cannot push to `main` or `library`. That contains the autonomous night
+shift without touching your own ability to edit `press/` directly. And because
+`press/site.yaml`'s `assets:` block runs JavaScript on every reader's page,
+never let an untrusted agent edit it.
+
 ### The schedule prompt
 
 This is the whole assignment. Paste it verbatim wherever your scheduler takes a
