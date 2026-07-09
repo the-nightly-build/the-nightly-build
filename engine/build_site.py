@@ -62,7 +62,7 @@ FEED_CONTENT_MAX = 150_000  # per-entry cap after stripping, bytes
 UPSTREAM_REPOSITORY = os.getenv(
     "UPSTREAM_REPOSITORY", "the-nightly-build/the-nightly-build"
 )
-NETWORK_URL = os.getenv("NETWORK_URL", "https://the-nightly-build.github.io/")
+DIRECTORY_URL = os.getenv("DIRECTORY_URL", "https://the-nightly-build.github.io/")
 META_RE = re.compile(r'<script[^>]*\bid="nb-meta"[^>]*>(.*?)</script>', re.S | re.I)
 
 esc = html.escape
@@ -329,24 +329,24 @@ def build_catalog(site_cfg, series_cfgs, *, articles, generated, repository=None
         "footer": site_cfg.get("footer"),
         "repository": repository,
         "upstream": UPSTREAM_REPOSITORY,
-        "network_url": NETWORK_URL,
+        "directory_url": DIRECTORY_URL,
         "series": series_entries,
         "articles": article_entries,
         "builds": builds,
         "tags": tags,
     }
     # Listing on the directory is opt-out: a paper is listed unless it sets
-    # network.publish: false. The block carries only that signal and an optional
+    # directory.publish: false. The block carries only that signal and an optional
     # description; the public URL is never in the catalog. The directory derives
     # each paper's URL from GitHub identity, so no catalog field can point a
     # reader off the paper's own site.
-    network = site_cfg.get("network") or {}
-    if network.get("publish") is False:
-        catalog["network"] = {"publish": False}
+    directory = site_cfg.get("directory") or {}
+    if directory.get("publish") is False:
+        catalog["directory"] = {"publish": False}
     else:
-        catalog["network"] = {
+        catalog["directory"] = {
             "publish": True,
-            "description": (network.get("description") or "").strip(),
+            "description": (directory.get("description") or "").strip(),
         }
     return catalog
 
@@ -429,7 +429,7 @@ def chrome_eco_links(site):
     # Ecosystem links under the hamburger nav (identical markup in nb.js). All
     # open in a new tab. "Star on GitHub" points at this press's own repo and is
     # omitted when the repo is unknown; "Start your own" recruits to the canonical
-    # repo; "The whole newspaper" links to the network directory.
+    # repo; "The whole newspaper" links to the directory directory.
     ext = 'target="_blank" rel="noopener noreferrer"'
     links = []
     if site.get("repository"):
@@ -440,7 +440,7 @@ def chrome_eco_links(site):
     links.append(
         f'<a href="https://github.com/{site["upstream"]}" {ext}>Start your own ↗</a>'
     )
-    links.append(f'<a href="{NETWORK_URL}" {ext}>The whole newspaper ↗</a>')
+    links.append(f'<a href="{DIRECTORY_URL}" {ext}>The whole newspaper ↗</a>')
     return "".join(links)
 
 

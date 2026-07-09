@@ -1371,9 +1371,9 @@ def vc_site_errors(yaml_text):
     return errs
 
 
-def vc_network_errors(network):
+def vc_directory_errors(directory):
     errs = []
-    V.check_site_network(network, errors=errs)
+    V.check_site_directory(directory, errors=errs)
     return errs
 
 
@@ -1388,28 +1388,28 @@ for name, cond in [
     ),
     ("footer: empty string fails", vc_site_errors('title: "x"\nfooter: ""\n') != []),
     (
-        "network: opted-in block validates",
-        vc_network_errors({"publish": True, "description": "hi"}) == [],
+        "directory: opted-in block validates",
+        vc_directory_errors({"publish": True, "description": "hi"}) == [],
     ),
     (
-        "network: opt-out block validates",
-        vc_network_errors({"publish": False}) == [],
+        "directory: opt-out block validates",
+        vc_directory_errors({"publish": False}) == [],
     ),
     (
-        "network: listed with no description validates (opt-out default)",
-        vc_network_errors({}) == [] and vc_network_errors({"publish": True}) == [],
+        "directory: listed with no description validates (opt-out default)",
+        vc_directory_errors({}) == [] and vc_directory_errors({"publish": True}) == [],
     ),
     (
-        "network: a url key is rejected as redundant",
-        vc_network_errors({"publish": True, "description": "hi", "url": "x"}) != [],
+        "directory: a url key is rejected as redundant",
+        vc_directory_errors({"publish": True, "description": "hi", "url": "x"}) != [],
     ),
     (
-        "network: non-bool publish fails",
-        vc_network_errors({"publish": "yes", "description": "hi"}) != [],
+        "directory: non-bool publish fails",
+        vc_directory_errors({"publish": "yes", "description": "hi"}) != [],
     ),
     (
-        "network: description over 280 chars fails",
-        vc_network_errors({"publish": True, "description": "a" * 281}) != [],
+        "directory: description over 280 chars fails",
+        vc_directory_errors({"publish": True, "description": "a" * 281}) != [],
     ),
 ]:
     if cond:

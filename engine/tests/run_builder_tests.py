@@ -94,14 +94,14 @@ check(
 )
 check("tags index", catalog["tags"].get("equity") == ["semiconductors/micron"])
 
-print("== catalog protocol 1.3 (network + chrome fields) ==")
+print("== catalog protocol 1.3 (directory + chrome fields) ==")
 check("protocol is 1.3", catalog["protocol"] == "1.3")
 check("footer defaults to None when unset", catalog["footer"] is None)
 check("upstream repo credited in catalog", catalog["upstream"] == B.UPSTREAM_REPOSITORY)
-check("network directory url in catalog", catalog["network_url"] == B.NETWORK_URL)
+check("directory directory url in catalog", catalog["directory_url"] == B.DIRECTORY_URL)
 check(
-    "listed by default under opt-out (no network config)",
-    catalog.get("network", {}).get("publish") is True,
+    "listed by default under opt-out (no directory config)",
+    catalog.get("directory", {}).get("publish") is True,
 )
 check(
     "repository derived from a Pages project URL",
@@ -115,13 +115,13 @@ check(
 )
 check("repository is None when underivable", B.derive_self_repository(None, "") is None)
 
-# A press that opts into the network, built with a Pages URL.
+# A press that opts into the directory, built with a Pages URL.
 net_repo = pathlib.Path(tempfile.mkdtemp()) / "repo"
 shutil.copytree(TESTREPO, net_repo)
 pathlib.Path(net_repo, "press", "site.yaml").write_text(
     'title: "Alice\'s Nightly Build"\n'
     'footer: "Read it with your coffee."\n'
-    "network:\n"
+    "directory:\n"
     "  publish: true\n"
     '  description: "Books, law, and the quiet parts of the news."\n'
 )
@@ -139,19 +139,21 @@ check(
 )
 check("repository derived at build time", net_catalog["repository"] == "alice/my-press")
 check(
-    "network block is publish + description only, no URL",
-    net_catalog.get("network")
+    "directory block is publish + description only, no URL",
+    net_catalog.get("directory")
     == {
         "publish": True,
         "description": "Books, law, and the quiet parts of the news.",
     },
-    detail=str(net_catalog.get("network")),
+    detail=str(net_catalog.get("directory")),
 )
 
 # A press that opts out emits only publish:false.
 out_repo = pathlib.Path(tempfile.mkdtemp()) / "repo"
 shutil.copytree(TESTREPO, out_repo)
-pathlib.Path(out_repo, "press", "site.yaml").write_text("network:\n  publish: false\n")
+pathlib.Path(out_repo, "press", "site.yaml").write_text(
+    "directory:\n  publish: false\n"
+)
 out_catalog = B.build(
     out_repo,
     make_full_library(),
@@ -161,8 +163,8 @@ out_catalog = B.build(
 )
 check(
     "opt-out emits only publish:false",
-    out_catalog.get("network") == {"publish": False},
-    detail=str(out_catalog.get("network")),
+    out_catalog.get("directory") == {"publish": False},
+    detail=str(out_catalog.get("directory")),
 )
 
 newsstand = read(out, "index.html")
@@ -186,7 +188,7 @@ check("menu says Today", ">Today</a>" in newsstand)
 
 # Reader chrome: ecosystem links and the footer imprint. The default build has
 # no repository (star link omitted) and no footer (default imprint), linked to
-# the canonical repo; the network build carries both.
+# the canonical repo; the directory build carries both.
 check(
     "default imprint credits the canonical repo",
     f'class="nb-imprint" href="https://github.com/{B.UPSTREAM_REPOSITORY}"'
@@ -200,8 +202,8 @@ check(
     'rel="noopener noreferrer">Start your own' in newsstand,
 )
 check(
-    "hamburger links to the network directory",
-    f'href="{B.NETWORK_URL}" target="_blank" '
+    "hamburger links to the directory directory",
+    f'href="{B.DIRECTORY_URL}" target="_blank" '
     'rel="noopener noreferrer">The whole newspaper' in newsstand,
 )
 check(

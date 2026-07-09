@@ -109,7 +109,7 @@ def check_site(repo, errors):
             f"of at most 80 characters"
         )
     check_site_assets(site.get("assets"), errors=errors)
-    check_site_network(site.get("network"), errors=errors)
+    check_site_directory(site.get("directory"), errors=errors)
 
 
 def check_site_assets(assets, *, errors):
@@ -155,31 +155,31 @@ def check_site_assets(assets, *, errors):
                 errors.append(f"{where}: 'defer' must be true or false")
 
 
-def check_site_network(network, *, errors):
-    # Network listing is opt-out: a press is listed unless it sets
-    # network.publish: false. The public URL is derived at build time (from the
+def check_site_directory(directory, *, errors):
+    # Directory listing is opt-out: a press is listed unless it sets
+    # directory.publish: false. The public URL is derived at build time (from the
     # Pages base URL), never configured, and the description is optional; a 'url'
     # key is intentionally not accepted, which the unknown-key check enforces.
-    if network is None:
+    if directory is None:
         return
     prefix = "press/site.yaml"
-    if not isinstance(network, dict):
-        errors.append(f"{prefix}: 'network' must be a mapping of publish/description")
+    if not isinstance(directory, dict):
+        errors.append(f"{prefix}: 'directory' must be a mapping of publish/description")
         return
-    unknown = set(network) - {"publish", "description"}
+    unknown = set(directory) - {"publish", "description"}
     if unknown:
-        errors.append(f"{prefix}: network: unknown keys {sorted(unknown)}")
-    publish = network.get("publish", False)
+        errors.append(f"{prefix}: directory: unknown keys {sorted(unknown)}")
+    publish = directory.get("publish", False)
     if not isinstance(publish, bool):
-        errors.append(f"{prefix}: network.publish must be true or false")
-    description = network.get("description")
+        errors.append(f"{prefix}: directory.publish must be true or false")
+    description = directory.get("description")
     if description is not None and (
         not isinstance(description, str)
         or not description.strip()
         or len(description.strip()) > 280
     ):
         errors.append(
-            f"{prefix}: network.description must be a non-empty string "
+            f"{prefix}: directory.description must be a non-empty string "
             f"of at most 280 characters"
         )
 

@@ -262,9 +262,9 @@
       var ext = 'target="_blank" rel="noopener noreferrer"';
       /* Ecosystem links under the nav (mirrors build_site.chrome_eco_links).
          Star on GitHub is omitted when the repo is unknown; the last link points
-         at the network directory. */
-      var network =
-        (cat && cat.network_url) || "https://the-nightly-build.github.io/";
+         at the directory directory. */
+      var directory =
+        (cat && cat.directory_url) || "https://the-nightly-build.github.io/";
       var eco = repo
         ? '<a href="https://github.com/' +
           repo +
@@ -278,7 +278,7 @@
         '" ' +
         ext +
         ">Start your own ↗</a>";
-      eco += '<a href="' + network + '" ' + ext + ">The whole newspaper ↗</a>";
+      eco += '<a href="' + directory + '" ' + ext + ">The whole newspaper ↗</a>";
       var imprint =
         cat && cat.footer
           ? '<span class="nb-imprint">' + escHtml(cat.footer) + "</span>"
