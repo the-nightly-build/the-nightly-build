@@ -286,7 +286,7 @@
             upstream +
             '" ' +
             ext +
-            ">A Nightly Build press</a>";
+            ">A Nightly Build paper</a>";
       var bar = document.createElement("header");
       bar.className = "nb-bar";
       bar.innerHTML =
@@ -706,7 +706,7 @@
           hits.length +
           " of " +
           docs.length +
-          " edition" +
+          " article" +
           (docs.length !== 1 ? "s" : "");
       }
       out.innerHTML =

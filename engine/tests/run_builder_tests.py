@@ -325,7 +325,7 @@ check(
 check(
     "email subject line",
     read(out, "email-latest-subject.txt").strip()
-    == "The Nightly Build — 2026-07-06: 2 editions",
+    == "The Nightly Build — 2026-07-06: 2 articles",
 )
 check(
     "per-build digests are permanent",

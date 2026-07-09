@@ -1,16 +1,16 @@
 # Furniture
 
-Furniture is the set of pre-designed components an edition may use. Every
+Furniture is the set of pre-designed components an article may use. Every
 class here is styled by the engine's shared CSS in both color schemes, so
 composing them cannot break the paper's look. Any template may use any
 component. Use a piece when it carries information better than prose would;
-skip it when it would decorate. Two or three pieces per edition is typical,
+skip it when it would decorate. Two or three pieces per article is typical,
 zero is fine.
 
 The section tags, citation markup, source entries, and nb-meta block are
 protocol, not furniture; they are defined in PROTOCOL.md. Presses can add
-their own furniture: define classes in the press theme CSS and instruct
-desks to use them in prompt.md (see docs/customization.md).
+their own furniture: define classes in the paper's theme CSS and instruct
+sections to use them in prompt.md (see docs/customization.md).
 
 ## Stat strip
 
@@ -61,7 +61,7 @@ A key term or concept the reader should carry forward.
 
 ## Pull quote
 
-One sentence from the edition itself, promoted for emphasis. Use at most one.
+One sentence from the article itself, promoted for emphasis. Use at most one.
 
 ```html
 <div class="nb-pull"><p>The sentence that earns the space.</p></div>
@@ -165,7 +165,7 @@ What the reader will be able to do afterwards. Openers for teaching pieces.
 
 ```html
 <div class="nb-objectives">
-  <div class="nb-objectives-label">In this edition</div>
+  <div class="nb-objectives-label">In this article</div>
   <ul>
     <li>OBJECTIVE, concrete and checkable.</li>
   </ul>
@@ -174,7 +174,7 @@ What the reader will be able to do afterwards. Openers for teaching pieces.
 
 ## Check box
 
-Self-test exercises answerable from the edition.
+Self-test exercises answerable from the article.
 
 ```html
 <div class="nb-check-box">
@@ -191,7 +191,7 @@ sequenced series.
 
 ```html
 <div class="nb-bridge">
-  <span class="nb-bridge-label">Next edition</span>
+  <span class="nb-bridge-label">Next article</span>
   One or two sentences.
 </div>
 ```
@@ -248,7 +248,7 @@ the assessment.
 ## Claim card
 
 A falsifiable prediction: what, how confident, and when it can be judged.
-If a desk makes claims, later editions should grade them (see grade row).
+If a section makes claims, later articles should grade them (see grade row).
 
 ```html
 <div class="nb-claim">

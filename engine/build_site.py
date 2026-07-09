@@ -459,7 +459,7 @@ def chrome_imprint(site):
         return f'<span class="nb-imprint">{esc(site["footer"])}</span>'
     return (
         f'<a class="nb-imprint" href="https://github.com/{site["upstream"]}" {ext}>'
-        f"A Nightly Build press</a>"
+        f"A Nightly Build paper</a>"
     )
 
 
@@ -568,7 +568,7 @@ def night_body(eds, series_cfgs, *, depth, date):
         f'<span class="nb-editionline-facts">{total} min read</span></div>'
     )
     if not eds:
-        return body + '<div class="nb-empty"><p>No editions this night.</p></div>'
+        return body + '<div class="nb-empty"><p>No articles this night.</p></div>'
     cells = lead_cell(eds[0], series_cfgs, depth=depth) + "".join(
         story_item(e, series_cfgs, depth=depth) for e in eds[1:]
     )
@@ -658,7 +658,7 @@ def desk_status(s, cfg):
         return "paused", True
     if mode in ("collection", "sequence"):
         if total and count >= total:
-            return f"complete · {count} edition{'s' if count != 1 else ''}", True
+            return f"complete · {count} article{'s' if count != 1 else ''}", True
         if not total:  # published but not in press config (or no items yet)
             return f"{count} published", False
         pct = round(100 * count / total)
@@ -704,12 +704,12 @@ def render_series_index(site, catalog, *, series_cfgs, editions):
         if rests:
             resting.append(row)
         else:
-            groups.setdefault(cfg.get("section") or "Desks", []).append(row)
+            groups.setdefault(cfg.get("section") or "Other", []).append(row)
 
     facts = (
         f"{max(len(groups), 1)} section{'s' if len(groups) != 1 else ''} · "
-        f"{ndesks} desk{'s' if ndesks != 1 else ''} · "
-        f"{len(catalog['editions'])} edition"
+        f"{ndesks} series · "
+        f"{len(catalog['editions'])} article"
         f"{'s' if len(catalog['editions']) != 1 else ''}"
     )
     body = (
@@ -721,14 +721,13 @@ def render_series_index(site, catalog, *, series_cfgs, editions):
     for section, rows in groups.items():
         body += (
             f'<div class="nb-secgroup"><div class="nb-sechead">'
-            f"<h2>{esc(section)}</h2><span>{len(rows)} desk"
-            f"{'s' if len(rows) != 1 else ''}</span></div>"
+            f"<h2>{esc(section)}</h2><span>{len(rows)} series</span></div>"
             f"{''.join(rows)}</div>"
         )
     if resting:
         body += (
             f'<details class="nb-stacks"><summary>In the stacks — '
-            f"{len(resting)} desk{'s' if len(resting) != 1 else ''}"
+            f"{len(resting)} series"
             f"</summary>{''.join(resting)}</details>"
         )
     return page(
@@ -817,7 +816,7 @@ def render_series_page(site, sid, *, cfg, eds, series_cfgs):
         body = head + (
             f'<div class="nb-list">{"".join(parts)}</div>'
             if parts
-            else '<div class="nb-empty"><p>No editions yet.</p></div>'
+            else '<div class="nb-empty"><p>No articles yet.</p></div>'
         )
     else:  # collection, in config order
         rows = [
@@ -869,7 +868,7 @@ def render_tag_page(site, tag, *, refs, editions, series_cfgs):
     ]
     body = (
         f'<div class="nb-pagehead"><h1>#{esc(tag)}</h1>'
-        f'<span class="nb-pagehead-facts">{len(eds)} edition'
+        f'<span class="nb-pagehead-facts">{len(eds)} article'
         f"{'s' if len(eds) != 1 else ''}</span></div>"
     )
     body += (
@@ -1056,7 +1055,7 @@ def render_email(site_title, date, *, eds, series_cfgs, base_url):
               text-transform:uppercase;letter-spacing:1px;margin:4px 0 10px">
     Tonight's build · {esc(date)}</div>
   <div style="font-family:Georgia,serif;font-size:15px;margin:0 0 12px">
-    {len(eds)} edition{"s" if len(eds) != 1 else ""} ·
+    {len(eds)} article{"s" if len(eds) != 1 else ""} ·
     {total_minutes} minutes of reading, built while you slept.</div>
   {"".join(rows)}
   <div style="border-top:2px solid #161D28;margin-top:16px;padding-top:12px;
@@ -1273,7 +1272,7 @@ def build(
         write(
             os.path.join(out, "email-latest-subject.txt"),
             f"{site_cfg['title']} — {latest}: {len(eds)} "
-            f"edition{'s' if len(eds) != 1 else ''}\n",
+            f"article{'s' if len(eds) != 1 else ''}\n",
         )
 
     copy_assets(repo, site_cfg, out=out)
@@ -1328,7 +1327,7 @@ def main(argv=None):
     )
     n = len(catalog["editions"])
     print(
-        f"site built: {args.out} ({n} edition{'s' if n != 1 else ''}, "
+        f"site built: {args.out} ({n} article{'s' if n != 1 else ''}, "
         f"{len(catalog['builds'])} builds)"
     )
     if args.preview:
