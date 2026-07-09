@@ -329,7 +329,7 @@ sup.nb-cite a[id],
   -webkit-line-clamp: 4;
 }
 
-/* story-cell deks are opt-in (site.yaml front: comfortable), desktop only */
+/* story-cell deks are opt-in (site.yaml front: comfortable), seriestop only */
 .nb-item:not(.nb-lead-cell) .nb-cell-dek {
   display: none;
 }
@@ -431,7 +431,7 @@ sup.nb-cite a[id],
   color: var(--faint);
 }
 
-.nb-desk {
+.nb-series {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
   gap: 1px 18px;
@@ -441,13 +441,13 @@ sup.nb-cite a[id],
   text-decoration: none;
 }
 
-.nb-desk-name {
+.nb-series-name {
   font-family: var(--serif);
   font-weight: 600;
   font-size: 16.5px;
 }
 
-.nb-desk-latest {
+.nb-series-latest {
   grid-column: 1;
   font-family: var(--serif);
   font-style: italic;
@@ -458,11 +458,11 @@ sup.nb-cite a[id],
   white-space: nowrap;
 }
 
-.nb-desk:hover .nb-desk-name {
+.nb-series:hover .nb-series-name {
   color: var(--accent);
 }
 
-.nb-desk-status {
+.nb-series-status {
   grid-column: 2;
   grid-row: 1 / span 2;
   align-self: center;
@@ -475,7 +475,7 @@ sup.nb-cite a[id],
   white-space: nowrap;
 }
 
-.nb-desk-done .nb-desk-name {
+.nb-series-done .nb-series-name {
   color: var(--ink-soft);
 }
 
@@ -511,7 +511,7 @@ sup.nb-cite a[id],
   display: none;
 }
 
-.nb-stacks .nb-desk {
+.nb-stacks .nb-series {
   opacity: 0.7;
 }
 

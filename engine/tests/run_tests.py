@@ -1025,7 +1025,7 @@ for name, cond in [
         FAIL.append(name)
         print(f"  FAIL {name}")
 
-print("== open mode (the hands-off desk) ==")
+print("== open mode (the hands-off series) ==")
 
 OPEN_YAML = """name: Wildcard
 mode: open
@@ -1194,7 +1194,7 @@ for name, cond in [
     ),
     ("cadence off-night is idle", duty_of(d_cad_off, "ai-briefs") in d_cad_off["idle"]),
     (
-        "open desk with a queue lists commissions",
+        "open series with a queue lists commissions",
         duty_of(d_open, "wildcard")["commissions"] == ["commissioned-piece"],
     ),
     (

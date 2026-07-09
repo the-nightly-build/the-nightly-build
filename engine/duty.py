@@ -112,7 +112,7 @@ def series_duty(
     published tonight, complete) or what to publish: a slug for sequence
     and rolling, candidates for collection (all remaining items under
     selection: random, otherwise just the next one), and commissions for
-    open desks with queued items. Gates apply in order: paused, then
+    open series with queued items. Gates apply in order: paused, then
     cadence, then already-published-tonight, so a paused series never
     reports a cadence excuse.
     """

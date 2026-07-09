@@ -230,8 +230,8 @@ check(
 )
 sections_page = read(out, "series", "index.html")
 check(
-    "sections page lists desks",
-    'class="nb-desk' in sections_page and "Semiconductors" in sections_page,
+    "sections page lists series",
+    'class="nb-series' in sections_page and "Semiconductors" in sections_page,
 )
 check("sections page shows collection progress", "1 of 5" in sections_page)
 check("build archive groups by month", "July 2026" in read(out, "builds", "index.html"))
@@ -459,7 +459,7 @@ empty_index = read(empty_out, "index.html")
 check("fresh-fork empty state", "The presses are ready" in empty_index)
 check(
     "empty build still renders a sections page",
-    'class="nb-desk' in read(empty_out, "series", "index.html"),
+    'class="nb-series' in read(empty_out, "series", "index.html"),
 )
 
 print("== press trusted external assets ==")

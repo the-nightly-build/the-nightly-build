@@ -8,7 +8,7 @@
  *      ONLY third-party script, loaded here, never by articles.
  *   3. Article chrome, retrofitted onto every article ever published:
  *      collapsible Contents, citation source-sheets with backrefs, byline
- *      normalization, desk-linked eyebrow, sequence prev/next from
+ *      normalization, series-linked eyebrow, sequence prev/next from
  *      catalog.json, external links in new tabs.
  *   4. The Search page: scoped fuzzy search over the builder-emitted index.
  *   5. Menu niceties (close on outside tap / Escape).
@@ -566,7 +566,7 @@
             e: e,
             title: (e.title || "").toLowerCase(),
             dek: (e.dek || "").toLowerCase(),
-            desk: (
+            series: (
               (e.section || "") +
               " " +
               (e.series_name || e.series || "")
@@ -589,7 +589,7 @@
     }
 
     function scoreDoc(d, tokens) {
-      /* one search over everything: titles, deks, desks, tags, full text */
+      /* one search over everything: titles, deks, series, tags, full text */
       var total = 0;
       for (var t = 0; t < tokens.length; t++) {
         var q = tokens[t],
@@ -597,8 +597,8 @@
         if (d.title.indexOf(q) >= 0) s = Math.max(s, 6);
         else s = Math.max(s, fuzzy(q, d.title) * 3);
         if (d.dek.indexOf(q) >= 0) s = Math.max(s, 3);
-        if (d.desk.indexOf(q) >= 0) s = Math.max(s, 4);
-        else s = Math.max(s, fuzzy(q, d.desk) * 2);
+        if (d.series.indexOf(q) >= 0) s = Math.max(s, 4);
+        else s = Math.max(s, fuzzy(q, d.series) * 2);
         if (d.tags && d.tags.indexOf(q) >= 0) s = Math.max(s, 4);
         if (d.text && d.text.indexOf(q) >= 0) s = Math.max(s, 2);
         if (s <= 0.34) return 0; /* every token must land somewhere */

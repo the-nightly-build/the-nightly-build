@@ -220,7 +220,7 @@ def assign_positions(articles, series_cfgs):
     """Assign each article its 1-based position in the series' canonical order.
 
     Sequences order by nb-meta order, collections by config item order
-    with unknown slugs last, open desks by publication date, rolling
+    with unknown slugs last, open series by publication date, rolling
     series by their date slugs. The position feeds catalog.json and the
     'Ed. N of M' labels, so it must be stable across rebuilds.
     """
@@ -638,11 +638,11 @@ def render_build_archive(site, dates):
     return page(site, f"All nights — {site['title']}", body=body, depth=1)
 
 
-def desk_status(s, cfg):
-    """Return (status_html, is_resting) for one desk on the Sections page.
+def series_status(s, cfg):
+    """Return (status_html, is_resting) for one series on the Sections page.
 
-    Finite desks show progress or read complete, rolling desks show
-    their cadence, open desks count published articles. Resting desks
+    Finite series show progress or read complete, rolling series show
+    their cadence, open series count published articles. Resting series
     (complete or paused) collect under the In-the-stacks disclosure
     instead of their section.
     """
@@ -673,27 +673,27 @@ def render_series_index(site, catalog, *, series_cfgs, articles):
         if cur is None or ed["meta"].get("date", "") > cur["meta"].get("date", ""):
             latest_by_series[ed["series"]] = ed
 
-    groups, resting, ndesks = {}, [], 0
+    groups, resting, nseries = {}, [], 0
     for s in catalog["series"]:
         cfg = series_cfgs.get(s["id"], {})
-        status, rests = desk_status(s, cfg)
+        status, rests = series_status(s, cfg)
         latest = latest_by_series.get(s["id"])
         latest_line = ""
         if latest:
             latest_line = (
-                f'<span class="nb-desk-latest">'
+                f'<span class="nb-series-latest">'
                 f"{esc(str(latest['meta'].get('title', '')))} · "
                 f"{esc(pretty_date(latest['meta'].get('date', '')))}"
                 "</span>"
             )
         row = (
-            f'<a class="nb-desk{" nb-desk-done" if rests else ""}" '
+            f'<a class="nb-series{" nb-series-done" if rests else ""}" '
             f'href="{s["id"]}/">'
-            f'<span class="nb-desk-name">{esc(s.get("name", s["id"]))}</span>'
+            f'<span class="nb-series-name">{esc(s.get("name", s["id"]))}</span>'
             f"{latest_line}"
-            f'<span class="nb-desk-status">{status}</span></a>'
+            f'<span class="nb-series-status">{status}</span></a>'
         )
-        ndesks += 1
+        nseries += 1
         if rests:
             resting.append(row)
         else:
@@ -701,7 +701,7 @@ def render_series_index(site, catalog, *, series_cfgs, articles):
 
     facts = (
         f"{max(len(groups), 1)} section{'s' if len(groups) != 1 else ''} · "
-        f"{ndesks} series · "
+        f"{nseries} series · "
         f"{len(catalog['articles'])} article"
         f"{'s' if len(catalog['articles']) != 1 else ''}"
     )
