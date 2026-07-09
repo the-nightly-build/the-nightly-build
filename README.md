@@ -139,7 +139,12 @@ contains a complete working configuration as documentation.
 - [Series: modes, open desks, cadence, commissioning](docs/series.md)
 - [Scheduling: native schedulers, the universal Actions cron, costs](docs/scheduling.md)
 - [Customization: themes, voice, your own templates](docs/customization.md)
-- [Delivery: feeds, morning email, the catalog API](docs/delivery.md)
+- [Delivery: feeds, morning email, the network, the catalog API](docs/delivery.md)
+
+Published presses are listed automatically on
+[the-nightly-build.github.io](https://the-nightly-build.github.io/), a shared
+front page over every paper (set `network.publish: false` to opt out). See
+[docs/delivery.md](docs/delivery.md).
 
 MIT licensed. No accounts, no backend, no analytics. `catalog.json` and the
 Atom feeds are the API.

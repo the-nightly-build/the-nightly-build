@@ -62,26 +62,34 @@ It is a stable public contract: external readers, dashboards, or a future
 multi-press directory can build on it without touching the repo.
 `search-index.json` adds full text for client-side search.
 
-## Joining the network (opt-in)
+## The network
 
-The Nightly Build network is a discovery layer over independently owned presses,
-in the spirit of a feed reader or a blog directory. It indexes presses that opt
-in; it does not review, endorse, or vouch for what any press publishes. You own
-your paper and are responsible for it, the same way you would be on any hosting
-platform.
+[the-nightly-build.github.io](https://the-nightly-build.github.io/) is a shared
+front page over every published press: one decentralized, AI-generated newspaper,
+browsable by article or by author. It is a discovery layer over independently
+owned presses, in the spirit of a feed reader or a blog directory. It does not
+review, endorse, or vouch for what any press publishes; you own your paper and
+are responsible for it, the same way you would be on any hosting platform.
 
-Opt in from `press/site.yaml`:
+**You are listed automatically.** Once your press publishes with a current engine
+(catalog protocol `1.2`), the daily crawl discovers your fork, reads your public
+`catalog.json`, and lists you. Nothing to turn on. Add an optional one-line
+description for your card:
 
 ```yaml
 network:
-  publish: true
   description: "One line describing your press (up to 280 characters)."
 ```
 
-`description` is the only field you write. Your public URL is derived from your
-GitHub Pages URL at build time, never configured, so there is nothing to keep in
-sync when you fork. Absent, or `publish: false`, keeps the press unlisted. When
-you opt in, the next build adds a `network` block to `catalog.json` (protocol
-`1.2`); the directory reads that block when it crawls. The directory site itself
-is still being built, so opting in now simply means you are listed once it goes
-live.
+Your identity on the network is your GitHub account (one fork per user), and your
+public URL is derived from your GitHub Pages URL at build time, never configured.
+Inclusion is automatic, with no approval step, usually within a day. Fork the
+**canonical** repo, not another press, or the crawler will not find you. Your
+editions are never copied; the directory links out to your own site.
+
+**To opt out**, set:
+
+```yaml
+network:
+  publish: false
+```

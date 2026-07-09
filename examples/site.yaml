@@ -30,9 +30,12 @@ assets:
 # email:
 #   send_utc_hour: 12
 
-# Opt in to the discovery network. The public URL is derived from your GitHub
-# Pages URL at build time, never set here, so description is the only field you
-# write. Absent, or publish: false, keeps the press unlisted.
+# The Nightly Build network. You are listed automatically at
+# the-nightly-build.github.io; the public URL is derived from your GitHub Pages
+# URL, never set here. Add an optional one-line description for your card, or set
+# publish: false to opt out entirely.
+network:
+  description: "AI, markets, engineering, and whatever I cannot stop thinking about."
+# To opt out of the network, uncomment:
 # network:
-#   publish: true
-#   description: "AI, markets, engineering, and whatever I cannot stop thinking about."
+#   publish: false

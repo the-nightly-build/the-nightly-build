@@ -261,21 +261,24 @@
       var repo = cat && cat.repository;
       var ext = 'target="_blank" rel="noopener noreferrer"';
       /* Ecosystem links under the nav (mirrors build_site.chrome_eco_links).
-         Star this press is omitted when the repo is unknown; no network link
-         yet, since the directory site is not live. */
+         Star on GitHub is omitted when the repo is unknown; the last link points
+         at the network directory. */
+      var network =
+        (cat && cat.network_url) || "https://the-nightly-build.github.io/";
       var eco = repo
         ? '<a href="https://github.com/' +
           repo +
           '" ' +
           ext +
-          ">Star this press on GitHub ↗</a>"
+          ">Star on GitHub ↗</a>"
         : "";
       eco +=
         '<a href="https://github.com/' +
         upstream +
         '" ' +
         ext +
-        ">Make your own press ↗</a>";
+        ">Start your own ↗</a>";
+      eco += '<a href="' + network + '" ' + ext + ">The whole newspaper ↗</a>";
       var imprint =
         cat && cat.footer
           ? '<span class="nb-imprint">' + escHtml(cat.footer) + "</span>"

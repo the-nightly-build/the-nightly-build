@@ -1392,12 +1392,12 @@ for name, cond in [
         vc_network_errors({"publish": True, "description": "hi"}) == [],
     ),
     (
-        "network: publish false needs no description",
+        "network: opt-out block validates",
         vc_network_errors({"publish": False}) == [],
     ),
     (
-        "network: publish true without description fails",
-        vc_network_errors({"publish": True}) != [],
+        "network: listed with no description validates (opt-out default)",
+        vc_network_errors({}) == [] and vc_network_errors({"publish": True}) == [],
     ),
     (
         "network: a url key is rejected as redundant",

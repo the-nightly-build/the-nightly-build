@@ -100,7 +100,11 @@ print("== catalog protocol 1.2 (network + chrome fields) ==")
 check("protocol is 1.2", catalog["protocol"] == "1.2")
 check("footer defaults to None when unset", catalog["footer"] is None)
 check("upstream repo credited in catalog", catalog["upstream"] == B.UPSTREAM_REPOSITORY)
-check("no network block when the press has not opted in", "network" not in catalog)
+check("network directory url in catalog", catalog["network_url"] == B.NETWORK_URL)
+check(
+    "listed by default under opt-out (no network config)",
+    catalog.get("network", {}).get("publish") is True,
+)
 check(
     "repository derived from a Pages project URL",
     B.derive_self_repository(None, "https://alice.github.io/my-press")
@@ -145,6 +149,23 @@ check(
         "url": "https://alice.github.io/my-press/",
     },
     detail=str(net_catalog.get("network")),
+)
+
+# A press that opts out emits only publish:false.
+out_repo = pathlib.Path(tempfile.mkdtemp()) / "repo"
+shutil.copytree(TESTREPO, out_repo)
+pathlib.Path(out_repo, "press", "site.yaml").write_text("network:\n  publish: false\n")
+out_catalog = B.build(
+    out_repo,
+    make_full_library(),
+    out=tempfile.mkdtemp(),
+    base_url="https://x.github.io/y",
+    now=NOW,
+)
+check(
+    "opt-out emits only publish:false",
+    out_catalog.get("network") == {"publish": False},
+    detail=str(out_catalog.get("network")),
 )
 
 # publish: true with no resolvable base URL warns rather than listing no URL.
@@ -193,13 +214,18 @@ check(
 )
 check("footer drops the old GitHub link", ">GitHub</a>" not in newsstand)
 check(
-    "make-your-own-press recruits to canonical",
+    "start-your-own recruits to canonical",
     f'href="https://github.com/{B.UPSTREAM_REPOSITORY}" target="_blank" '
-    'rel="noopener noreferrer">Make your own press' in newsstand,
+    'rel="noopener noreferrer">Start your own' in newsstand,
+)
+check(
+    "hamburger links to the network directory",
+    f'href="{B.NETWORK_URL}" target="_blank" '
+    'rel="noopener noreferrer">The whole newspaper' in newsstand,
 )
 check(
     "star link omitted when the repository is unknown",
-    "Star this press" not in newsstand,
+    "Star on GitHub" not in newsstand,
 )
 net_front = read(net_out, "index.html")
 check(
@@ -209,7 +235,7 @@ check(
 check(
     "star link targets this press when the repository is known",
     'href="https://github.com/alice/my-press" target="_blank" '
-    'rel="noopener noreferrer">Star this press on GitHub' in net_front,
+    'rel="noopener noreferrer">Star on GitHub' in net_front,
 )
 
 check(

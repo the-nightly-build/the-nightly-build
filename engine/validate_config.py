@@ -156,10 +156,10 @@ def check_site_assets(assets, *, errors):
 
 
 def check_site_network(network, *, errors):
-    # Opt-in to the discovery network. The public site URL is derived at build
-    # time (from the Pages base URL), never configured, so the only
-    # owner-authored field is the one-line description; a 'url' key is
-    # intentionally not accepted, which the unknown-key check enforces.
+    # Network listing is opt-out: a press is listed unless it sets
+    # network.publish: false. The public URL is derived at build time (from the
+    # Pages base URL), never configured, and the description is optional; a 'url'
+    # key is intentionally not accepted, which the unknown-key check enforces.
     if network is None:
         return
     prefix = "press/site.yaml"
@@ -182,8 +182,6 @@ def check_site_network(network, *, errors):
             f"{prefix}: network.description must be a non-empty string "
             f"of at most 280 characters"
         )
-    if publish is True and description is None:
-        errors.append(f"{prefix}: network.description is required when publish is true")
 
 
 def check_registry(repo, errors):

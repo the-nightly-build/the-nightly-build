@@ -62,6 +62,7 @@ FEED_CONTENT_MAX = 150_000  # per-entry cap after stripping, bytes
 UPSTREAM_REPOSITORY = os.getenv(
     "UPSTREAM_REPOSITORY", "the-nightly-build/the-nightly-build"
 )
+NETWORK_URL = os.getenv("NETWORK_URL", "https://the-nightly-build.github.io/")
 META_RE = re.compile(r'<script[^>]*\bid="nb-meta"[^>]*>(.*?)</script>', re.S | re.I)
 
 esc = html.escape
@@ -330,19 +331,24 @@ def build_catalog(
         "footer": site_cfg.get("footer"),
         "repository": repository,
         "upstream": UPSTREAM_REPOSITORY,
+        "network_url": NETWORK_URL,
         "series": series_entries,
         "editions": edition_entries,
         "builds": builds,
         "tags": tags,
     }
+    # Listing on the network is opt-out: a press is published unless it sets
+    # network.publish: false. The public URL is the Pages base URL, derived at
+    # build time and never configured. The block is always emitted so the crawler
+    # reads an explicit signal (a 1.1 catalog, lacking it, is simply not indexed).
     network = site_cfg.get("network") or {}
-    if network.get("publish") is True:
-        # The public URL is the Pages base URL, never configured. Without one the
-        # press cannot be listed, so warn rather than emit an unreachable entry.
+    if network.get("publish") is False:
+        catalog["network"] = {"publish": False}
+    else:
         if not base_url:
             sys.stderr.write(
-                "WARN: network.publish is true but no base URL was resolved; "
-                "the press cannot be listed without a public URL\n"
+                "WARN: this press is listed on the network but no base URL was "
+                "resolved; it cannot be listed without a public URL\n"
             )
         catalog["network"] = {
             "publish": True,
@@ -428,20 +434,20 @@ def asset_stamp(repo):
 
 def chrome_eco_links(site):
     # Ecosystem links under the hamburger nav (identical markup in nb.js). All
-    # open in a new tab. "Star this press" points at the press's own repo and is
-    # omitted when the repo is unknown; "Make your own press" recruits to the
-    # canonical repo. No network link yet: the directory site is not live.
+    # open in a new tab. "Star on GitHub" points at this press's own repo and is
+    # omitted when the repo is unknown; "Start your own" recruits to the canonical
+    # repo; "The whole newspaper" links to the network directory.
     ext = 'target="_blank" rel="noopener noreferrer"'
     links = []
     if site.get("repository"):
         links.append(
             f'<a href="https://github.com/{site["repository"]}" {ext}>'
-            f"Star this press on GitHub ↗</a>"
+            f"Star on GitHub ↗</a>"
         )
     links.append(
-        f'<a href="https://github.com/{site["upstream"]}" {ext}>'
-        f"Make your own press ↗</a>"
+        f'<a href="https://github.com/{site["upstream"]}" {ext}>Start your own ↗</a>'
     )
+    links.append(f'<a href="{NETWORK_URL}" {ext}>The whole newspaper ↗</a>')
     return "".join(links)
 
 
