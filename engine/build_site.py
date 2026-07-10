@@ -63,9 +63,35 @@ UPSTREAM_REPOSITORY = os.getenv(
     "UPSTREAM_REPOSITORY", "the-nightly-build/the-nightly-build"
 )
 DIRECTORY_URL = os.getenv("DIRECTORY_URL", "https://the-nightly-build.github.io/")
-META_RE = re.compile(r'<script[^>]*\bid="nb-meta"[^>]*>(.*?)</script>', re.S | re.I)
+# The nb-meta block build_site renders must be the same one check.py validates:
+# a <script type="application/json" id="nb-meta">. Requiring the type (in any
+# attribute order) means an untyped decoy #nb-meta the proof cannot see is
+# invisible to the builder too, instead of overriding title/date/series/slug.
+META_RE = re.compile(
+    r'<script\b(?=[^>]*\btype="application/json")(?=[^>]*\bid="nb-meta")'
+    r"[^>]*>(.*?)</script>",
+    re.S | re.I,
+)
 
 esc = html.escape
+
+NO_DATE = "unknown"
+
+
+def night_date(meta):
+    """The build-date bucket for an article: its nb-meta date, or the
+    NO_DATE sentinel when the date is absent. build_catalog and every
+    renderer bucket and filter on this one value, so a dateless article
+    lands in exactly one night instead of being lost between a `None`
+    date and an `"unknown"` bucket.
+    """
+    return meta.get("date") or NO_DATE
+
+
+def date_sort_key(date):
+    # A dateless night sorts before every real date, so a dateless
+    # article can never win the "latest" newsstand slot.
+    return "" if date == NO_DATE else date
 
 
 # --------------------------------------------------------------------------- #
@@ -312,13 +338,20 @@ def build_catalog(site_cfg, series_cfgs, *, articles, generated, repository=None
 
     builds = {}
     for ed in articles.values():
-        d = ed["meta"].get("date") or "unknown"
+        d = night_date(ed["meta"])
         builds.setdefault(d, []).append(f"{ed['series']}/{ed['slug']}")
-    builds = {d: sorted(v) for d, v in sorted(builds.items(), reverse=True)}
+    builds = {
+        d: sorted(v)
+        for d, v in sorted(
+            builds.items(), key=lambda kv: date_sort_key(kv[0]), reverse=True
+        )
+    }
 
     tags = {}
     for ed in articles.values():
         for t in ed["meta"].get("tags") or []:
+            if not is_safe_tag(t):
+                continue
             tags.setdefault(t, []).append(f"{ed['series']}/{ed['slug']}")
     tags = {t: sorted(v) for t, v in sorted(tags.items())}
 
@@ -577,9 +610,9 @@ def render_newsstand(site, catalog, *, series_cfgs, articles):
             "“set me up”, then run a press check.</p></div>"
         )
         return page(site, site["title"], body=body, active="Today")
-    dates = sorted(catalog["builds"])
+    dates = sorted(catalog["builds"], key=date_sort_key)
     latest = dates[-1]
-    tonight = [ed for ed in articles.values() if ed["meta"].get("date") == latest]
+    tonight = [ed for ed in articles.values() if night_date(ed["meta"]) == latest]
     body = night_body(tonight, series_cfgs, depth=0, date=latest)
     if len(dates) > 1:
         prev = dates[-2]
@@ -591,9 +624,9 @@ def render_newsstand(site, catalog, *, series_cfgs, articles):
 
 
 def render_build_page(site, date, *, dates, articles, series_cfgs):
-    eds = [e for e in articles.values() if e["meta"].get("date") == date]
+    eds = [e for e in articles.values() if night_date(e["meta"]) == date]
     body = night_body(eds, series_cfgs, depth=2, date=date)
-    ordered = sorted(dates)
+    ordered = sorted(dates, key=date_sort_key)
     i = ordered.index(date)
     prev_d = ordered[i - 1] if i > 0 else None
     next_d = ordered[i + 1] if i < len(ordered) - 1 else None
@@ -620,7 +653,7 @@ def render_build_archive(site, dates):
     if not dates:
         body += '<div class="nb-empty"><p>No builds yet.</p></div>'
     seen_month = None
-    for d in sorted(dates, reverse=True):
+    for d in sorted(dates, key=date_sort_key, reverse=True):
         month = d[:7]
         if month != seen_month:
             try:
@@ -853,7 +886,28 @@ def render_tags_index(site, catalog):
     return page(site, f"Tags — {site['title']}", body=body, depth=1)
 
 
+def is_safe_tag(tag):
+    """Whether a tag can be turned into a tags/<tag>/index.html page safely.
+
+    Tags are untrusted (they come from auto-merged night-shift content and
+    check.py does not constrain them), and the builder writes each one as a
+    directory under tags/. A tag whose segments escape that tree — `..`,
+    `.`, an absolute path, a backslash, or an empty segment from a leading/
+    trailing/double slash — is dropped from the catalog entirely, so no
+    page, link, or os.makedirs is ever created outside --out. A plain
+    nested tag like `a/b` is safe and renders at its true depth.
+    """
+    if not isinstance(tag, str) or not tag or tag != tag.strip():
+        return False
+    if "\\" in tag or tag.startswith("/"):
+        return False
+    return all(seg and seg not in (".", "..") for seg in tag.split("/"))
+
+
 def render_tag_page(site, tag, *, refs, articles, series_cfgs):
+    # tags/<tag>/index.html: a plain tag sits at depth 2 (tags/ + the tag),
+    # a nested tag `a/b` one deeper per segment, so links resolve either way.
+    depth = 1 + len(tag.split("/"))
     eds = [
         articles[tuple(r.split("/", 1))]
         for r in refs
@@ -867,12 +921,12 @@ def render_tag_page(site, tag, *, refs, articles, series_cfgs):
     body += (
         '<div class="nb-list">'
         + "".join(
-            story_item(e, series_cfgs, depth=2)
+            story_item(e, series_cfgs, depth=depth)
             for e in sorted(eds, key=lambda e: e["meta"].get("date", ""), reverse=True)
         )
         + "</div>"
     )
-    return page(site, f"#{tag} — {site['title']}", body=body, depth=2)
+    return page(site, f"#{tag} — {site['title']}", body=body, depth=depth)
 
 
 def render_search_page(site):
@@ -1248,9 +1302,9 @@ def build(
                 base_url=base_url,
             ),
         )
-    latest = max(catalog["builds"], default=None)
+    latest = max(catalog["builds"], key=date_sort_key, default=None)
     if latest:
-        eds = [e for e in articles.values() if e["meta"].get("date") == latest]
+        eds = [e for e in articles.values() if night_date(e["meta"]) == latest]
         write(
             os.path.join(out, "email-latest.html"),
             render_email(
