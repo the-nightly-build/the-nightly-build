@@ -47,6 +47,7 @@ PROTOCOL_MAJOR = "1"
 MAX_BYTES = 2 * 1024 * 1024
 SLUG_RE = re.compile(r"^[a-z0-9-]{1,64}$")
 SERIES_RE = re.compile(r"^[a-z0-9-]{1,32}$")
+TAG_RE = re.compile(r"^[a-z0-9-]{1,32}$")
 DATE_RE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
 # Off-origin references (link/img) may load only from Google Fonts over https.
 # Matched by exact host after browser-style normalization, never by string
@@ -489,6 +490,18 @@ def validate_meta_fields(meta, rep):
     order = meta.get("order")
     if order is not None and (not isinstance(order, int) or order < 1):
         rep.block("B-META-PARSE", "nb-meta 'order' must be a positive integer or null")
+    tags = meta.get("tags")
+    if tags is not None:
+        if not isinstance(tags, list):
+            rep.block("B-META-PARSE", "nb-meta field 'tags' has wrong type")
+        else:
+            for tag in tags:
+                if not isinstance(tag, str) or not TAG_RE.match(tag):
+                    rep.block(
+                        "B-META-PARSE",
+                        f"nb-meta tag {tag!r} must match {TAG_RE.pattern} "
+                        "(lowercase slug: a-z, 0-9, hyphen)",
+                    )
 
 
 def check_article(

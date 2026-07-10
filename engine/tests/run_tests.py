@@ -256,6 +256,32 @@ expect(
     run_local(mut('"template": "article"', '"template": "brief"'), "semiconductors"),
     must_have=["B-META-MATCH"],
 )
+expect(
+    "slug-style tag is accepted",
+    run_local(
+        mut('"tags": ["equity"]', '"tags": ["equity", "memory-cycle"]'),
+        "semiconductors",
+    ),
+    must_not=["B-META-PARSE"],
+    blocks=0,
+)
+expect(
+    "uppercase tag blocked (slug rule)",
+    run_local(mut('"tags": ["equity"]', '"tags": ["Equity"]'), "semiconductors"),
+    must_have=["B-META-PARSE"],
+)
+expect(
+    "path-traversal tag blocked (slug rule)",
+    run_local(
+        mut('"tags": ["equity"]', '"tags": ["../../../escape"]'), "semiconductors"
+    ),
+    must_have=["B-META-PARSE"],
+)
+expect(
+    "non-list tags blocked",
+    run_local(mut('"tags": ["equity"]', '"tags": "equity"'), "semiconductors"),
+    must_have=["B-META-PARSE"],
+)
 
 print("== B-HTML ==")
 expect(
