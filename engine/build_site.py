@@ -1119,6 +1119,8 @@ def render_email(site_title, date, *, eds, series_cfgs, base_url):
         meta = ed["meta"]
         cfg = series_cfgs.get(ed["series"], {})
         url = absolute(f"/library/{ed['series']}/{ed['slug']}.html")
+        label = source_label(meta)
+        sources_line = f" · {esc(label)}" if label else ""
         rows.append(f"""
   <div style="border-top:1px solid #D9E2EE;padding:18px 0 14px">
     <div style="font-family:monospace;font-size:11px;letter-spacing:1px;
@@ -1131,7 +1133,7 @@ def render_email(site_title, date, *, eds, series_cfgs, base_url):
     <div style="font-family:Georgia,serif;font-style:italic;font-size:14px;
                 color:#4E5866;margin:0 0 6px">{esc(str(meta.get("dek", "")))}</div>
     <div style="font-family:monospace;font-size:11px;color:#8794A4">
-      {ed["reading_minutes"]} min read · {meta.get("sources", "?")} sources</div>
+      {ed["reading_minutes"]} min read{sources_line}</div>
   </div>""")
     return f"""<!DOCTYPE html>
 <html><body style="margin:0;padding:0;background:#F4F7FB">
