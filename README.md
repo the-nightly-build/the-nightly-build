@@ -48,16 +48,19 @@ source count. The reader's front page and a single article, on a phone:
 
 ## How it works
 
-| Piece         | Where                  | Purpose                                                                                                                              |
-| ------------- | ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
-| `PROTOCOL.md` | main                   | The complete agent contract                                                                                                          |
-| the proof     | `engine/check.py`      | Validates articles. BLOCK findings stop publication; WARN findings drive revision                                                    |
-| the editor    | `check.yml`            | Validates every PR to `library`; auto-merges clean ones from `autopublish` series (otherwise a human merges); supersedes competitors |
-| the press     | `engine/build_site.py` | Rebuilds the site on every merge: front page, night archive, sections, search, feeds, email digests                                  |
-| the paperboy  | `morning-mail.yml`     | Optional daily email of the latest build                                                                                             |
-| duty          | `engine/duty.py`       | Deterministic nightly work selection: cadence, pauses, completion, commissions                                                       |
-| templates     | `templates/`           | Two citation geometries plus a shared furniture catalog. User templates in `press/templates/` are first class                        |
-| skills        | `skills/`              | Librarian (setup and curation) and Correspondent (the night shift runtime)                                                           |
+| Piece             | Where                   | Purpose                                                                                                                              |
+| ----------------- | ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| `PROTOCOL.md`     | main                    | The complete agent contract                                                                                                          |
+| the proof         | `engine/check.py`       | Validates articles. BLOCK findings stop publication; WARN findings drive revision                                                    |
+| the desk          | `check.yml`             | Validates every PR to `library`; auto-merges clean ones from `autopublish` series (otherwise a human merges); supersedes competitors |
+| the press         | `engine/build_site.py`  | Rebuilds the site on every merge: front page, night archive, sections, search, feeds, email digests                                  |
+| the paperboy      | `morning-mail.yml`      | Optional daily email of the latest build                                                                                             |
+| duty              | `engine/duty.py`        | Deterministic nightly work selection: cadence, pauses, completion, commissions                                                       |
+| templates         | `templates/`            | Two citation geometries plus a shared furniture catalog. User templates in `press/templates/` are first class                        |
+| the correspondent | `skills/correspondent/` | The night-shift runtime: serves every series, running each article through the pipeline below                                        |
+| the writing coach | `skills/writing-coach/` | Studies how the best writers in a topic actually write, then hands the drafter a per-article voice brief                             |
+| the editor        | `skills/editor/`        | A surgical editorial pass over each draft: cuts and tightens in place or asks for a redraft, never rewrites                          |
+| the librarian     | `skills/librarian/`     | Setup interview and ongoing curation of `press/`                                                                                     |
 
 Two branches with disjoint jobs: `main` holds the engine and your
 configuration, `library` holds published articles, which the press builds into
@@ -76,21 +79,31 @@ are one-line settings. See [docs/series.md](docs/series.md).
 
 Sources can be constrained per series: `required_docs` are committed files
 the agent must read and cite, `consult` lists must-read starting points, and
-`sources_exclusive: true` restricts citations to the declared set. The proof
-enforces all three.
+`sources_exclusive: true` restricts citations to the declared set. The three
+sit at different tiers of the proof: `sources_exclusive` is an unconditional
+BLOCK (a citation outside the declared set fails the PR); a missing
+`required_docs` citation is a WARN that a `strict` series promotes to a BLOCK;
+`consult` is a read-first instruction the proof does not verify (citing a
+consulted source is optional).
+
+The proof also verifies that every cited source link resolves. It probes each
+URL by default and BLOCKs only on a definitive dead link: a 404/410
+response or a domain that does not resolve. A restricted, slow, rate-limited,
+bot-blocking (403), or timing-out source is treated as unverified and never
+blocks, so a real-but-gated source cannot fail an article.
 
 ## Security
 
 No executable logic ever lives on the `library` branch. Articles are
 sandboxed: no scripts beyond JSON data blocks and the engine runtime, no
 iframes, no event handlers, and external references only to the engine
-assets path and Google Fonts. The editor validates untrusted PRs with
+assets path and Google Fonts. The desk validates untrusted PRs with
 read-only permissions and no secrets. Auto-merge is squash-only, into
 `library` only, for BLOCK-clean PRs only. Mail credentials exist only as
 Actions secrets on the trusted post-merge path.
 
 Anyone can open a pull request to a public site, but no stranger can publish
-through one. The editor runs on the `pull_request` event, so a PR from a fork
+through one. The desk runs on the `pull_request` event, so a PR from a fork
 receives a read-only token and cannot merge itself; only a branch pushed to the
 site's own repository (the night shift, holding that repository's token) opens
 a same-repo PR that auto-merge can act on. The guarantee is the token split
@@ -107,8 +120,14 @@ script-free, so the sandbox above is unchanged. See
 
 ## Development
 
-The engine is Python 3.10+ with one runtime dependency, PyYAML. Scripts carry
-PEP 723 metadata, so `uv run engine/check.py` works without any setup.
+The engine is pure Python with one runtime dependency, PyYAML. Two Python
+floors apply, by context. The night-shift scripts each carry PEP 723 metadata
+and run standalone (`uv run engine/check.py` works with no setup), so they
+target Python 3.9+ to run on whatever a headless harness provides. Local
+development and CI run the lint, type-check, and test gate through
+`pyproject.toml`, which pins 3.10+. If you only schedule a night shift you
+never touch the 3.10 toolchain; the 3.10 floor is for contributing to the
+engine.
 
 ```sh
 python3 engine/tests/run_tests.py    # proof, builder, and end-to-end suites
