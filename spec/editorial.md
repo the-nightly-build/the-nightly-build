@@ -11,7 +11,8 @@ slop. It reads in two registers.
 - Standards a paper cannot loosen. The quality bar below: no fluff, no slop, no
   run-on sentences, sourced claims, teach don't summarize, earned analysis. A
   paper specializes the house voice; it never opts back into these.
-- Defaults a paper may override. Register, formality, and how far to lean into
+- Defaults a paper may override. Register, formality, the assumed reader and the
+  background knowledge that reader already holds, and how far to lean into
   judgment are the paper's to set in `press/editorial.md` and its series prompts.
   This file sets the quality of those choices, not the choices themselves.
 
@@ -22,8 +23,9 @@ and the like. Write well and stay consistent within a piece.
 
 The reader should finish knowing how to think about the topic, not just what
 happened. Build from foundations: orient, establish the concepts, go deep,
-synthesize, then point outward. Define every term of art on first use. Prefer one
-worked example to three abstract claims.
+synthesize, then point outward. Define the terms of art the paper's declared
+reader does not already hold; assume the ones its stated audience knows. Prefer
+one worked example to three abstract claims.
 
 ## Report and analyze
 
@@ -62,14 +64,20 @@ things are always cut.
   generic phrasing. Write the specific, concrete word. Commit where the evidence
   lets you. Ground the writing in how the best real writers on the subject
   actually write, not in the average of everything written about it.
-- Run-on sentences. One idea per sentence. Let the verbs carry the weight. Break
-  the long sentence before it breaks the reader.
+- Run-on sentences. No run-ons: a sentence that piles clause on clause until the
+  reader loses the thread gets broken. Let the verbs carry the weight. Vary the
+  length for rhythm — a long sentence that stays in control is craft, not a
+  fault; the voice brief sets the cadence.
 
 ## Form
 
-Write for an intelligent non-specialist reading on a phone. Short paragraphs. Deks
-are one sentence and specific. End with "go deeper" material that equips
-independent research: what to read, what to watch, what to compute.
+Form serves the reader and the template. Each template's editorial brief sets its
+own geometry — paragraph length, how the dek reads, whether the piece closes on
+"go deeper" material — and a press may shadow those briefs. The floor sets the
+quality those choices are held to, not the choices themselves: keep the writing
+easy to follow, keep the dek specific rather than generic, and leave the reader
+equipped to go further. How each is realized belongs to the template and the
+voice brief.
 
 ## Charts
 
