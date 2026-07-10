@@ -441,17 +441,22 @@ def pretty_date(iso):
     return f"{WEEKDAYS[d.weekday()]}, {MONTHS[d.month - 1]} {d.day}, {d.year}"
 
 
-def asset_stamp(repo):
+def asset_stamp(repo, theme_path=None):
     """Return a short content hash of the shared assets for cache busting.
 
     Every generated page and article copy links assets with ?v=<stamp>,
     so a returning reader can never pair cached old CSS with newer
-    markup. The stamp changes exactly when nb.css or nb.js change.
+    markup. The stamp changes when nb.css, nb.js, or the resolved
+    theme.css change — copy_assets republishes the configured theme as
+    assets/theme.css every build, so folding it in means a theme edit
+    busts the reader's cache and the new look actually reaches them.
     """
     h = hashlib.md5()
     base = os.path.join(repo, "engine", "assets")
-    for name in ("nb.css", "nb.js"):
-        path = os.path.join(base, name)
+    paths = [os.path.join(base, "nb.css"), os.path.join(base, "nb.js")]
+    if theme_path:
+        paths.append(theme_path)
+    for path in paths:
         if os.path.isfile(path):
             with open(path, "rb") as fh:
                 h.update(fh.read())
@@ -1229,7 +1234,7 @@ def build(
     site = {
         "title": site_cfg["title"],
         "appearance": site_cfg["appearance"],
-        "stamp": asset_stamp(repo),
+        "stamp": asset_stamp(repo, os.path.join(repo, site_cfg["theme"])),
         "assets_html": render_assets_html(site_cfg.get("assets")),
         "footer": site_cfg.get("footer"),
         "repository": repository,
