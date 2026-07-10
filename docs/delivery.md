@@ -47,7 +47,7 @@ short notice, for up to 14 days, so a broken schedule never fails silently.
 Test a send anytime by running the workflow manually from the Actions tab.
 `workflow_dispatch` bypasses the hour and freshness gates, not the secrets
 gate. Credentials live only in GitHub Actions secrets, never in the repo,
-and never anywhere the editor's untrusted-PR validation can see them.
+and never anywhere the desk's untrusted-PR validation can see them.
 
 Every night's digest is also archived at `builds/<date>/email.html` on the
 site.
@@ -72,7 +72,8 @@ review, endorse, or vouch for what any author publishes; you own your paper and
 are responsible for it, the same way you would be on any hosting platform.
 
 **You are listed automatically.** Once your paper publishes with a current engine
-(catalog protocol `1.2`), the daily crawl discovers your fork, reads your public
+(catalog protocol `1.3` or later; the version is stamped in your `catalog.json`),
+the daily crawl discovers your fork, reads your public
 `catalog.json`, and lists you. Nothing to turn on. Add an optional one-line
 description for your card:
 
