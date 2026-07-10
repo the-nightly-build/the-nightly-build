@@ -1,5 +1,5 @@
 title: "The Nightly Build"
-theme: press/themes/newsroom.css # keeps the default palette; carries this paper's furniture (themes/newsroom.css)
+theme: press/themes/newsroom.css # the palette; furniture rides alongside it (press/furniture/ + each template folder)
 appearance: auto # auto | light | dark. auto follows the system; base/no-JS fallback is light.
 front: comfortable # show deks on front-page story cells (compact hides them)
 footer: "Filed while you slept." # left imprint on every page; unset -> "A Nightly Build paper"

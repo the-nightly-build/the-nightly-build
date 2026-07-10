@@ -602,6 +602,47 @@ check(
     detail=f"{stamp_before} == {stamp_after}",
 )
 
+print("== furniture concatenates into theme.css and busts the stamp ==")
+# copy_assets folds every CSS owner — the theme, shared press furniture, and each
+# template's bespoke furniture.css — into the single assets/theme.css, and the
+# stamp must fold in the same owners so a furniture edit reaches the reader.
+furn_repo = pathlib.Path(tempfile.mkdtemp()) / "repo"
+shutil.copytree(TESTREPO, furn_repo)
+shared_css = furn_repo / "press" / "furniture" / "styles.css"
+shared_css.parent.mkdir(parents=True)
+shared_css.write_text(".rs-shared-furniture{color:rebeccapurple}\n")
+tpl_css = furn_repo / "templates" / "article" / "furniture.css"
+tpl_css.write_text(".rs-article-furniture{color:seagreen}\n")
+furn_out = tempfile.mkdtemp()
+B.build(str(furn_repo), make_full_library(), out=furn_out, now=NOW)
+theme_out = read(furn_out, "assets", "theme.css")
+check(
+    "theme.css carries the base palette",
+    "--bg" in theme_out,
+    haystack=theme_out,
+    needle="--bg",
+)
+check(
+    "theme.css carries the shared press furniture",
+    ".rs-shared-furniture" in theme_out,
+    haystack=theme_out,
+    needle=".rs-shared-furniture",
+)
+check(
+    "theme.css carries the template's bespoke furniture",
+    ".rs-article-furniture" in theme_out,
+    haystack=theme_out,
+    needle=".rs-article-furniture",
+)
+furn_stamp_before = asset_stamp_of(read(furn_out, "index.html"))
+tpl_css.write_text(".rs-article-furniture{color:crimson}\n")
+furn_out2 = tempfile.mkdtemp()
+B.build(str(furn_repo), make_full_library(), out=furn_out2, now=NOW)
+check(
+    "editing a furniture.css changes the cache-busting stamp",
+    furn_stamp_before != asset_stamp_of(read(furn_out2, "index.html")),
+)
+
 print("== dateless article does not blank the newsstand ==")
 # A missing date must not win the 'latest' sort or leave the front page empty
 # next to a real dated article; both bucket under the same 'unknown' sentinel.

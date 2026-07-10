@@ -426,21 +426,20 @@ def month_label(iso, fallback):
     return f"{MONTHS[md.month - 1]} {md.year}"
 
 
-def asset_stamp(repo, theme_path=None):
+def asset_stamp(repo, css_paths=()):
     """Return a short content hash of the shared assets for cache busting.
 
     Every generated page and article copy links assets with ?v=<stamp>,
-    so a returning reader can never pair cached old CSS with newer
-    markup. The stamp changes when nb.css, nb.js, or the resolved
-    theme.css change — copy_assets republishes the configured theme as
-    assets/theme.css every build, so folding it in means a theme edit
-    busts the reader's cache and the new look actually reaches them.
+    so a returning reader can never pair cached old CSS with newer markup.
+    The stamp folds in nb.css, nb.js, and every CSS owner concatenated
+    into assets/theme.css (the configured theme plus all furniture, shared
+    and template-scoped). copy_assets rebuilds theme.css from those owners
+    every build, so editing any of them busts the reader's cache and the
+    new look actually reaches them.
     """
     h = hashlib.md5()
     base = os.path.join(repo, "engine", "assets")
-    paths = [os.path.join(base, "nb.css"), os.path.join(base, "nb.js")]
-    if theme_path:
-        paths.append(theme_path)
+    paths = [os.path.join(base, "nb.css"), os.path.join(base, "nb.js"), *css_paths]
     for path in paths:
         if os.path.isfile(path):
             with open(path, "rb") as fh:
@@ -1118,16 +1117,60 @@ def write(path, content):
         fh.write(content)
 
 
+def template_dirs(repo):
+    """Map each template id to its resolved folder, press shadowing shipped.
+
+    A template is a folder holding a manifest.yaml (the folder name is the
+    id); a press/templates/<id> package replaces a shipped one of the same
+    id wholesale. A folder without a manifest.yaml is not a template and is
+    skipped, so a stray asset left beside the packages is ignored.
+    """
+    dirs = {}
+    for base in (
+        os.path.join(repo, "templates"),
+        os.path.join(repo, "press", "templates"),  # press shadows shipped
+    ):
+        if not os.path.isdir(base):
+            continue
+        for name in sorted(os.listdir(base)):
+            folder = os.path.join(base, name)
+            if os.path.isfile(os.path.join(folder, "manifest.yaml")):
+                dirs[name] = folder
+    return dirs
+
+
+def css_owners(repo, site_cfg):
+    """Every CSS file concatenated into the published assets/theme.css.
+
+    Deterministically ordered so the cascade is stable and a later owner
+    can lean on tokens an earlier one defines: the site theme first, then
+    the shared press furniture, then each template's bespoke furniture in
+    id order. Missing optional files are filtered out.
+    """
+    owners = [os.path.join(repo, site_cfg["theme"])]
+    owners.append(os.path.join(repo, "press", "furniture", "styles.css"))
+    for _id, folder in sorted(template_dirs(repo).items()):
+        owners.append(os.path.join(folder, "furniture.css"))
+    return [path for path in owners if os.path.isfile(path)]
+
+
 def copy_assets(repo, site_cfg, *, out):
     src = os.path.join(repo, "engine", "assets")
     dst = os.path.join(out, "assets")
     if os.path.isdir(dst):
         shutil.rmtree(dst)
     shutil.copytree(src, dst)
-    # the configured theme is also published under the stable name assets/theme.css
-    # so a site.yaml theme swap restyles every already-published article
-    theme_src = os.path.join(repo, site_cfg["theme"])
-    shutil.copyfile(theme_src, os.path.join(dst, "theme.css"))
+    # Every CSS owner is concatenated under the stable name assets/theme.css:
+    # the configured theme plus all furniture (shared and template-scoped). The
+    # output name never changes, so page links and article copies need no edit,
+    # and a theme or furniture change restyles every already-published article.
+    blocks = []
+    for path in css_owners(repo, site_cfg):
+        with open(path, encoding="utf-8") as fh:
+            blocks.append(
+                f"/* --- {os.path.basename(path)} --- */\n{fh.read().rstrip()}"
+            )
+    write(os.path.join(dst, "theme.css"), "\n\n".join(blocks) + "\n")
 
 
 ARTICLE_ASSET_RE = re.compile(
@@ -1185,7 +1228,7 @@ def build(
     site = {
         "title": site_cfg["title"],
         "appearance": site_cfg["appearance"],
-        "stamp": asset_stamp(repo, os.path.join(repo, site_cfg["theme"])),
+        "stamp": asset_stamp(repo, css_owners(repo, site_cfg)),
         "assets_html": render_assets_html(site_cfg.get("assets")),
         "footer": site_cfg.get("footer"),
         "repository": repository,

@@ -1,34 +1,4 @@
 <!doctype html>
-<!--
-  TEMPLATE: article (longread · 800-6000 words · cite_rule per-section)
-  Enforced prose. The one template for anything told in sections: an
-  investigation, a history, an explainer, a profile, an argued essay, an
-  appraisal, a debate. You design the outline; the proof checks the shape.
-
-  The shape:
-  * Three anchors, exactly once each: orientation (open on a real fact or a
-    live tension, then orient the reader quickly), go-deeper (close by
-    equipping independent research), and sources.
-  * Between the anchors: 2 to 6 sections YOU name for the topic, each as
-    <section data-nb-section="your-label"> with a lowercase-hyphen label.
-    The outline should be the one this topic demands. A piece on a chip
-    monopoly might run orientation / the-monopoly / euv-explained /
-    the-china-question / go-deeper; a history might hang everything on a
-    timeline; an essay might run its argument in three moves. Never force
-    a section the material does not need.
-  * Every section needs >=1 inline citation:
-      <sup class="nb-cite"><a href="#sN">N</a></sup>
-    pointing at a numbered source entry <li id="sN"> in #sources.
-
-  Furniture: templates/FURNITURE.md is the catalog of pre-designed
-  components (stat strips, timelines, pull quotes, position blocks, claim
-  cards, charts...). Any of them may be used anywhere; use a piece when it
-  carries information better than prose.
-
-  Also: replace every ALL-CAPS placeholder and all sample content; fill
-  nb-meta; keep the asset <link>/<script> tags exactly as they are
-  (engine-owned).
--->
 <html lang="en">
   <head>
     <meta charset="utf-8" />
@@ -85,30 +55,11 @@
         </p>
       </section>
 
-      <section
-        data-nb-section="YOUR-FIRST-SECTION-LABEL"
-        id="YOUR-FIRST-SECTION-LABEL"
-      >
-        <h2>ITS HEADING</h2>
-        <!-- 2-6 of these, labeled for the topic. Order and count are yours. -->
-        <p>
-          Cited prose.<sup class="nb-cite"><a href="#s2">2</a></sup>
-        </p>
-      </section>
-
-      <section
-        data-nb-section="YOUR-SECOND-SECTION-LABEL"
-        id="YOUR-SECOND-SECTION-LABEL"
-      >
-        <h2>ITS HEADING</h2>
-        <p>
-          Cited prose.<sup class="nb-cite"><a href="#s3">3</a></sup>
-        </p>
-      </section>
+      <!-- FLEX SLOT: 2-6 sections YOU name for the topic, each
+           <section data-nb-section="lowercase-hyphen-label">, each cited. -->
 
       <section data-nb-section="go-deeper" id="go-deeper">
         <h2>Go deeper</h2>
-        <!-- Equip independent research: primary documents, filings, lectures, data. -->
         <p>
           Where to go next and what to look for when you get there.<sup
             class="nb-cite"
@@ -145,8 +96,6 @@
               >PUBLISHER — TITLE</a
             >
           </li>
-          <!-- Meet the series source floor. Mark required docs:
-         <a data-nb-source data-nb-required="DOC-ID" href="https://…">PUBLISHER — TITLE</a> -->
         </ol>
       </section>
     </article>

@@ -1,0 +1,14 @@
+# The machine contract for the brief template: the geometry engine/check.py
+# enforces (PROTOCOL step 2.4 reads it). brief is enforced structure — 4-8 tagged
+# items, every item cited, each with a "why it matters" line (data-nb-why). In
+# rolling mode the slug and nb-meta date are today's UTC date; on an open section
+# you coin a topical slug and set mode "open". Bands are quality calibration (WARN
+# tier), not law. A press adds or redefines templates as folder packages under
+# press/templates/<id>/.
+about: A batch of tonight's developments — an itemized nightly roundup, each item a judgment about why something matters.
+class: shortread
+items: [4, 8]
+sections: [items, sources]
+cite_rule: per-item
+require_why: true # each item needs a "why it matters" line (data-nb-why)
+modes: [rolling, open]

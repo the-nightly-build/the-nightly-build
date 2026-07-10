@@ -13,7 +13,9 @@ Pick tonight's matter like an editor:
 - Read the section's back catalog first. Return to a case only when its posture has
   actually changed, and lead with what changed.
 
-Open with the case docket furniture so the prose can argue instead of recite:
+Open with the case docket furniture (`rs-docket`, in this paper's shared
+furniture — `press/furniture/catalog.md`) so the prose can argue instead of
+recite:
 
 ```html
 <div class="rs-docket">

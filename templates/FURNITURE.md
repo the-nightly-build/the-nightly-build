@@ -3,14 +3,16 @@
 Furniture is the set of pre-designed components an article may use. Every
 class here is styled by the engine's shared CSS in both color schemes, so
 composing them cannot break the paper's look. Any template may use any
-component. Use a piece when it carries information better than prose would;
+component in this catalogue. Use a piece when it carries information better than prose would;
 skip it when it would decorate. Two or three pieces per article is typical,
 zero is fine.
 
 The section tags, citation markup, source entries, and nb-meta block are
-protocol, not furniture; they are defined in PROTOCOL.md. Papers can add
-their own furniture: define classes in the paper's theme CSS and instruct
-sections to use them in prompt.md (see docs/customization.md).
+protocol, not furniture; they are defined in PROTOCOL.md. This is the engine's
+base catalogue, always available. A paper can add its own furniture too — shared
+across the paper in `press/furniture/`, or bespoke to one template in that
+template's folder — and instruct sections to use it in prompt.md (see
+docs/customization.md).
 
 ## Stat strip
 
