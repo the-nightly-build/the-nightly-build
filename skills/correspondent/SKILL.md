@@ -100,12 +100,12 @@ task or todo tool, so no stage is skipped and each stage-skill fires at its step
    voice brief as you write so the prose is anchored, not slop. Start from
    `press/templates/<template>.html` if it exists, else
    `templates/<template>.html`.
-   - The registry entry defines the template's geometry. **article** is enforced
-     prose: the anchor sections appear once, and where it declares `flex_sections`
-     you name that many more between them (lowercase-hyphen `data-nb-section`
-     labels, each cited). **brief** is enforced structure: 4 to 8 tagged items,
-     each cited, each with a why-it-matters line. A custom template follows its
-     own entry the same way.
+   - The registry entry defines the template's geometry. The **article** template
+     is enforced prose: the anchor sections appear once, and where it declares
+     `flex_sections` you name that many more between them (lowercase-hyphen
+     `data-nb-section` labels, each cited). The **brief** template is enforced
+     structure: 4 to 8 tagged items, each cited, each with a why-it-matters line.
+     A custom template follows its own entry the same way.
    - `templates/FURNITURE.md` is the component catalog. Use a piece when it
      carries information better than prose; skip decoration.
    - Fill `nb-meta` honestly (`sources`/`words` are recounted by the proof;
