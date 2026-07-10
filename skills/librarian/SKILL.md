@@ -169,7 +169,7 @@ the proof rejects articles for unconfigured series), then hand off to the
 correspondent's _Commissioned work_ flow; let a
 collection surprise them (`selection: random`); adjust `words:` bands (may
 tighten, never loosen below the registry floor) and `min_sources`; flip
-`autopublish` (false ⇒ the editor approves, a human merges) and `strict`
+`autopublish` (false ⇒ the desk approves, a human merges) and `strict`
 (true ⇒ WARNs become BLOCKs — warn that a missed night then beats a thin
 article). Re-validate after every change.
 
