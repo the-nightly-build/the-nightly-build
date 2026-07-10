@@ -35,9 +35,11 @@ isolation and the parallelism, not the pipeline.
 
 `PROTOCOL.md` → `spec/editorial.md` (house floor) → `press/editorial.md` (the
 paper's voice, if present) → your template's registry entry
-(`templates/registry.yaml` overlaid by `press/templates/registry.yaml`) →
-`press/series/<id>/prompt.md` → tag fragments in declared order → the item's
-`prompt` if present. Later layers specialize; they never override earlier ones.
+(`templates/registry.yaml` overlaid by `press/templates/registry.yaml`) → the
+template's editorial brief if it ships one (`press/templates/<t>.md` over
+`templates/<t>.md`) → `press/series/<id>/prompt.md` → tag fragments in declared
+order → the item's `prompt` if present. Later layers specialize; they never
+override earlier ones.
 
 ## Select work
 

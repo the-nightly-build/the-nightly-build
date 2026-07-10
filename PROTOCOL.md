@@ -27,7 +27,9 @@ available, `uv run engine/<script>.py` manages the dependency itself.
    4. The registry entry for your series' template: `templates/registry.yaml`,
       overlaid by `press/templates/registry.yaml` (your entries win). The
       template file itself is `press/templates/<t>.html` if it exists, else
-      `templates/<t>.html`.
+      `templates/<t>.html`. If the template ships an editorial brief
+      (`press/templates/<t>.md` overlaid on `templates/<t>.md`), read it as the
+      template's voice; it composes here, before the series prompt.
    5. `press/series/<id>/prompt.md`: the series' editorial instructions.
    6. Tag fragments listed in the series config, in declared order.
    7. The item-level `prompt`, if present.

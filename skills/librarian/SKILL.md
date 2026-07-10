@@ -194,7 +194,10 @@ article). Re-validate after every change.
   name): `cite_exempt: [names]` for sections that carry no citations (on top
   of the always-exempt `sources`) and `require_why: true` to require a
   `data-nb-why` line on each item. The build-your-own walkthrough in
-  `docs/customization.md` rebuilds the classic lesson template this way.
+  `docs/customization.md` rebuilds the classic lesson template this way. An
+  optional `press/templates/<id>.md` editorial brief gives the template its voice
+  and identity (crib `templates/article.md`): specific about stance and craft,
+  permissive about structure.
   Validate, then press check before scheduling.
 - _"Give my paper its own furniture"_ — add component classes to the paper's
   theme CSS (it restyles the whole library on every publish) and instruct
