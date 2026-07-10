@@ -23,6 +23,8 @@ The voice you produce must fit the paper, not float free. Read first:
   (`press/editorial.md`). Together they are the style guide; they own register
   and assumed knowledge.
 - The template brief and the series prompt: the shape and the subject.
+- The tag fragments in declared order and the item's `prompt` if present: they
+  can redefine the genre and voice you are calibrating, so read them too.
 
 Your job is to take the domain's best voice and adapt it to fit all of these in
 the best way. The brief you write is already reconciled to the paper, so the

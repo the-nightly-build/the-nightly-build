@@ -22,18 +22,14 @@ agents can run it and their costs.
 upstream-owned. Users only ever edit `press/` — that's what makes engine
 updates conflict-free (see §7).
 
-**Fresh paper?** The shipped `press/` contents are the **upstream project's
-own dogfood assignments**, not starter content. Reset them before the
-interview — don't offer to keep them, and never let them reach a schedule:
-
-```sh
-rm -r press/series/*
-```
-
-Also rewrite `press/site.yaml` (their title) and `press/editorial.md` (their
-voice, §1) as part of setup. The upstream versions remain readable on the
-upstream repo as living examples — every file there demonstrates part of the
-config surface, including commented-out advanced options.
+**Fresh paper?** A fresh fork has no `press/` content of its own to reset.
+Upstream ships no `press/` at all — the directory does not exist there, which
+is what keeps engine updates conflict-free — and `setup.sh` scaffolds an empty
+one. So the interview writes `press/site.yaml` (their title), `press/editorial.md`
+(their voice, §1), and `press/series/` from scratch. The complete working
+configuration in `examples/` is the living reference — every file there
+demonstrates part of the config surface, including commented-out advanced
+options — so crib from it rather than copy it wholesale.
 
 ## 1. Interview
 
@@ -169,7 +165,7 @@ the proof rejects articles for unconfigured series), then hand off to the
 correspondent's _Commissioned work_ flow; let a
 collection surprise them (`selection: random`); adjust `words:` bands (may
 tighten, never loosen below the registry floor) and `min_sources`; flip
-`autopublish` (false ⇒ the editor approves, a human merges) and `strict`
+`autopublish` (false ⇒ the desk approves, a human merges) and `strict`
 (true ⇒ WARNs become BLOCKs — warn that a missed night then beats a thin
 article). Re-validate after every change.
 

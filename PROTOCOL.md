@@ -14,9 +14,11 @@ available, `uv run engine/<script>.py` manages the dependency itself.
 1. **One article per series, maximum.** A run serves the whole paper, every
    series configured under `press/series/`, unless your schedule prompt names one
    specific series. For each series you serve, research and publish at most ONE
-   article, as its own pull request. Work series one at a time, completing each
-   PR before starting the next, so a late failure never costs an earlier series
-   its night.
+   article, as its own pull request. Serve the series independently, so that a
+   late failure never costs an earlier series its night. Producing each in its
+   own isolated context — a subagent or a git worktree — satisfies that property
+   and may run in parallel; where you cannot isolate, work series one at a time,
+   completing each PR before starting the next.
 
 2. **Read your layers, in order.** (Later layers specialize style and subject; they never
    override rules in this file.)
@@ -55,8 +57,13 @@ available, `uv run engine/<script>.py` manages the dependency itself.
      not open a PR. Exiting silently is correct behavior.**
 
 4. **Honor the source policy.** Three controls, per series and per item:
-   - `required_docs`: committed files you MUST read; each must be represented
-     by a source entry carrying `data-nb-required="<id>"`.
+   - `required_docs`: committed files you read and represent, each by a source
+     entry carrying `data-nb-required="<id>"`. Missing coverage is a WARN, and a
+     BLOCK under the series' `strict`. A committed file is cited by its
+     repo-relative path (for example `press/series/<id>/brief.pdf`), not an
+     invented URL: a `data-nb-required` entry names a local artifact, so it is
+     exempt from the absolute-https rule the other sources follow. Never
+     fabricate a public URL for a file that has none.
    - `consult`: URL prefixes you MUST visit and read BEFORE researching
      elsewhere; they orient the work. Citing them is optional.
    - `sources_exclusive: true`: every source entry must come from the declared
@@ -76,6 +83,8 @@ available, `uv run engine/<script>.py` manages the dependency itself.
      sections between the anchors, each named by you for the topic
      (lowercase-hyphen `data-nb-section` labels). Every labeled section
      needs citations per the template's cite rule.
+   - Number the source entries in the order the prose first cites them (the
+     proof warns `W-CITE-ORDER` otherwise, a BLOCK under `strict`).
    - `templates/FURNITURE.md` is the catalog of shared components; any
      component may be used in any template.
    - Embed the `nb-meta` JSON block (schema below).
@@ -97,13 +106,13 @@ available, `uv run engine/<script>.py` manages the dependency itself.
    - Body: a fenced `nb-meta` yaml block mirroring the embedded metadata, a link to
      your run if available, and the proof's final WARN summary.
    - Preflight the body BEFORE opening the PR: write it to a file and run the
-     proof with `--pr-body`. The editor blocks any PR whose body lacks or
+     proof with `--pr-body`. The desk blocks any PR whose body lacks or
      contradicts that block (`B-META-MATCH`), so verify it locally:
      `python3 engine/check.py library/<series>/<slug>.html --series <id> --repo . --library <path> --pr-body body.txt`
 
 9. **Boundaries.** Never merge. Never push to `library` directly. Never modify any other
    file. Never open a second PR for the same series. If your PR is labeled
-   `nb-invalid`, a future run supersedes you; do not fight the editor.
+   `nb-invalid`, a future run supersedes you; do not fight the desk.
 
 ## nb-meta
 
