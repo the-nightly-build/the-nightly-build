@@ -38,7 +38,6 @@ TESTREPO = make_fixtures.test_repo()
 def run_local(
     html_text, series, *, slug=None, library=None, repo=None, today=TODAY, pr_body=None
 ):
-    # Write html as library/<series>/<slug>.html in a temp dir and run the proof.
     repo = repo or TESTREPO
     tmp = tempfile.mkdtemp()
     slug = slug or "micron"
@@ -95,7 +94,6 @@ def expect(name, rep, *, must_have=(), must_not=(), blocks=None):
 
 
 def make_library(published):
-    # published: {series: [slugs]}. Returns a temp dir shaped like a library checkout.
     tmp = tempfile.mkdtemp()
     for series, slugs in published.items():
         d = pathlib.Path(tmp) / "library" / series
@@ -106,7 +104,6 @@ def make_library(published):
 
 
 def seq_repo():
-    # Copy the fixture repo and rewrite semiconductors as a sequence.
     tmp = tempfile.mkdtemp()
     for sub in ("press", "templates"):
         shutil.copytree(pathlib.Path(TESTREPO) / sub, pathlib.Path(tmp) / sub)
@@ -1150,7 +1147,6 @@ print("== rhythm & governance (cadence, paused, selection) ==")
 
 
 def patched_repo(patch, series="semiconductors"):
-    # Copy the fixture repo and append yaml to one series config.
     tmp = tempfile.mkdtemp()
     for sub in ("press", "templates", "engine"):
         shutil.copytree(pathlib.Path(TESTREPO) / sub, pathlib.Path(tmp) / sub)
@@ -1401,8 +1397,6 @@ print("== duty.py degrades gracefully on malformed input ==")
 
 
 def overwrite_series(body, series="ai-briefs"):
-    # Copy the fixture repo and replace one series.yaml wholesale, so tests
-    # can hand duty a config shape validate_config would never let through.
     tmp = patched_repo("", series=series)
     y = pathlib.Path(tmp) / "press" / "series" / series / "series.yaml"
     y.write_text(body)
@@ -1766,9 +1760,6 @@ print("== ci_helpers.autopublish (the auto-merge gate) ==")
 
 
 def ci_autopublish(series_yaml):
-    # Stand up a throwaway repo whose single-file PR adds one library article,
-    # then ask ci_helpers whether that series auto-merges — the exact question
-    # check.yml poses on every night-shift PR.
     repo = tempfile.mkdtemp()
     sd = pathlib.Path(repo) / "press" / "series" / "foo"
     sd.mkdir(parents=True)
@@ -1938,9 +1929,6 @@ for name, ok in wf_cases:
 
 
 def run_suite(script, label):
-    # Run a subprocess suite, stream its output, and fold its own assertion
-    # counts into this runner's totals so the summary reports real coverage
-    # instead of omitting the ~125 builder + e2e assertions.
     global PASS
     print(f"== {label} ({script}) ==")
     proc = subprocess.run(

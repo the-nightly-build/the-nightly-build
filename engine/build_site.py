@@ -81,14 +81,10 @@ def night_date(meta):
 
 
 def date_sort_key(date):
-    # A dateless night sorts before every real date, so a dateless
-    # article can never win the "latest" newsstand slot.
     return "" if date == NO_DATE else date
 
 
 def by_date_and_slug(ed):
-    # Reverse-chron ordering key shared by the search index, both feeds, and
-    # the open-series position sort (which applies it ascending).
     return (ed["meta"].get("date", ""), ed["slug"])
 
 
@@ -103,7 +99,6 @@ def load_yaml(path):
 
 
 def load_site_config(repo):
-    # Engine defaults, overridden by the user's press/site.yaml when present.
     cfg = {}
     path = os.path.join(repo, "press", "site.yaml")
     if os.path.isfile(path):
@@ -258,11 +253,6 @@ def assign_positions(articles, series_cfgs):
 
 
 def derive_self_repository(explicit, base_url) -> str | None:
-    # The press's own "owner/repo", used by chrome for the "star this press"
-    # link. Prefer an explicit value (GITHUB_REPOSITORY in CI); otherwise parse
-    # a GitHub Pages project URL of the form https://<owner>.github.io/<repo>/.
-    # A user/organization Pages site (no repo path) yields None, and chrome
-    # simply omits the star link in that rare case.
     if explicit:
         return explicit
     match = re.match(r"https?://([^./]+)\.github\.io/([^/]+)", base_url or "")
@@ -425,8 +415,6 @@ def pretty_date(iso):
 
 
 def month_label(iso, fallback):
-    # "July 2026" for an ISO date, falling back to the raw value when it does
-    # not parse (e.g. the blank month of the NO_DATE sentinel).
     try:
         md = dt.date.fromisoformat(iso)
     except ValueError:
@@ -457,10 +445,6 @@ def asset_stamp(repo, theme_path=None):
 
 
 def chrome_eco_links(site):
-    # Ecosystem links under the hamburger nav (identical markup in nb.js). All
-    # open in a new tab. "Star on GitHub" points at this press's own repo and is
-    # omitted when the repo is unknown; "Start your own" recruits to the canonical
-    # repo; "The whole newspaper" links to the directory directory.
     ext = 'target="_blank" rel="noopener noreferrer"'
     links = []
     if site.get("repository"):
@@ -476,8 +460,6 @@ def chrome_eco_links(site):
 
 
 def chrome_imprint(site):
-    # Footer left side. Custom footer text renders as plain unlinked text; the
-    # default credits the engine and links to the canonical repo.
     ext = 'target="_blank" rel="noopener noreferrer"'
     if site.get("footer"):
         return f'<span class="nb-imprint">{esc(site["footer"])}</span>'
@@ -869,8 +851,6 @@ def is_safe_tag(tag):
 
 
 def render_tag_page(site, tag, *, refs, articles, series_cfgs):
-    # tags/<tag>/index.html: a plain tag sits at depth 2 (tags/ + the tag),
-    # a nested tag `a/b` one deeper per segment, so links resolve either way.
     depth = 1 + len(tag.split("/"))
     eds = [
         articles[tuple(r.split("/", 1))]
@@ -914,8 +894,6 @@ BODY_RE = re.compile(r"<body[^>]*>([\s\S]*?)</body>", re.I)
 
 
 def article_body_html(path):
-    # The inner HTML of an article's <body>, or the whole file when it has no
-    # <body>. Shared by the search index and the feed content extractor.
     with open(path, encoding="utf-8", errors="replace") as fh:
         raw = fh.read()
     m = BODY_RE.search(raw)
@@ -923,7 +901,6 @@ def article_body_html(path):
 
 
 def article_text(path):
-    # Readable text of an article, for the search index.
     text = TEXT_STRIP_RE.sub(" ", article_body_html(path))
     text = html.unescape(text)
     return re.sub(r"\s+", " ", text).strip()
@@ -966,8 +943,6 @@ HREF_RE = re.compile(r'((?:href|src)=")([^"]+)(")', re.I)
 
 
 def absolutize_url(base_url, path):
-    # Prefix a site-root path with the base URL when one is known (feeds and
-    # the email digest need absolute links); otherwise the path stands as-is.
     return f"{base_url}{path}" if base_url else path
 
 
