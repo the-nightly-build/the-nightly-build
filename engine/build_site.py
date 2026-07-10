@@ -63,9 +63,35 @@ UPSTREAM_REPOSITORY = os.getenv(
     "UPSTREAM_REPOSITORY", "the-nightly-build/the-nightly-build"
 )
 DIRECTORY_URL = os.getenv("DIRECTORY_URL", "https://the-nightly-build.github.io/")
-META_RE = re.compile(r'<script[^>]*\bid="nb-meta"[^>]*>(.*?)</script>', re.S | re.I)
+# The nb-meta block build_site renders must be the same one check.py validates:
+# a <script type="application/json" id="nb-meta">. Requiring the type (in any
+# attribute order) means an untyped decoy #nb-meta the proof cannot see is
+# invisible to the builder too, instead of overriding title/date/series/slug.
+META_RE = re.compile(
+    r'<script\b(?=[^>]*\btype="application/json")(?=[^>]*\bid="nb-meta")'
+    r"[^>]*>(.*?)</script>",
+    re.S | re.I,
+)
 
 esc = html.escape
+
+NO_DATE = "unknown"
+
+
+def night_date(meta):
+    """The build-date bucket for an article: its nb-meta date, or the
+    NO_DATE sentinel when the date is absent. build_catalog and every
+    renderer bucket and filter on this one value, so a dateless article
+    lands in exactly one night instead of being lost between a `None`
+    date and an `"unknown"` bucket.
+    """
+    return meta.get("date") or NO_DATE
+
+
+def date_sort_key(date):
+    # A dateless night sorts before every real date, so a dateless
+    # article can never win the "latest" newsstand slot.
+    return "" if date == NO_DATE else date
 
 
 # --------------------------------------------------------------------------- #
@@ -312,13 +338,20 @@ def build_catalog(site_cfg, series_cfgs, *, articles, generated, repository=None
 
     builds = {}
     for ed in articles.values():
-        d = ed["meta"].get("date") or "unknown"
+        d = night_date(ed["meta"])
         builds.setdefault(d, []).append(f"{ed['series']}/{ed['slug']}")
-    builds = {d: sorted(v) for d, v in sorted(builds.items(), reverse=True)}
+    builds = {
+        d: sorted(v)
+        for d, v in sorted(
+            builds.items(), key=lambda kv: date_sort_key(kv[0]), reverse=True
+        )
+    }
 
     tags = {}
     for ed in articles.values():
         for t in ed["meta"].get("tags") or []:
+            if not is_safe_tag(t):
+                continue
             tags.setdefault(t, []).append(f"{ed['series']}/{ed['slug']}")
     tags = {t: sorted(v) for t, v in sorted(tags.items())}
 
@@ -408,17 +441,22 @@ def pretty_date(iso):
     return f"{WEEKDAYS[d.weekday()]}, {MONTHS[d.month - 1]} {d.day}, {d.year}"
 
 
-def asset_stamp(repo):
+def asset_stamp(repo, theme_path=None):
     """Return a short content hash of the shared assets for cache busting.
 
     Every generated page and article copy links assets with ?v=<stamp>,
     so a returning reader can never pair cached old CSS with newer
-    markup. The stamp changes exactly when nb.css or nb.js change.
+    markup. The stamp changes when nb.css, nb.js, or the resolved
+    theme.css change — copy_assets republishes the configured theme as
+    assets/theme.css every build, so folding it in means a theme edit
+    busts the reader's cache and the new look actually reaches them.
     """
     h = hashlib.md5()
     base = os.path.join(repo, "engine", "assets")
-    for name in ("nb.css", "nb.js"):
-        path = os.path.join(base, name)
+    paths = [os.path.join(base, "nb.css"), os.path.join(base, "nb.js")]
+    if theme_path:
+        paths.append(theme_path)
+    for path in paths:
         if os.path.isfile(path):
             with open(path, "rb") as fh:
                 h.update(fh.read())
@@ -527,7 +565,7 @@ def story_item(ed, series_cfgs, *, depth=0):
     dek = str(ed["meta"].get("dek", ""))
     dek_html = f'<p class="nb-dek nb-cell-dek">{esc(dek)}</p>' if dek else ""
     return (
-        f'<a class="nb-item" href="{rel}library/{ed["series"]}/{ed["slug"]}.html">'
+        f'<a class="nb-item" href="{rel}library/{esc(ed["series"])}/{esc(ed["slug"])}.html">'
         f'<div class="nb-kicker">{esc(kicker_text(ed, series_cfgs))}</div>'
         f"<h3>{esc(str(ed['meta'].get('title', ed['slug'])))}</h3>"
         f"{dek_html}{item_meta_row(ed)}</a>"
@@ -539,7 +577,7 @@ def lead_cell(ed, series_cfgs, *, depth=0):
     meta = ed["meta"]
     return (
         f'<a class="nb-item nb-lead-cell" '
-        f'href="{rel}library/{ed["series"]}/{ed["slug"]}.html">'
+        f'href="{rel}library/{esc(ed["series"])}/{esc(ed["slug"])}.html">'
         f'<div class="nb-kicker">{esc(kicker_text(ed, series_cfgs))}</div>'
         f"<h2>{esc(str(meta.get('title', ed['slug'])))}</h2>"
         f'<p class="nb-dek">{esc(str(meta.get("dek", "")))}</p>'
@@ -577,9 +615,9 @@ def render_newsstand(site, catalog, *, series_cfgs, articles):
             "“set me up”, then run a press check.</p></div>"
         )
         return page(site, site["title"], body=body, active="Today")
-    dates = sorted(catalog["builds"])
+    dates = sorted(catalog["builds"], key=date_sort_key)
     latest = dates[-1]
-    tonight = [ed for ed in articles.values() if ed["meta"].get("date") == latest]
+    tonight = [ed for ed in articles.values() if night_date(ed["meta"]) == latest]
     body = night_body(tonight, series_cfgs, depth=0, date=latest)
     if len(dates) > 1:
         prev = dates[-2]
@@ -591,9 +629,9 @@ def render_newsstand(site, catalog, *, series_cfgs, articles):
 
 
 def render_build_page(site, date, *, dates, articles, series_cfgs):
-    eds = [e for e in articles.values() if e["meta"].get("date") == date]
+    eds = [e for e in articles.values() if night_date(e["meta"]) == date]
     body = night_body(eds, series_cfgs, depth=2, date=date)
-    ordered = sorted(dates)
+    ordered = sorted(dates, key=date_sort_key)
     i = ordered.index(date)
     prev_d = ordered[i - 1] if i > 0 else None
     next_d = ordered[i + 1] if i < len(ordered) - 1 else None
@@ -620,7 +658,7 @@ def render_build_archive(site, dates):
     if not dates:
         body += '<div class="nb-empty"><p>No builds yet.</p></div>'
     seen_month = None
-    for d in sorted(dates, reverse=True):
+    for d in sorted(dates, key=date_sort_key, reverse=True):
         month = d[:7]
         if month != seen_month:
             try:
@@ -688,7 +726,7 @@ def render_series_index(site, catalog, *, series_cfgs, articles):
             )
         row = (
             f'<a class="nb-series{" nb-series-done" if rests else ""}" '
-            f'href="{s["id"]}/">'
+            f'href="{esc(s["id"])}/">'
             f'<span class="nb-series-name">{esc(s.get("name", s["id"]))}</span>'
             f"{latest_line}"
             f'<span class="nb-series-status">{status}</span></a>'
@@ -761,7 +799,7 @@ def render_series_page(site, sid, *, cfg, eds, series_cfgs):
             slug, title = it.get("slug"), it.get("title", it.get("slug"))
             if slug in published:
                 rows.append(
-                    f'<li><a href="../../library/{sid}/{slug}.html">'
+                    f'<li><a href="../../library/{esc(sid)}/{esc(str(slug))}.html">'
                     f'<span class="nb-seq-n">{i:02d}</span>'
                     f'<span class="nb-seq-t">{esc(str(title))}</span></a></li>'
                 )
@@ -853,7 +891,28 @@ def render_tags_index(site, catalog):
     return page(site, f"Tags — {site['title']}", body=body, depth=1)
 
 
+def is_safe_tag(tag):
+    """Whether a tag can be turned into a tags/<tag>/index.html page safely.
+
+    Tags are untrusted (they come from auto-merged night-shift content and
+    check.py does not constrain them), and the builder writes each one as a
+    directory under tags/. A tag whose segments escape that tree — `..`,
+    `.`, an absolute path, a backslash, or an empty segment from a leading/
+    trailing/double slash — is dropped from the catalog entirely, so no
+    page, link, or os.makedirs is ever created outside --out. A plain
+    nested tag like `a/b` is safe and renders at its true depth.
+    """
+    if not isinstance(tag, str) or not tag or tag != tag.strip():
+        return False
+    if "\\" in tag or tag.startswith("/"):
+        return False
+    return all(seg and seg not in (".", "..") for seg in tag.split("/"))
+
+
 def render_tag_page(site, tag, *, refs, articles, series_cfgs):
+    # tags/<tag>/index.html: a plain tag sits at depth 2 (tags/ + the tag),
+    # a nested tag `a/b` one deeper per segment, so links resolve either way.
+    depth = 1 + len(tag.split("/"))
     eds = [
         articles[tuple(r.split("/", 1))]
         for r in refs
@@ -867,12 +926,12 @@ def render_tag_page(site, tag, *, refs, articles, series_cfgs):
     body += (
         '<div class="nb-list">'
         + "".join(
-            story_item(e, series_cfgs, depth=2)
+            story_item(e, series_cfgs, depth=depth)
             for e in sorted(eds, key=lambda e: e["meta"].get("date", ""), reverse=True)
         )
         + "</div>"
     )
-    return page(site, f"#{tag} — {site['title']}", body=body, depth=2)
+    return page(site, f"#{tag} — {site['title']}", body=body, depth=depth)
 
 
 def render_search_page(site):
@@ -966,7 +1025,36 @@ def feed_content_html(path, base_url):
     return body if len(body) <= FEED_CONTENT_MAX else ""
 
 
-def atom_feed(base_url, feed_path, *, title, eds, generated):
+def feed_tag_id(base_url, resource, *, year):
+    """A globally-unique, stable Atom id for a feed or entry.
+
+    When the paper has a base_url its id is an RFC 4151 tag: IRI whose
+    authority is the paper's own domain and whose specific part is the
+    resource path under it, so two independent papers — even two on the
+    same host under different paths, or two publishing the same
+    series/slug — never collide (the constant urn:nightly-build: ids they
+    replace were byte-identical across papers). With no base_url (a local
+    build) it falls back to that urn scheme, which is fine offline.
+    """
+    match = re.match(r"https?://([^/]+)(/.*)?$", base_url or "")
+    if not match:
+        return f"urn:nightly-build:{resource}"
+    host = match.group(1)
+    prefix = (match.group(2) or "").strip("/")
+    specific = f"{prefix}/{resource}".strip("/")
+    return f"tag:{host},{year}:{specific}"
+
+
+def entry_year(meta, generated):
+    date = meta.get("date")
+    if isinstance(date, str) and len(date) >= 4 and date[:4].isdigit():
+        return date[:4]
+    return generated.strftime("%Y")
+
+
+def atom_feed(base_url, feed_path, *, title, eds, generated, author=None):
+    author = author or title
+
     def absolute(path):
         return f"{base_url}{path}" if base_url else path
 
@@ -975,6 +1063,11 @@ def atom_feed(base_url, feed_path, *, title, eds, generated):
         meta = ed["meta"]
         link = absolute(f"/library/{ed['series']}/{ed['slug']}.html")
         updated = f"{meta.get('date', generated.date().isoformat())}T00:00:00Z"
+        entry_id = feed_tag_id(
+            base_url,
+            f"library/{ed['series']}/{ed['slug']}",
+            year=entry_year(meta, generated),
+        )
         content = ""
         if i < FEED_CONTENT_LIMIT:
             fragment = feed_content_html(ed["file"], base_url)
@@ -983,18 +1076,20 @@ def atom_feed(base_url, feed_path, *, title, eds, generated):
         entries.append(f"""  <entry>
     <title>{esc(str(meta.get("title", ed["slug"])))}</title>
     <link rel="alternate" type="text/html" href="{esc(link)}"/>
-    <id>urn:nightly-build:{ed["series"]}/{ed["slug"]}</id>
+    <id>{esc(entry_id)}</id>
     <updated>{updated}</updated>
     <summary>{esc(str(meta.get("dek", "")))}</summary>{content}
     <category term="{esc(ed["series"])}"/>
   </entry>""")
     self_link = absolute(f"/{feed_path}")
+    feed_id = feed_tag_id(base_url, feed_path, year=generated.strftime("%Y"))
     return f"""<?xml version="1.0" encoding="utf-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom">
   <title>{esc(title)}</title>
   <link rel="self" type="application/atom+xml" href="{esc(self_link)}"/>
   <link rel="alternate" type="text/html" href="{esc(absolute("/") or "/")}"/>
-  <id>urn:nightly-build:{esc(feed_path)}</id>
+  <id>{esc(feed_id)}</id>
+  <author><name>{esc(author)}</name></author>
   <updated>{generated.strftime("%Y-%m-%dT%H:%M:%SZ")}</updated>
 {chr(10).join(entries)}
 </feed>
@@ -1024,6 +1119,8 @@ def render_email(site_title, date, *, eds, series_cfgs, base_url):
         meta = ed["meta"]
         cfg = series_cfgs.get(ed["series"], {})
         url = absolute(f"/library/{ed['series']}/{ed['slug']}.html")
+        label = source_label(meta)
+        sources_line = f" · {esc(label)}" if label else ""
         rows.append(f"""
   <div style="border-top:1px solid #D9E2EE;padding:18px 0 14px">
     <div style="font-family:monospace;font-size:11px;letter-spacing:1px;
@@ -1036,7 +1133,7 @@ def render_email(site_title, date, *, eds, series_cfgs, base_url):
     <div style="font-family:Georgia,serif;font-style:italic;font-size:14px;
                 color:#4E5866;margin:0 0 6px">{esc(str(meta.get("dek", "")))}</div>
     <div style="font-family:monospace;font-size:11px;color:#8794A4">
-      {ed["reading_minutes"]} min read · {meta.get("sources", "?")} sources</div>
+      {ed["reading_minutes"]} min read{sources_line}</div>
   </div>""")
     return f"""<!DOCTYPE html>
 <html><body style="margin:0;padding:0;background:#F4F7FB">
@@ -1139,7 +1236,7 @@ def build(
     site = {
         "title": site_cfg["title"],
         "appearance": site_cfg["appearance"],
-        "stamp": asset_stamp(repo),
+        "stamp": asset_stamp(repo, os.path.join(repo, site_cfg["theme"])),
         "assets_html": render_assets_html(site_cfg.get("assets")),
         "footer": site_cfg.get("footer"),
         "repository": repository,
@@ -1213,7 +1310,12 @@ def build(
     write(
         os.path.join(out, "feed.xml"),
         atom_feed(
-            base_url, "feed.xml", title=site_cfg["title"], eds=all_sorted, generated=now
+            base_url,
+            "feed.xml",
+            title=site_cfg["title"],
+            eds=all_sorted,
+            generated=now,
+            author=site_cfg["title"],
         ),
     )
     for s in catalog["series"]:
@@ -1231,13 +1333,14 @@ def build(
                 title=f"{site_cfg['title']} — {s['name']}",
                 eds=eds,
                 generated=now,
+                author=site_cfg["title"],
             ),
         )
 
     # email digests: one per build (permanent) + the latest at a stable path
     # for the morning-mail workflow
     for date in catalog["builds"]:
-        eds = [e for e in articles.values() if e["meta"].get("date") == date]
+        eds = [e for e in articles.values() if night_date(e["meta"]) == date]
         write(
             os.path.join(out, "builds", date, "email.html"),
             render_email(
@@ -1248,9 +1351,9 @@ def build(
                 base_url=base_url,
             ),
         )
-    latest = max(catalog["builds"], default=None)
+    latest = max(catalog["builds"], key=date_sort_key, default=None)
     if latest:
-        eds = [e for e in articles.values() if e["meta"].get("date") == latest]
+        eds = [e for e in articles.values() if night_date(e["meta"]) == latest]
         write(
             os.path.join(out, "email-latest.html"),
             render_email(
