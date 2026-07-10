@@ -27,8 +27,10 @@ included. Base tokens are light, the universal fallback; dark applies via
 `prefers-color-scheme` or the reader's toggle. Keep it that way in custom
 themes.
 
-Fonts load from Google Fonts, the only allowed external origin besides the
-engine's own assets. Swapping families changes the chrome and new articles
+Fonts load from Google Fonts. For an article's own `<head>`, that is the only
+external origin the sandbox allows besides the engine's own assets path (the
+page-injected `assets:` libraries below are a separate, owner-authored path
+with their own rules). Swapping families changes the chrome and new articles
 immediately; articles published earlier keep their frozen font links and
 fall back to system faces for any family they did not load.
 
@@ -112,8 +114,14 @@ The layer order, first to last. Later layers specialize and never override:
 
 ```text
 PROTOCOL.md > spec/editorial.md > press/editorial.md > template registry
-entry > press/series/<id>/prompt.md > tag fragments > item prompt
+entry > template editorial brief > press/series/<id>/prompt.md > tag fragments
+> item prompt
 ```
+
+The template editorial brief is the prose guidance carried in the template
+itself (its identity, opener, and structure notes), distinct from the machine
+config in the registry entry above it. A `press/templates/` template supplies
+its own brief.
 
 ## Your own templates
 
@@ -170,6 +178,17 @@ ordered course, rebuilt as your own template.
 3. Validate and rehearse: `python3 engine/validate_config.py`, then point a
    series at the template and run a press check before scheduling it.
 
+## What stays with the engine
+
+Themes, furniture, and templates are yours to define in `press/` with no engine
+edit. The site's frame is not. The top nav (`Today`, `Sections`, `Search`,
+`RSS`), the front-page night layout, and the way each of the four series-page
+modes renders are all fixed in `engine/build_site.py`. Wanting a new nav entry
+(an "About" page), a different front page, or a timeline-style index means
+editing the engine, which takes you off the conflict-free `press/`-only update
+path. The look and structure inside a page are unbounded; the page layout and
+navigation are the ceiling of "customize within `press/`".
+
 ## site.yaml reference
 
 ```yaml
@@ -177,6 +196,15 @@ title: "My Paper" # masthead; the accent period is added
 theme: press/themes/mytheme.css # default: the shipped newspaper theme
 appearance: auto # auto | light | dark
 front: compact # compact (default) | comfortable (deks on story cells)
+footer: "Filed while you slept." # left imprint on every page (<= 80 chars);
+# unset -> "A Nightly Build paper"
+assets: # optional; page-injected JS/CSS libraries (see "Furniture that needs
+  # a JavaScript library" above). Every entry is https + SRI-pinned.
+  scripts: []
+  styles: []
 email: # optional, see docs/delivery.md
   send_utc_hour: 12
+directory: # optional, see docs/delivery.md
+  description: "One line for your directory card (<= 280 chars)."
+  publish: true # set false to opt out of the shared directory
 ```
