@@ -30,14 +30,31 @@ PASS, FAIL = 0, []
 TESTREPO = make_fixtures.test_repo()
 
 
-def check(name, condition, *, detail=""):
+def snippet(haystack, needle=None, *, width=240):
+    text = haystack if isinstance(haystack, str) else str(haystack)
+    if needle:
+        i = text.find(needle if isinstance(needle, str) else str(needle))
+        if i != -1:
+            lo = max(0, i - width // 2)
+            hi = i + len(str(needle)) + width // 2
+            return ("…" if lo else "") + text[lo:hi] + ("…" if hi < len(text) else "")
+    return text[:width] + ("…" if len(text) > width else "")
+
+
+def check(name, condition, *, detail="", needle=None, haystack=None):
     global PASS
     if condition:
         PASS += 1
         print(f"  ok   {name}")
-    else:
-        FAIL.append(name)
-        print(f"  FAIL {name} {detail}")
+        return
+    FAIL.append(name)
+    print(f"  FAIL {name}")
+    if needle is not None:
+        print(f"        looked for: {needle!r}")
+    if haystack is not None:
+        print(f"        in: {snippet(haystack, needle)}")
+    if detail:
+        print(f"        {detail}")
 
 
 def write_article(root, series, *, slug, html):
@@ -247,15 +264,21 @@ check(
     "sections page lists series",
     'class="nb-series' in sections_page and "Semiconductors" in sections_page,
 )
-check("sections page shows collection progress", "1 of 5" in sections_page)
+check(
+    "sections page shows collection published count",
+    "1 published" in sections_page and "1 of 5" not in sections_page,
+    haystack=sections_page,
+    needle="1 published",
+)
 check("build archive groups by month", "July 2026" in read(out, "builds", "index.html"))
 
 series_page = read(out, "series", "semiconductors", "index.html")
 check("collection page shows published card", "Micron Technology" in series_page)
 check(
-    "collection page greys unpublished items",
-    series_page.count("coming") == 4,
-    detail=f"count={series_page.count('coming')}",
+    "collection page renders no placeholder for unpublished items",
+    series_page.count("coming") == 0 and "commissioned" not in series_page,
+    haystack=series_page,
+    needle="coming",
 )
 rolling_page = read(out, "series", "ai-briefs", "index.html")
 check("rolling page groups by month", "July 2026" in rolling_page)
@@ -340,16 +363,26 @@ write_article(seq_lib, "semiconductors", slug="micron", html=seq_ed)
 seq_out = tempfile.mkdtemp()
 B.build(seq_repo, seq_lib, out=seq_out, now=NOW)
 seq_page = read(seq_out, "series", "semiconductors", "index.html")
-check("sequence page has progress bar", "nb-progress-wide" in seq_page)
-check("sequence page numbers items", ">01<" in seq_page and ">05<" in seq_page)
 check(
-    "sequence page marks continue-here on next item",
-    "continue here" in seq_page
-    and seq_page.find("TSMC") < seq_page.find("continue here"),
+    "sequence page numbers published items in config order",
+    ">01<" in seq_page and ">05<" not in seq_page,
+    haystack=seq_page,
+    needle=">01<",
 )
 check(
-    "sequence progress on the sections page",
-    "1 of 5" in read(seq_out, "series", "index.html"),
+    "sequence page renders no placeholder for unpublished items",
+    "nb-seq-unpub" not in seq_page
+    and "continue here" not in seq_page
+    and "nb-progress-wide" not in seq_page,
+    haystack=seq_page,
+    needle="nb-seq-unpub",
+)
+check(
+    "sequence sections page shows published count, not progress",
+    "1 published" in (secs := read(seq_out, "series", "index.html"))
+    and "1 of 5" not in secs,
+    haystack=secs,
+    needle="1 published",
 )
 
 print("== press check preview ==")
@@ -429,8 +462,10 @@ check(
     "July 2026" in open_page and "the-cuda-moat" in open_page,
 )
 check(
-    "pending commission shows as coming",
-    "On Commission" in open_page and "commissioned" in open_page,
+    "open series renders no placeholder for a pending commission",
+    "On Commission" not in open_page and "commissioned" not in open_page,
+    haystack=open_page,
+    needle="On Commission",
 )
 check("open series page shows the template choice list", "article, brief" in open_page)
 

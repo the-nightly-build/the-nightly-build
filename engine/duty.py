@@ -21,8 +21,9 @@ import argparse
 import datetime as _dt
 import json
 import os
-import re
 import sys
+
+import nb_meta
 
 try:
     import yaml
@@ -31,14 +32,6 @@ except ImportError:
     sys.exit(2)
 
 DAY_NAMES = ("mon", "tue", "wed", "thu", "fri", "sat", "sun")
-# Match only the typed block the proof validates (check.py requires
-# type="application/json"), so an untyped decoy placed first cannot feed
-# duty a different date than the one that passed the sandbox. Lookaheads
-# keep the two attributes order-independent, matching check.py's parser.
-META_RE = re.compile(
-    r'<script(?=[^>]*\btype="application/json")(?=[^>]*\bid="nb-meta")[^>]*>(.*?)</script>',
-    re.S,
-)
 
 
 def cadence_includes(cadence, day: str) -> bool:
@@ -56,16 +49,6 @@ def cadence_includes(cadence, day: str) -> bool:
     return True  # unknown value: validate_config flags it; never skip work here
 
 
-def series_dir_in_library(library: str, series_id: str) -> str | None:
-    for base in (
-        os.path.join(library, "library", series_id),
-        os.path.join(library, series_id),
-    ):
-        if os.path.isdir(base):
-            return base
-    return None
-
-
 def published_state(library: str, series_id: str) -> tuple[set[str], set[str]]:
     """Return (published slugs, published nb-meta dates) for one series.
 
@@ -73,7 +56,7 @@ def published_state(library: str, series_id: str) -> tuple[set[str], set[str]]:
     for rerun safety: an article published tonight idles its series even
     when its slug is topical rather than dated.
     """
-    base = series_dir_in_library(library, series_id)
+    base = nb_meta.series_dir(library, series_id)
     if base is None:
         return set(), set()
     slugs, dates = set(), set()
@@ -81,16 +64,10 @@ def published_state(library: str, series_id: str) -> tuple[set[str], set[str]]:
         if not fname.endswith(".html"):
             continue
         slugs.add(fname[:-5])
-        with open(os.path.join(base, fname), encoding="utf-8", errors="replace") as fh:
-            m = META_RE.search(fh.read())
-        if m:
-            try:
-                parsed = json.loads(m.group(1))
-            except ValueError:
-                continue
-            date = parsed.get("date") if isinstance(parsed, dict) else None
-            if isinstance(date, str):
-                dates.add(date)
+        meta = nb_meta.read_meta(os.path.join(base, fname))
+        date = meta.get("date") if meta else None
+        if isinstance(date, str):
+            dates.add(date)
     return slugs, dates
 
 

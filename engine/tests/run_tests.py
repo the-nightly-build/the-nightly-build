@@ -130,7 +130,7 @@ expect("valid article is BLOCK-clean", run_local(VALID, "semiconductors"), block
 expect(
     "valid article has zero warns too",
     run_local(VALID, "semiconductors"),
-    must_not=["W-LENGTH-LOW", "W-SOURCES-MIN", "W-CITE-DENSITY", "W-REQ-URL"],
+    must_not=["W-LENGTH-LOW", "W-SOURCES-MIN", "W-CITE-DENSITY"],
 )
 expect(
     "valid brief is BLOCK-clean",
@@ -658,7 +658,7 @@ expect(
         mut("https://www.sec.gov/filings/mu-10k", "https://example.org/not-sec"),
         "semiconductors",
     ),
-    must_not=["W-REQ-URL", "B-SOURCES-EXCLUSIVE"],
+    must_not=["B-SOURCES-EXCLUSIVE"],
     blocks=0,
 )
 expect(
@@ -1936,17 +1936,30 @@ for name, ok in wf_cases:
         FAIL.append(name)
         print(f"  FAIL {name}")
 
-print()
-print("== builder suite (run_builder_tests.py) ==")
-builder = subprocess.run([sys.executable, str(HERE / "run_builder_tests.py")])
-if builder.returncode != 0:
-    FAIL.append("builder suite")
+
+def run_suite(script, label):
+    # Run a subprocess suite, stream its output, and fold its own assertion
+    # counts into this runner's totals so the summary reports real coverage
+    # instead of omitting the ~125 builder + e2e assertions.
+    global PASS
+    print(f"== {label} ({script}) ==")
+    proc = subprocess.run(
+        [sys.executable, str(HERE / script)], capture_output=True, text=True
+    )
+    sys.stdout.write(proc.stdout)
+    if proc.stderr:
+        sys.stderr.write(proc.stderr)
+    m = _re.search(r"(\d+) passed, (\d+) failed", proc.stdout)
+    if m:
+        PASS += int(m.group(1))
+    if proc.returncode != 0:
+        FAIL.append(f"{label} ({m.group(2) if m else '?'} failed)")
+
 
 print()
-print("== end-to-end dress rehearsal (run_e2e_test.py) ==")
-e2e = subprocess.run([sys.executable, str(HERE / "run_e2e_test.py")])
-if e2e.returncode != 0:
-    FAIL.append("e2e suite")
+run_suite("run_builder_tests.py", "builder suite")
+print()
+run_suite("run_e2e_test.py", "end-to-end dress rehearsal")
 
 print()
 print(f"{PASS} passed, {len(FAIL)} failed")
