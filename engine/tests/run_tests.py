@@ -524,6 +524,31 @@ expect(
     must_have=["B-SOURCES-FORM"],
 )
 expect(
+    "data-nb-required source may cite a repo-relative local file (V6a)",
+    run_local(
+        mut('href="https://example.org/src1"', 'href="sources/mu-10k-2025.txt"'),
+        "semiconductors",
+    ),
+    must_not=["B-SOURCES-FORM"],
+    blocks=0,
+)
+expect(
+    "non-required source still must be absolute https",
+    run_local(
+        mut('href="https://example.org/src4"', 'href="sources/local.txt"'),
+        "semiconductors",
+    ),
+    must_have=["B-SOURCES-FORM"],
+)
+expect(
+    "off-origin path even on a required source is rejected",
+    run_local(
+        mut('href="https://example.org/src1"', 'href="//evil.example/x.txt"'),
+        "semiconductors",
+    ),
+    must_have=["B-SOURCES-FORM"],
+)
+expect(
     "dangling citation",
     run_local(mut('<a href="#s5">5</a>', '<a href="#s99">99</a>'), "semiconductors"),
     must_have=["B-CITES-RESOLVE"],

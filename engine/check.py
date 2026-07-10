@@ -449,6 +449,19 @@ def external_ref_allowed(normalized_url):
     return host.lower() in ALLOWED_EXTERNAL_HOSTS
 
 
+def is_repo_relative_source(href):
+    """True for a repo-relative path (no scheme, no authority, not root-absolute).
+
+    A `data-nb-required` source may cite a committed local file by such a path,
+    so a private/paywalled excerpt need not fabricate a public URL (V6a).
+    """
+    if not href or re.search(r"\s", href):
+        return False
+    normalized = href.replace("\\", "/")
+    is_off_origin = "://" in normalized or normalized.startswith("//")
+    return not is_off_origin and not normalized.startswith("/")
+
+
 def validate_meta_fields(meta, rep):
     def need(field, typ, *, pattern=None, enum=None):
         v = meta.get(field)
@@ -835,6 +848,8 @@ def check_article(
         href = s["href"]
         if re.match(r"^https://[^\s]+$", href or ""):
             well_formed.append(href)
+        elif s["required"] and is_repo_relative_source(href):
+            continue  # local-file citation (V6a): no public URL to probe
         else:
             rep.block(
                 "B-SOURCES-FORM", f"source href must be absolute https URL: {href!r}"
