@@ -63,6 +63,18 @@ def read(out, *parts):
     return path.read_text()
 
 
+def find_text(elem, path):
+    node = elem.find(path)
+    assert node is not None, f"missing element: {path}"
+    return node.text or ""
+
+
+def asset_stamp_of(page_html):
+    m = re.search(r"nb\.css\?v=([0-9a-f]+)", page_html)
+    assert m is not None, "no asset stamp in page"
+    return m.group(1)
+
+
 print("== full build ==")
 lib = make_full_library()
 out = tempfile.mkdtemp()
@@ -516,6 +528,203 @@ check(
 check(
     "declared asset injected into article copy",
     injected in read(assets_out, "library", "semiconductors", "micron.html"),
+)
+
+print("== nb-meta reader requires the typed block ==")
+# The proof only recognizes <script type="application/json" id="nb-meta">;
+# the builder must read the same block, so an untyped decoy placed first
+# (invisible to check.py) can never override title/date/series/slug.
+decoy_dir = pathlib.Path(tempfile.mkdtemp())
+decoy_file = decoy_dir / "decoy.html"
+decoy_file.write_text(
+    "<!DOCTYPE html><html><head>"
+    '<script id="nb-meta">{"series":"EVIL","slug":"evil"}</script>'
+    '<script type="application/json" id="nb-meta">'
+    '{"series":"semiconductors","slug":"micron","date":"2026-07-06"}'
+    "</script></head><body></body></html>"
+)
+decoy_meta = B.read_meta(str(decoy_file))
+check(
+    "read_meta ignores an untyped decoy and reads the typed block",
+    decoy_meta is not None and decoy_meta.get("series") == "semiconductors",
+    detail=str(decoy_meta),
+)
+
+print("== theme edit busts the asset stamp ==")
+# The ?v= stamp must change when the resolved theme.css changes, or a theme
+# swap leaves returning readers on the cached old look.
+theme_repo = pathlib.Path(tempfile.mkdtemp()) / "repo"
+shutil.copytree(TESTREPO, theme_repo)
+B.build(str(theme_repo), make_full_library(), out=(t1 := tempfile.mkdtemp()), now=NOW)
+stamp_before = asset_stamp_of(read(t1, "index.html"))
+theme_file = theme_repo / "engine" / "assets" / "themes" / "newspaper.css"
+theme_file.write_text(theme_file.read_text() + "\n:root{--nb-test-token:1}\n")
+B.build(str(theme_repo), make_full_library(), out=(t2 := tempfile.mkdtemp()), now=NOW)
+stamp_after = asset_stamp_of(read(t2, "index.html"))
+check(
+    "a theme edit changes the cache-busting stamp",
+    stamp_before != stamp_after,
+    detail=f"{stamp_before} == {stamp_after}",
+)
+
+print("== dateless article does not blank the newsstand ==")
+# A missing date must not win the 'latest' sort or leave the front page empty
+# next to a real dated article; both bucket under the same 'unknown' sentinel.
+dateless_lib = tempfile.mkdtemp()
+write_article(
+    dateless_lib, "semiconductors", slug="micron", html=make_fixtures.article()
+)
+undated = (
+    make_fixtures.article()
+    .replace('"slug": "micron"', '"slug": "tsmc"')
+    .replace('"date": "2026-07-06", ', "")
+    .replace("Micron Technology: The Scarcest Commodity in AI", "TSMC (undated draft)")
+)
+write_article(dateless_lib, "semiconductors", slug="tsmc", html=undated)
+dl_out = tempfile.mkdtemp()
+dl_catalog = B.build(TESTREPO, dateless_lib, out=dl_out, now=NOW)
+dl_index = read(dl_out, "index.html")
+check(
+    "newsstand still leads with the real dated article",
+    "Micron Technology" in dl_index and "No articles this night" not in dl_index,
+)
+check(
+    "a real date wins 'latest' over the dateless bucket",
+    sorted(dl_catalog["builds"], key=B.date_sort_key)[-1] == "2026-07-06",
+    detail=str(list(dl_catalog["builds"])),
+)
+check(
+    "the dateless article still gets its own build page",
+    "TSMC (undated draft)" in read(dl_out, "builds", "unknown", "index.html"),
+)
+
+print("== atom feed ids are per-paper unique and carry an author ==")
+# Two papers must never emit byte-identical feed/entry ids; RFC 4287 wants an
+# author. xml.etree parsing here doubles as the well-formedness (xmllint) check.
+feed_a = B.atom_feed(
+    "https://alice.github.io/paper-a", "feed.xml", title="A", eds=[], generated=NOW
+)
+feed_b = B.atom_feed(
+    "https://alice.github.io/paper-b", "feed.xml", title="B", eds=[], generated=NOW
+)
+root_a, root_b = ET.fromstring(feed_a), ET.fromstring(feed_b)
+id_a, id_b = find_text(root_a, f"{NS}id"), find_text(root_b, f"{NS}id")
+check(
+    "two papers on one host get distinct feed ids",
+    id_a != id_b and id_a.startswith("tag:alice.github.io,"),
+    detail=f"{id_a} / {id_b}",
+)
+author_a = root_a.find(f"{NS}author/{NS}name")
+check(
+    "feed carries an author name from the site title",
+    author_a is not None and author_a.text == "A",
+)
+pa_out, pb_out = tempfile.mkdtemp(), tempfile.mkdtemp()
+B.build(
+    TESTREPO, make_full_library(), out=pa_out, base_url="https://a.example", now=NOW
+)
+B.build(
+    TESTREPO, make_full_library(), out=pb_out, base_url="https://b.example", now=NOW
+)
+entry_a = find_text(ET.fromstring(read(pa_out, "feed.xml")), f"{NS}entry/{NS}id")
+entry_b = find_text(ET.fromstring(read(pb_out, "feed.xml")), f"{NS}entry/{NS}id")
+check(
+    "same series/slug on two papers get distinct entry ids",
+    entry_a != entry_b and "a.example" in entry_a and "b.example" in entry_b,
+    detail=f"{entry_a} / {entry_b}",
+)
+
+print("== hostile slug/series/tag are escaped or refused ==")
+# series/slug flow raw from library dir/file names; a quote/ampersand/angle
+# must not break an href attribute or the Atom <id> text.
+hostile = {
+    "series": 'a"&b',
+    "slug": 'c"&d',
+    "reading_minutes": 3,
+    "meta": {"title": "T", "dek": "d", "sources": 2},
+}
+item_html, lead_html = B.story_item(hostile, {}), B.lead_cell(hostile, {})
+check(
+    "story_item escapes a hostile href",
+    'library/a"&b/c"&d' not in item_html and "a&quot;&amp;b/c&quot;&amp;d" in item_html,
+)
+check(
+    "lead_cell escapes a hostile href",
+    'library/a"&b/c"&d' not in lead_html and "a&quot;&amp;b/c&quot;&amp;d" in lead_html,
+)
+hostile_dir = pathlib.Path(tempfile.mkdtemp())
+(hostile_dir / "x.html").write_text("<html><body><p>hi</p></body></html>")
+hostile_ed = {
+    "series": 'a"&b',
+    "slug": 'c"&d',
+    "file": str(hostile_dir / "x.html"),
+    "reading_minutes": 3,
+    "meta": {"title": "T", "dek": "d", "date": "2026-07-06"},
+}
+hostile_feed = B.atom_feed("", "feed.xml", title="T", eds=[hostile_ed], generated=NOW)
+hostile_id = find_text(ET.fromstring(hostile_feed), f"{NS}entry/{NS}id")
+check(
+    "atom entry id with a hostile slug/series stays well-formed",
+    hostile_id == 'urn:nightly-build:library/a"&b/c"&d',
+    detail=hostile_id,
+)
+
+# tag path traversal is refused; a nested tag renders at its true depth.
+check("is_safe_tag rejects parent-traversal", not B.is_safe_tag("../../escape"))
+check("is_safe_tag rejects an absolute path", not B.is_safe_tag("/etc/passwd"))
+check("is_safe_tag rejects a backslash", not B.is_safe_tag("a\\b"))
+check("is_safe_tag accepts a plain tag", B.is_safe_tag("equity"))
+check("is_safe_tag accepts a nested tag", B.is_safe_tag("markets/equity"))
+evil_lib = tempfile.mkdtemp()
+write_article(
+    evil_lib,
+    "semiconductors",
+    slug="micron",
+    html=make_fixtures.article().replace(
+        '"tags": ["equity"]', '"tags": ["../../pwned"]'
+    ),
+)
+evil_out = pathlib.Path(tempfile.mkdtemp()) / "site"
+evil_catalog = B.build(TESTREPO, evil_lib, out=str(evil_out), now=NOW)
+check(
+    "traversal tag dropped from the catalog", "../../pwned" not in evil_catalog["tags"]
+)
+check(
+    "traversal tag created no directory outside --out",
+    not (evil_out.parent / "pwned").exists(),
+)
+nested_lib = tempfile.mkdtemp()
+write_article(
+    nested_lib,
+    "semiconductors",
+    slug="micron",
+    html=make_fixtures.article().replace(
+        '"tags": ["equity"]', '"tags": ["markets/equity"]'
+    ),
+)
+nested_out = tempfile.mkdtemp()
+B.build(TESTREPO, nested_lib, out=nested_out, now=NOW)
+nested_page = read(nested_out, "tags", "markets", "equity", "index.html")
+check(
+    "a nested tag page links assets at its true depth-3 path",
+    "../../../assets/nb.css" in nested_page,
+)
+
+print("== email digest routes sources through source_label ==")
+em = read(dl_out, "email-latest.html")
+check("email shows a well-formed source count", "8 sources" in em)
+bad_lib = tempfile.mkdtemp()
+write_article(
+    bad_lib,
+    "semiconductors",
+    slug="micron",
+    html=make_fixtures.article().replace('"sources": 8,', '"sources": "<b>x</b>",'),
+)
+bad_out = tempfile.mkdtemp()
+B.build(TESTREPO, bad_lib, out=bad_out, now=NOW)
+check(
+    "a non-int sources value never reaches the reader raw",
+    "<b>x</b>" not in read(bad_out, "email-latest.html"),
 )
 
 print()
