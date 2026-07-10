@@ -13,7 +13,8 @@ You configure the paper; you never run it. Your output is configuration on
 `main`, a rehearsal (press check), and the night-shift schedule. If your harness
 lets you create the schedule and fire the first run yourself, do it; otherwise
 emit the filled prompt for the human to paste. Say which case applies plainly.
-`docs/scheduling.md` holds the scheduling paths and their costs.
+`docs/scheduling.md` holds the scheduling model; `docs/harnesses.md` lists which
+agents can run it and their costs.
 
 ## 0. The ownership model (say it once, early)
 
@@ -131,8 +132,9 @@ completing series never requires touching the harness again. If the paper
 already has its schedule, say so and skip this section — configuring the new
 series on `main` was the whole job.
 
-For a first-time handoff, read `docs/scheduling.md`. Ask what agent or
-subscription the user already pays for, match it to a path there (a native
+For a first-time handoff, read `docs/scheduling.md` (the model) and
+`docs/harnesses.md` (which agents work and their costs). Ask what agent or
+subscription the user already pays for, match it to a harness there (a native
 scheduler when the provider hosts one, else the universal GitHub Actions cron),
 and cover four things:
 
@@ -141,7 +143,7 @@ and cover four things:
    prompt in `docs/scheduling.md` with `<repo>` and `<checkout>` filled in.
 3. **Model and cost** — pick the strongest model available; nb-meta records what
    actually ran. Say plainly whether the run is included in a subscription or
-   bills a metered key (the coverage table has it per agent).
+   bills a metered key (the coverage table in `docs/harnesses.md` has it per agent).
 4. **First run now** — do not make them wait for tonight. If your harness lets
    you fire a one-off run yourself, do it and watch today's article publish;
    otherwise tell them exactly how. Setting up in the morning should mean a paper
@@ -149,8 +151,8 @@ and cover four things:
 
 If you (the running agent) can create the schedule and fire the first run
 yourself, do it. Otherwise the human pastes the filled prompt into their
-scheduler; say that plainly. The prompt and every path live in
-`docs/scheduling.md`, so they are not repeated here.
+scheduler; say that plainly. The prompt lives in `docs/scheduling.md` and the
+per-agent paths in `docs/harnesses.md`, so they are not repeated here.
 
 ## 6. Curation verbs
 

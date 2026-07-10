@@ -6,17 +6,18 @@ how you put one on a nightly schedule.
 
 Two choices are involved, and they are independent:
 
-1. **The setup agent** is whatever you are talking to right now (Claude Code,
-   Cursor, opencode, Codex, anything). It configures `press/` and wires up the
-   schedule. It does not have to be the same product that runs the night shift.
+1. **The setup agent** is whatever you are talking to right now (any coding
+   agent). It configures `press/` and wires up the schedule. It does not have to
+   be the same product that runs the night shift.
 2. **The night-shift runtime and its scheduler** is what actually fires nightly.
    You can do setup in one agent and schedule the night shift on another.
 
-The scheduler comes in two shapes. Some providers host their own (Claude
-Routines, Jules Scheduled Tasks); when yours does, that is the shortcut, and for
-some it is included in a plan you already pay for. When it does not, the
-universal path below runs the same night shift on a GitHub Actions cron. That
-path always works.
+The scheduler comes in two shapes. Some providers host their own; when yours
+does, that is the shortcut, and it is often included in a plan you already pay
+for. When it does not, the universal path below runs the same night shift on a
+GitHub Actions cron. That path always works. Which specific agents can be the
+night shift, how to invoke each, and what a run costs are in
+[harnesses.md](harnesses.md).
 
 ## What the night shift needs
 
@@ -61,7 +62,7 @@ jobs:
       - run: pip install pyyaml
       # Invoke your agent here with the prompt below. It needs web access, your
       # agent's API key as a repo secret, and the two permissions declared above.
-      # Per-agent one-liners are under the coverage table.
+      # Per-agent one-liners are in docs/harnesses.md.
 ```
 
 The trigger lives on `main` (or in a separate repo). Never put it on the
@@ -98,8 +99,8 @@ never let an untrusted agent edit it.
 ### The schedule prompt
 
 This is the whole assignment. Paste it verbatim wherever your scheduler takes a
-prompt (a Routine, a Scheduled Task, or the invoke step above), with `<repo>`
-and `<checkout>` filled in. Do not trim it.
+prompt (a hosted routine, a scheduled task, or the invoke step above), with
+`<repo>` and `<checkout>` filled in. Do not trim it.
 
 > You are the night shift for The Nightly Build repo `<repo>`. Read
 > `PROTOCOL.md` on main and follow it exactly. Runtime: needs Python 3.9+ and
@@ -123,81 +124,10 @@ the repo, so adding, retiring, or completing a series never touches the
 schedule. To run series on different models or in parallel, add a second
 schedule and append one line: `Work ONLY series <series-id>.`
 
-## Coverage and cost
+## Which agent, and the cost
 
-Which agents can run the night shift laptop-off, how you invoke them headless,
-and whether tonight's run is already paid for or metered on top. Verified
-2026-07; provider capabilities move fast, and the universal path always works.
-
-| Agent           | Native laptop-off scheduler                           | Headless entrypoint               | Cost of the automated run                                     |
-| --------------- | ----------------------------------------------------- | --------------------------------- | ------------------------------------------------------------- |
-| **Claude Code** | Yes: Routines                                         | `anthropics/claude-code-action`   | Routine: included in Pro/Max usage. Actions path: metered key |
-| **Jules**       | Yes: Scheduled Tasks                                  | `google-labs-code/jules-action`   | Included in your Jules plan (daily task quota)                |
-| **Codex**       | No (Automations need machine on)                      | `openai/codex-action`             | Metered `OPENAI_API_KEY`                                      |
-| **Cursor**      | Not verified                                          | `cursor-agent -p`                 | Draws on your Cursor plan credits                             |
-| **opencode**    | Via its own Action on cron                            | `opencode run`                    | Metered: your own model key (BYOK)                            |
-| **Devin**       | Yes: Schedules                                        | `devin -p` / REST                 | Included in your Devin plan                                   |
-| **Copilot**     | Yes: Automations                                      | server-side / Copilot CLI         | Included in your Copilot plan                                 |
-| **Antigravity** | Not verified (native schedule runs via the local app) | IDE/CLI                           | Depends on the entrypoint you script                          |
-| **pi**          | No                                                    | CLI (no documented headless flag) | Metered: your own model key (BYOK)                            |
-
-Invoke one-liners for the marked step in `nightly.yml` (each needs its key as a
-repo secret and web access enabled): `openai/codex-action` with `OPENAI_API_KEY`;
-`cursor-agent -p "<prompt>"` with `CURSOR_API_KEY`; `opencode run "<prompt>"`
-with your model key; `anthropics/claude-code-action` with `ANTHROPIC_API_KEY`
-(though a native Routine is cheaper, below). Each action's own README is the
-current source for inputs.
-
-## Native shortcuts
-
-Skip the cron entirely when your provider hosts the scheduler. Paste the same
-schedule prompt into these.
-
-### Claude Code (Routines)
-
-Create one Routine for the whole paper: type `/schedule` in the CLI, or use
-[claude.ai/code/routines](https://claude.ai/code/routines). Connect the fork
-once (grant contents and pull-requests access), set a nightly cron, paste the
-prompt, and pick the model. Also set the environment's **Network access** to
-**Full** (or Custom with your series' sources): Routines sandbox outbound web by
-default, so without it the night shift researches nothing and publishes nothing.
-Routines run in Anthropic's cloud, so your laptop
-can be off, and they **draw on your Pro/Max subscription like an interactive
-session**, so a nightly run costs nothing extra within your plan limits. Use
-**Run now** for tonight's first article instead of waiting.
-
-### Jules (Scheduled Tasks)
-
-Install the Jules GitHub app on your fork, then create a Scheduled Task with the
-prompt and a nightly cadence. It runs server-side in Jules's cloud VM against the
-connected repo. Runs **draw on your plan's daily task quota** rather than a
-metered key, and the model tier is fixed by your plan. The equivalent CI path is
-`google-labs-code/jules-action` on `on: schedule` with a `JULES_API_KEY` secret.
-
-### Codex (the universal path, worked)
-
-Codex's in-product Automations need your machine powered on, so the laptop-off
-path is the GitHub Actions workflow above with `openai/codex-action` in the
-marked step. It runs `codex exec` with a **metered `OPENAI_API_KEY`** (a repo
-secret), billed per token on top of any ChatGPT plan. Enable agent internet
-access on the environment, since it is **off by default**, or research fails.
-(The interactive cloud tasks at chatgpt.com/codex are a separate, plan-gated
-surface; the Action is what runs unattended.)
-
-## Choosing, for the setup agent
-
-Ask the user what they already pay for, then match it. State plainly which case
-applies and whether tonight's run is subscription-included or metered.
-
-- **Claude Pro/Max** → a Routine. Included in the plan, zero infra, laptop-off.
-- **Jules Pro/Ultra** → a Scheduled Task. Included in the task quota, zero infra.
-- **Devin or Copilot** → their native schedule.
-- **An OpenAI or Anthropic API key, or any agent with a headless command** → the
-  universal Actions path. Say when it bills a metered key (Codex and the Claude
-  Actions path both do; the native Routine does not).
-- **No verified laptop-off native scheduler** (Codex, Cursor, Antigravity, pi) →
-  the universal Actions path with that agent's headless entrypoint.
-
-If you (the setup agent) can create the schedule and fire the first run yourself,
-do it and confirm the run started. If you cannot, hand the user the filled prompt
-and the exact place to paste it, and say that pasting it is the one manual step.
+For the specific agents verified to run the night shift, how to invoke each
+headless, whether a run is subscription-included or metered, and the native
+provider shortcuts (hosted routines and scheduled tasks), see
+[harnesses.md](harnesses.md). The universal Actions path above works with any of
+them.

@@ -38,9 +38,8 @@ source count. The reader's front page and a single article, on a phone:
    rendered to a locally served site, with no PR, so you can tune prompts
    before scheduling anything.
 4. Connect and schedule. Pick a path in [docs/scheduling.md](docs/scheduling.md):
-   a provider's native scheduler (Claude Routines and Jules Scheduled Tasks are
-   included in a plan you may already pay for) or the universal GitHub Actions
-   cron that runs any headless agent. Schedule one nightly job for the whole
+   a provider's native scheduler (often included in a plan you already pay for)
+   or the universal GitHub Actions cron that runs any headless agent. Schedule one nightly job for the whole
    paper and trigger it once now for today's first article. Each run derives its
    work list from the repo, so you never touch the schedule again.
 5. Read. The night shift opens one PR per series, CI validates and (for
@@ -137,7 +136,8 @@ contains a complete working configuration as documentation.
 
 - [Your site: ownership, forks, updates](docs/press.md)
 - [Series: modes, open sections, cadence, commissioning](docs/series.md)
-- [Scheduling: native schedulers, the universal Actions cron, costs](docs/scheduling.md)
+- [Scheduling: native schedulers, the universal Actions cron](docs/scheduling.md)
+- [Harnesses: which agents can run the night shift, and the cost](docs/harnesses.md)
 - [Customization: themes, voice, your own templates](docs/customization.md)
 - [Delivery: feeds, morning email, the directory, the catalog API](docs/delivery.md)
 
