@@ -1205,6 +1205,7 @@ def main(argv=None):
             rep=rep,
             pr_body_meta=resolve_pr_body(args.pr_body, rep),
             today=args.today and _dt.date.fromisoformat(args.today),
+            check_links=args.check_links,
         )
 
     # strict promotion for pr mode (series known only after path parse)

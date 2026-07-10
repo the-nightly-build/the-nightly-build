@@ -9,6 +9,8 @@ throwaway git repository so the diff-shape rules face actual git output.
 Run: python3 engine/tests/run_tests.py
 """
 
+import contextlib
+import io
 import json
 import pathlib
 import re as _re
@@ -1607,6 +1609,57 @@ link_cases = [
     ("no links to probe returns empty", C.dead_source_links([]) == []),
 ]
 for name, ok in link_cases:
+    if ok:
+        PASS += 1
+        print(f"  ok   {name}")
+    else:
+        FAIL.append(name)
+        print(f"  FAIL {name}")
+
+print()
+print("== rehearsal honors --check-links (parity with CI) ==")
+
+
+# 1.5: the local (rehearsal) branch of main() must forward --check-links, or a
+# dead citation passes the press check yet fails B-SOURCE-DEAD in CI. Every source
+# points at the reserved `.invalid` TLD (RFC 6761), which never resolves — so the
+# probe classifies it dead offline or online, making this deterministic without a
+# real network round-trip. The assertion is purely about whether main() wires the
+# flag through: links-on must surface B-SOURCE-DEAD, --no-check-links must not.
+def run_main_json(argv):
+    buf = io.StringIO()
+    with contextlib.redirect_stdout(buf):
+        C.main(argv)
+    return json.loads(buf.getvalue())
+
+
+_dead_article = VALID.replace(
+    "https://example.org/", "https://nb-dead.invalid/"
+).replace("https://www.sec.gov/filings/mu-10k", "https://nb-dead.invalid/sec")
+_link_tmp = tempfile.mkdtemp()
+_art = pathlib.Path(_link_tmp) / "library" / "semiconductors" / "micron.html"
+_art.parent.mkdir(parents=True)
+_art.write_text(_dead_article)
+_common = [
+    str(_art),
+    "--series",
+    "semiconductors",
+    "--repo",
+    TESTREPO,
+    "--today",
+    TODAY,
+    "--json",
+]
+links_on = run_main_json(_common)
+links_off = run_main_json([*_common, "--no-check-links"])
+shutil.rmtree(_link_tmp)
+on_codes = {f["code"] for f in links_on["findings"]}
+off_codes = {f["code"] for f in links_off["findings"]}
+link_flag_cases = [
+    ("local mode probes links by default", "B-SOURCE-DEAD" in on_codes),
+    ("--no-check-links suppresses probing locally", "B-SOURCE-DEAD" not in off_codes),
+]
+for name, ok in link_flag_cases:
     if ok:
         PASS += 1
         print(f"  ok   {name}")
