@@ -667,10 +667,10 @@ def render_build_archive(site, dates):
 def series_status(s, cfg):
     """Return (status_html, is_resting) for one series on the Sections page.
 
-    Finite series show progress or read complete, rolling series show
-    their cadence, open series count published articles. Resting series
-    (complete or paused) collect under the In-the-stacks disclosure
-    instead of their section.
+    Finite series read complete once every configured item is published and
+    otherwise report their published count; rolling series show their cadence.
+    Resting series (complete or paused) collect under the In-the-stacks
+    disclosure instead of their section.
     """
     mode, count, total = s.get("mode"), s["count"], s.get("total")
     if cfg.get("paused"):
@@ -678,14 +678,7 @@ def series_status(s, cfg):
     if mode in ("collection", "sequence"):
         if total and count >= total:
             return f"complete · {count} article{'s' if count != 1 else ''}", True
-        if not total:  # published but not in press config (or no items yet)
-            return f"{count} published", False
-        pct = round(100 * count / total)
-        return (
-            f'<span class="nb-progress"><b style="width:{pct}%"></b></span>'
-            f"{count} of {total}",
-            False,
-        )
+        return f"{count} published", False
     if mode == "rolling":
         cadence = cfg.get("cadence")
         return (esc(str(cadence)) if isinstance(cadence, str) else "nightly"), False
@@ -754,28 +747,11 @@ def render_series_index(site, catalog, *, series_cfgs, articles):
     )
 
 
-def coming_card(item):
-    # Placeholder card for an item that is configured but not yet published.
-    # One shared shape across collection and open series — the two had drifted,
-    # with the open card carrying an nb-kicker the collection card lacked.
-    return (
-        f'<div class="nb-item" style="color:var(--faint);'
-        f'padding:14px 0 12px;border-bottom:1px solid var(--hair)">'
-        f'<div class="nb-kicker">commissioned</div>'
-        f"<h3>{esc(str(item.get('title', item.get('slug'))))}</h3>"
-        f'<div class="nb-meta"><span>coming</span></div></div>'
-    )
-
-
-def series_head_html(name, *, mode, cfg, eds, total):
+def series_head_html(name, *, mode, cfg, eds):
     tpl_label = ", ".join(
         cfg.get("templates") or ([cfg["template"]] if cfg.get("template") else [])
     )
-    sub_bits = [esc(mode), esc(tpl_label)]
-    if total and mode in ("collection", "sequence"):
-        sub_bits.append(f"{len(eds)} of {total} published")
-    else:
-        sub_bits.append(f"{len(eds)} published")
+    sub_bits = [esc(mode), esc(tpl_label), f"{len(eds)} published"]
     return (
         f'<div class="nb-serieshead"><h1>{esc(name)}</h1>'
         f'<div class="nb-series-sub">{" · ".join(b for b in sub_bits if b)}'
@@ -783,37 +759,25 @@ def series_head_html(name, *, mode, cfg, eds, total):
     )
 
 
-def render_sequence_body(sid, *, items, published, eds, total):
-    pct = round(100 * len(eds) / total) if total else 0
-    rows = []
-    continue_slug = next(
-        (it.get("slug") for it in items if it.get("slug") not in published), None
-    )
-    for i, it in enumerate(items, 1):
-        slug, title = it.get("slug"), it.get("title", it.get("slug"))
-        if slug in published:
-            rows.append(
-                f'<li><a href="../../library/{esc(sid)}/{esc(str(slug))}.html">'
-                f'<span class="nb-seq-n">{i:02d}</span>'
-                f'<span class="nb-seq-t">{esc(str(title))}</span></a></li>'
-            )
-        else:
-            marker = (
-                '<span class="nb-continue">continue here</span>'
-                if slug == continue_slug
-                else ""
-            )
-            rows.append(
-                f'<li><span class="nb-seq-unpub">'
-                f'<span class="nb-seq-n">{i:02d}</span>'
-                f'<span class="nb-seq-t">{esc(str(title))}</span>{marker}'
-                "</span></li>"
-            )
-    bar = f'<div class="nb-progress-wide"><b style="width:{pct}%"></b></div>'
-    return bar + f'<ol class="nb-seq">{"".join(rows)}</ol>'
+def render_sequence_body(sid, *, items, published):
+    """Render the published entries of a sequence in config order.
+
+    Numbering follows each item's position in the configured sequence, so
+    published entries keep their canonical number even when earlier or later
+    items are not yet published.
+    """
+    rows = [
+        f'<li><a href="../../library/{esc(sid)}/{esc(str(it.get("slug")))}.html">'
+        f'<span class="nb-seq-n">{i:02d}</span>'
+        f'<span class="nb-seq-t">{esc(str(it.get("title", it.get("slug"))))}</span>'
+        "</a></li>"
+        for i, it in enumerate(items, 1)
+        if it.get("slug") in published
+    ]
+    return f'<ol class="nb-seq">{"".join(rows)}</ol>'
 
 
-def render_timeline_body(*, mode, eds, items, published, series_cfgs):
+def render_timeline_body(*, mode, eds, series_cfgs):
     date_of = (
         (lambda e: e["slug"])
         if mode == "rolling"
@@ -827,8 +791,6 @@ def render_timeline_body(*, mode, eds, items, published, series_cfgs):
             parts.append(f'<span class="nb-month-label">{esc(label)}</span>')
             seen_month = month
         parts.append(story_item(ed, series_cfgs, depth=2))
-    if mode == "open":
-        parts += [coming_card(it) for it in items if it.get("slug") not in published]
     return (
         f'<div class="nb-list">{"".join(parts)}</div>'
         if parts
@@ -847,7 +809,6 @@ def render_collection_body(*, items, published, eds, series_cfgs):
         for e in eds
         if not any(it.get("slug") == e["slug"] for it in items)
     ]
-    rows += [coming_card(it) for it in items if it.get("slug") not in published]
     return f'<div class="nb-list">{"".join(rows)}</div>'
 
 
@@ -857,21 +818,12 @@ def render_series_page(site, sid, *, cfg, eds, series_cfgs):
     eds = sorted(eds, key=lambda e: e["position"])
     published = {e["slug"]: e for e in eds}
     items = cfg.get("items") or []
-    total = len(items)
-    head = series_head_html(name, mode=mode, cfg=cfg, eds=eds, total=total)
+    head = series_head_html(name, mode=mode, cfg=cfg, eds=eds)
 
     if mode == "sequence":
-        body = head + render_sequence_body(
-            sid, items=items, published=published, eds=eds, total=total
-        )
+        body = head + render_sequence_body(sid, items=items, published=published)
     elif mode in ("rolling", "open"):
-        body = head + render_timeline_body(
-            mode=mode,
-            eds=eds,
-            items=items,
-            published=published,
-            series_cfgs=series_cfgs,
-        )
+        body = head + render_timeline_body(mode=mode, eds=eds, series_cfgs=series_cfgs)
     else:  # collection, in config order
         body = head + render_collection_body(
             items=items, published=published, eds=eds, series_cfgs=series_cfgs

@@ -293,8 +293,9 @@ check("global feed updated to 3 entries", len(feed2.findall(f"{NS}entry")) == 3)
 series_feed = ET.fromstring((sitedir / "series" / "ai-briefs" / "feed.xml").read_text())
 check("series feed updated to 2 entries", len(series_feed.findall(f"{NS}entry")) == 2)
 check(
-    "sections page shows collection progress 1 of 5",
-    "1 of 5" in (sitedir / "series" / "index.html").read_text(),
+    "sections page shows collection published count, not progress",
+    "1 published" in (secs := (sitedir / "series" / "index.html").read_text())
+    and "1 of 5" not in secs,
 )
 
 print()
