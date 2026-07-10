@@ -65,7 +65,6 @@ appearance: auto
 
 
 def test_repo():
-    # A temp repo with the fixture series plus the real templates and assets.
     root = pathlib.Path(tempfile.mkdtemp())
     shutil.copytree(REPO / "templates", root / "templates")
     shutil.copytree(REPO / "engine" / "assets", root / "engine" / "assets")

@@ -113,9 +113,6 @@ def check_site(repo, errors):
 
 
 def check_site_assets(assets, *, errors):
-    # Trusted external libraries a press loads on every page. Owner-authored on
-    # main, so they must be https and Subresource-Integrity-pinned: the SRI hash
-    # is what lets the browser refuse a tampered CDN response.
     if assets is None:
         return
     prefix = "press/site.yaml"
@@ -156,16 +153,15 @@ def check_site_assets(assets, *, errors):
 
 
 def check_site_directory(directory, *, errors):
-    # Directory listing is opt-out: a press is listed unless it sets
-    # directory.publish: false. The public URL is derived at build time (from the
-    # Pages base URL), never configured, and the description is optional; a 'url'
-    # key is intentionally not accepted, which the unknown-key check enforces.
     if directory is None:
         return
     prefix = "press/site.yaml"
     if not isinstance(directory, dict):
         errors.append(f"{prefix}: 'directory' must be a mapping of publish/description")
         return
+    # Directory listing is opt-out (directory.publish: false). The public URL is
+    # derived at build time from the Pages base URL, never configured, so a 'url'
+    # key is intentionally rejected here by the unknown-key check.
     unknown = set(directory) - {"publish", "description"}
     if unknown:
         errors.append(f"{prefix}: directory: unknown keys {sorted(unknown)}")
@@ -240,9 +236,6 @@ def check_registry(repo, errors):
 
 
 def check_required_docs(docs, root, sid, where, errors):
-    # Shared by series-level and item-level required_docs. Each entry is a
-    # mapping carrying an 'id' and a 'path' to a committed file; the proof
-    # later demands a matching data-nb-required source entry.
     if docs is None:
         return
     if not isinstance(docs, list):

@@ -316,9 +316,8 @@ def load_registry(repo):
 
 
 def find_template(repo, template_id):
-    # User templates shadow shipped ones: press/templates/ wins.
     for base in (
-        os.path.join(repo, "press", "templates"),
+        os.path.join(repo, "press", "templates"),  # press/ shadows shipped templates/
         os.path.join(repo, "templates"),
     ):
         path = os.path.join(base, f"{template_id}.html")
@@ -377,12 +376,12 @@ def classify_link(status, error) -> Literal["dead", "ok", "unverified"]:
 
 
 def _probe_link(href):
-    # GET one byte (Range) rather than HEAD: some servers 404/405 a HEAD they
-    # would serve. A browser-like UA keeps casual bot filters from lying to us.
     req = urllib.request.Request(
         href, headers={"User-Agent": LINK_UA, "Range": "bytes=0-0"}
     )
     try:
+        # A one-byte Range GET, not HEAD: some servers 404/405 a HEAD they would
+        # serve, and a browser-like UA keeps casual bot filters from lying to us.
         with urllib.request.urlopen(req, timeout=LINK_TIMEOUT_S) as resp:
             return classify_link(resp.status, None)
     except urllib.error.HTTPError as e:
@@ -450,11 +449,6 @@ def external_ref_allowed(normalized_url):
 
 
 def is_repo_relative_source(href):
-    """True for a repo-relative path (no scheme, no authority, not root-absolute).
-
-    A `data-nb-required` source may cite a committed local file by such a path,
-    so a private/paywalled excerpt need not fabricate a public URL (V6a).
-    """
     if not href or re.search(r"\s", href):
         return False
     normalized = href.replace("\\", "/")
@@ -585,11 +579,6 @@ def resolve_series_and_template(repo, series_id, rep):
 
 
 def read_article_source(html_path, rep):
-    """B-HTML: confirm the file exists and is within size; return its text.
-
-    Returns None only when the file is missing (nothing to parse); an oversize
-    file blocks but still parses, matching the original flow.
-    """
     if not os.path.isfile(html_path):
         rep.block("B-HTML", f"file not found: {html_path}")
         return None
@@ -601,7 +590,6 @@ def read_article_source(html_path, rep):
 
 
 def parse_meta(ed, rep):
-    """B-META-PARSE: return the single well-formed nb-meta dict, or None."""
     if not ed.meta_raw:
         rep.block(
             "B-META-PARSE", 'no <script type="application/json" id="nb-meta"> block'
@@ -626,11 +614,6 @@ def parse_meta(ed, rep):
 
 
 def bind_open_template(meta, registry, allowed_templates, rep):
-    """B-META-MATCH for an open series: bind the template nb-meta names.
-
-    Returns (template_id, treg), or None when the named template is unknown
-    and the check must stop.
-    """
     template_id = meta.get("template")
     treg = (registry or {}).get(template_id)
     if treg is None:
@@ -651,7 +634,6 @@ def bind_open_template(meta, registry, allowed_templates, rep):
 def check_meta_agreement(
     meta, *, series, series_id, template_id, slug_from_path, parent, pr_body_meta, rep
 ):
-    """B-META-MATCH: path, series config, and PR body must agree with nb-meta."""
     if meta.get("slug") != slug_from_path:
         rep.block(
             "B-META-MATCH",
@@ -690,7 +672,6 @@ def check_meta_agreement(
 
 
 def check_sequence_slug(meta, *, items, idx, slug, pub, rep):
-    """B-MODE for a sequence item at 0-based position idx."""
     if pub is None:
         if meta.get("order") != idx + 1:
             rep.block(
@@ -721,7 +702,6 @@ def check_sequence_slug(meta, *, items, idx, slug, pub, rep):
 
 
 def check_ordered_mode(meta, *, series_id, items, slug, pub, mode, rep):
-    """B-SLUG/B-MODE for collection and sequence modes. Returns the item cfg."""
     idx = next((i for i, it in enumerate(items) if it.get("slug") == slug), None)
     if idx is None:
         rep.block(
@@ -738,7 +718,6 @@ def check_ordered_mode(meta, *, series_id, items, slug, pub, mode, rep):
 
 
 def check_rolling_mode(meta, *, slug, pub, today, rep):
-    """B-SLUG/B-MODE for a rolling (dated) brief."""
     if not DATE_RE.match(slug):
         rep.block("B-SLUG", f"rolling slug must be YYYY-MM-DD, got '{slug}'")
     else:
@@ -762,7 +741,6 @@ def check_rolling_mode(meta, *, slug, pub, today, rep):
 
 
 def check_open_slug(*, items, slug, pub, rep):
-    """B-MODE for an open pick. Returns the item cfg when the slug is commissioned."""
     item_cfg = next((it for it in items if it.get("slug") == slug), None)
     if pub is None:
         rep.notes.append(
@@ -783,7 +761,6 @@ def check_open_slug(*, items, slug, pub, rep):
 
 
 def check_mode(meta, *, series, series_id, slug, pub, today, rep):
-    """B-SLUG/B-MODE dispatch per series mode. Returns the matched item cfg."""
     mode = series.get("mode")
     items = series.get("items") or []
     if mode in ("collection", "sequence"):
@@ -805,7 +782,6 @@ def check_mode(meta, *, series, series_id, slug, pub, today, rep):
 
 
 def check_required_sections(ed, treg, rep):
-    """B-HTML: anchor sections present exactly once; extras within the flex band."""
     required_sections = treg.get("sections") or []
     counts = {s: ed.sections.count(s) for s in required_sections}
     for s in required_sections:
@@ -834,7 +810,6 @@ def check_required_sections(ed, treg, rep):
 
 
 def check_sandbox(ed, rep):
-    """B-SANDBOX: no executable scripts, forbidden tags, or off-origin refs."""
     for a in ed.script_tags:
         stype = (a.get("type") or "").strip().lower()
         src = a.get("src", "")
@@ -877,7 +852,6 @@ def check_sandbox(ed, rep):
 
 
 def check_sources(ed, rep, *, check_links):
-    """B-SOURCES-FORM and, when enabled, B-SOURCE-DEAD for the source entries."""
     if not ed.sources:
         rep.block("B-SOURCES-FORM", "no source entries (a[data-nb-source]) found")
     well_formed = []
@@ -901,7 +875,6 @@ def check_sources(ed, rep, *, check_links):
 
 
 def check_cites(ed, rep):
-    """B-CITES-RESOLVE: every inline citation points at a real source entry."""
     for target in ed.cite_hrefs:
         if target not in ed.ids:
             rep.block(
@@ -915,8 +888,6 @@ def check_cites(ed, rep):
 
 
 def check_warns(ed, meta, *, series, treg, template_id, item_cfg, rep):
-    """The WARN tier: length, source floor, cite density/order, why, policy, counts."""
-    # length band
     band = series.get("words") or treg.get("words")
     if band:
         lo, hi = band
