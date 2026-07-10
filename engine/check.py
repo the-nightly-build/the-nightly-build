@@ -145,6 +145,7 @@ class Article(HTMLParser):
         self.items = []  # per data-nb-item: {"cites": int, "why": bool}
         self.ids = set()
         self.source_container_ids = set()
+        self.source_ids = []  # source entry ids in declaration order
         self.sources = []  # {"href":, "required":}
         self.cite_hrefs = []  # hrefs of anchors inside sup.nb-cite
         self.bad_event_attrs = []
@@ -242,6 +243,11 @@ class Article(HTMLParser):
                 for e in self.stack:
                     if e.get("id"):
                         self.source_container_ids.add(e["id"])
+                for e in reversed(self.stack):
+                    if e.get("id"):
+                        if e["id"] not in self.source_ids:
+                            self.source_ids.append(e["id"])
+                        break
 
         if tag in ("script", "style"):
             self._suppress_text_depth += 1
@@ -878,6 +884,25 @@ def check_article(
         for i, it in enumerate(ed.items, 1):
             if it["cites"] == 0:
                 rep.warn("W-CITE-DENSITY", f"item #{i} has no inline citations")
+
+    # citation order: sources should be numbered in order of first appearance
+    if ed.source_ids:
+        decl = {sid: i for i, sid in enumerate(ed.source_ids)}
+        seen = set()
+        frontier = 0
+        for target in ed.cite_hrefs:
+            if target in seen or target not in decl:
+                continue
+            seen.add(target)
+            if decl[target] != frontier:
+                rep.warn(
+                    "W-CITE-ORDER",
+                    f"citation '#{target}' (source {decl[target] + 1}) is first "
+                    f"cited before source {frontier + 1}; number sources in order "
+                    "of first appearance",
+                )
+                break
+            frontier += 1
 
     # per-item "why it matters", when the template's registry entry requires it
     if treg.get("require_why"):

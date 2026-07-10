@@ -943,6 +943,28 @@ expect(
     blocks=0,
     must_not=["W-CITE-DENSITY"],
 )
+expect(
+    "W-CITE-ORDER: sources cited out of first-appearance order",
+    run_local(
+        flex_article([("the-lab", CITE2), ("the-bet", CITE1)]),
+        "notes",
+        slug="first-notes",
+        repo=ut_repo,
+    ),
+    must_have=["W-CITE-ORDER"],
+    blocks=0,
+)
+expect(
+    "in-order citations do not warn",
+    run_local(
+        flex_article([("the-lab", CITE1), ("the-bet", CITE2)]),
+        "notes",
+        slug="first-notes",
+        repo=ut_repo,
+    ),
+    must_not=["W-CITE-ORDER"],
+    blocks=0,
+)
 
 print("== require_why is registry-driven, not tied to the 'brief' template ==")
 
