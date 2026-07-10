@@ -534,19 +534,6 @@ sup.nb-cite a[id],
   color: var(--ink-soft);
 }
 
-.nb-progress-wide {
-  height: 4px;
-  background: var(--hair);
-  overflow: hidden;
-  margin: 12px 0 4px;
-}
-
-.nb-progress-wide b {
-  display: block;
-  height: 100%;
-  background: var(--accent);
-}
-
 .nb-seq {
   list-style: none;
   margin: 0;
@@ -557,8 +544,7 @@ sup.nb-cite a[id],
   border-bottom: 1px solid var(--hair);
 }
 
-.nb-seq a,
-.nb-seq .nb-seq-unpub {
+.nb-seq a {
   display: flex;
   gap: 14px;
   align-items: baseline;
@@ -579,21 +565,6 @@ sup.nb-cite a[id],
   font-weight: 600;
   font-size: 17px;
   flex: 1;
-}
-
-.nb-seq .nb-seq-unpub {
-  color: var(--faint);
-}
-
-.nb-seq .nb-seq-unpub .nb-seq-t {
-  font-weight: 400;
-}
-
-.nb-continue {
-  font-family: var(--sans);
-  font-size: 12px;
-  color: var(--accent-2);
-  white-space: nowrap;
 }
 
 .nb-list .nb-item {
