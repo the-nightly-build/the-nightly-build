@@ -22,7 +22,8 @@ press/
   series/<id>/       series.yaml + prompt.md + sources/ per series
   series/_tags/      reusable prompt fragments shared across series
   themes/            custom design token files
-  templates/         your own article templates (see customization.md)
+  furniture/         shared furniture: catalog.md + styles.css (see customization.md)
+  templates/<id>/    your own template packages: manifest, skeleton, brief, furniture
 ```
 
 ## The fork lifecycle

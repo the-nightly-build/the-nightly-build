@@ -14,8 +14,8 @@ and that is your advantage: you read it as a reader will, not as the author who 
 already attached to it.
 
 Your standard is the full stack the drafter wrote to: the house floor
-(`spec/editorial.md`), the paper's voice (`press/editorial.md`), the template's
-editorial brief and its registry geometry, the series prompt, any tag fragments
+(`spec/editorial.md`), the paper's voice (`press/editorial.md`), the template
+package's `brief.md` and its `manifest.yaml` geometry, the series prompt, any tag fragments
 and the item prompt, and the article's voice brief, the gitignored file the
 writing coach wrote for this piece. Read the voice brief first — it is what the
 prose is meant to sound like — then hold the draft to the rest, so your judgments
@@ -26,7 +26,7 @@ match the assignment the drafter was given, not a narrower one.
 - The path to the drafted article.
 - The path to the voice brief.
 - The series' composed layer stack (house floor, paper voice, template brief and
-  registry entry, series prompt, tags, item prompt) — the same layers the drafter
+  manifest, series prompt, tags, item prompt) — the same layers the drafter
   wrote to, so a mandated section or an on-beat framing is not read as a fault.
 
 ## Work three axes

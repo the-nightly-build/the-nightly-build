@@ -77,7 +77,7 @@ repo is a copyright/ToS problem: use a private repo or excerpts.
 ## 2. Propose, then write
 
 Propose: series `id` (`[a-z0-9-]{1,32}`), mode, template (must be legal for the
-mode per `templates/registry.yaml` — open series may declare a `templates:`
+mode per the template's `manifest.yaml` — open series may declare a `templates:`
 choice list instead), name, cadence if not nightly, and — for
 collection/sequence — the full item list (slugs `[a-z0-9-]{1,64}`, titles,
 tags, per-item prompts). For a sequence, draft the complete ordered syllabus
@@ -180,24 +180,29 @@ article). Re-validate after every change.
   series `prompt.md` (outline conventions, furniture) and rely on `article`'s
   flex sections. That is how the examples run chronicles, lessons, and
   appraisals.
-- _"Make a new template"_ — for structure the proof should ENFORCE: add an
-  entry to `press/templates/registry.yaml` (class, band, `sections` anchors
-  incl. `sources`, optional `flex_sections: [min, max]` for an agent-named
-  middle, cite_rule, modes) and a `press/templates/<id>.html` scaffold (crib
-  a shipped template's head and chrome; keep the asset links and sandbox
-  rules). Omit `flex_sections` for a fully fixed outline. Two optional fields
-  declare requirements the engine reads from the entry (never from a template
-  name): `cite_exempt: [names]` for sections that carry no citations (on top
-  of the always-exempt `sources`) and `require_why: true` to require a
+- _"Make a new template"_ — for structure the proof should ENFORCE: create a
+  package folder `press/templates/<id>/` (the folder name is the id) with a
+  `manifest.yaml` (class, band, `sections` anchors incl. `sources`, optional
+  `flex_sections: [min, max]` for an agent-named middle, cite_rule, modes) and a
+  `skeleton.html` scaffold (crib a shipped template's head and chrome; keep the
+  asset links and sandbox rules). A press package replaces a shipped one of the
+  same id wholesale. Omit `flex_sections` for a fully fixed outline. Two optional
+  manifest fields declare requirements the engine reads (never from a template
+  name): `cite_exempt: [names]` for sections that carry no citations (on top of
+  the always-exempt `sources`) and `require_why: true` to require a
   `data-nb-why` line on each item. The build-your-own walkthrough in
   `docs/customization.md` rebuilds the classic lesson template this way. An
-  optional `press/templates/<id>.md` editorial brief gives the template its voice
-  and identity (crib `templates/article.md`): specific about stance and craft,
-  permissive about structure.
-  Validate, then press check before scheduling.
-- _"Give my paper its own furniture"_ — add component classes to the paper's
-  theme CSS (it restyles the whole library on every publish) and instruct
-  the sections to use them in `prompt.md`; see `docs/customization.md`.
+  optional `<id>/brief.md` editorial brief gives the template its voice and
+  identity (crib `templates/article/brief.md`): specific about stance and craft,
+  permissive about structure. A `<id>/furniture.md` + `furniture.css` adds
+  bespoke furniture only this template renders. Validate, then press check
+  before scheduling.
+- _"Give my paper its own furniture"_ — for pieces shared across sections, add
+  component classes to `press/furniture/styles.css` and catalogue them in
+  `press/furniture/catalog.md`; for a piece only one template renders, put it in
+  that template's folder (`furniture.md` + `furniture.css`). Either restyles the
+  whole library on every publish. Instruct the sections to use them in
+  `prompt.md`; see `docs/customization.md`.
 
 ## 7. Update my engine (plain git)
 

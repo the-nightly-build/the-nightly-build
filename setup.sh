@@ -69,7 +69,7 @@ else
 fi
 
 # 2. Configuration validates before anything else ----------------------------
-say "validating press/ configuration and the template registry"
+say "validating press/ configuration and the template packages"
 python3 engine/validate_config.py || die "fix the configuration above, then re-run"
 
 # 3. The library branch (orphan, empty press) --------------------------------

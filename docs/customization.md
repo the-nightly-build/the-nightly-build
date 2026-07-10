@@ -36,17 +36,28 @@ fall back to system faces for any family they did not load.
 
 ## Your own furniture
 
-Articles compose pre-designed components from the shared catalog,
+Articles compose pre-designed components from the engine's base catalog,
 `templates/FURNITURE.md`: stat strips, timelines, pull quotes, position
-blocks, claim cards, and more. Any component works in any template.
+blocks, claim cards, and more. Any component in it works in any template.
 
-You can extend the catalog without touching the engine. The builder
-republishes your theme CSS across the whole library on every publish, so a
-class defined there restyles past articles too. Define a component below
-the token blocks, on your own prefix (`nb-` is reserved):
+A drafter's furniture palette composes three scopes, so you extend the catalog
+without touching the engine:
+
+- **Engine base** — `templates/FURNITURE.md`, always available.
+- **Shared press furniture** — `press/furniture/`, a `catalog.md` (one read is
+  the whole palette) beside a `styles.css`. Anything every section might reach
+  for lives here.
+- **Template-bespoke** — a `furniture.md` + `furniture.css` inside a template's
+  own folder (`press/templates/<id>/`), for a component only that template
+  renders.
+
+The builder concatenates every CSS owner — your theme plus all furniture files —
+into the single `assets/theme.css` on each publish, so a class defined in any of
+them restyles past articles too. Define a component on your own prefix (`nb-` is
+reserved):
 
 ```css
-/* press/themes/mytheme.css, below the tokens */
+/* press/furniture/styles.css */
 .rs-margin-note {
   float: right;
   width: 200px;
@@ -58,8 +69,9 @@ the token blocks, on your own prefix (`nb-` is reserved):
 }
 ```
 
-Then instruct a section in its `prompt.md`: "use `<div class=\"rs-margin-note\">`
-for asides." Articles carry the markup, your theme carries the look, and
+Catalogue it in `press/furniture/catalog.md` (a heading and a markup sample),
+then instruct a section in its `prompt.md`: "use `<div class=\"rs-margin-note\">`
+for asides." Articles carry the markup, your furniture carries the look, and
 engine updates never touch either.
 
 ### Furniture that needs a JavaScript library
@@ -81,8 +93,9 @@ assets:
 
 With Prism loaded, a code component is pure markup — the article writes
 `<pre><code class="language-python">…escaped code…</code></pre>` and Prism
-highlights it; your theme colors the `.token` classes. The
-`examples/` paper does exactly this for its `rs-code` furniture.
+highlights it; your furniture CSS colors the `.token` classes. The
+`examples/` paper does exactly this for its `rs-code` furniture, in
+`examples/furniture/`.
 
 This does not weaken the security model, because the trust boundary is
 **authorship**, not the presence of JavaScript:
@@ -113,25 +126,39 @@ across every series. Series-specific emphasis belongs in that series'
 The layer order, first to last. Later layers specialize and never override:
 
 ```text
-PROTOCOL.md > spec/editorial.md > press/editorial.md > template registry
-entry > template editorial brief > press/series/<id>/prompt.md > tag fragments
+PROTOCOL.md > spec/editorial.md > press/editorial.md > template manifest >
+template editorial brief > press/series/<id>/prompt.md > tag fragments
 > item prompt
 ```
 
-The template editorial brief is the prose guidance carried in the template
-itself (its identity, opener, and structure notes), distinct from the machine
-config in the registry entry above it. A `press/templates/` template supplies
-its own brief.
+The template editorial brief (`<id>/brief.md`) is the prose guidance carried in
+the template package itself (its identity, opener, and structure notes), distinct
+from the machine contract in the `manifest.yaml` above it. A `press/templates/`
+package supplies its own brief.
 
 ## Your own templates
 
-User templates are first class: the proof enforces whatever a registry
-entry declares, so a template you define gets the same validation, CI, and
-site treatment as the shipped two. Reach for one when a section needs
-structure enforced rather than described; for most genres, describing it in
-the series prompt on `article` is enough (see [series.md](series.md)).
+A template is a self-contained folder — the folder name is the template id —
+under `templates/` (shipped) or `press/templates/` (yours):
 
-Registry entries come in two styles:
+```text
+press/templates/<id>/
+  manifest.yaml    the machine contract the proof enforces (required)
+  skeleton.html    the scaffold the agent renders (required)
+  brief.md         the template's voice and identity (optional)
+  furniture.md     bespoke furniture catalogue for this template (optional)
+  furniture.css    bespoke furniture styles (optional)
+```
+
+A `press/templates/<id>/` package replaces a shipped `templates/<id>/` of the
+same id **wholesale**. User templates are first class: the proof enforces
+whatever the manifest declares, so a template you define gets the same
+validation, CI, and site treatment as the shipped two. Reach for one when a
+section needs structure enforced rather than described; for most genres,
+describing it in the series prompt on `article` is enough (see
+[series.md](series.md)).
+
+Manifests come in two styles:
 
 - Fixed outline: declare `sections` and each must appear exactly once.
 - Flexible outline: declare anchor `sections` plus
@@ -143,16 +170,15 @@ Registry entries come in two styles:
 Worked example: the classic lesson template, six fixed sections for an
 ordered course, rebuilt as your own template.
 
-1. Declare it in `press/templates/registry.yaml`:
+1. Write `press/templates/lesson/manifest.yaml`:
 
    ```yaml
-   lesson:
-     class: longread
-     words: [1500, 4000]
-     sections: [objectives, recap, teach, check, bridge, sources]
-     cite_rule: per-section
-     cite_exempt: [objectives] # the goals box carries no citations
-     modes: [sequence]
+   class: longread
+   words: [1500, 4000]
+   sections: [objectives, recap, teach, check, bridge, sources]
+   cite_rule: per-section
+   cite_exempt: [objectives] # the goals box carries no citations
+   modes: [sequence]
    ```
 
    Rules: `sections` must include `sources`. Bands are `[low, high]`.
@@ -161,19 +187,21 @@ ordered course, rebuilt as your own template.
    otherwise not know: `cite_exempt: [names]` (sections that need no citations,
    on top of the always-exempt `sources`) and `require_why: true` (each
    `data-nb-item` must carry a `data-nb-why` line, as `brief` does). The engine
-   reads these from the entry, so any template can use them.
-   Entries here overlay the shipped registry, so reusing a shipped id
-   redefines it. The test suite exercises this exact lesson entry, so the
+   reads these from the manifest, so any template can use them. An optional
+   `about:` one-liner documents the template for a browsing human; the engine
+   ignores it. The test suite exercises this exact lesson manifest, so the
    walkthrough cannot drift from what the proof enforces.
 
-2. Scaffold it as `press/templates/lesson.html`. Copy a shipped template's
+2. Scaffold `press/templates/lesson/skeleton.html`. Copy a shipped skeleton's
    `<head>` and header chrome verbatim (asset links, nb-meta skeleton,
    eyebrow, title, dek, byline), then lay out one
    `<section data-nb-section="...">` per declared section. The objectives
    box, check box, and bridge components in `templates/FURNITURE.md` carry
-   the lesson. Template files shadow shipped ones by filename. The sandbox
-   applies unchanged: no scripts beyond the JSON blocks and the engine
-   runtime, citations as `sup.nb-cite` anchors into numbered source entries.
+   the lesson. The sandbox applies unchanged: no scripts beyond the JSON blocks
+   and the engine runtime, citations as `sup.nb-cite` anchors into numbered
+   source entries. Optionally add `brief.md` (the template's voice) and
+   `furniture.md` + `furniture.css` for bespoke components only this template
+   renders.
 
 3. Validate and rehearse: `python3 engine/validate_config.py`, then point a
    series at the template and run a press check before scheduling it.

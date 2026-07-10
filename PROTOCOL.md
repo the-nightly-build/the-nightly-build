@@ -26,12 +26,14 @@ available, `uv run engine/<script>.py` manages the dependency itself.
    2. `spec/editorial.md`: the house voice and quality bar.
    3. `press/editorial.md`: the author's voice, if present. It specializes
       the house style.
-   4. The registry entry for your series' template: `templates/registry.yaml`,
-      overlaid by `press/templates/registry.yaml` (your entries win). The
-      template file itself is `press/templates/<t>.html` if it exists, else
-      `templates/<t>.html`. If the template ships an editorial brief
-      (`press/templates/<t>.md` overlaid on `templates/<t>.md`), read it as the
-      template's voice; it composes here, before the series prompt.
+   4. Your series' template package: the folder `templates/<t>/`, replaced
+      wholesale by `press/templates/<t>/` if a press package of the same id
+      exists (your package wins). Read its `manifest.yaml` (the machine
+      contract this file's proof enforces) and its `skeleton.html` (the
+      scaffold you render). If the package ships an editorial brief
+      (`<t>/brief.md`), read it as the template's voice; it composes here,
+      before the series prompt. If the package ships bespoke furniture
+      (`<t>/furniture.md`), it joins your furniture palette (step 6).
    5. `press/series/<id>/prompt.md`: the series' editorial instructions.
    6. Tag fragments listed in the series config, in declared order.
    7. The item-level `prompt`, if present.
@@ -78,15 +80,18 @@ available, `uv run engine/<script>.py` manages the dependency itself.
    resolves. Meet the source floor for your series.
 
 6. **Render exactly one self-contained HTML file** from your series' template:
-   - Fill every anchor section the registry requires exactly once. If the
+   - Fill every anchor section the manifest requires exactly once. If the
      template declares `flex_sections: [min, max]`, add that many more
      sections between the anchors, each named by you for the topic
      (lowercase-hyphen `data-nb-section` labels). Every labeled section
      needs citations per the template's cite rule.
    - Number the source entries in the order the prose first cites them (the
      proof warns `W-CITE-ORDER` otherwise, a BLOCK under `strict`).
-   - `templates/FURNITURE.md` is the catalog of shared components; any
-     component may be used in any template.
+   - Your furniture palette composes three scopes: the engine base catalogue
+     (`templates/FURNITURE.md`), the paper's shared furniture
+     (`press/furniture/catalog.md`) if present, and your template's bespoke
+     furniture (`<t>/furniture.md`) if it ships any. Use a component from any of
+     them when it carries information better than prose.
    - Embed the `nb-meta` JSON block (schema below).
    - Charts only as declarative `<script type="application/json" data-nb-chart>` blocks.
    - No scripts other than those JSON blocks and the template's own
