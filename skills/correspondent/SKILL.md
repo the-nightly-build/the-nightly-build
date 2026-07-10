@@ -74,7 +74,14 @@ not failure.**
 Produce each due series' article by these steps, in order. Track them with your
 task or todo tool, so no stage is skipped and each stage-skill fires at its step.
 
-1. **Load the series layers** (series prompt, tags, item prompt) for this series.
+1. **Load the full layer stack** into this fresh context, in order: `PROTOCOL.md`
+   → `spec/editorial.md` (house floor) → `press/editorial.md` (paper voice) →
+   the template's registry entry → its editorial brief if it ships one → the
+   series prompt → tag fragments in declared order → the item's `prompt` if
+   present. The isolated context starts empty; load these here directly rather
+   than assuming the orchestrator's copy carried over, so the drafter reads the
+   floor and the paper voice firsthand, not only through the voice brief. Later
+   layers specialize; they never override earlier ones.
 2. **Writing coach, always.** Spawn a subagent that loads the `writing-coach`
    skill. It studies how the best real writers on this subject actually write and
    leaves a voice brief at `.nb-voice/<series>-<slug>.md`. Read the brief before
@@ -133,7 +140,7 @@ task or todo tool, so no stage is skipped and each stage-skill fires at its step
 The voice brief stays under `.nb-voice/` (gitignored), so the PR still adds
 exactly one file. Never merge. Never push to `library` directly. Never open a
 second PR for a series. If your PR is labeled `nb-invalid`, stop; a future run
-supersedes you, and fighting the editor is not your job.
+supersedes you, and fighting the desk is not your job.
 
 ## Commissioned work (a human asks directly)
 
