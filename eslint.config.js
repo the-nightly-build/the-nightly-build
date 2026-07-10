@@ -20,4 +20,13 @@ export default [
     files: ["*.config.js"],
     languageOptions: { globals: globals.node },
   },
+  {
+    // Node ESM behavior tests for the browser runtime.
+    files: ["engine/tests/**/*.js"],
+    languageOptions: {
+      ecmaVersion: 2022,
+      sourceType: "module",
+      globals: globals.node,
+    },
+  },
 ];
