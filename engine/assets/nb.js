@@ -362,7 +362,9 @@
       "<summary>Contents</summary><ol>" +
       items
         .map(function (i) {
-          return '<li><a href="#' + i.id + '">' + i.label + "</a></li>";
+          return (
+            '<li><a href="#' + i.id + '">' + escHtml(i.label) + "</a></li>"
+          );
         })
         .join("") +
       "</ol>";
@@ -502,7 +504,7 @@
           articleUrl(e) +
           '">' +
           (arrow === "l" ? "← " : "") +
-          e.title +
+          escHtml(e.title) +
           (arrow === "r" ? " →" : "") +
           "</a>"
         );
