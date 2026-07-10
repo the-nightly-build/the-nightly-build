@@ -1,0 +1,46 @@
+id: nbjs-innerhtml-escape
+language: JavaScript
+severity: error
+files:
+  - engine/assets/nb.js
+message: >
+  Dynamic value concatenated into HTML must pass through escHtml(). A bare
+  member-expression operand (e.g. i.label, e.title) reaches a DOM sink un-escaped
+  and re-materializes escaped-entity payloads as live markup (finding 1.6).
+rule:
+  kind: member_expression
+  all:
+    # A direct operand of a string-concatenation (`+`) expression.
+    - inside:
+        kind: binary_expression
+        pattern: $L + $R
+    # The concatenation is building HTML: some string literal in the chain
+    # carries a tag delimiter. This is what separates an HTML sink from plain
+    # URL/string building (e.g. ROOT + "series/" + meta.series + "/").
+    - inside:
+        kind: binary_expression
+        stopBy: end
+        has:
+          kind: string
+          stopBy: end
+          regex: "[<>]"
+    # Reading `.innerHTML` back off a cloned DOM node is serialized-safe.
+    - not:
+        has:
+          field: property
+          regex: "^innerHTML$"
+metadata:
+  byor:
+    rationale: >
+      nb.js renders article-derived strings (titles, headings) into innerHTML.
+      The proof (check.py) sees article source as text, so an escaped-entity
+      payload is legal there but decodes to live markup once innerHTML re-parses
+      it. Every dynamic value at a DOM sink must be escaped.
+    agent_prompt: >
+      Wrap the concatenated member-expression in escHtml(...) before it reaches
+      innerHTML/insertAdjacentHTML, or build the node with textContent /
+      setAttribute instead of string concatenation.
+    tags:
+      - javascript
+      - security
+      - xss

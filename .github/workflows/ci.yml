@@ -47,6 +47,8 @@ jobs:
       - run: npx eslint .
       - run: npx stylelint "engine/assets/**/*.css"
       - run: npx markdownlint-cli2
+      - run: npm run lint:sg
+      - run: npm run test:js
 
   shell:
     runs-on: ubuntu-latest

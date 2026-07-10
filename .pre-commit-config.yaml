@@ -46,6 +46,12 @@ repos:
         entry: npx eslint
         language: system
         files: \.js$
+      - id: ast-grep
+        name: ast-grep (nb.js DOM-sink invariants)
+        entry: npx ast-grep scan --rule .byor/rules/project/nbjs-innerhtml-escape.yml
+        language: system
+        pass_filenames: false
+        files: ^(engine/assets/.*\.js|\.byor/rules/project/nbjs-innerhtml-escape\.yml)$
       - id: stylelint
         name: stylelint
         entry: npx stylelint
@@ -70,6 +76,13 @@ repos:
       - id: tests
         name: engine test suite
         entry: python3 engine/tests/run_tests.py
+        language: system
+        pass_filenames: false
+        always_run: true
+        stages: [pre-push]
+      - id: tests-js
+        name: nb.js behavior suite
+        entry: npm run test:js
         language: system
         pass_filenames: false
         always_run: true
