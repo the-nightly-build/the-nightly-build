@@ -9,6 +9,8 @@ throwaway git repository so the diff-shape rules face actual git output.
 Run: python3 engine/tests/run_tests.py
 """
 
+import contextlib
+import io
 import json
 import pathlib
 import re as _re
@@ -256,6 +258,32 @@ expect(
     run_local(mut('"template": "article"', '"template": "brief"'), "semiconductors"),
     must_have=["B-META-MATCH"],
 )
+expect(
+    "slug-style tag is accepted",
+    run_local(
+        mut('"tags": ["equity"]', '"tags": ["equity", "memory-cycle"]'),
+        "semiconductors",
+    ),
+    must_not=["B-META-PARSE"],
+    blocks=0,
+)
+expect(
+    "uppercase tag blocked (slug rule)",
+    run_local(mut('"tags": ["equity"]', '"tags": ["Equity"]'), "semiconductors"),
+    must_have=["B-META-PARSE"],
+)
+expect(
+    "path-traversal tag blocked (slug rule)",
+    run_local(
+        mut('"tags": ["equity"]', '"tags": ["../../../escape"]'), "semiconductors"
+    ),
+    must_have=["B-META-PARSE"],
+)
+expect(
+    "non-list tags blocked",
+    run_local(mut('"tags": ["equity"]', '"tags": "equity"'), "semiconductors"),
+    must_have=["B-META-PARSE"],
+)
 
 print("== B-HTML ==")
 expect(
@@ -367,6 +395,39 @@ expect(
     "google fonts allowed", run_local(VALID, "semiconductors"), must_not=["B-SANDBOX"]
 )
 expect(
+    "font-host subdomain-suffix bypass blocked",
+    run_local(
+        mut(
+            "https://fonts.googleapis.com/css2?family=Newsreader&amp;display=swap",
+            "https://fonts.googleapis.com.evil.example/pwn.css",
+        ),
+        "semiconductors",
+    ),
+    must_have=["B-SANDBOX"],
+)
+expect(
+    "font-host userinfo bypass blocked",
+    run_local(
+        mut(
+            "https://fonts.googleapis.com/css2?family=Newsreader&amp;display=swap",
+            "https://fonts.googleapis.com@evil.example/pwn.css",
+        ),
+        "semiconductors",
+    ),
+    must_have=["B-SANDBOX"],
+)
+expect(
+    "font-host lookalike TLD suffix blocked",
+    run_local(
+        mut(
+            "https://fonts.googleapis.com/css2?family=Newsreader&amp;display=swap",
+            "https://fonts.googleapis.commmm/x.css",
+        ),
+        "semiconductors",
+    ),
+    must_have=["B-SANDBOX"],
+)
+expect(
     "malformed chart json",
     run_local(mut('"type":"bar"', '"type":"pie"'), "semiconductors"),
     must_have=["B-SANDBOX"],
@@ -460,6 +521,31 @@ expect(
     "http (not https) source",
     run_local(
         mut('href="https://example.org/src4"', 'href="http://example.org/src4"'),
+        "semiconductors",
+    ),
+    must_have=["B-SOURCES-FORM"],
+)
+expect(
+    "data-nb-required source may cite a repo-relative local file (V6a)",
+    run_local(
+        mut('href="https://example.org/src1"', 'href="sources/mu-10k-2025.txt"'),
+        "semiconductors",
+    ),
+    must_not=["B-SOURCES-FORM"],
+    blocks=0,
+)
+expect(
+    "non-required source still must be absolute https",
+    run_local(
+        mut('href="https://example.org/src4"', 'href="sources/local.txt"'),
+        "semiconductors",
+    ),
+    must_have=["B-SOURCES-FORM"],
+)
+expect(
+    "off-origin path even on a required source is rejected",
+    run_local(
+        mut('href="https://example.org/src1"', 'href="//evil.example/x.txt"'),
         "semiconductors",
     ),
     must_have=["B-SOURCES-FORM"],
@@ -848,6 +934,20 @@ expect(
     "the docs walkthrough lesson template passes as a fixed user template",
     run_local(LESSON, "crypto", slug="hashes", repo=ut_repo),
     blocks=0,
+)
+expect(
+    "fixed outline (no flex_sections): an undeclared extra section blocks (V6c)",
+    run_local(
+        LESSON.replace(
+            '<section data-nb-section="sources">',
+            '<section data-nb-section="rogue"><p>extra</p></section>'
+            '<section data-nb-section="sources">',
+        ),
+        "crypto",
+        slug="hashes",
+        repo=ut_repo,
+    ),
+    must_have=["B-HTML"],
 )
 
 print("== flex sections (agent-named outline) ==")
@@ -1509,6 +1609,57 @@ link_cases = [
     ("no links to probe returns empty", C.dead_source_links([]) == []),
 ]
 for name, ok in link_cases:
+    if ok:
+        PASS += 1
+        print(f"  ok   {name}")
+    else:
+        FAIL.append(name)
+        print(f"  FAIL {name}")
+
+print()
+print("== rehearsal honors --check-links (parity with CI) ==")
+
+
+# 1.5: the local (rehearsal) branch of main() must forward --check-links, or a
+# dead citation passes the press check yet fails B-SOURCE-DEAD in CI. Every source
+# points at the reserved `.invalid` TLD (RFC 6761), which never resolves — so the
+# probe classifies it dead offline or online, making this deterministic without a
+# real network round-trip. The assertion is purely about whether main() wires the
+# flag through: links-on must surface B-SOURCE-DEAD, --no-check-links must not.
+def run_main_json(argv):
+    buf = io.StringIO()
+    with contextlib.redirect_stdout(buf):
+        C.main(argv)
+    return json.loads(buf.getvalue())
+
+
+_dead_article = VALID.replace(
+    "https://example.org/", "https://nb-dead.invalid/"
+).replace("https://www.sec.gov/filings/mu-10k", "https://nb-dead.invalid/sec")
+_link_tmp = tempfile.mkdtemp()
+_art = pathlib.Path(_link_tmp) / "library" / "semiconductors" / "micron.html"
+_art.parent.mkdir(parents=True)
+_art.write_text(_dead_article)
+_common = [
+    str(_art),
+    "--series",
+    "semiconductors",
+    "--repo",
+    TESTREPO,
+    "--today",
+    TODAY,
+    "--json",
+]
+links_on = run_main_json(_common)
+links_off = run_main_json([*_common, "--no-check-links"])
+shutil.rmtree(_link_tmp)
+on_codes = {f["code"] for f in links_on["findings"]}
+off_codes = {f["code"] for f in links_off["findings"]}
+link_flag_cases = [
+    ("local mode probes links by default", "B-SOURCE-DEAD" in on_codes),
+    ("--no-check-links suppresses probing locally", "B-SOURCE-DEAD" not in off_codes),
+]
+for name, ok in link_flag_cases:
     if ok:
         PASS += 1
         print(f"  ok   {name}")

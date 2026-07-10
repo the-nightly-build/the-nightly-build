@@ -47,12 +47,13 @@ PROTOCOL_MAJOR = "1"
 MAX_BYTES = 2 * 1024 * 1024
 SLUG_RE = re.compile(r"^[a-z0-9-]{1,64}$")
 SERIES_RE = re.compile(r"^[a-z0-9-]{1,32}$")
+TAG_RE = re.compile(r"^[a-z0-9-]{1,32}$")
 DATE_RE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
-ALLOWED_EXTERNAL_PREFIXES = (
-    "/assets/",
-    "https://fonts.googleapis.com",
-    "https://fonts.gstatic.com",
-)
+# Off-origin references (link/img) may load only from Google Fonts over https.
+# Matched by exact host after browser-style normalization, never by string
+# prefix — "fonts.googleapis.com.evil.example" and userinfo tricks defeat prefix
+# matching but not a real host comparison.
+ALLOWED_EXTERNAL_HOSTS = frozenset({"fonts.googleapis.com", "fonts.gstatic.com"})
 # The one executable script an article may load: the engine-owned runtime
 # (§7.4 — contextual nav + chart renderer), by relative or root-absolute path.
 ENGINE_SCRIPT_RE = re.compile(r"^(?:(?:\.\./)+|/)assets/nb\.js$")
@@ -431,6 +432,36 @@ def chart_spec_error(raw):
     return None
 
 
+def external_ref_allowed(normalized_url):
+    """True when an off-origin link/img reference may load.
+
+    `normalized_url` is browser-normalized (whitespace stripped, backslashes
+    folded to slashes). Requires an https scheme and a host in the font
+    allowlist, comparing the parsed host — not a string prefix, so
+    `fonts.googleapis.com.evil.example`, `fonts.googleapis.com@evil.example`,
+    and protocol-relative `//host` refs are all rejected.
+    """
+    scheme = re.match(r"(https?)://", normalized_url, re.IGNORECASE)
+    if not scheme or scheme.group(1).lower() != "https":
+        return False
+    authority = re.split(r"[/?#]", normalized_url.split("://", 1)[1], maxsplit=1)[0]
+    host = authority.rsplit("@", 1)[-1].split(":", 1)[0]
+    return host.lower() in ALLOWED_EXTERNAL_HOSTS
+
+
+def is_repo_relative_source(href):
+    """True for a repo-relative path (no scheme, no authority, not root-absolute).
+
+    A `data-nb-required` source may cite a committed local file by such a path,
+    so a private/paywalled excerpt need not fabricate a public URL (V6a).
+    """
+    if not href or re.search(r"\s", href):
+        return False
+    normalized = href.replace("\\", "/")
+    is_off_origin = "://" in normalized or normalized.startswith("//")
+    return not is_off_origin and not normalized.startswith("/")
+
+
 def validate_meta_fields(meta, rep):
     def need(field, typ, *, pattern=None, enum=None):
         v = meta.get(field)
@@ -472,6 +503,18 @@ def validate_meta_fields(meta, rep):
     order = meta.get("order")
     if order is not None and (not isinstance(order, int) or order < 1):
         rep.block("B-META-PARSE", "nb-meta 'order' must be a positive integer or null")
+    tags = meta.get("tags")
+    if tags is not None:
+        if not isinstance(tags, list):
+            rep.block("B-META-PARSE", "nb-meta field 'tags' has wrong type")
+        else:
+            for tag in tags:
+                if not isinstance(tag, str) or not TAG_RE.match(tag):
+                    rep.block(
+                        "B-META-PARSE",
+                        f"nb-meta tag {tag!r} must match {TAG_RE.pattern} "
+                        "(lowercase slug: a-z, 0-9, hyphen)",
+                    )
 
 
 def check_article(
@@ -742,19 +785,21 @@ def check_article(
                 "B-HTML",
                 f"section '{s}' appears {counts[s]} times; must be exactly once",
             )
-    flex_band = treg.get("flex_sections")
-    if flex_band:
-        extras = [s for s in ed.sections if s not in required_sections]
-        dupes = sorted({s for s in extras if extras.count(s) > 1})
-        if dupes:
-            rep.block("B-HTML", f"duplicate section labels: {dupes}")
-        low, high = flex_band
-        if not (low <= len(extras) <= high):
-            rep.block(
-                "B-HTML",
-                f"{len(extras)} sections beyond the anchors; this template "
-                f"expects between {low} and {high}",
-            )
+    # Absent flex_sections means a fully fixed outline: no section beyond the
+    # anchors is allowed (V6c). Present it as [0, 0] so extras BLOCK rather than
+    # slip through unchecked.
+    flex_band = treg.get("flex_sections") or [0, 0]
+    extras = [s for s in ed.sections if s not in required_sections]
+    dupes = sorted({s for s in extras if extras.count(s) > 1})
+    if dupes:
+        rep.block("B-HTML", f"duplicate section labels: {dupes}")
+    low, high = flex_band
+    if not (low <= len(extras) <= high):
+        rep.block(
+            "B-HTML",
+            f"{len(extras)} sections beyond the anchors; this template "
+            f"expects between {low} and {high}",
+        )
 
     # --- B-SANDBOX ---
     for a in ed.script_tags:
@@ -790,7 +835,7 @@ def check_article(
         # cannot slip an off-origin load past the check.
         u = re.sub(r"[\t\n\r]", "", (url or "").strip()).replace("\\", "/")
         is_external = "://" in u or u.startswith("//")
-        if is_external and not u.startswith(ALLOWED_EXTERNAL_PREFIXES):
+        if is_external and not external_ref_allowed(u):
             rep.block("B-SANDBOX", f"external {kind} reference not on allowlist: {url}")
     for i, raw_chart in enumerate(ed.chart_raw, 1):
         err = chart_spec_error(raw_chart)
@@ -805,6 +850,8 @@ def check_article(
         href = s["href"]
         if re.match(r"^https://[^\s]+$", href or ""):
             well_formed.append(href)
+        elif s["required"] and is_repo_relative_source(href):
+            continue  # local-file citation (V6a): no public URL to probe
         else:
             rep.block(
                 "B-SOURCES-FORM", f"source href must be absolute https URL: {href!r}"
@@ -1158,6 +1205,7 @@ def main(argv=None):
             rep=rep,
             pr_body_meta=resolve_pr_body(args.pr_body, rep),
             today=args.today and _dt.date.fromisoformat(args.today),
+            check_links=args.check_links,
         )
 
     # strict promotion for pr mode (series known only after path parse)
