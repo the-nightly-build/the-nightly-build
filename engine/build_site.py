@@ -48,6 +48,8 @@ import re
 import shutil
 import sys
 
+import nb_meta
+
 try:
     import yaml
 except ImportError:
@@ -63,16 +65,6 @@ UPSTREAM_REPOSITORY = os.getenv(
     "UPSTREAM_REPOSITORY", "the-nightly-build/the-nightly-build"
 )
 DIRECTORY_URL = os.getenv("DIRECTORY_URL", "https://the-nightly-build.github.io/")
-# The nb-meta block build_site renders must be the same one check.py validates:
-# a <script type="application/json" id="nb-meta">. Requiring the type (in any
-# attribute order) means an untyped decoy #nb-meta the proof cannot see is
-# invisible to the builder too, instead of overriding title/date/series/slug.
-META_RE = re.compile(
-    r'<script\b(?=[^>]*\btype="application/json")(?=[^>]*\bid="nb-meta")'
-    r"[^>]*>(.*?)</script>",
-    re.S | re.I,
-)
-
 esc = html.escape
 
 NO_DATE = "unknown"
@@ -92,6 +84,12 @@ def date_sort_key(date):
     # A dateless night sorts before every real date, so a dateless
     # article can never win the "latest" newsstand slot.
     return "" if date == NO_DATE else date
+
+
+def by_date_and_slug(ed):
+    # Reverse-chron ordering key shared by the search index, both feeds, and
+    # the open-series position sort (which applies it ascending).
+    return (ed["meta"].get("date", ""), ed["slug"])
 
 
 # --------------------------------------------------------------------------- #
@@ -159,24 +157,7 @@ def load_series_configs(repo):
     return out
 
 
-def read_meta(path):
-    with open(path, encoding="utf-8", errors="replace") as fh:
-        m = META_RE.search(fh.read())
-    if not m:
-        return None
-    try:
-        meta = json.loads(m.group(1))
-        return meta if isinstance(meta, dict) else None
-    except ValueError:
-        return None
-
-
-def articles_dir(root, sid):
-    # Accepts a full library checkout or a bare library/ folder.
-    for base in (os.path.join(root, "library", sid), os.path.join(root, sid)):
-        if os.path.isdir(base):
-            return base
-    return None
+read_meta = nb_meta.read_meta
 
 
 def scan_library(root):
@@ -210,7 +191,9 @@ def reading_minutes(meta):
     return max(1, round(words / WORDS_PER_MINUTE)) if words else 1
 
 
-def collect_articles(series_cfgs, library_root, *, preview_root=None):
+def collect_articles(
+    series_cfgs, library_root, *, preview_root=None
+) -> dict[tuple[str, str], dict]:
     """Load every article under the library root, preview drafts included.
 
     Returns {(series_id, slug): article dict} where each dict carries the
@@ -262,7 +245,7 @@ def assign_positions(articles, series_cfgs):
             order = {it.get("slug"): i for i, it in enumerate(cfg.get("items") or [])}
             eds.sort(key=lambda e: (order.get(e["slug"], 10**6), e["slug"]))
         elif mode == "open":  # topical slugs; publication date is the order
-            eds.sort(key=lambda e: (e["meta"].get("date", ""), e["slug"]))
+            eds.sort(key=by_date_and_slug)
         else:  # rolling
             eds.sort(key=lambda e: e["slug"])
         for i, ed in enumerate(eds, 1):
@@ -274,7 +257,7 @@ def assign_positions(articles, series_cfgs):
 # --------------------------------------------------------------------------- #
 
 
-def derive_self_repository(explicit, base_url):
+def derive_self_repository(explicit, base_url) -> str | None:
     # The press's own "owner/repo", used by chrome for the "star this press"
     # link. Prefer an explicit value (GITHUB_REPOSITORY in CI); otherwise parse
     # a GitHub Pages project URL of the form https://<owner>.github.io/<repo>/.
@@ -439,6 +422,16 @@ def pretty_date(iso):
     except (ValueError, TypeError):
         return iso
     return f"{WEEKDAYS[d.weekday()]}, {MONTHS[d.month - 1]} {d.day}, {d.year}"
+
+
+def month_label(iso, fallback):
+    # "July 2026" for an ISO date, falling back to the raw value when it does
+    # not parse (e.g. the blank month of the NO_DATE sentinel).
+    try:
+        md = dt.date.fromisoformat(iso)
+    except ValueError:
+        return fallback
+    return f"{MONTHS[md.month - 1]} {md.year}"
 
 
 def asset_stamp(repo, theme_path=None):
@@ -661,12 +654,7 @@ def render_build_archive(site, dates):
     for d in sorted(dates, key=date_sort_key, reverse=True):
         month = d[:7]
         if month != seen_month:
-            try:
-                md = dt.date.fromisoformat(d)
-                label = f"{MONTHS[md.month - 1]} {md.year}"
-            except ValueError:
-                label = month
-            body += f'<span class="nb-month-label">{esc(label)}</span>'
+            body += f'<span class="nb-month-label">{esc(month_label(d, month))}</span>'
             seen_month = month
         body += (
             f'<div class="nb-list"><a class="nb-nightnav" '
@@ -766,14 +754,20 @@ def render_series_index(site, catalog, *, series_cfgs, articles):
     )
 
 
-def render_series_page(site, sid, *, cfg, eds, series_cfgs):
-    name = cfg.get("name", sid)
-    mode = cfg.get("mode", "collection")
-    eds = sorted(eds, key=lambda e: e["position"])
-    published = {e["slug"]: e for e in eds}
-    items = cfg.get("items") or []
-    total = len(items)
+def coming_card(item):
+    # Placeholder card for an item that is configured but not yet published.
+    # One shared shape across collection and open series — the two had drifted,
+    # with the open card carrying an nb-kicker the collection card lacked.
+    return (
+        f'<div class="nb-item" style="color:var(--faint);'
+        f'padding:14px 0 12px;border-bottom:1px solid var(--hair)">'
+        f'<div class="nb-kicker">commissioned</div>'
+        f"<h3>{esc(str(item.get('title', item.get('slug'))))}</h3>"
+        f'<div class="nb-meta"><span>coming</span></div></div>'
+    )
 
+
+def series_head_html(name, *, mode, cfg, eds, total):
     tpl_label = ", ".join(
         cfg.get("templates") or ([cfg["template"]] if cfg.get("template") else [])
     )
@@ -782,93 +776,106 @@ def render_series_page(site, sid, *, cfg, eds, series_cfgs):
         sub_bits.append(f"{len(eds)} of {total} published")
     else:
         sub_bits.append(f"{len(eds)} published")
-    head = (
+    return (
         f'<div class="nb-serieshead"><h1>{esc(name)}</h1>'
         f'<div class="nb-series-sub">{" · ".join(b for b in sub_bits if b)}'
         "</div></div>"
     )
 
+
+def render_sequence_body(sid, *, items, published, eds, total):
+    pct = round(100 * len(eds) / total) if total else 0
+    rows = []
+    continue_slug = next(
+        (it.get("slug") for it in items if it.get("slug") not in published), None
+    )
+    for i, it in enumerate(items, 1):
+        slug, title = it.get("slug"), it.get("title", it.get("slug"))
+        if slug in published:
+            rows.append(
+                f'<li><a href="../../library/{esc(sid)}/{esc(str(slug))}.html">'
+                f'<span class="nb-seq-n">{i:02d}</span>'
+                f'<span class="nb-seq-t">{esc(str(title))}</span></a></li>'
+            )
+        else:
+            marker = (
+                '<span class="nb-continue">continue here</span>'
+                if slug == continue_slug
+                else ""
+            )
+            rows.append(
+                f'<li><span class="nb-seq-unpub">'
+                f'<span class="nb-seq-n">{i:02d}</span>'
+                f'<span class="nb-seq-t">{esc(str(title))}</span>{marker}'
+                "</span></li>"
+            )
+    bar = f'<div class="nb-progress-wide"><b style="width:{pct}%"></b></div>'
+    return bar + f'<ol class="nb-seq">{"".join(rows)}</ol>'
+
+
+def render_timeline_body(*, mode, eds, items, published, series_cfgs):
+    date_of = (
+        (lambda e: e["slug"])
+        if mode == "rolling"
+        else (lambda e: e["meta"].get("date", ""))
+    )
+    parts, seen_month = [], None
+    for ed in sorted(eds, key=lambda e: (date_of(e), e["slug"]), reverse=True):
+        month = date_of(ed)[:7]
+        if month != seen_month:
+            label = month_label(date_of(ed), month)
+            parts.append(f'<span class="nb-month-label">{esc(label)}</span>')
+            seen_month = month
+        parts.append(story_item(ed, series_cfgs, depth=2))
+    if mode == "open":
+        parts += [coming_card(it) for it in items if it.get("slug") not in published]
+    return (
+        f'<div class="nb-list">{"".join(parts)}</div>'
+        if parts
+        else '<div class="nb-empty"><p>No articles yet.</p></div>'
+    )
+
+
+def render_collection_body(*, items, published, eds, series_cfgs):
+    rows = [
+        story_item(published[it["slug"]], series_cfgs, depth=2)
+        for it in items
+        if it.get("slug") in published
+    ]
+    rows += [
+        story_item(e, series_cfgs, depth=2)
+        for e in eds
+        if not any(it.get("slug") == e["slug"] for it in items)
+    ]
+    rows += [coming_card(it) for it in items if it.get("slug") not in published]
+    return f'<div class="nb-list">{"".join(rows)}</div>'
+
+
+def render_series_page(site, sid, *, cfg, eds, series_cfgs):
+    name = cfg.get("name", sid)
+    mode = cfg.get("mode", "collection")
+    eds = sorted(eds, key=lambda e: e["position"])
+    published = {e["slug"]: e for e in eds}
+    items = cfg.get("items") or []
+    total = len(items)
+    head = series_head_html(name, mode=mode, cfg=cfg, eds=eds, total=total)
+
     if mode == "sequence":
-        pct = round(100 * len(eds) / total) if total else 0
-        head += f'<div class="nb-progress-wide"><b style="width:{pct}%"></b></div>'
-        rows = []
-        continue_slug = next(
-            (it.get("slug") for it in items if it.get("slug") not in published), None
+        body = head + render_sequence_body(
+            sid, items=items, published=published, eds=eds, total=total
         )
-        for i, it in enumerate(items, 1):
-            slug, title = it.get("slug"), it.get("title", it.get("slug"))
-            if slug in published:
-                rows.append(
-                    f'<li><a href="../../library/{esc(sid)}/{esc(str(slug))}.html">'
-                    f'<span class="nb-seq-n">{i:02d}</span>'
-                    f'<span class="nb-seq-t">{esc(str(title))}</span></a></li>'
-                )
-            else:
-                marker = (
-                    '<span class="nb-continue">continue here</span>'
-                    if slug == continue_slug
-                    else ""
-                )
-                rows.append(
-                    f'<li><span class="nb-seq-unpub">'
-                    f'<span class="nb-seq-n">{i:02d}</span>'
-                    f'<span class="nb-seq-t">{esc(str(title))}</span>{marker}'
-                    "</span></li>"
-                )
-        body = head + f'<ol class="nb-seq">{"".join(rows)}</ol>'
     elif mode in ("rolling", "open"):
-        date_of = (
-            (lambda e: e["slug"])
-            if mode == "rolling"
-            else (lambda e: e["meta"].get("date", ""))
-        )
-        parts, seen_month = [], None
-        for ed in sorted(eds, key=lambda e: (date_of(e), e["slug"]), reverse=True):
-            month = date_of(ed)[:7]
-            if month != seen_month:
-                try:
-                    md = dt.date.fromisoformat(date_of(ed))
-                    label = f"{MONTHS[md.month - 1]} {md.year}"
-                except ValueError:
-                    label = month
-                parts.append(f'<span class="nb-month-label">{esc(label)}</span>')
-                seen_month = month
-            parts.append(story_item(ed, series_cfgs, depth=2))
-        if mode == "open":
-            parts += [
-                f'<div class="nb-item" style="color:var(--faint);'
-                f'padding:14px 0 12px;border-bottom:1px solid var(--hair)">'
-                f'<div class="nb-kicker">commissioned</div>'
-                f"<h3>{esc(str(it.get('title', it.get('slug'))))}</h3>"
-                f'<div class="nb-meta"><span>coming</span></div></div>'
-                for it in items
-                if it.get("slug") not in published
-            ]
-        body = head + (
-            f'<div class="nb-list">{"".join(parts)}</div>'
-            if parts
-            else '<div class="nb-empty"><p>No articles yet.</p></div>'
+        body = head + render_timeline_body(
+            mode=mode,
+            eds=eds,
+            items=items,
+            published=published,
+            series_cfgs=series_cfgs,
         )
     else:  # collection, in config order
-        rows = [
-            story_item(published[it["slug"]], series_cfgs, depth=2)
-            for it in items
-            if it.get("slug") in published
-        ]
-        rows += [
-            story_item(e, series_cfgs, depth=2)
-            for e in eds
-            if not any(it.get("slug") == e["slug"] for it in items)
-        ]
-        rows += [
-            f'<div class="nb-item" style="color:var(--faint);'
-            f'padding:14px 0 12px;border-bottom:1px solid var(--hair)">'
-            f"<h3>{esc(str(it.get('title', it.get('slug'))))}</h3>"
-            f'<div class="nb-meta"><span>coming</span></div></div>'
-            for it in items
-            if it.get("slug") not in published
-        ]
-        body = head + f'<div class="nb-list">{"".join(rows)}</div>'
+        body = head + render_collection_body(
+            items=items, published=published, eds=eds, series_cfgs=series_cfgs
+        )
 
     return page(
         site, f"{name} — {site['title']}", body=body, depth=2, active="Sections"
@@ -954,12 +961,18 @@ TEXT_STRIP_RE = re.compile(
 BODY_RE = re.compile(r"<body[^>]*>([\s\S]*?)</body>", re.I)
 
 
-def article_text(path):
-    # Readable text of an article, for the search index.
+def article_body_html(path):
+    # The inner HTML of an article's <body>, or the whole file when it has no
+    # <body>. Shared by the search index and the feed content extractor.
     with open(path, encoding="utf-8", errors="replace") as fh:
         raw = fh.read()
     m = BODY_RE.search(raw)
-    text = TEXT_STRIP_RE.sub(" ", m.group(1) if m else raw)
+    return m.group(1) if m else raw
+
+
+def article_text(path):
+    # Readable text of an article, for the search index.
+    text = TEXT_STRIP_RE.sub(" ", article_body_html(path))
     text = html.unescape(text)
     return re.sub(r"\s+", " ", text).strip()
 
@@ -968,7 +981,7 @@ def build_search_index(articles, series_cfgs):
     out = []
     for ed in sorted(
         articles.values(),
-        key=lambda e: (e["meta"].get("date", ""), e["slug"]),
+        key=by_date_and_slug,
         reverse=True,
     ):
         meta = ed["meta"]
@@ -1000,6 +1013,12 @@ FEED_STRIP_RE = re.compile(r"<script[\s\S]*?</script>|<style[\s\S]*?</style>", r
 HREF_RE = re.compile(r'((?:href|src)=")([^"]+)(")', re.I)
 
 
+def absolutize_url(base_url, path):
+    # Prefix a site-root path with the base URL when one is known (feeds and
+    # the email digest need absolute links); otherwise the path stands as-is.
+    return f"{base_url}{path}" if base_url else path
+
+
 def feed_content_html(path, base_url):
     """Return the article body as a feed-safe HTML fragment.
 
@@ -1008,10 +1027,7 @@ def feed_content_html(path, base_url):
     absolutized; oversized bodies return empty so the entry falls back
     to its summary.
     """
-    with open(path, encoding="utf-8", errors="replace") as fh:
-        raw = fh.read()
-    m = re.search(r"<body[^>]*>([\s\S]*?)</body>", raw, re.I)
-    body = FEED_STRIP_RE.sub(" ", m.group(1) if m else raw)
+    body = FEED_STRIP_RE.sub(" ", article_body_html(path))
 
     def absolutize(match):
         pre, url, post = match.groups()
@@ -1056,7 +1072,7 @@ def atom_feed(base_url, feed_path, *, title, eds, generated, author=None):
     author = author or title
 
     def absolute(path):
-        return f"{base_url}{path}" if base_url else path
+        return absolutize_url(base_url, path)
 
     entries = []
     for i, ed in enumerate(eds[:FEED_LIMIT]):
@@ -1110,7 +1126,7 @@ def render_email(site_title, date, *, eds, series_cfgs, base_url):
     """
 
     def absolute(path):
-        return f"{base_url}{path}" if base_url else path
+        return absolutize_url(base_url, path)
 
     eds = sorted(eds, key=lambda e: -e["reading_minutes"])
     total_minutes = sum(e["reading_minutes"] for e in eds)
@@ -1219,7 +1235,7 @@ def build(
     base_url="",
     repository=None,
     now=None,
-):
+) -> dict:
     now = now or dt.datetime.now(dt.timezone.utc)
     site_cfg = load_site_config(repo)
     series_cfgs = load_series_configs(repo)
@@ -1304,7 +1320,7 @@ def build(
 
     all_sorted = sorted(
         articles.values(),
-        key=lambda e: (e["meta"].get("date", ""), e["slug"]),
+        key=by_date_and_slug,
         reverse=True,
     )
     write(
@@ -1322,7 +1338,7 @@ def build(
         sid = s["id"]
         eds = sorted(
             by_series.get(sid, []),
-            key=lambda e: (e["meta"].get("date", ""), e["slug"]),
+            key=by_date_and_slug,
             reverse=True,
         )
         write(
