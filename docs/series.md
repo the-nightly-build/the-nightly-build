@@ -42,8 +42,11 @@ section: Foundations # optional shelf on the Sections page and in kickers
 
 Cadence is why one nightly schedule is enough forever: the run asks
 `engine/duty.py` what is due tonight, so a weekly deep-dive section and a
-daily brief coexist under the same schedule. Pausing is the vacation
-switch: the proof refuses new articles for a paused series.
+daily brief coexist under the same schedule. Duty reckons in UTC: a
+`[mon, thu]` cadence means the run's UTC weekday, and `rolling` slugs the
+article by the run's UTC date, so a cron hour near midnight can land a
+"Monday" run on your local Sunday evening. Pausing is the vacation switch: the
+proof refuses new articles for a paused series.
 
 `section:` is the one level of hierarchy a paper needs. Series group under
 their `section:` heading on the Sections page, and front-page kickers show the
@@ -53,10 +56,11 @@ paused series sink into "In the stacks" automatically.
 ## Quality and sources
 
 Per series: `words: [low, high]` (may tighten, never loosen below the
-template's registry floor), `min_sources`, `strict: true` (every WARN
-becomes a BLOCK), `autopublish: true` (the editor auto-merges a clean PR;
-the default is a human merge), and the source policy: `required_docs`,
-`consult`, and
+template's registry floor), `min_sources` (the citation floor; defaults to
+`8` for a longread template and `5` for a shortread one, so you only set it to
+raise the bar), `strict: true` (every WARN becomes a BLOCK), `autopublish: true`
+(the desk auto-merges a clean PR; the default is a human merge), and the source
+policy: `required_docs`, `consult`, and
 `sources_exclusive`, described in the [README](../README.md) and
 demonstrated across `examples/series/`.
 
@@ -67,17 +71,28 @@ Any PR to `library` that adds one file and passes the proof is a legitimate
 article, whoever commissioned it. Ask your agent for three extra pieces
 this afternoon and tonight's build is simply bigger. The recommended flow
 is press check, then promote, so you read the rehearsal before it
-publishes. The editor applies the same validation either way.
+publishes. The desk applies the same validation either way.
 
-Two rules of the road:
+Three rules of the road:
 
 - Every article needs a home. The proof rejects articles for series that do
   not exist in `press/series/`, so a brand-new topic means a config change
   on `main` first. Usually that is a one-line commission into an open
   section's queue or a new item in a collection. A new series is the last
   resort.
-- Extras count as tonight's article. A series that publishes by hand today
-  is skipped by tonight's scheduled run.
+- Extras count as tonight's article, on the same UTC day. The scheduled run
+  skips a series only when a hand-published article's nb-meta date equals the
+  run's own UTC date. Publish an extra late in the afternoon your time and a
+  cron that fires after UTC midnight sees a new date: the series reads as due
+  again and the run publishes a second item that night. Commission close to the
+  run, or expect the automatic piece as well.
+- Merge the night's PR before the next run. Duty dedupes against merged
+  `library` state, not open PRs, so a series whose PR is still unmerged when the
+  next run fires is re-selected and produces a second PR for the same work. Once
+  the first PR merges the duplicate becomes a file modification and the proof
+  BLOCKs it, but the wasted research and the open-PR pileup are real.
+  `autopublish` series merge themselves; a human-merge series needs you to merge
+  it in time.
 
 ## Governing without YAML
 
