@@ -363,7 +363,11 @@
       items
         .map(function (i) {
           return (
-            '<li><a href="#' + i.id + '">' + escHtml(i.label) + "</a></li>"
+            '<li><a href="#' +
+            escHtml(i.id) +
+            '">' +
+            escHtml(i.label) +
+            "</a></li>"
           );
         })
         .join("") +
@@ -546,7 +550,9 @@
     return String(s)
       .replace(/&/g, "&amp;")
       .replace(/</g, "&lt;")
-      .replace(/>/g, "&gt;");
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#39;");
   }
 
   function initSearch() {
