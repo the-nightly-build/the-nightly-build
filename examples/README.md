@@ -23,7 +23,7 @@ starting point, not a look to undo.
   tags, `consult` sources, and a commented `required_docs` example.
 
 Between them they exercise all four modes, both shipped templates plus a custom
-one, three custom furniture components (`rs-code` with CSS-only syntax
+one, three custom furniture components (`rs-code` with Prism-based syntax
 highlighting, `rs-docket`, `rs-side`), the source policy (`consult` live,
 `required_docs` and `sources_exclusive` shown as documented options), `cadence`
 scheduling, word-band and source-floor calibration, tag fragments, and a voice
