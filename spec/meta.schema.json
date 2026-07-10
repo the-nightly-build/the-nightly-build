@@ -22,7 +22,7 @@
     "slug": { "type": "string", "pattern": "^[a-z0-9-]{1,64}$" },
     "template": {
       "type": "string",
-      "description": "a template id from the merged registry (shipped or press-defined)"
+      "description": "a template id from the merged template packages (shipped or press-defined)"
     },
     "title": { "type": "string", "minLength": 1, "maxLength": 200 },
     "mode": { "enum": ["collection", "sequence", "rolling", "open"] },

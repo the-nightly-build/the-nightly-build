@@ -39,6 +39,7 @@ TEMPLATE_KEYS = {
     "cite_exempt",
     "require_why",
     "modes",
+    "about",
 }
 CITE_RULES = {"per-section", "per-item"}
 SERIES_KEYS = {
@@ -181,14 +182,28 @@ def check_site_directory(directory, *, errors):
 
 
 def check_registry(repo, errors):
-    path = os.path.join(repo, "templates", "registry.yaml")
-    if not os.path.isfile(path):
-        errors.append("templates/registry.yaml is missing")
+    registry, folders = {}, {}
+    for base in (
+        os.path.join(repo, "templates"),
+        os.path.join(repo, "press", "templates"),  # press shadows shipped
+    ):
+        if not os.path.isdir(base):
+            continue
+        for name in sorted(os.listdir(base)):
+            folder = os.path.join(base, name)
+            manifest = os.path.join(folder, "manifest.yaml")
+            if not os.path.isfile(manifest):
+                continue
+            try:
+                registry[name] = load(manifest) or {}
+                folders[name] = folder
+            except yaml.YAMLError as e:
+                errors.append(
+                    f"registry '{name}': manifest.yaml is not valid YAML: {e}"
+                )
+    if not registry:
+        errors.append("no template packages found (templates/<id>/manifest.yaml)")
         return {}
-    registry = load(path) or {}
-    press_path = os.path.join(repo, "press", "templates", "registry.yaml")
-    if os.path.isfile(press_path):
-        registry.update(load(press_path) or {})
     for tid, entry in registry.items():
         where = f"registry '{tid}'"
         if not isinstance(entry, dict):
@@ -224,14 +239,9 @@ def check_registry(repo, errors):
                 and band[0] <= band[1]
             ):
                 errors.append(f"{where}: '{band_key}' must be [low, high] integers")
-        candidates = [
-            os.path.join(repo, "press", "templates", f"{tid}.html"),
-            os.path.join(repo, "templates", f"{tid}.html"),
-        ]
-        if not any(os.path.isfile(c) for c in candidates):
-            errors.append(
-                f"{where}: no {tid}.html in the press templates folder or templates/"
-            )
+        skeleton = os.path.join(folders[tid], "skeleton.html")
+        if not os.path.isfile(skeleton):
+            errors.append(f"{where}: no skeleton.html in the {tid} template folder")
     return registry
 
 

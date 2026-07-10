@@ -302,16 +302,26 @@ def load_yaml(path):
 
 
 def load_registry(repo):
-    """Load the shipped template registry overlaid by the press registry.
+    """Load every template's manifest, press packages shadowing shipped.
 
-    A press entry fully replaces a shipped entry of the same id, which
-    is both how users add templates and how they redefine a shipped
-    template's band press-wide.
+    A template is a folder holding a manifest.yaml (the folder name is the
+    id); the manifest carries the geometry the proof enforces. A
+    press/templates/<id> package replaces a shipped one of the same id
+    wholesale, which is both how a press adds templates and how it
+    redefines a shipped template's band press-wide. A folder without a
+    manifest.yaml is not a template and is skipped.
     """
-    registry = load_yaml(os.path.join(repo, "templates", "registry.yaml")) or {}
-    press_path = os.path.join(repo, "press", "templates", "registry.yaml")
-    if os.path.isfile(press_path):
-        registry.update(load_yaml(press_path) or {})
+    registry = {}
+    for base in (
+        os.path.join(repo, "templates"),
+        os.path.join(repo, "press", "templates"),  # press shadows shipped
+    ):
+        if not os.path.isdir(base):
+            continue
+        for name in sorted(os.listdir(base)):
+            manifest = os.path.join(base, name, "manifest.yaml")
+            if os.path.isfile(manifest):
+                registry[name] = load_yaml(manifest) or {}
     return registry
 
 
@@ -320,7 +330,7 @@ def find_template(repo, template_id):
         os.path.join(repo, "press", "templates"),  # press/ shadows shipped templates/
         os.path.join(repo, "templates"),
     ):
-        path = os.path.join(base, f"{template_id}.html")
+        path = os.path.join(base, template_id, "skeleton.html")
         if os.path.isfile(path):
             return path
     return None
@@ -532,7 +542,7 @@ def resolve_series_and_template(repo, series_id, rep):
     try:
         registry = load_registry(repo)
     except (OSError, yaml.YAMLError, TypeError, ValueError) as e:
-        rep.block("B-SERIES", f"templates/registry.yaml unreadable: {e}")
+        rep.block("B-SERIES", f"template manifests unreadable: {e}")
         return None
 
     mode_cfg = series.get("mode")
@@ -546,8 +556,7 @@ def resolve_series_and_template(repo, series_id, rep):
         if not allowed_templates or unknown:
             rep.block(
                 "B-SERIES",
-                f"open series templates {unknown or 'missing'} not in "
-                f"templates/registry.yaml",
+                f"open series templates {unknown or 'missing'} are not known templates",
             )
             return None
         for t in allowed_templates:
@@ -566,7 +575,7 @@ def resolve_series_and_template(repo, series_id, rep):
     if not treg:
         rep.block(
             "B-SERIES",
-            f"series template '{template_id}' not in templates/registry.yaml",
+            f"series template '{template_id}' is not a known template",
         )
         return None
     if mode_cfg not in (treg.get("modes") or []):
@@ -619,7 +628,7 @@ def bind_open_template(meta, registry, allowed_templates, rep):
     if treg is None:
         rep.block(
             "B-META-MATCH",
-            f"nb-meta template '{template_id}' not in templates/registry.yaml",
+            f"nb-meta template '{template_id}' is not a known template",
         )
         return None
     if template_id not in allowed_templates:

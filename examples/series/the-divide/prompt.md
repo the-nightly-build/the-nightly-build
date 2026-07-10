@@ -14,8 +14,9 @@ Pick tonight's question like an editor:
 - Read the section's published articles first. Never re-argue a settled question or
   repeat one you ran recently.
 
-Build it on the divide template. It is a two-sided format, rendered left vs
-right across a spine:
+Build it on the divide template. Its two-sided furniture (`rs-divide` / `rs-side`)
+is catalogued in the template's own folder (`press/templates/divide/furniture.md`).
+It is a two-sided format, rendered left vs right across a spine:
 
 - Orientation names the question, why it is live now, and who stands on each
   side, taking no position. Full width, above the split.

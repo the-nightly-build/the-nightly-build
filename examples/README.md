@@ -5,8 +5,9 @@ whole surface, including the parts a paper builds for itself: a custom template
 and custom furniture. It keeps the shipped palette on purpose, so it is a
 starting point, not a look to undo.
 
-- `the-divide/` is an **open section** on a **custom template** (`divide`, defined
-  in `examples/templates/registry.yaml` and `examples/templates/divide.html`). It
+- `the-divide/` is an **open section** on a **custom template** (`divide`, the
+  package at `examples/templates/divide/` — manifest, skeleton, brief, and its
+  bespoke `rs-side` furniture). It
   argues one contested question from every side. The template enforces exactly two
   sides, each its own section, and the section runs `strict: true` so the per-side
   citation checks become hard BLOCKs. This is the reason to build a template:
@@ -29,11 +30,14 @@ highlighting, `rs-docket`, `rs-side`), the source policy (`consult` live,
 scheduling, word-band and source-floor calibration, tag fragments, and a voice
 file.
 
-Custom furniture has to live in a paper theme file, because that is the only
-CSS the engine publishes for a site. `themes/newsroom.css` keeps the shipped
-palette unchanged and adds the components below the tokens, on the paper's own
-`rs-` prefix (the `nb-` prefix is the engine's); each section's `prompt.md` shows
-the markup. See [docs/customization.md](../docs/customization.md) for how
+Custom furniture lives in one of two scopes, all on the paper's own `rs-` prefix
+(the `nb-` prefix is the engine's). Shared pieces reached for across sections live
+in `furniture/` (`catalog.md` + `styles.css`) — here, `rs-code` and `rs-docket`.
+A piece only one template renders lives in that template's folder — here,
+`rs-side` in `templates/divide/`. `themes/newsroom.css` is now just the palette,
+kept unchanged from the shipped default; the engine concatenates it with every
+furniture file into the published `assets/theme.css`. Each section's `prompt.md`
+shows the markup. See [docs/customization.md](../docs/customization.md) for how
 templates, themes, and furniture fit together.
 
 The engine never reads this folder. To use any of it, copy files into your

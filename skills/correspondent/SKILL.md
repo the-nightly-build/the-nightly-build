@@ -34,10 +34,10 @@ isolation and the parallelism, not the pipeline.
 ## Load your layers (in order)
 
 `PROTOCOL.md` → `spec/editorial.md` (house floor) → `press/editorial.md` (the
-paper's voice, if present) → your template's registry entry
-(`templates/registry.yaml` overlaid by `press/templates/registry.yaml`) → the
-template's editorial brief if it ships one (`press/templates/<t>.md` over
-`templates/<t>.md`) → `press/series/<id>/prompt.md` → tag fragments in declared
+paper's voice, if present) → your template package's `manifest.yaml` (the folder
+`templates/<t>/`, replaced wholesale by `press/templates/<t>/` if a press package
+of that id exists) → the package's editorial brief if it ships one
+(`<t>/brief.md`) → `press/series/<id>/prompt.md` → tag fragments in declared
 order → the item's `prompt` if present. Later layers specialize; they never
 override earlier ones.
 
@@ -76,7 +76,7 @@ task or todo tool, so no stage is skipped and each stage-skill fires at its step
 
 1. **Load the full layer stack** into this fresh context, in order: `PROTOCOL.md`
    → `spec/editorial.md` (house floor) → `press/editorial.md` (paper voice) →
-   the template's registry entry → its editorial brief if it ships one → the
+   the template package's `manifest.yaml` → its `brief.md` if it ships one → the
    series prompt → tag fragments in declared order → the item's `prompt` if
    present. The isolated context starts empty; load these here directly rather
    than assuming the orchestrator's copy carried over, so the drafter reads the
@@ -96,22 +96,31 @@ task or todo tool, so no stage is skipped and each stage-skill fires at its step
    - Every load-bearing claim gets an inline citation that links to a source
      entry. Never fabricate a citation; a dangling cite is a BLOCK.
    - Collect at least the series' source floor; aim past it.
-4. **Draft.** Render one self-contained HTML file from the template, reading the
-   voice brief as you write so the prose is anchored, not slop. Start from
-   `press/templates/<template>.html` if it exists, else
-   `templates/<template>.html`.
-   - The registry entry defines the template's geometry. The **article** template
+4. **Draft.** Render one self-contained HTML file from the template's
+   `skeleton.html`, reading the voice brief as you write so the prose is
+   anchored, not slop. Start from `press/templates/<template>/skeleton.html` if a
+   press package of that id exists, else `templates/<template>/skeleton.html`.
+   - **Fill the skeleton:** replace every ALL-CAPS placeholder and all sample
+     content, drop the one flex-slot marker once you have added the sections it
+     stands for, fill `nb-meta` honestly, and keep the engine asset
+     `<link>`/`<script>` tags exactly as they are (engine-owned). This is the
+     universal fill discipline for every template.
+   - The `manifest.yaml` defines the template's geometry. The **article** template
      is enforced prose: the anchor sections appear once, and where it declares
      `flex_sections` you name that many more between them (lowercase-hyphen
      `data-nb-section` labels, each cited). The **brief** template is enforced
-     structure: 4 to 8 tagged items, each cited, each with a why-it-matters line.
-     A custom template follows its own entry the same way.
-   - `templates/FURNITURE.md` is the component catalog. Use a piece when it
-     carries information better than prose; skip decoration.
-   - Fill `nb-meta` honestly (`sources`/`words` are recounted by the proof;
-     `harness`/`model` are your provenance). Charts only as `data-nb-chart` JSON
-     blocks. Keep the engine asset links; add no other scripts, styles, iframes,
-     or handlers. Write to `library/<series>/<slug>.html`.
+     structure: 4 to 8 tagged items,
+     each cited, each with a why-it-matters line. A custom template follows its
+     own manifest the same way.
+   - Your furniture palette is three composed scopes: the engine base catalogue
+     (`templates/FURNITURE.md`), the paper's shared furniture
+     (`press/furniture/catalog.md`) if present, and this template's bespoke
+     furniture (`<template>/furniture.md`) if it ships any. Use a piece from any
+     scope when it carries information better than prose; skip decoration.
+   - `nb-meta`: `sources`/`words` are recounted by the proof; `harness`/`model`
+     are your provenance. Charts only as `data-nb-chart` JSON blocks. Add no
+     scripts, styles, iframes, or handlers beyond the engine tags. Write to
+     `library/<series>/<slug>.html`.
 5. **Self-edit, always.** Spawn a fresh subagent that loads the `editor` skill on
    the draft and the voice brief. Apply its surgical edits. If it requests a
    redraft, the piece needs more than surgery: redraft from step 4 with its

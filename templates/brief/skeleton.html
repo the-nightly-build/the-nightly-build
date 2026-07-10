@@ -1,23 +1,4 @@
 <!doctype html>
-<!--
-  TEMPLATE: brief (shortread · 4-8 items · cite_rule per-item · rolling or open)
-  A batch of tonight's developments. In rolling mode the slug and nb-meta date
-  are today's UTC date and mode is "rolling"; on an open section you coin a
-  topical slug and set mode "open" (this scaffold shows the rolling case).
-
-  Agent instructions:
-  * Replace every ALL-CAPS placeholder and all sample content. Fill nb-meta.
-  * Keep the asset <link>/<script> tags exactly as they are (engine-owned).
-  * 4-8 items. Each item: mono topic tag, serif headline LINKING DIRECTLY to
-    the item's primary source (plus the citation sup), 1-2 sentence body,
-    and a judgment line marked data-nb-why (the proof checks the attribute,
-    not the words). Label it however fits the paper — "Why it matters", "The
-    stakes", "What to watch" — and vary it across items; the identical bolded
-    phrase on every item, every night, is a tell.
-  * Items may reference this series' own prior briefs ("we've been tracking…").
-  * Cite with <sup class="nb-cite"><a href="#sN">N</a></sup> against #sources.
-  * Shared components are welcome where they earn it: templates/FURNITURE.md.
--->
 <html lang="en">
   <head>
     <meta charset="utf-8" />
@@ -65,6 +46,8 @@
       </header>
 
       <section data-nb-section="items" id="items">
+        <!-- FLEX SLOT: 4-8 of these items, each data-nb-item, each cited, each
+             with a data-nb-why line (vary the label across items). -->
         <div class="nb-brief-item" data-nb-item>
           <span class="nb-brief-tag">TOPIC TAG</span>
           <h3>
@@ -78,7 +61,7 @@
           </p>
           <p data-nb-why>
             <b>Why it matters</b> — the connection to the larger story this
-            series tracks. (Label is yours; vary it.)
+            series tracks.
           </p>
         </div>
 
@@ -111,8 +94,6 @@
           <p>WHAT HAPPENED.</p>
           <p data-nb-why><b>The signal</b> — WHY.</p>
         </div>
-
-        <!-- 4-8 items total -->
       </section>
 
       <section class="nb-sources" data-nb-section="sources" id="sources">

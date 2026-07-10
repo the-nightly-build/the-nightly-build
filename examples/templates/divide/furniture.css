@@ -1,0 +1,89 @@
+/* The Divide's bespoke furniture (prefix rs-). Bespoke to this template: only a
+   divide article renders two sides, so these classes live in the template's own
+   folder rather than in press/furniture/. The engine concatenates this file into
+   assets/theme.css whenever the divide template is present. Documented in
+   furniture.md beside it.
+
+   One contested question argued left vs right. Exactly two sides sit in a
+   two-column grid across an accent spine on wide screens. On a phone they stack,
+   but each keeps its allegiance: the left camp hugs a left rule, the right camp is
+   indented and hugs a right rule, so the reader still feels two sides. Each side
+   is four slots: camp, thesis, argument, champion. One accent, mirrored — never
+   two team colors, so the paper never looks partisan. */
+.rs-divide {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  margin: 1.8rem 0;
+}
+
+.rs-divide .rs-side {
+  min-width: 0; /* let grid cells shrink below content width instead of overflowing */
+}
+
+.rs-divide .rs-left {
+  padding-right: 1.6rem;
+  border-right: 2px solid var(--accent);
+}
+
+.rs-divide .rs-right {
+  padding-left: 1.6rem;
+}
+
+.rs-side-camp {
+  margin: 0 0 0.2rem;
+  font-family: var(--sans);
+  font-weight: 600;
+  font-size: 0.78rem;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+.rs-side-thesis {
+  margin: 0 0 0.75rem;
+  font-family: var(--serif);
+  font-weight: 600;
+  font-size: 1.18rem;
+  line-height: 1.35;
+  color: var(--ink);
+}
+
+.rs-side-champion {
+  margin-top: 0.9rem;
+  padding-top: 0.55rem;
+  border-top: 1px solid var(--hair);
+  font-family: var(--sans);
+  font-size: 0.82rem;
+  line-height: 1.5;
+  color: var(--ink-soft);
+}
+
+.rs-side-outlet {
+  font-weight: 600;
+  color: var(--ink);
+}
+
+@media (width <= 640px) {
+  .rs-divide {
+    grid-template-columns: 1fr;
+    gap: 1.6rem;
+  }
+
+  .rs-divide .rs-left {
+    padding-right: 0;
+    padding-left: 1rem;
+    border-right: none;
+    border-left: 3px solid var(--accent);
+  }
+
+  .rs-divide .rs-right {
+    margin-left: 1.5rem;
+    padding-right: 1rem;
+    padding-left: 0;
+    border-right: 3px solid var(--accent);
+  }
+
+  .rs-divide .rs-right .rs-side-camp {
+    text-align: right;
+  }
+}

@@ -753,14 +753,15 @@ for name, fixture, sid, slug in [
         ],
     )
 
-print("== templates: structural lint of the template files ==")
+print("== templates: structural lint of the template skeletons ==")
 registry = C.load_registry(str(REPO))
 for template_id, treg in registry.items():
     tpl_path = C.find_template(str(REPO), template_id)
     if tpl_path is None:
-        FAIL.append(f"template {template_id}.html")
+        FAIL.append(f"template {template_id}/skeleton.html")
         print(
-            f"  FAIL template {template_id}.html: no file in templates/ or press/templates/"
+            f"  FAIL template {template_id}: no skeleton.html in "
+            "templates/ or press/templates/"
         )
         continue
     src = pathlib.Path(tpl_path).read_text()
@@ -787,11 +788,11 @@ for template_id, treg in registry.items():
     ok = ok_sections and ok_meta and ok_scripts and ok_sandbox
     if ok:
         PASS += 1
-        print(f"  ok   template {template_id}.html structure")
+        print(f"  ok   template {template_id}/skeleton.html structure")
     else:
-        FAIL.append(f"template {template_id}.html")
+        FAIL.append(f"template {template_id}/skeleton.html")
         print(
-            f"  FAIL template {template_id}.html: sections={ok_sections} "
+            f"  FAIL template {template_id}/skeleton.html: sections={ok_sections} "
             f"meta={ok_meta} scripts={ok_scripts} sandbox={ok_sandbox}"
         )
 
@@ -800,50 +801,53 @@ ut_repo = tempfile.mkdtemp()
 for sub in ("press", "templates", "engine"):
     shutil.copytree(pathlib.Path(TESTREPO) / sub, pathlib.Path(ut_repo) / sub)
 ut_tpl = pathlib.Path(ut_repo) / "press" / "templates"
-ut_tpl.mkdir()
-(ut_tpl / "registry.yaml").write_text(
-    "memo:\n  class: shortread\n  words: [200, 3000]\n"
-    "  sections: [note, sources]\n  cite_rule: per-section\n"
-    "  modes: [collection]\n"
-    "fieldnotes:\n  class: shortread\n  words: [200, 3000]\n"
-    "  sections: [sources]\n  flex_sections: [2, 3]\n"
-    "  cite_rule: per-section\n  cite_exempt: [context]\n  modes: [collection]\n"
-    # the exact registry entry from the docs/customization.md walkthrough,
-    # so the tutorial cannot drift from what the proof enforces
-    "lesson:\n  class: longread\n  words: [1500, 4000]\n"
-    "  sections: [objectives, recap, teach, check, bridge, sources]\n"
-    "  cite_rule: per-section\n  cite_exempt: [objectives]\n  modes: [sequence]\n"
-    # a per-item template NOT named 'brief', to prove require_why is
-    # registry-driven rather than hardcoded to the shipped brief template
-    "digest:\n  class: shortread\n  items: [2, 4]\n"
-    "  sections: [entries, sources]\n  cite_rule: per-item\n"
-    "  require_why: true\n  modes: [collection]\n"
-)
-(ut_tpl / "memo.html").write_text(
-    "<!DOCTYPE html><html><body>"
-    '<section data-nb-section="note"></section>'
-    '<section data-nb-section="sources"></section>'
-    "</body></html>"
-)
-(ut_tpl / "fieldnotes.html").write_text(
-    "<!DOCTYPE html><html><body>"
-    '<section data-nb-section="YOUR-LABEL"></section>'
-    '<section data-nb-section="sources"></section>'
-    "</body></html>"
-)
-(ut_tpl / "lesson.html").write_text(
-    "<!DOCTYPE html><html><body>"
-    + "".join(
-        f'<section data-nb-section="{s}"></section>'
-        for s in ("objectives", "recap", "teach", "check", "bridge", "sources")
+
+
+def user_template(tid, manifest, skeleton):
+    folder = ut_tpl / tid
+    folder.mkdir(parents=True)
+    (folder / "manifest.yaml").write_text(manifest)
+    (folder / "skeleton.html").write_text(skeleton)
+
+
+def skeleton_of(*sections):
+    return (
+        "<!DOCTYPE html><html><body>"
+        + "".join(f'<section data-nb-section="{s}"></section>' for s in sections)
+        + "</body></html>"
     )
-    + "</body></html>"
+
+
+user_template(
+    "memo",
+    "class: shortread\nwords: [200, 3000]\n"
+    "sections: [note, sources]\ncite_rule: per-section\nmodes: [collection]\n",
+    skeleton_of("note", "sources"),
 )
-(ut_tpl / "digest.html").write_text(
-    "<!DOCTYPE html><html><body>"
-    '<section data-nb-section="entries"></section>'
-    '<section data-nb-section="sources"></section>'
-    "</body></html>"
+user_template(
+    "fieldnotes",
+    "class: shortread\nwords: [200, 3000]\n"
+    "sections: [sources]\nflex_sections: [2, 3]\n"
+    "cite_rule: per-section\ncite_exempt: [context]\nmodes: [collection]\n",
+    skeleton_of("YOUR-LABEL", "sources"),
+)
+# the exact manifest from the docs/customization.md walkthrough, so the tutorial
+# cannot drift from what the proof enforces
+user_template(
+    "lesson",
+    "class: longread\nwords: [1500, 4000]\n"
+    "sections: [objectives, recap, teach, check, bridge, sources]\n"
+    "cite_rule: per-section\ncite_exempt: [objectives]\nmodes: [sequence]\n",
+    skeleton_of("objectives", "recap", "teach", "check", "bridge", "sources"),
+)
+# a per-item template NOT named 'brief', to prove require_why is manifest-driven
+# rather than hardcoded to the shipped brief template
+user_template(
+    "digest",
+    "class: shortread\nitems: [2, 4]\n"
+    "sections: [entries, sources]\ncite_rule: per-item\n"
+    "require_why: true\nmodes: [collection]\n",
+    skeleton_of("entries", "sources"),
 )
 ut_series = pathlib.Path(ut_repo) / "press" / "series" / "memos"
 ut_series.mkdir()
@@ -1132,10 +1136,13 @@ if "memo" in reg and "article" in reg:
 else:
     FAIL.append("registry merge")
     print(f"  FAIL registry merge: keys={sorted(reg)}")
+memo_tpl = C.find_template(ut_repo, "memo") or ""
+article_tpl = C.find_template(ut_repo, "article") or ""
 if (
-    C.find_template(ut_repo, "memo")
-    and "press" in C.find_template(ut_repo, "memo")
-    and "press" not in (C.find_template(ut_repo, "article") or "")
+    memo_tpl.endswith("memo/skeleton.html")
+    and "press" in memo_tpl
+    and article_tpl.endswith("article/skeleton.html")
+    and "press" not in article_tpl
 ):
     PASS += 1
     print("  ok   template lookup: press shadows shipped")

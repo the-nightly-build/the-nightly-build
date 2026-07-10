@@ -48,19 +48,19 @@ source count. The reader's front page and a single article, on a phone:
 
 ## How it works
 
-| Piece             | Where                   | Purpose                                                                                                                              |
-| ----------------- | ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
-| `PROTOCOL.md`     | main                    | The complete agent contract                                                                                                          |
-| the proof         | `engine/check.py`       | Validates articles. BLOCK findings stop publication; WARN findings drive revision                                                    |
-| the desk          | `check.yml`             | Validates every PR to `library`; auto-merges clean ones from `autopublish` series (otherwise a human merges); supersedes competitors |
-| the press         | `engine/build_site.py`  | Rebuilds the site on every merge: front page, night archive, sections, search, feeds, email digests                                  |
-| the paperboy      | `morning-mail.yml`      | Optional daily email of the latest build                                                                                             |
-| duty              | `engine/duty.py`        | Deterministic nightly work selection: cadence, pauses, completion, commissions                                                       |
-| templates         | `templates/`            | Two citation geometries plus a shared furniture catalog. User templates in `press/templates/` are first class                        |
-| the correspondent | `skills/correspondent/` | The night-shift runtime: serves every series, running each article through the pipeline below                                        |
-| the writing coach | `skills/writing-coach/` | Studies how the best writers in a topic actually write, then hands the drafter a per-article voice brief                             |
-| the editor        | `skills/editor/`        | A surgical editorial pass over each draft: cuts and tightens in place or asks for a redraft, never rewrites                          |
-| the librarian     | `skills/librarian/`     | Setup interview and ongoing curation of `press/`                                                                                     |
+| Piece             | Where                   | Purpose                                                                                                                                                                                                   |
+| ----------------- | ----------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `PROTOCOL.md`     | main                    | The complete agent contract                                                                                                                                                                               |
+| the proof         | `engine/check.py`       | Validates articles. BLOCK findings stop publication; WARN findings drive revision                                                                                                                         |
+| the desk          | `check.yml`             | Validates every PR to `library`; auto-merges clean ones from `autopublish` series (otherwise a human merges); supersedes competitors                                                                      |
+| the press         | `engine/build_site.py`  | Rebuilds the site on every merge: front page, night archive, sections, search, feeds, email digests                                                                                                       |
+| the paperboy      | `morning-mail.yml`      | Optional daily email of the latest build                                                                                                                                                                  |
+| duty              | `engine/duty.py`        | Deterministic nightly work selection: cadence, pauses, completion, commissions                                                                                                                            |
+| templates         | `templates/<id>/`       | Two citation geometries, each a self-contained folder package (manifest, skeleton, brief, optional furniture), plus a shared furniture catalog. User templates in `press/templates/<id>/` are first class |
+| the correspondent | `skills/correspondent/` | The night-shift runtime: serves every series, running each article through the pipeline below                                                                                                             |
+| the writing coach | `skills/writing-coach/` | Studies how the best writers in a topic actually write, then hands the drafter a per-article voice brief                                                                                                  |
+| the editor        | `skills/editor/`        | A surgical editorial pass over each draft: cuts and tightens in place or asks for a redraft, never rewrites                                                                                               |
+| the librarian     | `skills/librarian/`     | Setup interview and ongoing curation of `press/`                                                                                                                                                          |
 
 Two branches with disjoint jobs: `main` holds the engine and your
 configuration, `library` holds published articles, which the press builds into
