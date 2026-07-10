@@ -159,6 +159,9 @@ def check_site_directory(directory, *, errors):
     if not isinstance(directory, dict):
         errors.append(f"{prefix}: 'directory' must be a mapping of publish/description")
         return
+    # Directory listing is opt-out (directory.publish: false). The public URL is
+    # derived at build time from the Pages base URL, never configured, so a 'url'
+    # key is intentionally rejected here by the unknown-key check.
     unknown = set(directory) - {"publish", "description"}
     if unknown:
         errors.append(f"{prefix}: directory: unknown keys {sorted(unknown)}")

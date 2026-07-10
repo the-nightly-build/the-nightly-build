@@ -81,7 +81,7 @@ def night_date(meta):
 
 
 def date_sort_key(date):
-    return "" if date == NO_DATE else date
+    return "" if date == NO_DATE else date  # dateless sorts first, never wins "latest"
 
 
 def by_date_and_slug(ed):
@@ -124,6 +124,8 @@ def render_assets_html(assets):
     if not assets:
         return ""
     parts = []
+    # Owner-authored assets must be https and Subresource-Integrity-pinned: the
+    # integrity hash is what lets the browser refuse a tampered CDN response.
     for st in assets.get("styles") or []:
         parts.append(
             f'<link rel="stylesheet" href="{esc(st["url"])}" '
@@ -255,6 +257,8 @@ def assign_positions(articles, series_cfgs):
 def derive_self_repository(explicit, base_url) -> str | None:
     if explicit:
         return explicit
+    # Parse a Pages project URL https://<owner>.github.io/<repo>/; a user or org
+    # Pages site has no repo path, so this yields None and chrome omits the star link.
     match = re.match(r"https?://([^./]+)\.github\.io/([^/]+)", base_url or "")
     return f"{match.group(1)}/{match.group(2)}" if match else None
 
@@ -852,6 +856,8 @@ def is_safe_tag(tag):
 
 def render_tag_page(site, tag, *, refs, articles, series_cfgs):
     depth = 1 + len(tag.split("/"))
+    # A plain tag sits at depth 2 (tags/ + tag); a nested a/b is one deeper per
+    # segment, so links resolve either way.
     eds = [
         articles[tuple(r.split("/", 1))]
         for r in refs

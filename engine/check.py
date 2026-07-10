@@ -317,7 +317,7 @@ def load_registry(repo):
 
 def find_template(repo, template_id):
     for base in (
-        os.path.join(repo, "press", "templates"),
+        os.path.join(repo, "press", "templates"),  # press/ shadows shipped templates/
         os.path.join(repo, "templates"),
     ):
         path = os.path.join(base, f"{template_id}.html")
@@ -380,6 +380,8 @@ def _probe_link(href):
         href, headers={"User-Agent": LINK_UA, "Range": "bytes=0-0"}
     )
     try:
+        # A one-byte Range GET, not HEAD: some servers 404/405 a HEAD they would
+        # serve, and a browser-like UA keeps casual bot filters from lying to us.
         with urllib.request.urlopen(req, timeout=LINK_TIMEOUT_S) as resp:
             return classify_link(resp.status, None)
     except urllib.error.HTTPError as e:

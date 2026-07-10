@@ -1399,6 +1399,8 @@ print("== duty.py degrades gracefully on malformed input ==")
 def overwrite_series(body, series="ai-briefs"):
     tmp = patched_repo("", series=series)
     y = pathlib.Path(tmp) / "press" / "series" / series / "series.yaml"
+    # Replace the series.yaml wholesale so tests can hand duty a config shape
+    # validate_config would never let through.
     y.write_text(body)
     return tmp
 
@@ -1937,6 +1939,9 @@ def run_suite(script, label):
     sys.stdout.write(proc.stdout)
     if proc.stderr:
         sys.stderr.write(proc.stderr)
+    # Fold the subprocess suite's own assertion counts into this runner's totals,
+    # so the summary reports real coverage instead of dropping the builder and
+    # e2e assertions.
     m = _re.search(r"(\d+) passed, (\d+) failed", proc.stdout)
     if m:
         PASS += int(m.group(1))
