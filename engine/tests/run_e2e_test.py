@@ -108,7 +108,6 @@ subprocess.run(
 
 
 def library_state():
-    # refresh a plain-dir snapshot of the library branch (what CI checks out)
     for child in pathlib.Path(libdir).iterdir():
         shutil.rmtree(child) if child.is_dir() else child.unlink()
     subprocess.run(
@@ -118,7 +117,6 @@ def library_state():
 
 
 def night_shift_run(branch, series, *, slug, html, today, from_ref="library"):
-    # one agent run: branch off library, add one article, validate as CI does
     git("checkout", "-q", from_ref, cwd=root)
     git("checkout", "-qb", branch, cwd=root)
     d = pathlib.Path(root, "library", series)

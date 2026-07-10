@@ -23,22 +23,12 @@ META_RE = re.compile(
 
 
 def is_meta_script(attrs: dict) -> bool:
-    """Whether a parsed <script>'s attributes mark it as the nb-meta block.
-
-    check.py's single-pass HTML parse recognizes the block by the same
-    contract this module's regex encodes: type application/json and id nb-meta.
-    """
     return (
         attrs.get("type") or ""
     ).strip().lower() == "application/json" and attrs.get("id") == "nb-meta"
 
 
 def read_meta(path: str) -> dict | None:
-    """Parse the typed nb-meta block from an article file, or None.
-
-    Returns None when the file has no typed block, its JSON is invalid, or it
-    does not parse to an object.
-    """
     with open(path, encoding="utf-8", errors="replace") as fh:
         m = META_RE.search(fh.read())
     if not m:
@@ -51,11 +41,6 @@ def read_meta(path: str) -> dict | None:
 
 
 def series_dir(library: str, series_id: str) -> str | None:
-    """The on-disk directory for a series inside a library checkout, or None.
-
-    Accepts a full library checkout (contains library/<series>/) or a bare
-    library folder (<series>/ directly), returning the first that exists.
-    """
     for base in (
         os.path.join(library, "library", series_id),
         os.path.join(library, series_id),
