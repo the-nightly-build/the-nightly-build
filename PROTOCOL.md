@@ -139,3 +139,8 @@ self-measurements (the proof recounts; >20% deviation is a WARN).
 
 Articles teach rather than summarize. Every load-bearing claim carries a citation the
 reader can follow. The goal is to equip the reader to go deeper on their own.
+
+Every article is produced in its own context, its voice anchored to how the best real
+writers on the subject actually write, and independently edited against this bar before
+it meets the proof. The runtime skill (`skills/correspondent/SKILL.md`) carries the
+procedure; the writing-coach and editor stages are its skills.
