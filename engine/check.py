@@ -785,19 +785,21 @@ def check_article(
                 "B-HTML",
                 f"section '{s}' appears {counts[s]} times; must be exactly once",
             )
-    flex_band = treg.get("flex_sections")
-    if flex_band:
-        extras = [s for s in ed.sections if s not in required_sections]
-        dupes = sorted({s for s in extras if extras.count(s) > 1})
-        if dupes:
-            rep.block("B-HTML", f"duplicate section labels: {dupes}")
-        low, high = flex_band
-        if not (low <= len(extras) <= high):
-            rep.block(
-                "B-HTML",
-                f"{len(extras)} sections beyond the anchors; this template "
-                f"expects between {low} and {high}",
-            )
+    # Absent flex_sections means a fully fixed outline: no section beyond the
+    # anchors is allowed (V6c). Present it as [0, 0] so extras BLOCK rather than
+    # slip through unchecked.
+    flex_band = treg.get("flex_sections") or [0, 0]
+    extras = [s for s in ed.sections if s not in required_sections]
+    dupes = sorted({s for s in extras if extras.count(s) > 1})
+    if dupes:
+        rep.block("B-HTML", f"duplicate section labels: {dupes}")
+    low, high = flex_band
+    if not (low <= len(extras) <= high):
+        rep.block(
+            "B-HTML",
+            f"{len(extras)} sections beyond the anchors; this template "
+            f"expects between {low} and {high}",
+        )
 
     # --- B-SANDBOX ---
     for a in ed.script_tags:

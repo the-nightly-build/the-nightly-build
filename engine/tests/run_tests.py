@@ -933,6 +933,20 @@ expect(
     run_local(LESSON, "crypto", slug="hashes", repo=ut_repo),
     blocks=0,
 )
+expect(
+    "fixed outline (no flex_sections): an undeclared extra section blocks (V6c)",
+    run_local(
+        LESSON.replace(
+            '<section data-nb-section="sources">',
+            '<section data-nb-section="rogue"><p>extra</p></section>'
+            '<section data-nb-section="sources">',
+        ),
+        "crypto",
+        slug="hashes",
+        repo=ut_repo,
+    ),
+    must_have=["B-HTML"],
+)
 
 print("== flex sections (agent-named outline) ==")
 
