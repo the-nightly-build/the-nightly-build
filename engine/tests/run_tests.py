@@ -1397,6 +1397,84 @@ for name, cond in [
         FAIL.append(name)
         print(f"  FAIL {name}")
 
+print("== duty.py degrades gracefully on malformed input ==")
+
+
+def overwrite_series(body, series="ai-briefs"):
+    # Copy the fixture repo and replace one series.yaml wholesale, so tests
+    # can hand duty a config shape validate_config would never let through.
+    tmp = patched_repo("", series=series)
+    y = pathlib.Path(tmp) / "press" / "series" / series / "series.yaml"
+    y.write_text(body)
+    return tmp
+
+
+COLLECTION_MISSING_SLUG = (
+    "name: Test\nmode: collection\ntemplate: article\n"
+    "items:\n  - {slug: alpha}\n  - {title: no-slug-here}\n  - {slug: beta}\n"
+)
+d_missing_slug = duty(
+    overwrite_series(COLLECTION_MISSING_SLUG), make_library({"ai-briefs": []})
+)
+d_bare_string = duty(overwrite_series("just a bare string\n"), empty_lib)
+d_unparseable = duty(overwrite_series("a: b: c\n"), empty_lib)
+
+bad_meta_lib = make_library({"semiconductors": []})
+(pathlib.Path(bad_meta_lib) / "library" / "semiconductors" / "micron.html").write_text(
+    '<script type="application/json" id="nb-meta">[1, 2, 3]</script>'
+)
+d_bad_meta = duty(TESTREPO, bad_meta_lib)
+
+# 2026-07-06 is a Monday; a list cadence should match case-insensitively and
+# fail open (treat as due) when no entry is a recognized day name.
+d_cad_upper = duty(patched_repo("cadence: [Mon]\n"), empty_lib)
+d_cad_unknown = duty(patched_repo("cadence: [Fortnight]\n"), empty_lib)
+
+seq_extra_lib = make_library({"semiconductors": ["micron", "hand-extra"]})
+d_seq_extra = duty(seq_repo(), seq_extra_lib)
+
+for name, cond in [
+    (
+        "a dict item without a slug is dropped, not crashed on",
+        duty_of(d_missing_slug, "ai-briefs")["candidates"] == ["alpha"],
+    ),
+    (
+        "a non-dict series.yaml idles that one series with a reason",
+        duty_of(d_bare_string, "ai-briefs")["reason"] == "series.yaml is not a mapping"
+        and duty_of(d_bare_string, "ai-briefs") in d_bare_string["idle"],
+    ),
+    (
+        "one bad series never takes down the others",
+        duty_of(d_bare_string, "semiconductors") is not None,
+    ),
+    (
+        "unparseable series.yaml idles rather than aborting the run",
+        duty_of(d_unparseable, "ai-briefs")["reason"] == "series.yaml is not a mapping",
+    ),
+    (
+        "a non-dict nb-meta payload does not crash published_state",
+        duty_of(d_bad_meta, "semiconductors")["candidates"] == ["tsmc"],
+    ),
+    (
+        "list cadence matches case-insensitively (Mon on a Monday is due)",
+        duty_of(d_cad_upper, "semiconductors") in d_cad_upper["due"],
+    ),
+    (
+        "list cadence with no recognized day fails open (due)",
+        duty_of(d_cad_unknown, "semiconductors") in d_cad_unknown["due"],
+    ),
+    (
+        "sequence progress counts syllabus items, not library extras",
+        duty_of(d_seq_extra, "semiconductors")["reason"].startswith("1 of 5 published"),
+    ),
+]:
+    if cond:
+        PASS += 1
+        print(f"  ok   {name}")
+    else:
+        FAIL.append(name)
+        print(f"  FAIL {name}")
+
 print("== PR mode (real git repo) ==")
 
 
@@ -1585,6 +1663,166 @@ for name, cond in [
     (
         "directory: description over 280 chars fails",
         vc_directory_errors({"publish": True, "description": "a" * 281}) != [],
+    ),
+]:
+    if cond:
+        PASS += 1
+        print(f"  ok   {name}")
+    else:
+        FAIL.append(name)
+        print(f"  FAIL {name}")
+
+print()
+print("== validate_config catches malformed series before an unattended run ==")
+
+
+def vc_output(repo):
+    r = subprocess.run(
+        [sys.executable, str(vc), "--repo", str(repo)],
+        capture_output=True,
+        text=True,
+    )
+    return r.returncode, r.stdout, r.stderr
+
+
+REQ_DOCS_NOT_LIST = "name: X\nmode: rolling\ntemplate: brief\nrequired_docs: nope\n"
+REQ_DOC_NOT_MAP = (
+    "name: X\nmode: collection\ntemplate: article\n"
+    "items:\n  - {slug: alpha, required_docs: [oops]}\n"
+)
+TWO_SLUGLESS = (
+    "name: X\nmode: collection\ntemplate: article\n"
+    "items:\n  - {title: one}\n  - {title: two}\n"
+)
+DUP_SLUG = (
+    "name: X\nmode: collection\ntemplate: article\n"
+    "items:\n  - {slug: alpha}\n  - {slug: alpha}\n"
+)
+
+rc_unparseable, out_unparseable, err_unparseable = vc_output(
+    overwrite_series("a: b: c\n")
+)
+rc_nonmap, out_nonmap, err_nonmap = vc_output(overwrite_series("just a bare string\n"))
+_, out_reqlist, _ = vc_output(overwrite_series(REQ_DOCS_NOT_LIST))
+_, out_reqmap, _ = vc_output(overwrite_series(REQ_DOC_NOT_MAP))
+_, out_slugless, _ = vc_output(overwrite_series(TWO_SLUGLESS))
+_, out_dup, _ = vc_output(overwrite_series(DUP_SLUG))
+
+for name, cond in [
+    (
+        "autopublish: 'false' (a truthy string) is a validation error",
+        vc_rc(patched_repo("autopublish: 'false'\n")) == 1,
+    ),
+    (
+        "strict: 'no' (a truthy string) is a validation error",
+        vc_rc(patched_repo("strict: 'no'\n")) == 1,
+    ),
+    (
+        "min_sources: lots (a string) is a validation error",
+        vc_rc(patched_repo("min_sources: lots\n")) == 1,
+    ),
+    (
+        "a well-typed min_sources still validates",
+        vc_rc(patched_repo("min_sources: 12\n")) == 0,
+    ),
+    (
+        "unparseable series.yaml is a readable error, not a traceback",
+        rc_unparseable == 1
+        and "not valid YAML" in out_unparseable
+        and "Traceback" not in err_unparseable,
+    ),
+    (
+        "a non-dict series.yaml is a readable error, not a traceback",
+        rc_nonmap == 1
+        and "must be a mapping" in out_nonmap
+        and "Traceback" not in err_nonmap,
+    ),
+    (
+        "series-level required_docs must be a list",
+        "'required_docs' must be a list" in out_reqlist,
+    ),
+    (
+        "a required_docs entry must be a mapping",
+        "required_docs entry must be a mapping" in out_reqmap,
+    ),
+    (
+        "two slugless items report two slug errors, never a false duplicate",
+        "duplicate item slug" not in out_slugless,
+    ),
+    (
+        "a genuine duplicate slug is still caught",
+        "duplicate item slug 'alpha'" in out_dup,
+    ),
+]:
+    if cond:
+        PASS += 1
+        print(f"  ok   {name}")
+    else:
+        FAIL.append(name)
+        print(f"  FAIL {name}")
+
+print()
+print("== ci_helpers.autopublish (the auto-merge gate) ==")
+
+
+def ci_autopublish(series_yaml):
+    # Stand up a throwaway repo whose single-file PR adds one library article,
+    # then ask ci_helpers whether that series auto-merges — the exact question
+    # check.yml poses on every night-shift PR.
+    repo = tempfile.mkdtemp()
+    sd = pathlib.Path(repo) / "press" / "series" / "foo"
+    sd.mkdir(parents=True)
+    (sd / "series.yaml").write_text(series_yaml)
+    git("init", "-q", "-b", "main", cwd=repo)
+    git("config", "user.email", "t@t", cwd=repo)
+    git("config", "user.name", "t", cwd=repo)
+    git("add", "-A", cwd=repo)
+    git("commit", "-qm", "config", cwd=repo)
+    git("checkout", "-qb", "night", cwd=repo)
+    lib = pathlib.Path(repo) / "library" / "foo"
+    lib.mkdir(parents=True)
+    (lib / "story.html").write_text("<html></html>")
+    git("add", "-A", cwd=repo)
+    git("commit", "-qm", "nb: foo/story", cwd=repo)
+    # ci_helpers reads the diff from the current working directory (check.yml
+    # runs it inside the checkout), so drive it with cwd set to the repo.
+    return subprocess.run(
+        [
+            sys.executable,
+            str(REPO / "engine" / "ci_helpers.py"),
+            "autopublish",
+            "--repo",
+            repo,
+            "--diff-base",
+            "main",
+        ],
+        cwd=repo,
+        capture_output=True,
+        text=True,
+    ).stdout.strip()
+
+
+for name, cond in [
+    (
+        "autopublish: true enables auto-merge",
+        ci_autopublish("autopublish: true\n") == "true",
+    ),
+    (
+        "autopublish: false disables it",
+        ci_autopublish("autopublish: false\n") == "false",
+    ),
+    ("autopublish absent disables it", ci_autopublish("mode: rolling\n") == "false"),
+    (
+        "autopublish: 'false' (string) never auto-merges",
+        ci_autopublish("autopublish: 'false'\n") == "false",
+    ),
+    (
+        "autopublish: 'true' (string) never auto-merges",
+        ci_autopublish("autopublish: 'true'\n") == "false",
+    ),
+    (
+        "autopublish: 1 (int) never auto-merges",
+        ci_autopublish("autopublish: 1\n") == "false",
     ),
 ]:
     if cond:

@@ -42,7 +42,9 @@ def autopublish(repo, diff_base):
     try:
         with open(f"{repo}/press/series/{m.group(1)}/series.yaml") as fh:
             cfg = yaml.safe_load(fh)
-        print("true" if cfg.get("autopublish", False) else "false")
+        # Only a real boolean True auto-merges: a string like 'false' is
+        # truthy, so anything but True stays a human-reviewed PR.
+        print("true" if cfg.get("autopublish") is True else "false")
     except (OSError, yaml.YAMLError, AttributeError):
         print("false")
 

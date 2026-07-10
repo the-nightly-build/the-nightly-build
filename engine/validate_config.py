@@ -239,6 +239,29 @@ def check_registry(repo, errors):
     return registry
 
 
+def check_required_docs(docs, root, sid, where, errors):
+    # Shared by series-level and item-level required_docs. Each entry is a
+    # mapping carrying an 'id' and a 'path' to a committed file; the proof
+    # later demands a matching data-nb-required source entry.
+    if docs is None:
+        return
+    if not isinstance(docs, list):
+        errors.append(f"{where}: 'required_docs' must be a list")
+        return
+    for doc in docs:
+        if not isinstance(doc, dict):
+            errors.append(
+                f"{where}: required_docs entry must be a mapping with 'id' and 'path'"
+            )
+            continue
+        dpath = os.path.join(root, sid, doc.get("path", ""))
+        if not doc.get("id") or not os.path.isfile(dpath):
+            errors.append(
+                f"{where}: required_doc "
+                f"{doc.get('id')!r} file not found: {doc.get('path')!r}"
+            )
+
+
 def check_series(repo, registry, *, errors):
     label = "press"
     root = os.path.join(repo, "press", "series")
@@ -254,7 +277,16 @@ def check_series(repo, registry, *, errors):
         if not os.path.isfile(path):
             errors.append(f"{where}: series.yaml is missing")
             continue
-        cfg = load(path) or {}
+        try:
+            cfg = load(path) or {}
+        except yaml.YAMLError as e:
+            errors.append(
+                f"{where}: series.yaml is not valid YAML ({e.__class__.__name__})"
+            )
+            continue
+        if not isinstance(cfg, dict):
+            errors.append(f"{where}: series.yaml must be a mapping")
+            continue
         unknown = set(cfg) - SERIES_KEYS
         if unknown:
             errors.append(
@@ -274,6 +306,14 @@ def check_series(repo, registry, *, errors):
             )
         if not isinstance(cfg.get("paused", False), bool):
             errors.append(f"{where}: 'paused' must be true or false")
+        for flag in ("autopublish", "strict"):
+            if not isinstance(cfg.get(flag, False), bool):
+                errors.append(f"{where}: '{flag}' must be true or false")
+        min_sources = cfg.get("min_sources")
+        if min_sources is not None and (
+            not isinstance(min_sources, int) or isinstance(min_sources, bool)
+        ):
+            errors.append(f"{where}: 'min_sources' must be an integer")
         section = cfg.get("section")
         if section is not None and (
             not isinstance(section, str) or not section.strip()
@@ -345,21 +385,18 @@ def check_series(repo, registry, *, errors):
             errors.append(f"{where}: rolling mode must not define 'items'")
         seen = set()
         for i, item in enumerate(items):
-            slug = (item or {}).get("slug")
+            item = item or {}
+            slug = item.get("slug")
             if not isinstance(slug, str) or not SLUG_RE.match(slug):
                 errors.append(
                     f"{where}: item #{i + 1} slug {slug!r} must match {SLUG_RE.pattern}"
                 )
-            elif slug in seen:
-                errors.append(f"{where}: duplicate item slug '{slug}'")
-            seen.add(slug)
-            for doc in (item or {}).get("required_docs") or []:
-                dpath = os.path.join(root, sid, doc.get("path", ""))
-                if not doc.get("id") or not os.path.isfile(dpath):
-                    errors.append(
-                        f"{where}: required_doc "
-                        f"{doc.get('id')!r} file not found: {doc.get('path')!r}"
-                    )
+            else:
+                if slug in seen:
+                    errors.append(f"{where}: duplicate item slug '{slug}'")
+                seen.add(slug)  # only valid slugs seed the duplicate check
+            check_required_docs(item.get("required_docs"), root, sid, where, errors)
+        check_required_docs(cfg.get("required_docs"), root, sid, where, errors)
         item_consult = [p for item in items for p in (item or {}).get("consult") or []]
         for prefix in (cfg.get("consult") or []) + item_consult:
             if not str(prefix).startswith("https://"):
