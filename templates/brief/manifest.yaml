@@ -1,5 +1,5 @@
 # The machine contract for the brief template: the geometry engine/check.py
-# enforces (PROTOCOL step 2.4 reads it). brief is enforced structure — 4-8 tagged
+# enforces (PROTOCOL step 2.4 reads it). the `brief` template is enforced structure — 4-8 tagged
 # items, every item cited, each with a "why it matters" line (data-nb-why). In
 # rolling mode the slug and nb-meta date are today's UTC date; on an open section
 # you coin a topical slug and set mode "open". Bands are quality calibration (WARN

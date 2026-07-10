@@ -1,6 +1,6 @@
 # The machine contract for the article template: the geometry engine/check.py
 # enforces (PROTOCOL step 2.4 reads it). A template is a citation geometry, not a
-# genre: article is enforced prose — three anchors plus 2-6 agent-named sections,
+# genre: the `article` template is enforced prose — three anchors plus 2-6 sections,
 # every section cited. Genres live in series prompts. Bands are quality
 # calibration (WARN tier), not law; a series may tighten `words:` but never loosen
 # below these floors. A press adds or redefines templates as folder packages under

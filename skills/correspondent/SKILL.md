@@ -105,10 +105,11 @@ task or todo tool, so no stage is skipped and each stage-skill fires at its step
      stands for, fill `nb-meta` honestly, and keep the engine asset
      `<link>`/`<script>` tags exactly as they are (engine-owned). This is the
      universal fill discipline for every template.
-   - The `manifest.yaml` defines the template's geometry. **article** is enforced
-     prose: the anchor sections appear once, and where it declares `flex_sections`
-     you name that many more between them (lowercase-hyphen `data-nb-section`
-     labels, each cited). **brief** is enforced structure: 4 to 8 tagged items,
+   - The `manifest.yaml` defines the template's geometry. The **article** template
+     is enforced prose: the anchor sections appear once, and where it declares
+     `flex_sections` you name that many more between them (lowercase-hyphen
+     `data-nb-section` labels, each cited). The **brief** template is enforced
+     structure: 4 to 8 tagged items,
      each cited, each with a why-it-matters line. A custom template follows its
      own manifest the same way.
    - Your furniture palette is three composed scopes: the engine base catalogue
