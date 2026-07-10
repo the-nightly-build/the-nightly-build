@@ -48,11 +48,11 @@ MAX_BYTES = 2 * 1024 * 1024
 SLUG_RE = re.compile(r"^[a-z0-9-]{1,64}$")
 SERIES_RE = re.compile(r"^[a-z0-9-]{1,32}$")
 DATE_RE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
-ALLOWED_EXTERNAL_PREFIXES = (
-    "/assets/",
-    "https://fonts.googleapis.com",
-    "https://fonts.gstatic.com",
-)
+# Off-origin references (link/img) may load only from Google Fonts over https.
+# Matched by exact host after browser-style normalization, never by string
+# prefix — "fonts.googleapis.com.evil.example" and userinfo tricks defeat prefix
+# matching but not a real host comparison.
+ALLOWED_EXTERNAL_HOSTS = frozenset({"fonts.googleapis.com", "fonts.gstatic.com"})
 # The one executable script an article may load: the engine-owned runtime
 # (§7.4 — contextual nav + chart renderer), by relative or root-absolute path.
 ENGINE_SCRIPT_RE = re.compile(r"^(?:(?:\.\./)+|/)assets/nb\.js$")
@@ -431,6 +431,23 @@ def chart_spec_error(raw):
     return None
 
 
+def external_ref_allowed(normalized_url):
+    """True when an off-origin link/img reference may load.
+
+    `normalized_url` is browser-normalized (whitespace stripped, backslashes
+    folded to slashes). Requires an https scheme and a host in the font
+    allowlist, comparing the parsed host — not a string prefix, so
+    `fonts.googleapis.com.evil.example`, `fonts.googleapis.com@evil.example`,
+    and protocol-relative `//host` refs are all rejected.
+    """
+    scheme = re.match(r"(https?)://", normalized_url, re.IGNORECASE)
+    if not scheme or scheme.group(1).lower() != "https":
+        return False
+    authority = re.split(r"[/?#]", normalized_url.split("://", 1)[1], maxsplit=1)[0]
+    host = authority.rsplit("@", 1)[-1].split(":", 1)[0]
+    return host.lower() in ALLOWED_EXTERNAL_HOSTS
+
+
 def validate_meta_fields(meta, rep):
     def need(field, typ, *, pattern=None, enum=None):
         v = meta.get(field)
@@ -790,7 +807,7 @@ def check_article(
         # cannot slip an off-origin load past the check.
         u = re.sub(r"[\t\n\r]", "", (url or "").strip()).replace("\\", "/")
         is_external = "://" in u or u.startswith("//")
-        if is_external and not u.startswith(ALLOWED_EXTERNAL_PREFIXES):
+        if is_external and not external_ref_allowed(u):
             rep.block("B-SANDBOX", f"external {kind} reference not on allowlist: {url}")
     for i, raw_chart in enumerate(ed.chart_raw, 1):
         err = chart_spec_error(raw_chart)

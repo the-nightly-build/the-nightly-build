@@ -367,6 +367,39 @@ expect(
     "google fonts allowed", run_local(VALID, "semiconductors"), must_not=["B-SANDBOX"]
 )
 expect(
+    "font-host subdomain-suffix bypass blocked",
+    run_local(
+        mut(
+            "https://fonts.googleapis.com/css2?family=Newsreader&amp;display=swap",
+            "https://fonts.googleapis.com.evil.example/pwn.css",
+        ),
+        "semiconductors",
+    ),
+    must_have=["B-SANDBOX"],
+)
+expect(
+    "font-host userinfo bypass blocked",
+    run_local(
+        mut(
+            "https://fonts.googleapis.com/css2?family=Newsreader&amp;display=swap",
+            "https://fonts.googleapis.com@evil.example/pwn.css",
+        ),
+        "semiconductors",
+    ),
+    must_have=["B-SANDBOX"],
+)
+expect(
+    "font-host lookalike TLD suffix blocked",
+    run_local(
+        mut(
+            "https://fonts.googleapis.com/css2?family=Newsreader&amp;display=swap",
+            "https://fonts.googleapis.commmm/x.css",
+        ),
+        "semiconductors",
+    ),
+    must_have=["B-SANDBOX"],
+)
+expect(
     "malformed chart json",
     run_local(mut('"type":"bar"', '"type":"pie"'), "semiconductors"),
     must_have=["B-SANDBOX"],
