@@ -31,7 +31,14 @@ except ImportError:
     sys.exit(2)
 
 DAY_NAMES = ("mon", "tue", "wed", "thu", "fri", "sat", "sun")
-META_RE = re.compile(r'<script[^>]*\bid="nb-meta"[^>]*>(.*?)</script>', re.S)
+# Match only the typed block the proof validates (check.py requires
+# type="application/json"), so an untyped decoy placed first cannot feed
+# duty a different date than the one that passed the sandbox. Lookaheads
+# keep the two attributes order-independent, matching check.py's parser.
+META_RE = re.compile(
+    r'<script(?=[^>]*\btype="application/json")(?=[^>]*\bid="nb-meta")[^>]*>(.*?)</script>',
+    re.S,
+)
 
 
 def cadence_includes(cadence, day: str) -> bool:
@@ -42,7 +49,10 @@ def cadence_includes(cadence, day: str) -> bool:
     if cadence == "weekends":
         return day in ("sat", "sun")
     if isinstance(cadence, list):
-        return day in cadence
+        days = [str(d).lower() for d in cadence]
+        if not any(d in DAY_NAMES for d in days):
+            return True  # no recognized day name: fail open, like an unknown scalar
+        return day in days
     return True  # unknown value: validate_config flags it; never skip work here
 
 
@@ -75,11 +85,12 @@ def published_state(library: str, series_id: str) -> tuple[set[str], set[str]]:
             m = META_RE.search(fh.read())
         if m:
             try:
-                d = json.loads(m.group(1)).get("date")
-                if isinstance(d, str):
-                    dates.add(d)
+                parsed = json.loads(m.group(1))
             except ValueError:
-                pass
+                continue
+            date = parsed.get("date") if isinstance(parsed, dict) else None
+            if isinstance(date, str):
+                dates.add(date)
     return slugs, dates
 
 
@@ -87,13 +98,15 @@ def config_items(cfg: dict[str, object]) -> list[dict[str, object]]:
     """Return the series' items list, defensively narrowed from parsed YAML.
 
     series.yaml is user-edited, so items may be missing or malformed.
-    Non-list values become an empty list and non-dict entries are
-    dropped, with keys normalized to strings.
+    Non-list values become an empty list, non-dict entries are dropped,
+    and entries without a string slug are dropped too — every returned
+    item is safe to index by ``slug``.
     """
     raw = cfg.get("items")
     if not isinstance(raw, list):
         return []
-    return [{str(k): v for k, v in it.items()} for it in raw if isinstance(it, dict)]
+    items = [{str(k): v for k, v in it.items()} for it in raw if isinstance(it, dict)]
+    return [it for it in items if isinstance(it.get("slug"), str)]
 
 
 def series_duty(
@@ -144,7 +157,8 @@ def series_duty(
             **entry,
             "slug": nxt,
             "order": order,
-            "reason": f"{len(pub)} of {len(items)} published; '{nxt}' is next",
+            "reason": f"{len(items) - len(unpublished)} of {len(items)} "
+            f"published; '{nxt}' is next",
         }
     if mode == "collection":
         if not unpublished:
@@ -203,8 +217,18 @@ def main(argv=None) -> int:
         else []
     )
     for sid in sids:
-        with open(os.path.join(root, sid, "series.yaml"), encoding="utf-8") as fh:
-            cfg = yaml.safe_load(fh) or {}
+        try:
+            with open(os.path.join(root, sid, "series.yaml"), encoding="utf-8") as fh:
+                cfg = yaml.safe_load(fh)
+        except yaml.YAMLError:
+            cfg = None
+        if not isinstance(cfg, dict):
+            # A bare string/list or unparseable series.yaml idles one series
+            # with a reason; the run still exits 0 for every other series.
+            idle.append(
+                {"series": sid, "mode": None, "reason": "series.yaml is not a mapping"}
+            )
+            continue
         pub, pub_dates = published_state(args.library, sid)
         is_due, entry = series_duty(
             sid, cfg, pub=pub, pub_dates=pub_dates, date=date, day=day
