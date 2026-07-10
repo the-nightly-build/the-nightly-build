@@ -1,8 +1,9 @@
 # The template registry: the single source of truth for what each template requires.
 # Agents read their template's entry (PROTOCOL step 2.3); engine/check.py enforces it.
-# A template is a citation geometry, not a genre: article is enforced prose
-# (anchors plus agent-named sections, every section cited), brief is enforced
-# structure (tagged items, every item cited). Genres live in series prompts.
+# A template is a citation geometry, not a genre: the `article` template is
+# enforced prose (anchors plus agent-named sections, every section cited), the
+# `brief` template is enforced structure (tagged items, every item cited).
+# Genres live in series prompts.
 # Bands are quality calibration (WARN tier), not law. Series may tighten via
 # `words:` but never loosen below these floors. Presses add their own
 # templates in press/templates/registry.yaml; `flex_sections` is optional
