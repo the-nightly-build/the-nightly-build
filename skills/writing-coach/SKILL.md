@@ -25,6 +25,10 @@ The voice you produce must fit the paper, not float free. Read first:
 - The template identity and the series prompt: the shape and the subject.
 - The tag fragments in declared order and the item's `prompt` if present: they
   can redefine the genre and voice you are calibrating, so read them too.
+- The recent library and tonight's slate: skim the latest published articles'
+  titles, deks, and openers in the library checkout, reading deeper where a
+  piece neighbors yours, and note the other series due tonight from the duty
+  list. A move or an angle the paper just used is off tonight's menu.
 
 Your job is to take the domain's best voice and adapt it to fit all of these in
 the best way. The brief you write is already reconciled to the paper, so the
@@ -83,7 +87,9 @@ drafter writes by, distilled from the exemplars below and fitted to this paper,
 template, and prompt: cadence, how to open and close, what to commit to, the
 concrete habits to keep and the tells to avoid. Describe moves to write by, never
 a catchphrase or a line to reuse; a slogan coined here becomes a house tic the
-next article repeats.
+next article repeats. Close this section with "Recently used, do not reuse:"
+and the moves you saw in the recent library that sit nearest this piece's
+temptations.
 
 ## <Author name>, "<Piece title>"
 Source: <citation URL>
