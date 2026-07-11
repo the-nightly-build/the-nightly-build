@@ -312,7 +312,7 @@ expect(
     "duplicated section",
     run_local(
         VALID.replace(
-            '<section data-nb-section="go-deeper">',
+            '<section data-nb-section="bull-versus-bear">',
             '<section data-nb-section="orientation">',
             1,
         ),

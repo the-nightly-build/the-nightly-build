@@ -1,6 +1,6 @@
 # The machine contract for the article template: the geometry engine/check.py
 # enforces (PROTOCOL step 2.4 reads it). A template is a citation geometry, not a
-# genre; the `article` template is enforced prose (three anchors plus 2-6 sections,
+# genre; the `article` template is enforced prose (two anchors plus 2-6 sections,
 # every section cited), and genres live in series prompts. Bands calibrate quality
 # at the WARN tier: a series may tighten `words:` but never loosen below these
 # floors. A press adds or redefines templates as folder packages under
@@ -8,7 +8,7 @@
 about: "Enforced prose for anything told in sections: an investigation, a history, an explainer, a profile, an argued essay, an appraisal, or a debate."
 class: longread
 words: [800, 6000]
-sections: [orientation, go-deeper, sources]
+sections: [orientation, sources]
 flex_sections: [2, 6]
 cite_rule: per-section
 modes: [collection, sequence, rolling, open]

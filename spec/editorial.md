@@ -21,9 +21,15 @@ like; be consistent within a piece.
 ## Teach, don't summarize
 
 The reader should finish knowing how to think about the topic, not just what happened. Build
-from foundations: orient, establish the concepts, go deep, synthesize, then point outward.
+from foundations: orient, establish the concepts, go deep, synthesize, conclude.
 Define the terms of art the paper's declared reader does not already hold, and assume the ones
 its stated audience knows. One worked example beats three abstract claims.
+
+The declared reader centers the paper: the profile chooses what to cover, when it is timely,
+and what background to assume. Write each piece for the natural audience around that center — a
+paper that declares a new parent gets articles any parent of a young child could be handed, and
+a declared practitioner gets pieces worth forwarding to a colleague. Narrowing a desk to the
+reader personally takes an explicit ask in `press/editorial.md` or the series prompt.
 
 ## Report and analyze
 
@@ -69,7 +75,9 @@ tells that mark writing as slop.
   little ("that's the whole point", "here's the kicker"). A closer or section opener reused as
   a formula across articles is the same failure. Coin no house catchphrase.
 - **Self-reference.** The piece never narrates itself or its newsroom ("this dossier", "what
-  this desk is watching", "the paper's read"). Report the subject, not the act of reporting.
+  this desk is watching", "the paper's read"), and it never addresses or describes its
+  particular reader ("the reader works there", "your son"). Report the subject, not the act of
+  reporting, for the audience the reader belongs to.
 - **Em-dashes at a careful-writer rate.** An em-dash earns its place for a real aside or a
   sharp break. Reaching for one as the default connective is an AI tell; a comma, a period, or
   a colon usually reads cleaner. Use them far less than the reflex wants.
@@ -91,9 +99,10 @@ a generic slot like "understanding-x", "the-road-ahead", or "key-takeaways".
 ## Form
 
 Form serves the reader and the template. Each template's identity sets its own form: paragraph
-length, how the dek reads, whether the piece closes on "go deeper" material. A press may shadow
-them. The floor holds those choices to a standard, it does not make them: keep the
-writing easy to follow and leave the reader equipped to go further.
+length, how the dek reads, how the piece closes. A press may shadow
+them. The floor holds those choices to a standard, it does not make them: keep the writing
+easy to follow, land on the piece's own conclusion, and leave the reader equipped to go
+further because the teaching and the citations did their work, never by saying so.
 
 ## Charts
 

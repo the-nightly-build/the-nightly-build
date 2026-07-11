@@ -521,7 +521,7 @@ def kicker_text(ed, series_cfgs):
     cfg = series_cfgs.get(ed["series"], {})
     name = cfg.get("name", ed["series"])
     section = cfg.get("section")
-    return f"{section} — {name}" if section else name
+    return f"{section} · {name}" if section else name
 
 
 def source_label(meta):
@@ -625,7 +625,7 @@ def render_build_page(site, date, *, dates, articles, series_cfgs):
     else:
         right = "<span></span>"
     body += f'<nav class="nb-nightnav">{left}{right}</nav>'
-    return page(site, f"{pretty_date(date)} — {site['title']}", body=body, depth=2)
+    return page(site, f"{pretty_date(date)} · {site['title']}", body=body, depth=2)
 
 
 def render_build_archive(site, dates):
@@ -646,7 +646,7 @@ def render_build_archive(site, dates):
             f'style="padding:8px 0" href="{d}/">{esc(pretty_date(d))}'
             f"</a></div>"
         )
-    return page(site, f"All nights — {site['title']}", body=body, depth=1)
+    return page(site, f"All nights · {site['title']}", body=body, depth=1)
 
 
 def series_status(s, cfg):
@@ -723,12 +723,12 @@ def render_series_index(site, catalog, *, series_cfgs, articles):
         )
     if resting:
         body += (
-            f'<details class="nb-stacks"><summary>In the stacks — '
+            f'<details class="nb-stacks"><summary>In the stacks · '
             f"{len(resting)} series"
             f"</summary>{''.join(resting)}</details>"
         )
     return page(
-        site, f"Sections — {site['title']}", body=body, depth=1, active="Sections"
+        site, f"Sections · {site['title']}", body=body, depth=1, active="Sections"
     )
 
 
@@ -815,7 +815,7 @@ def render_series_page(site, sid, *, cfg, eds, series_cfgs):
         )
 
     return page(
-        site, f"{name} — {site['title']}", body=body, depth=2, active="Sections"
+        site, f"{name} · {site['title']}", body=body, depth=2, active="Sections"
     )
 
 
@@ -832,7 +832,7 @@ def render_tags_index(site, catalog):
         )
     else:
         body += '<div class="nb-empty"><p>No tags yet.</p></div>'
-    return page(site, f"Tags — {site['title']}", body=body, depth=1)
+    return page(site, f"Tags · {site['title']}", body=body, depth=1)
 
 
 def is_safe_tag(tag):
@@ -875,7 +875,7 @@ def render_tag_page(site, tag, *, refs, articles, series_cfgs):
         )
         + "</div>"
     )
-    return page(site, f"#{tag} — {site['title']}", body=body, depth=depth)
+    return page(site, f"#{tag} · {site['title']}", body=body, depth=depth)
 
 
 def render_search_page(site):
@@ -887,7 +887,7 @@ def render_search_page(site):
         '<div class="nb-results-count" id="nb-count"></div>'
         '<div class="nb-results" id="nb-results"></div>'
     )
-    return page(site, f"Search — {site['title']}", body=body, depth=1, active="Search")
+    return page(site, f"Search · {site['title']}", body=body, depth=1, active="Search")
 
 
 TEXT_STRIP_RE = re.compile(
@@ -1322,7 +1322,7 @@ def build(
             atom_feed(
                 base_url,
                 f"series/{sid}/feed.xml",
-                title=f"{site_cfg['title']} — {s['name']}",
+                title=f"{site_cfg['title']} · {s['name']}",
                 eds=eds,
                 generated=now,
                 author=site_cfg["title"],
@@ -1358,7 +1358,7 @@ def build(
         )
         write(
             os.path.join(out, "email-latest-subject.txt"),
-            f"{site_cfg['title']} — {latest}: {len(eds)} "
+            f"{site_cfg['title']} · {latest}: {len(eds)} "
             f"article{'s' if len(eds) != 1 else ''}\n",
         )
 
