@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>TITLE · SERIES NAME</title>
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400..700;1,6..72,400..700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="../../assets/theme.css" />
+    <link rel="stylesheet" href="../../assets/nb.css" />
+    <script defer src="../../assets/nb.js"></script>
+    <script type="application/json" id="nb-meta">
+      {
+        "protocol": "1.1",
+        "series": "SERIES-ID",
+        "slug": "SLUG",
+        "template": "paper",
+        "title": "TITLE",
+        "mode": "open",
+        "order": null,
+        "date": "2026-01-01",
+        "tags": [],
+        "sources": 0,
+        "words": 0,
+        "reading_minutes": 0,
+        "dek": "ONE-SENTENCE TEASER FOR THE NEWSSTAND CARD.",
+        "harness": "HARNESS",
+        "model": "MODEL"
+      }
+    </script>
+  </head>
+  <body class="nb-article">
+    <article class="nb-reading">
+      <header>
+        <div class="nb-eyebrow">SERIES NAME</div>
+        <h1 class="nb-title">TITLE: THE IDEA, NAMED FOR THIS PIECE</h1>
+        <p class="nb-dekline">
+          DEK: one italic sentence, the idea and why it earned tonight.
+        </p>
+        <div class="nb-byline">
+          <span>N min read</span><span>YYYY-MM-DD</span>
+        </div>
+      </header>
+
+      <section data-nb-section="abstract" id="abstract">
+        <div class="nb-paper-card">
+          <p class="nb-paper-title">PAPER TITLE AS PUBLISHED</p>
+          <p class="nb-paper-meta">AUTHORS · VENUE OR ARXIV ID · YEAR</p>
+          <a class="nb-paper-link" href="https://example.org/replace"
+            >Read the paper</a
+          >
+          <blockquote class="nb-paper-abstract">
+            THE ABSTRACT, VERBATIM.<sup class="nb-cite"
+              ><a href="#s1">1</a></sup
+            >
+          </blockquote>
+        </div>
+      </section>
+
+      <section data-nb-section="before-you-read" id="before-you-read">
+        <h2>Before you read</h2>
+        <p>
+          Whatever this specific paper assumes that the reader may not already
+          hold, briefly; when there is nothing, one line saying so.
+        </p>
+      </section>
+
+      <section data-nb-section="orientation" id="orientation">
+        <h2>ORIENTATION HEADING, NAMED FOR THIS PIECE</h2>
+        <p>
+          What problem the paper attacks, why it was open, and the one-sentence
+          shape of its answer.<sup class="nb-cite"><a href="#s1">1</a></sup>
+        </p>
+      </section>
+
+      <!-- FLEX SLOT: 2-6 sections YOU name for the reconstruction, each
+           <section data-nb-section="lowercase-hyphen-label">, each cited.
+           The last one lands the reconstruction's own verdict. Anchor
+           load-bearing moments with nb-excerpt (see furniture.md). -->
+
+      <section data-nb-section="read-it-yourself" id="read-it-yourself">
+        <h2>Read it yourself</h2>
+        <p>One line: what a full read adds beyond this reconstruction.</p>
+        <ul class="nb-paper-map">
+          <li>
+            <span class="nb-map-verdict nb-read">read</span>
+            <strong class="nb-map-target">§N NAME</strong>: why it rewards a
+            full read.
+          </li>
+          <li>
+            <span class="nb-map-verdict nb-skim">skim</span>
+            <strong class="nb-map-target">§N NAME</strong>: the figure or table
+            to stare at.
+          </li>
+          <li>
+            <span class="nb-map-verdict nb-skip">skip</span>
+            <strong class="nb-map-target">§N NAME</strong>: why it can wait.
+          </li>
+        </ul>
+      </section>
+
+      <section class="nb-sources" data-nb-section="sources" id="sources">
+        <h2>Sources</h2>
+        <ol>
+          <li id="s1">
+            <a data-nb-source href="https://example.org/replace-1"
+              >PUBLISHER · TITLE</a
+            >
+          </li>
+          <li id="s2">
+            <a data-nb-source href="https://example.org/replace-2"
+              >PUBLISHER · TITLE</a
+            >
+          </li>
+          <li id="s3">
+            <a data-nb-source href="https://example.org/replace-3"
+              >PUBLISHER · TITLE</a
+            >
+          </li>
+          <li id="s4">
+            <a data-nb-source href="https://example.org/replace-4"
+              >PUBLISHER · TITLE</a
+            >
+          </li>
+          <li id="s5">
+            <a data-nb-source href="https://example.org/replace-5"
+              >PUBLISHER · TITLE</a
+            >
+          </li>
+        </ol>
+      </section>
+    </article>
+  </body>
+</html>

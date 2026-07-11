@@ -1,0 +1,164 @@
+/* The paper template's bespoke furniture. Only a paper reconstruction opens
+   on the source's own card, quotes it with locators, or closes on a triaged
+   reading map, so these classes live in the template's folder. The build
+   concatenates this file into assets/theme.css whenever the template is
+   present. Documented in furniture.md beside it. */
+
+/* Paper card — the source itself, opening the abstract section: title,
+   authors, a link to the full text, and the abstract verbatim under a
+   hairline. */
+.nb-paper-card {
+  margin: 1.6rem 0;
+  padding: 1rem 1.15rem;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+}
+
+.nb-paper-title {
+  margin: 0;
+  font-family: var(--serif);
+  font-weight: 600;
+  font-size: 1.08rem;
+  line-height: 1.35;
+  color: var(--ink);
+}
+
+.nb-paper-meta {
+  margin: 0.25rem 0 0;
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--faint);
+}
+
+.nb-paper-link {
+  display: inline-block;
+  margin-top: 0.7rem;
+  padding: 0.25rem 0.75rem;
+  border: 1px solid var(--accent);
+  border-radius: var(--radius);
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  text-decoration: none;
+  color: var(--accent);
+}
+
+.nb-paper-link:hover {
+  color: var(--bg);
+  background: var(--accent);
+}
+
+.nb-paper-abstract {
+  margin: 0.9rem 0 0;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--hair);
+  font-family: var(--serif);
+  font-size: 0.98rem;
+  font-style: italic;
+  line-height: 1.55;
+  color: var(--ink-soft);
+}
+
+/* Anchored excerpt — the original's sentence at a load-bearing moment. Reads
+   as quoted source material: a quiet panel behind a serif quote, the locator
+   set small in the mono face so it reads as a coordinate, the gloss under a
+   hairline. */
+.nb-excerpt {
+  margin: 1.6rem 0;
+  padding: 1rem 1.15rem 0.8rem;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-left: 3px solid var(--accent);
+  border-radius: var(--radius);
+}
+
+.nb-excerpt blockquote {
+  margin: 0;
+  font-family: var(--serif);
+  font-size: 1.02rem;
+  font-style: italic;
+  line-height: 1.55;
+  color: var(--ink);
+}
+
+.nb-excerpt figcaption {
+  margin-top: 0.7rem;
+  padding-top: 0.55rem;
+  border-top: 1px solid var(--hair);
+  font-family: var(--sans);
+  font-size: 0.82rem;
+  line-height: 1.5;
+  color: var(--ink-soft);
+}
+
+.nb-excerpt-loc {
+  margin-right: 0.5rem;
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--accent);
+  white-space: nowrap;
+}
+
+/* Reading map — the read-it-yourself triage of the original. Each entry is a
+   plain block that wraps like prose behind an inline verdict badge, so a long
+   section title breaks across lines instead of forcing the page wide. One
+   accent across the three verdicts; the map directs attention without turning
+   into a traffic light. */
+.nb-paper-map {
+  margin: 1.2rem 0;
+  padding: 0;
+  list-style: none;
+}
+
+.nb-paper-map li {
+  padding: 0.55rem 0;
+  border-top: 1px solid var(--hair);
+  font-size: 0.95rem;
+  line-height: 1.6;
+}
+
+.nb-paper-map li:last-child {
+  border-bottom: 1px solid var(--hair);
+}
+
+.nb-map-verdict {
+  display: inline-block;
+  margin-right: 0.45rem;
+  padding: 0.05rem 0.45rem;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  font-family: var(--mono);
+  font-size: 0.68rem;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  vertical-align: 0.08em;
+}
+
+.nb-map-verdict.nb-read {
+  color: var(--bg);
+  background: var(--accent);
+  border-color: var(--accent);
+}
+
+.nb-map-verdict.nb-skim {
+  color: var(--accent);
+  border-color: var(--accent);
+}
+
+.nb-map-verdict.nb-skip {
+  color: var(--faint);
+}
+
+.nb-map-target {
+  font-family: var(--sans);
+  font-weight: 600;
+  color: var(--ink);
+}
