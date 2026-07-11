@@ -27,7 +27,7 @@ but still allegiant on phones. Each side is four slots, in order.
       >
     </p>
     <p class="rs-side-champion">
-      <span class="rs-side-outlet">OUTLET</span> — standing here because
+      <span class="rs-side-outlet">OUTLET</span>, standing here because
       REASON.<sup class="nb-cite"><a href="#s2">2</a></sup>
     </p>
   </section>

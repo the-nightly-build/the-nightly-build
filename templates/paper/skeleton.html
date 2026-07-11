@@ -17,9 +17,9 @@
         "protocol": "1.1",
         "series": "SERIES-ID",
         "slug": "SLUG",
-        "template": "article",
+        "template": "paper",
         "title": "TITLE",
-        "mode": "collection",
+        "mode": "open",
         "order": null,
         "date": "2026-01-01",
         "tags": [],
@@ -36,28 +36,71 @@
     <article class="nb-reading">
       <header>
         <div class="nb-eyebrow">SERIES NAME</div>
-        <h1 class="nb-title">TITLE</h1>
+        <h1 class="nb-title">TITLE: THE IDEA, NAMED FOR THIS PIECE</h1>
         <p class="nb-dekline">
-          DEK: one specific italic sentence, concrete not generic.
+          DEK: one italic sentence, the idea and why it earned tonight.
         </p>
         <div class="nb-byline">
           <span>N min read</span><span>YYYY-MM-DD</span>
         </div>
       </header>
 
-      <section data-nb-section="orientation" id="orientation">
-        <h2>ORIENTATION HEADING</h2>
-        <p>
-          Opening paragraph with a concrete, cited anchor claim.<sup
-            class="nb-cite"
-            ><a href="#s1">1</a></sup
+      <section data-nb-section="abstract" id="abstract">
+        <div class="nb-paper-card">
+          <p class="nb-paper-title">PAPER TITLE AS PUBLISHED</p>
+          <p class="nb-paper-meta">AUTHORS · VENUE OR ARXIV ID · YEAR</p>
+          <a class="nb-paper-link" href="https://example.org/replace"
+            >Read the paper</a
           >
+          <blockquote class="nb-paper-abstract">
+            THE ABSTRACT, VERBATIM.<sup class="nb-cite"
+              ><a href="#s1">1</a></sup
+            >
+          </blockquote>
+        </div>
+      </section>
+
+      <section data-nb-section="before-you-read" id="before-you-read">
+        <h2>Before you read</h2>
+        <p>
+          Whatever this specific paper assumes that the reader may not already
+          hold, briefly; when there is nothing, one line saying so.
         </p>
       </section>
 
-      <!-- FLEX SLOT: 2-6 sections YOU name for the topic, each
+      <section data-nb-section="orientation" id="orientation">
+        <h2>ORIENTATION HEADING, NAMED FOR THIS PIECE</h2>
+        <p>
+          What problem the paper attacks, why it was open, and the one-sentence
+          shape of its answer.<sup class="nb-cite"><a href="#s1">1</a></sup>
+        </p>
+      </section>
+
+      <!-- FLEX SLOT: 2-6 sections YOU name for the reconstruction, each
            <section data-nb-section="lowercase-hyphen-label">, each cited.
-           The last one is the piece's own conclusion. -->
+           The last one lands the reconstruction's own verdict. Anchor
+           load-bearing moments with nb-excerpt (see furniture.md). -->
+
+      <section data-nb-section="read-it-yourself" id="read-it-yourself">
+        <h2>Read it yourself</h2>
+        <p>One line: what a full read adds beyond this reconstruction.</p>
+        <ul class="nb-paper-map">
+          <li>
+            <span class="nb-map-verdict nb-read">read</span>
+            <strong class="nb-map-target">§N NAME</strong>: why it rewards a
+            full read.
+          </li>
+          <li>
+            <span class="nb-map-verdict nb-skim">skim</span>
+            <strong class="nb-map-target">§N NAME</strong>: the figure or table
+            to stare at.
+          </li>
+          <li>
+            <span class="nb-map-verdict nb-skip">skip</span>
+            <strong class="nb-map-target">§N NAME</strong>: why it can wait.
+          </li>
+        </ul>
+      </section>
 
       <section class="nb-sources" data-nb-section="sources" id="sources">
         <h2>Sources</h2>
