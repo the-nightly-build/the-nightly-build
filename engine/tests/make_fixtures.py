@@ -100,7 +100,7 @@ def article():
         ("memory-economics", "Memory economics 101", 8),
         ("microns-position", "Micron's position", 8),
         ("bull-versus-bear", "Bull versus bear", 6),
-        ("go-deeper", "Go deeper", 3),
+        ("the-verdict", "The verdict", 3),
     ]
     ci = 0
     body = []
@@ -271,7 +271,7 @@ def chronicle():
         f'<ol class="nb-timeline">{events}</ol></section>'
         '<section data-nb-section="echoes"><h2>Echoes today</h2>'
         f"{_cited_paras(4, 8, start=4)}</section>"
-        '<section data-nb-section="go-deeper"><h2>Go deeper</h2>'
+        '<section data-nb-section="legacy"><h2>Legacy</h2>'
         f"{_cited_paras(1, 8, start=2)}</section>" + _sources(8)
     )
     meta = _meta(

@@ -9,7 +9,7 @@ Each appraisal fixes its spine: open with the plain-abstract furniture
 (nb-abstract) stating the idea in one jargon-free paragraph, then a section on
 the mechanism with the real numbers, then the holds-up grid (nb-holdsup)
 weighing what it buys against what it costs, and close on a verdict box
-(nb-verdict) before go-deeper.
+(nb-verdict) before the close.
 
 Show the load-bearing idea in code with the rs-code furniture when a few lines
 make it concrete: a kernel signature, a scheduling loop, a quantization step.

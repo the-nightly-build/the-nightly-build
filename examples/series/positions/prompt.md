@@ -15,7 +15,7 @@ Rotate the section:
   filler.
 
 Shape the dossier to the company, not to a template: orientation, then two to
-four sections you name for this business, then go-deeper. Furniture that earns
+four sections you name for this business. Furniture that earns
 its place here is a stat strip of three or four load-bearing numbers near the
 top (each cited in nearby prose) and a chart when a trend is the argument.
 

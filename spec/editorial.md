@@ -21,7 +21,7 @@ like; be consistent within a piece.
 ## Teach, don't summarize
 
 The reader should finish knowing how to think about the topic, not just what happened. Build
-from foundations: orient, establish the concepts, go deep, synthesize, then point outward.
+from foundations: orient, establish the concepts, go deep, synthesize, conclude.
 Define the terms of art the paper's declared reader does not already hold, and assume the ones
 its stated audience knows. One worked example beats three abstract claims.
 
@@ -99,9 +99,10 @@ a generic slot like "understanding-x", "the-road-ahead", or "key-takeaways".
 ## Form
 
 Form serves the reader and the template. Each template's identity sets its own form: paragraph
-length, how the dek reads, whether the piece closes on "go deeper" material. A press may shadow
-them. The floor holds those choices to a standard, it does not make them: keep the
-writing easy to follow and leave the reader equipped to go further.
+length, how the dek reads, how the piece closes. A press may shadow
+them. The floor holds those choices to a standard, it does not make them: keep the writing
+easy to follow, land on the piece's own conclusion, and leave the reader equipped to go
+further because the teaching and the citations did their work.
 
 ## Charts
 
