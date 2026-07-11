@@ -11,14 +11,12 @@ available, `uv run engine/<script>.py` manages the dependency itself.
 
 ## The contract
 
-1. **One article per series, maximum.** A run serves the whole paper, every
-   series configured under `press/series/`, unless your schedule prompt names one
-   specific series. For each series you serve, research and publish at most ONE
-   article, as its own pull request. Serve the series independently, so that a
-   late failure never costs an earlier series its night. Producing each in its
-   own isolated context — a subagent or a git worktree — satisfies that property
-   and may run in parallel; where you cannot isolate, work series one at a time,
-   completing each PR before starting the next.
+1. **One article per series, maximum.** A run is responsible for the whole paper,
+   every series configured under `press/series/`, unless your schedule prompt names
+   one; it publishes only the series the duty oracle reports due (step 3). For each
+   series you serve, research and publish at most one article, as its own pull
+   request. Serve the series independently, so a late failure never costs an earlier
+   series its night. How you isolate each one is the runtime skill's concern.
 
 2. **Read your layers, in order.** (Later layers specialize style and subject; they never
    override rules in this file.)
@@ -38,7 +36,9 @@ available, `uv run engine/<script>.py` manages the dependency itself.
    6. Tag fragments listed in the series config, in declared order.
    7. The item-level `prompt`, if present.
 
-3. **Select your work.** Fetch the `library` branch, then run the duty oracle:
+3. **Select your work.** Fetch the `library` branch and check it out to its own
+   path (a `git worktree add`, or a second clone) so the engine can read tonight's
+   published state, then run the duty oracle:
    `python3 engine/duty.py --repo . --library <path-to-library-checkout>`
    It applies every scheduling rule deterministically (per-series `cadence`,
    `paused`, completion, already-published-tonight) and prints the series due,
@@ -60,12 +60,12 @@ available, `uv run engine/<script>.py` manages the dependency itself.
 
 4. **Honor the source policy.** Three controls, per series and per item:
    - `required_docs`: committed files you read and represent, each by a source
-     entry carrying `data-nb-required="<id>"`. Missing coverage is a WARN, and a
-     BLOCK under the series' `strict`. A committed file is cited by its
-     repo-relative path (for example `press/series/<id>/brief.pdf`), not an
-     invented URL: a `data-nb-required` entry names a local artifact, so it is
-     exempt from the absolute-https rule the other sources follow. Never
-     fabricate a public URL for a file that has none.
+     entry carrying `data-nb-required="<id>"`. Missing coverage is a WARN, a BLOCK
+     under the series' `strict`. Cite a committed file by its repo-relative path
+     (for example `press/series/<id>/brief.pdf`), never an invented URL. A
+     `data-nb-required` entry names a local artifact, so it is exempt from the
+     absolute-https rule the other sources follow. Never fabricate a public URL
+     for a file that has none.
    - `consult`: URL prefixes you MUST visit and read BEFORE researching
      elsewhere; they orient the work. Citing them is optional.
    - `sources_exclusive: true`: every source entry must come from the declared
@@ -105,8 +105,8 @@ available, `uv run engine/<script>.py` manages the dependency itself.
    Revise until `BLOCK: 0`. Treat every WARN as a revision note and address what you
    reasonably can. WARNs are the quality bar; BLOCKs are the publishing bar.
 
-8. **Open one pull request per article, targeting the `library` branch**, each
-   adding exactly one file.
+8. **Open one pull request per article, targeting the `library` branch.** Branch
+   from `library` and add exactly one file, so the PR's diff is that file alone.
    - Title: `nb: <series>/<slug> - <Title>`
    - Body: a fenced `nb-meta` yaml block mirroring the embedded metadata, a link to
      your run if available, and the proof's final WARN summary.
