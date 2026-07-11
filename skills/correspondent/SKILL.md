@@ -180,5 +180,5 @@ When a human asks for a press check of `<series>`:
    artifact. Copy the file to `library/<series>/<slug>.html` on a branch, no
    duplicate research spend, normal validation path.
 
-Tell the human once: a press check consumes the same usage as a real run. It IS
-one, minus publication.
+Tell the human once: a press check runs the full pipeline at the same usage cost
+as a real run; only the publish step is skipped.
