@@ -1,26 +1,25 @@
 title: "The Nightly Build"
-theme: press/themes/newsroom.css # keeps the default palette; carries this press's furniture (themes/newsroom.css)
+theme: press/themes/newsroom.css # the palette; furniture rides alongside it (press/furniture/ + each template folder)
 appearance: auto # auto | light | dark. auto follows the system; base/no-JS fallback is light.
 front: comfortable # show deks on front-page story cells (compact hides them)
+footer: "Filed while you slept."
 
 # Trusted external libraries this press loads on every page, to power its
-# furniture. Here: Prism, which syntax-highlights the code blocks in the
-# Kernels and Inference Stack desks. This is how a press uses a real JS library
-# without any engine change: declare it here (owner-authored on main), and the
-# build injects it into every page; editions stay script-free. Every entry is
-# version-pinned and Subresource-Integrity-hashed (validate_config requires the
-# hash), so the browser refuses a tampered CDN response. Order matters: Prism
-# language components load after its core, and c/cpp build on clike.
+# furniture. Here: Prism, which syntax-highlights the rs-code blocks in The
+# Build. This is how a press uses a real JS library without any engine change:
+# declare it here (owner-authored on main), and the build injects it into
+# every page; articles stay script-free. Every entry is version-pinned and
+# Subresource-Integrity-hashed (validate_config requires the hash), so the
+# browser refuses a tampered CDN response. Order matters: Prism language
+# components load after its core, and javascript builds on clike.
 assets:
   scripts:
     - url: https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-core.min.js
       integrity: sha384-MXybTpajaBV0AkcBaCPT4KIvo0FzoCiWXgcihYsw4FUkEz0Pv3JGV6tk2G8vJtDc
     - url: https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-clike.min.js
       integrity: sha384-7LHwxHIDSHTBleLmgDWZbC/IMJsfYfFVOihKhvsrxYW4j47YQcRwZja4ToFE3bA8
-    - url: https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-c.min.js
-      integrity: sha384-gaD4ncierlmWk42Z3BmTp37/z+Dqt8V4Wf74UjTvFeo+M+SgnEI6Ysd98pWhksQv
-    - url: https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-cpp.min.js
-      integrity: sha384-NiOrAquf32LSG3Vuig99LKS03EZPUuM8a51NOp+XXsqx08hUVo3wbNWALY7K/2J8
+    - url: https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js
+      integrity: sha384-D44bgYYKvaiDh4cOGlj1dbSDpSctn2FSUj118HZGmZEShZcO2v//Q5vvhNy206pp
     - url: https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js
       integrity: sha384-WJdEkJKrbsqw0evQ4GB6mlsKe5cGTxBOw4KAEIa52ZLB7DDpliGkwdme/HMa5n1m
 
@@ -33,4 +32,4 @@ assets:
 # URL is derived from your GitHub Pages URL, so a one-line description is the
 # only field worth setting (set publish: false to opt out).
 directory:
-  description: "AI, markets, engineering, and whatever I cannot stop thinking about."
+  description: "One reader's daily: research papers reconstructed, the news argued from both sides, markets, engineering, and a family in Westchester."

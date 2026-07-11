@@ -1,0 +1,13 @@
+# The machine contract for the paper template: a guided reconstruction of one
+# research paper. The anchors guarantee the primer up front and the reading map
+# at the end; the flex sections carry the reconstruction itself, each cited.
+# The primer and the map are cite-exempt: they orient and direct, they do not
+# claim.
+about: "A guided reconstruction of one research paper: a primer, the idea rebuilt in this paper's own words anchored by the original's, and a map for reading the source."
+class: longread
+words: [1800, 3400]
+sections: [before-you-read, orientation, read-it-yourself, sources]
+flex_sections: [2, 6]
+cite_rule: per-section
+cite_exempt: [before-you-read, read-it-yourself]
+modes: [open]

@@ -1,0 +1,13 @@
+# The machine contract for the unbiased template: an enforced two-sided format.
+# flex_sections [2, 2] means exactly two sides (left vs right) or the article
+# BLOCKs, and per-section cite_rule means each side (and the crux) must be
+# sourced. The series runs `strict: true`, so those citation checks are hard
+# gates: one-sided or uncited never publishes. Two sides and a crux are the
+# whole contract; everything else about the piece's shape is the writer's.
+about: "A both-sides format for one genuinely contested question — politics, news, economics, culture, technology — argued left vs right from named, vetted sources."
+class: longread
+words: [1200, 3500]
+sections: [orientation, crux, sources]
+flex_sections: [2, 2] # exactly two sides, rendered left vs right
+cite_rule: per-section
+modes: [open]

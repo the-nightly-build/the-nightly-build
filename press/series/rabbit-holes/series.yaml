@@ -1,0 +1,10 @@
+# The wildcard desk: whatever is genuinely fascinating, dug to the bottom.
+name: Rabbit Holes
+mode: open
+section: "Curiosities"
+template: article
+prompt: prompt.md
+autopublish: true
+strict: false
+words: [1200, 2600]
+cadence: [wed, sat]

@@ -1,0 +1,20 @@
+# The annotated arXiv daily, on the press's own `paper` template. Open mode
+# with a commission queue: items publish first, in any order; an empty queue
+# means the desk picks tonight's paper itself.
+name: The Paper
+mode: open
+section: "Research"
+template: paper
+prompt: prompt.md
+autopublish: true
+strict: false
+words: [2000, 3200]
+cadence: daily
+consult:
+  - https://arxiv.org/
+# The queue. Add a paper by appending an item; the item-level consult pins it.
+# items:
+#   - slug: attention-is-all-you-need
+#     title: "Attention Is All You Need (2017)"
+#     consult:
+#       - https://arxiv.org/abs/1706.03762

@@ -1,0 +1,14 @@
+# The general-news brief: rolling, slugged by UTC date, five minutes.
+name: The World
+mode: rolling
+section: "The Daily"
+template: brief
+prompt: prompt.md
+autopublish: true
+strict: false
+min_sources: 6
+cadence: daily
+consult:
+  - https://www.reuters.com/
+  - https://apnews.com/
+  - https://www.readtangle.com/

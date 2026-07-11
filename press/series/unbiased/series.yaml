@@ -1,0 +1,13 @@
+# The two-sided desk, on the press's own `unbiased` template. Strict on
+# purpose: the per-side citation checks become hard BLOCKs, so a one-sided or
+# thinly sourced piece never publishes.
+name: Unbiased
+mode: open
+section: "Opinion"
+template: unbiased
+prompt: prompt.md
+autopublish: true
+strict: true
+min_sources: 10
+words: [1800, 3000]
+cadence: daily

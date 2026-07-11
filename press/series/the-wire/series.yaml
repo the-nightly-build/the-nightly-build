@@ -1,0 +1,13 @@
+# The AI and technology brief: rolling, slugged by UTC date, five minutes.
+name: The Wire
+mode: rolling
+section: "The Daily"
+template: brief
+prompt: prompt.md
+autopublish: true
+strict: false
+min_sources: 6
+cadence: daily
+consult:
+  - https://arxiv.org/
+  - https://simonwillison.net/

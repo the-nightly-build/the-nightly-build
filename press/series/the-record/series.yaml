@@ -1,0 +1,13 @@
+# The law and policy desk: one matter a week, from the documents, opened by
+# the rs-docket.
+name: The Record
+mode: open
+section: "Policy & Law"
+template: article
+prompt: prompt.md
+autopublish: true
+strict: false
+words: [1500, 2800]
+cadence: [wed]
+consult:
+  - https://www.courtlistener.com/
