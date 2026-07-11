@@ -60,16 +60,33 @@ not influencer reach.
 ## Write the brief
 
 Write a structured file to `.nb-voice/<series>-<slug>.md`. It is gitignored, so it
-never enters the one-file PR. Author, title, and source are required per exemplar,
-so provenance is durable and any downstream agent can read it cold.
+never enters the one-file PR. Lead with the voice, then the evidence: the drafter
+opens this file for the directive, not a synopsis.
+
+Two rules for the brief's own prose. It specifies how to write, not what to say:
+never summarize the article's subject or restate the series and template rules,
+which the drafter already reads. And it holds to the house floor itself, because the
+drafter and editor read it: concrete words, no filler, em-dashes only where they
+earn their place. A brief that preaches "no slop" in slop teaches slop.
+
+Give at least three exemplars, each its own section in the form shown: the author
+and piece title as the heading, then the source URL, the craft notes, and one short
+calibration passage. Author, title, and source are required, so provenance is durable
+and any downstream agent can read the brief cold.
+
+Format:
 
 ```text
-# Voice brief -- <series>/<slug>
+# Voice brief: <series>/<slug>
 
-## Exemplars
-(at least three)
+Open with the register and the reader in one line. Then the handful of moves the
+drafter writes by, distilled from the exemplars below and fitted to this paper,
+template, and prompt: cadence, how to open and close, what to commit to, the
+concrete habits to keep and the tells to avoid. Describe moves to write by, never
+a catchphrase or a line to reuse; a slogan coined here becomes a house tic the
+next article repeats.
 
-### <Author name> -- "<Piece title>"
+## <Author name>, "<Piece title>"
 Source: <citation URL>
 Craft:
 - cadence: ...
@@ -79,11 +96,7 @@ Craft:
 - notice: ...
 - diction: ...
 - reader: ...
-Calibration: <one short verbatim passage, texture only, never echoed>
-
-## Voice for this article
-- <the distilled craft the drafter writes by, already fitted to the paper's
-  style guide, template, and prompt>
+Calibration: <one short verbatim passage, texture only>
 ```
 
 ## Output
