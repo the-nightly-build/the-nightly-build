@@ -477,7 +477,7 @@
       var back = document.createElement("a");
       back.className = "nb-backref";
       back.href = "#" + firstCiter[target];
-      back.textContent = "↩";
+      back.textContent = "^";
       back.setAttribute("aria-label", "back to text");
       li.appendChild(document.createTextNode(" "));
       li.appendChild(back);
@@ -762,6 +762,33 @@
     });
   }
 
+  /* paper template: long abstracts clamp behind an ellipsis; a tap expands.
+     Progressive: no JS means the full abstract, clamped only when it
+     actually overflows. */
+  function bindAbstract() {
+    var abs = document.querySelector(".nb-paper-abstract");
+    if (!abs) return;
+    abs.classList.add("nb-clamped");
+    if (abs.scrollHeight <= abs.clientHeight + 4) {
+      abs.classList.remove("nb-clamped");
+      return;
+    }
+    abs.setAttribute("role", "button");
+    abs.setAttribute("aria-expanded", "false");
+    abs.setAttribute("tabindex", "0");
+    var toggle = function () {
+      var clamped = abs.classList.toggle("nb-clamped");
+      abs.setAttribute("aria-expanded", String(!clamped));
+    };
+    abs.addEventListener("click", toggle);
+    abs.addEventListener("keydown", function (e) {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        toggle();
+      }
+    });
+  }
+
   function init() {
     bindChrome();
     renderCharts();
@@ -775,6 +802,7 @@
       normalizeSources();
       bindCitations();
       bindSequenceNav(meta);
+      bindAbstract();
     }
 
     initSearch();

@@ -53,15 +53,30 @@
   background: var(--accent);
 }
 
-.nb-paper-abstract {
+.nb-article .nb-paper-abstract {
   margin: 0.9rem 0 0;
-  padding-top: 0.75rem;
+  padding: 0.75rem 0 0;
+  border-left: none;
   border-top: 1px solid var(--hair);
   font-family: var(--serif);
   font-size: 0.98rem;
   font-style: italic;
   line-height: 1.55;
   color: var(--ink-soft);
+}
+
+/* The runtime clamps a long abstract behind an ellipsis; a tap expands.
+   Without JS the full abstract shows. */
+.nb-article .nb-paper-abstract.nb-clamped {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 6;
+  overflow: hidden;
+  cursor: pointer;
+}
+
+.nb-article .nb-paper-abstract[role="button"]:not(.nb-clamped) {
+  cursor: pointer;
 }
 
 /* Anchored excerpt — the original's sentence at a load-bearing moment. Reads
@@ -77,8 +92,10 @@
   border-radius: var(--radius);
 }
 
-.nb-excerpt blockquote {
+.nb-article .nb-excerpt blockquote {
   margin: 0;
+  padding: 0;
+  border-left: none;
   font-family: var(--serif);
   font-size: 1.02rem;
   font-style: italic;

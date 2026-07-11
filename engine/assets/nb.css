@@ -1003,15 +1003,16 @@ sup.nb-cite a:hover {
   overflow-wrap: anywhere;
 }
 
-.nb-backref {
-  font-family: var(--sans);
+a.nb-backref {
+  font-family: var(--mono);
   font-size: 12px;
+  font-weight: 500;
   text-decoration: none;
   color: var(--faint);
   padding: 0 3px;
 }
 
-.nb-backref:hover {
+a.nb-backref:hover {
   color: var(--accent);
 }
 
