@@ -66,8 +66,11 @@ available, `uv run engine/<script>.py` manages the dependency itself.
      `data-nb-required` entry names a local artifact, so it is exempt from the
      absolute-https rule the other sources follow. Never fabricate a public URL
      for a file that has none.
-   - `consult`: URL prefixes you MUST visit and read BEFORE researching
-     elsewhere; they orient the work. Citing them is optional.
+   - `consult`: sources you MUST read BEFORE researching elsewhere; they orient
+     the work, and citing them is optional. An entry that is a specific page
+     gets read in full; an entry that scopes an archive (an arXiv listing, a
+     court index) tells you where to search, and you read what is relevant
+     under it.
    - `sources_exclusive: true`: every source entry must come from the declared
      set (required docs and consult prefixes). Cite nothing else; an outside
      source is a BLOCK.

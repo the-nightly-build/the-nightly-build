@@ -28,6 +28,8 @@ to the rest, so your judgments match the assignment the drafter was given.
 - The series' composed layer stack (house floor, paper voice, template identity and manifest,
   `series.yaml`, series prompt, tags, item prompt), the same layers the drafter wrote to, so a
   mandated section or an on-beat framing is not read as a fault.
+- The run's devices note (`.nb-voice/devices.md`) when one exists. A move on that list
+  surviving into the draft is a voice fix.
 
 ## Work three axes
 

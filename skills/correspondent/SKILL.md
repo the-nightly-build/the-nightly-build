@@ -22,10 +22,16 @@ earlier ones. Two stages of each article are skills you invoke: the writing coac
 ## How a run works
 
 1. Load the shared layers below, fetch the `library` branch, and run the duty
-   oracle for tonight's due series.
+   oracle for tonight's due series. Then skim the ten or so most recently
+   published articles across sections and write a short devices note at
+   `.nb-voice/devices.md` (gitignored): the title shapes, opening and closing
+   constructions, and furniture rhythms the catalog just used. Tonight's
+   articles stay off that list; a paper that reuses a move every night grows a
+   formula.
 2. Produce each due series' article in its own context: spawn a subagent in its
-   own git worktree, in parallel where your runtime allows. One article per
-   series, each its own PR. Collect the outcomes.
+   own git worktree, in parallel where your runtime allows. Hand each context
+   the devices note's path along with its assignment. One article per series,
+   each its own PR. Collect the outcomes.
 
 If your runtime cannot spawn subagents or worktrees, do the same work one series
 at a time, each in a fresh pass. The steps are identical; you lose only the
@@ -77,13 +83,18 @@ task or todo tool, so no stage is skipped and each stage-skill fires at its step
    floor and the paper's voice directly, not only through the voice brief. Later
    layers specialize; they never override earlier ones.
 2. **Writing coach, always.** Spawn a subagent that loads the `writing-coach`
-   skill. It studies how the best real writers on this subject actually write and
-   leaves a voice brief at `.nb-voice/<series>-<slug>.md`. Read the brief before
-   you draft; it is what the prose should sound like.
+   skill, handing it the devices note when the run wrote one. It studies how the
+   best real writers on this subject actually write and leaves a voice brief at
+   `.nb-voice/<series>-<slug>.md`. Read the brief before you draft; it is what
+   the prose should sound like. For an open series with an empty queue, settle
+   tonight's topic, template, and slug in "Select work" before this step: the
+   coach needs a subject and the brief's filename needs the slug.
 3. **Research.**
-   - Read every `required_docs` file. Visit and read every `consult` prefix
-     BEFORE researching elsewhere; they orient the work, and citing them is
-     optional.
+   - Read every `required_docs` file. Read every `consult` entry BEFORE
+     researching elsewhere; citing them is optional. An entry that is a
+     specific page gets read in full; an entry that scopes an archive (an
+     arXiv listing, a court index) orients where to search, and you read what
+     is relevant under it.
    - If the series sets `sources_exclusive: true`, cite ONLY the declared docs and
      consult sources; anything else is a BLOCK.
    - Use web access; prefer primary sources; verify numbers against them.
@@ -99,8 +110,10 @@ task or todo tool, so no stage is skipped and each stage-skill fires at its step
      stands for, fill `nb-meta` honestly, and keep the engine asset
      `<link>`/`<script>` tags exactly as they are (engine-owned). This is the
      universal fill discipline for every template.
-   - The `manifest.yaml` defines the template's geometry; obey its counts, not any
-     number restated elsewhere. The **article** template is enforced prose: fill
+   - The `manifest.yaml` defines the template's geometry, and `series.yaml`
+     may tighten its bands (`words`, `min_sources`); both bind, and the proof
+     enforces them. A number restated in any prose layer does not. The
+     **article** template is enforced prose: fill
      each anchor section once, and where the manifest declares `flex_sections` add
      that many more between the anchors (lowercase-hyphen `data-nb-section` labels,
      each cited). The **brief** template is enforced structure: the tagged items
@@ -174,7 +187,9 @@ When a human asks for a press check of `<series>`:
 3. Build the preview:
    `python3 engine/build_site.py --repo . --preview press-check/ --out press-check/site/`
    then serve it: `python3 -m http.server -d press-check/site/`. This is the real
-   newsstand with the draft on it; previews render exactly like production.
+   newsstand with the draft on it; previews render exactly like production. In a
+   headless or orchestrated run, build the preview, skip the server, and return
+   the paths.
 4. Iterate with the human: tune `press/series/<id>/prompt.md`, re-run, compare.
 5. **Promote on request** ("publish this one"): open the real PR from the existing
    artifact. Copy the file to `library/<series>/<slug>.html` on a branch, no
