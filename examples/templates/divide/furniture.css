@@ -18,6 +18,8 @@
 
 .rs-divide .rs-side {
   min-width: 0; /* let grid cells shrink below content width instead of overflowing */
+  display: flex;
+  flex-direction: column;
 }
 
 .rs-divide .rs-left {
@@ -48,8 +50,11 @@
   color: var(--ink);
 }
 
-.rs-side-champion {
-  margin-top: 0.9rem;
+.nb-article .rs-side-champion {
+  /* pinned to the side's bottom edge, so the two champions align across the
+     spine however the arguments differ in length; scoped under .nb-article to
+     outrank nb.css paragraph margins in the cascade */
+  margin-top: auto;
   padding-top: 0.55rem;
   border-top: 1px solid var(--hair);
   font-family: var(--sans);
@@ -85,5 +90,25 @@
 
   .rs-divide .rs-right .rs-side-camp {
     text-align: right;
+  }
+}
+
+/* Desktop: when the argument rides in its wrapper, the four side slots share
+   grid rows across the spine, so the camps, the theses, and the champions'
+   hairlines start aligned however long each argument runs. Articles written
+   before the wrapper keep the bottom-pinned champion above. */
+@media (width >= 641px) {
+  .rs-divide:has(.rs-side-argument) {
+    grid-template-rows: auto auto 1fr auto;
+  }
+
+  .rs-divide .rs-side:has(> .rs-side-argument) {
+    display: grid;
+    grid-row: span 4;
+    grid-template-rows: subgrid;
+  }
+
+  .nb-article .rs-side:has(> .rs-side-argument) .rs-side-champion {
+    margin-top: 0.9rem;
   }
 }
