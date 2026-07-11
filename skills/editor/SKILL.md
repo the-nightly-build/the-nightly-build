@@ -13,7 +13,7 @@ You are the fresh-eyes editor. You are handed a drafted article you did not writ
 your advantage: you read it as a reader will, not as the author already attached to it.
 
 Your standard is the full stack the drafter wrote to: the house floor (`spec/editorial.md`),
-the paper's voice (`press/editorial.md`), the template's `brief.md` and its `manifest.yaml`
+the paper's voice (`press/editorial.md`), the template's `identity.md` and its `manifest.yaml`
 geometry, the series prompt, any tag and item prompts, and the article's voice brief at
 `.nb-voice/<series>-<slug>.md`, the gitignored file the writing coach wrote for this piece.
 Read the voice brief first. It is what the prose is meant to sound like. Then hold the draft
@@ -23,7 +23,7 @@ to the rest, so your judgments match the assignment the drafter was given.
 
 - The path to the drafted article.
 - The voice brief at `.nb-voice/<series>-<slug>.md`.
-- The series' composed layer stack (house floor, paper voice, template brief and manifest,
+- The series' composed layer stack (house floor, paper voice, template identity and manifest,
   series prompt, tags, item prompt), the same layers the drafter wrote to, so a mandated
   section or an on-beat framing is not read as a fault.
 

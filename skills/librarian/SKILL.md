@@ -192,8 +192,8 @@ article). Re-validate after every change.
   the always-exempt `sources`) and `require_why: true` to require a
   `data-nb-why` line on each item. The build-your-own walkthrough in
   `docs/customization.md` rebuilds the classic lesson template this way. An
-  optional `<id>/brief.md` editorial brief gives the template its voice and
-  identity (crib `templates/article/brief.md`): specific about stance and craft,
+  optional `<id>/identity.md` gives the template its voice and character
+  (crib `templates/article/identity.md`): specific about stance and craft,
   permissive about structure. A `<id>/furniture.md` + `furniture.css` adds
   bespoke furniture only this template renders. Validate, then press check
   before scheduling.

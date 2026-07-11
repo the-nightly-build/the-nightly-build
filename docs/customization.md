@@ -127,14 +127,14 @@ The layer order, first to last. Later layers specialize and never override:
 
 ```text
 PROTOCOL.md > spec/editorial.md > press/editorial.md > template manifest >
-template editorial brief > press/series/<id>/prompt.md > tag fragments
+template identity > press/series/<id>/prompt.md > tag fragments
 > item prompt
 ```
 
-The template editorial brief (`<id>/brief.md`) is the prose guidance carried in
-the template package itself (its identity, opener, and structure notes), distinct
-from the machine contract in the `manifest.yaml` above it. A `press/templates/`
-package supplies its own brief.
+The template identity (`<id>/identity.md`) is the prose guidance carried in the
+template package itself (its editorial character, opener, and structure notes),
+distinct from the machine contract in the `manifest.yaml` above it. A
+`press/templates/` package supplies its own.
 
 ## Your own templates
 
@@ -145,7 +145,7 @@ under `templates/` (shipped) or `press/templates/` (yours):
 press/templates/<id>/
   manifest.yaml    the machine contract the proof enforces (required)
   skeleton.html    the scaffold the agent renders (required)
-  brief.md         the template's voice and identity (optional)
+  identity.md      the template's voice and character (optional)
   furniture.md     bespoke furniture catalogue for this template (optional)
   furniture.css    bespoke furniture styles (optional)
 ```
@@ -199,7 +199,7 @@ ordered course, rebuilt as your own template.
    box, check box, and bridge components in `templates/FURNITURE.md` carry
    the lesson. The sandbox applies unchanged: no scripts beyond the JSON blocks
    and the engine runtime, citations as `sup.nb-cite` anchors into numbered
-   source entries. Optionally add `brief.md` (the template's voice) and
+   source entries. Optionally add `identity.md` (the template's voice) and
    `furniture.md` + `furniture.css` for bespoke components only this template
    renders.
 

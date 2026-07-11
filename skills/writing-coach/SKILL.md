@@ -22,7 +22,7 @@ The voice you produce must fit the paper, not float free. Read first:
 - The house floor (`spec/editorial.md`) and the paper's voice
   (`press/editorial.md`). Together they are the style guide; they own register
   and assumed knowledge.
-- The template brief and the series prompt: the shape and the subject.
+- The template identity and the series prompt: the shape and the subject.
 - The tag fragments in declared order and the item's `prompt` if present: they
   can redefine the genre and voice you are calibrating, so read them too.
 

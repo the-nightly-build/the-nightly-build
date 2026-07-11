@@ -83,9 +83,9 @@ not a generic summary.
 
 ## Form
 
-Form serves the reader and the template. Each template's brief sets its own geometry: paragraph
+Form serves the reader and the template. Each template's identity sets its own form: paragraph
 length, how the dek reads, whether the piece closes on "go deeper" material. A press may shadow
-those briefs. The floor holds those choices to a standard, it does not make them: keep the
+them. The floor holds those choices to a standard, it does not make them: keep the
 writing easy to follow and leave the reader equipped to go further.
 
 ## Charts

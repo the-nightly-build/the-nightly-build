@@ -1,4 +1,4 @@
-# divide — editorial brief
+# divide
 
 The manifest gives this template its geometry. This brief gives it its identity:
 what a great Divide actually does. It composes as a layer, so the series prompt can

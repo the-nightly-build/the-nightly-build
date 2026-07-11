@@ -28,8 +28,8 @@ available, `uv run engine/<script>.py` manages the dependency itself.
       wholesale by `press/templates/<t>/` if a press package of the same id
       exists (your package wins). Read its `manifest.yaml` (the machine
       contract this file's proof enforces) and its `skeleton.html` (the
-      scaffold you render). If the package ships an editorial brief
-      (`<t>/brief.md`), read it as the template's voice; it composes here,
+      scaffold you render). If the package ships an identity file
+      (`<t>/identity.md`), read it as the template's voice; it composes here,
       before the series prompt. If the package ships bespoke furniture
       (`<t>/furniture.md`), it joins your furniture palette (step 6).
    5. `press/series/<id>/prompt.md`: the series' editorial instructions.
