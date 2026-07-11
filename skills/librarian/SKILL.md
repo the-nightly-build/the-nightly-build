@@ -224,7 +224,11 @@ construction: their commits and upstream's touch disjoint paths. If they HAVE
 edited engine files, the merge may conflict exactly there; that is normal fork
 ownership, so help them resolve it like any merge, never overwriting their work.
 After updating, offer to dispatch the publish workflow so the back catalog
-re-renders with the new engine immediately.
+re-renders with the new engine immediately, and ask to see their schedule
+prompt: it lives outside the repo, so no merge can fix it. Diff it against the
+canonical prompt in `docs/scheduling.md` and replace anything that restates
+what the repo owns; a trigger that recites the pipeline is stale the day after
+it is written.
 
 ## Boundaries
 

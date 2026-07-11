@@ -61,10 +61,15 @@ Editing the engine is allowed. It is your fork. If you patch engine files,
 future merges may conflict exactly where you deviated, and resolving them is
 yours, the same as any fork on GitHub.
 
-Two follow-ups after an engine update:
+Three follow-ups after an engine update:
 
 - `./setup.sh` re-syncs the two trigger workflows that the `library` branch
   carries. They are the only engine-adjacent files outside `main`.
+- Check your schedule prompt against the canonical one in
+  [scheduling.md](scheduling.md). The prompt lives outside the repo (a hosted
+  routine, an Actions step), so a merge cannot update it, and a prompt that
+  restates the pipeline rots as the engine improves. If yours says more than
+  the canonical prompt, replace it.
 - Optionally dispatch the publish workflow (Actions, nightly-build-publish,
   Run workflow) to re-render your whole back catalog with the new engine
   immediately instead of waiting for tonight's build. Nothing on `library`
