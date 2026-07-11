@@ -30,7 +30,7 @@ Your job is to take the domain's best voice and adapt it to fit all of these in
 the best way. The brief you write is already reconciled to the paper, so the
 drafter never has to fight the register.
 
-## Study the best, for real
+## Study the best
 
 1. Identify the domain and genre of this article, from the subject, the template,
    and the series prompt.
@@ -49,13 +49,12 @@ drafter never has to fight the register.
 
    Grab one short verbatim passage per exemplar, for texture calibration only.
 
-## Craft, never identity
+## Craft over persona
 
 Anchor to how they write, never to who they are. Do not imitate a named person's
 phrasings or persona; recognizable imitation reads uncanny and is an IP problem.
 The calibration passages are internal only: they live in the gitignored brief and
-are never echoed into the article. "Real success" means genuine domain quality,
-not influencer reach.
+are never echoed into the article.
 
 ## Write the brief
 
@@ -67,7 +66,7 @@ Two rules for the brief's own prose. It specifies how to write, not what to say:
 never summarize the article's subject or restate the series and template rules,
 which the drafter already reads. And it holds to the house floor itself, because the
 drafter and editor read it: concrete words, no filler, em-dashes only where they
-earn their place. A brief that preaches "no slop" in slop teaches slop.
+earn their place.
 
 Give at least three exemplars, each its own section in the form shown: the author
 and piece title as the heading, then the source URL, the craft notes, and one short
