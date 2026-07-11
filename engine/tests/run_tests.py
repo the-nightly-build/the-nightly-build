@@ -130,6 +130,23 @@ expect(
     must_not=["W-LENGTH-LOW", "W-SOURCES-MIN", "W-CITE-DENSITY"],
 )
 expect(
+    "clean prose does not trip the em-dash warn",
+    run_local(VALID, "semiconductors"),
+    must_not=["W-EM-DASH"],
+)
+expect(
+    "em-dash overuse trips the soft W-EM-DASH warn (never a block)",
+    run_local(
+        mut(
+            "<h2>Orientation</h2>",
+            "<h2>Orientation</h2><p>" + "clause — " * 40 + "</p>",
+        ),
+        "semiconductors",
+    ),
+    must_have=["W-EM-DASH"],
+    blocks=0,
+)
+expect(
     "valid brief is BLOCK-clean",
     run_local(VALID_BRIEF, "ai-briefs", slug=TODAY),
     blocks=0,
@@ -603,7 +620,7 @@ expect(
     "W-WHY-MISSING + W-CITE-DENSITY (per-item)",
     run_local(
         VALID_BRIEF.replace(
-            "<p data-nb-why><b>Why it matters</b> — it moves the larger story we track.</p>",
+            "<p data-nb-why><b>Why it matters</b>: it moves the larger story we track.</p>",
             "",
             1,
         ).replace('<sup class="nb-cite"><a href="#s2">2</a></sup>', "", 1),

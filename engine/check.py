@@ -62,6 +62,8 @@ ALLOWED_EXTERNAL_HOSTS = frozenset({"fonts.googleapis.com", "fonts.gstatic.com"}
 ENGINE_SCRIPT_RE = re.compile(r"^(?:(?:\.\./)+|/)assets/nb\.js$")
 DEFAULT_MIN_SOURCES = {"longread": 8, "shortread": 5}
 DEFAULT_CITE_EXEMPT = ("sources",)  # a template extends this via registry cite_exempt
+EM_DASH_PER_1000 = 4.0  # soft WARN threshold: em-dashes per 1000 words of body prose
+EM_DASH_MIN_WORDS = 100  # skip the check on very short text where the rate is noisy
 SELF_COUNT_TOLERANCE = 0.20
 
 
@@ -158,6 +160,7 @@ class Article(HTMLParser):
         self.external_refs = []  # (tag, url) for script src / link href / img src
         self._capture = None  # ("meta"|"chart", buffer) while inside a JSON script
         self._text_parts = []
+        self._prose_text_parts = []  # body prose only, excludes the sources section
         self._suppress_text_depth = 0  # inside script/style
 
     # -- helpers -------------------------------------------------------------
@@ -284,6 +287,9 @@ class Article(HTMLParser):
             self._capture[1].append(data)
         elif self._suppress_text_depth == 0:
             self._text_parts.append(data)
+            sec = self._current("section")
+            if sec is None or sec.get("section") != "sources":
+                self._prose_text_parts.append(data)
 
     @property
     def word_count(self):
@@ -1037,6 +1043,21 @@ def check_warns(ed, meta, *, series, treg, template_id, item_cfg, rep):
                 "W-SELF-COUNT",
                 f"nb-meta words={meta['words']} vs counted {actual}",
                 suggestion="update nb-meta words to the counted total",
+            )
+
+    # em-dash overuse (soft): AI drafts reach for the em-dash as a default
+    # connective. WARN only, never a BLOCK; some em-dashes earn their place.
+    prose = " ".join(ed._prose_text_parts)
+    prose_words = len(re.findall(r"\S+", prose))
+    if prose_words >= EM_DASH_MIN_WORDS:
+        dashes = prose.count("—")
+        rate = dashes * 1000 / prose_words
+        if rate > EM_DASH_PER_1000:
+            rep.warn(
+                "W-EM-DASH",
+                f"{dashes} em-dashes in {prose_words} words ({rate:.1f} per 1000)",
+                suggestion="AI drafts overuse the em-dash as a default connective; "
+                "cut the reflexive ones, keep the few that earn their place",
             )
 
 
