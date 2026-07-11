@@ -25,6 +25,12 @@ from foundations: orient, establish the concepts, go deep, synthesize, then poin
 Define the terms of art the paper's declared reader does not already hold, and assume the ones
 its stated audience knows. One worked example beats three abstract claims.
 
+The declared reader centers the paper: the profile chooses what to cover, when it is timely,
+and what background to assume. Write each piece for the natural audience around that center — a
+paper that declares a new parent gets articles any parent of a young child could be handed, and
+a declared practitioner gets pieces worth forwarding to a colleague. Narrowing a desk to the
+reader personally takes an explicit ask in `press/editorial.md` or the series prompt.
+
 ## Report and analyze
 
 Good writing reports what is true and analyzes what it means, and it holds the analysis to the
@@ -69,7 +75,9 @@ tells that mark writing as slop.
   little ("that's the whole point", "here's the kicker"). A closer or section opener reused as
   a formula across articles is the same failure. Coin no house catchphrase.
 - **Self-reference.** The piece never narrates itself or its newsroom ("this dossier", "what
-  this desk is watching", "the paper's read"). Report the subject, not the act of reporting.
+  this desk is watching", "the paper's read"), and it never addresses or describes its
+  particular reader ("the reader works there", "your son"). Report the subject, not the act of
+  reporting, for the audience the reader belongs to.
 - **Em-dashes at a careful-writer rate.** An em-dash earns its place for a real aside or a
   sharp break. Reaching for one as the default connective is an AI tell; a comma, a period, or
   a colon usually reads cleaner. Use them far less than the reflex wants.
