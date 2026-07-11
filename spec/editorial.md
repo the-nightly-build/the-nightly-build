@@ -74,12 +74,19 @@ tells that mark writing as slop.
   sharp break. Reaching for one as the default connective is an AI tell; a comma, a period, or
   a colon usually reads cleaner. Use them far less than the reflex wants.
 
-## Headline and dek
+## Headlines and sections
 
-The headline may earn attention; the body earns trust. Hook with a real fact or a live tension,
-never a promise the piece does not pay off. The dek is the one-sentence standfirst under the
-headline (the `dek` in `nb-meta`, shown on the newsstand card): make it specific to this piece,
-not a generic summary.
+The headline may earn attention; the body earns trust. Hook with a real fact or a live
+tension, never a promise the piece does not pay off. Keep it short and specific, and skip the
+slop formulas: the generic colon subtitle ("X: How Y Changed Z"), the superlative ("The
+Ultimate Guide to X"), the vague abstraction. A colon or a strong claim is fine when it names
+something real, slop when it is a template any topic drops into.
+
+The dek is the one-sentence standfirst under the headline (the `dek` in `nb-meta`, on the
+newsstand card): specific to this piece, not a generic summary.
+
+Name each section (`data-nb-section`) for the argument step it carries, short and concrete, not
+a generic slot like "understanding-x", "the-road-ahead", or "key-takeaways".
 
 ## Form
 
