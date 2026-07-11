@@ -239,3 +239,106 @@
   font-family: var(--sans);
   color: var(--ink-soft);
 }
+
+/* Legacy paper furniture. Articles published before the paper template
+   shipped with the engine carry rs- classes; these are the shipped styles
+   under the old names (locators wrap, map entries wrap), so those pages
+   stay styled and stay inside a phone viewport. New articles use the
+   shipped template's nb- furniture. */
+/* Anchored excerpt — the original's sentence at a load-bearing moment. Reads
+   as quoted source material: a quiet panel behind a serif quote, the locator
+   set small in the mono face so it reads as a coordinate, the gloss under a
+   hairline. */
+.rs-excerpt {
+  margin: 1.6rem 0;
+  padding: 1rem 1.15rem 0.8rem;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-left: 3px solid var(--accent);
+  border-radius: var(--radius);
+}
+
+.rs-excerpt blockquote {
+  margin: 0;
+  font-family: var(--serif);
+  font-size: 1.02rem;
+  font-style: italic;
+  line-height: 1.55;
+  color: var(--ink);
+}
+
+.rs-excerpt figcaption {
+  margin-top: 0.7rem;
+  padding-top: 0.55rem;
+  border-top: 1px solid var(--hair);
+  font-family: var(--sans);
+  font-size: 0.82rem;
+  line-height: 1.5;
+  color: var(--ink-soft);
+}
+
+.rs-excerpt-loc {
+  margin-right: 0.5rem;
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+/* Reading map — the read-it-yourself triage of the original. Each entry is a
+   plain block that wraps like prose behind an inline verdict badge, so a long
+   section title breaks across lines instead of forcing the page wide. One
+   accent across the three verdicts; the map directs attention without turning
+   into a traffic light. */
+.rs-paper-map {
+  margin: 1.2rem 0;
+  padding: 0;
+  list-style: none;
+}
+
+.rs-paper-map li {
+  padding: 0.55rem 0;
+  border-top: 1px solid var(--hair);
+  font-size: 0.95rem;
+  line-height: 1.6;
+}
+
+.rs-paper-map li:last-child {
+  border-bottom: 1px solid var(--hair);
+}
+
+.rs-map-verdict {
+  display: inline-block;
+  margin-right: 0.45rem;
+  padding: 0.05rem 0.45rem;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  font-family: var(--mono);
+  font-size: 0.68rem;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  vertical-align: 0.08em;
+}
+
+.rs-map-verdict.rs-read {
+  color: var(--bg);
+  background: var(--accent);
+  border-color: var(--accent);
+}
+
+.rs-map-verdict.rs-skim {
+  color: var(--accent);
+  border-color: var(--accent);
+}
+
+.rs-map-verdict.rs-skip {
+  color: var(--faint);
+}
+
+.rs-map-target {
+  font-family: var(--sans);
+  font-weight: 600;
+  color: var(--ink);
+}
