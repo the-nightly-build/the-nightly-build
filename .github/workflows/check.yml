@@ -104,10 +104,28 @@ jobs:
       pull-requests: write
       actions: write # required to dispatch publish.yml (Start the press)
     steps:
+      # A night's PRs land in one burst, and a sibling merging first moves the
+      # base between GitHub's mergeability snapshot and this call ("Base branch
+      # was modified") — a transient, never a verdict on the article. Retry
+      # with jittered backoff: each successful merge removes a contender, so N
+      # racing PRs converge within N rounds. Any other refusal fails fast so
+      # retries never mask a real problem. Exhausted retries still self-heal:
+      # the PR stays open and validated, and the next night supersedes it.
       - name: Squash-merge
         env:
           GH_TOKEN: ${{ github.token }}
-        run: gh pr merge ${{ github.event.pull_request.number }} --squash --repo ${{ github.repository }}
+        run: |
+          pr=${{ github.event.pull_request.number }}
+          for attempt in 1 2 3 4 5; do
+            err=$(gh pr merge "$pr" --squash --repo ${{ github.repository }} 2>&1) && exit 0
+            echo "$err"
+            case "$err" in
+              *"Base branch was modified"*) sleep $((attempt * 11 + RANDOM % 7)) ;;
+              *) exit 1 ;;
+            esac
+          done
+          echo "::error::lost the base race five times; PR #$pr stays open and validated, and a rerun or the next night merges it"
+          exit 1
 
       # Pushes made with GITHUB_TOKEN never fire push-triggered workflows
       # (recursion guard), so the merge above cannot start the press by
