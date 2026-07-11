@@ -1,0 +1,107 @@
+/* The paper template's bespoke furniture (prefix rs-). Bespoke to this
+   template: only a paper reconstruction quotes a source paper with locators or
+   closes on a triaged reading map, so these classes live in the template's own
+   folder rather than in press/furniture/. The engine concatenates this file
+   into assets/theme.css whenever this template is present. Documented in
+   furniture.md beside it. */
+
+/* Anchored excerpt — the original paper's sentence at a load-bearing moment.
+   Reads as quoted source material: a quiet panel behind a serif quote, the
+   locator set small in the mono face so it reads as a coordinate, the gloss
+   under a hairline. */
+.rs-excerpt {
+  margin: 1.6rem 0;
+  padding: 1rem 1.15rem 0.8rem;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-left: 3px solid var(--accent);
+  border-radius: var(--radius);
+}
+
+.rs-excerpt blockquote {
+  margin: 0;
+  font-family: var(--serif);
+  font-size: 1.02rem;
+  font-style: italic;
+  line-height: 1.55;
+  color: var(--ink);
+}
+
+.rs-excerpt figcaption {
+  margin-top: 0.7rem;
+  padding-top: 0.55rem;
+  border-top: 1px solid var(--hair);
+  font-family: var(--sans);
+  font-size: 0.82rem;
+  line-height: 1.5;
+  color: var(--ink-soft);
+}
+
+.rs-excerpt-loc {
+  margin-right: 0.5rem;
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--accent);
+  white-space: nowrap;
+}
+
+/* Reading map — the read-it-yourself triage of the original. Each entry leads
+   with a verdict badge; the three verdicts share one accent so the map directs
+   attention without turning into a traffic light. */
+.rs-paper-map {
+  margin: 1.2rem 0;
+  padding: 0;
+  list-style: none;
+}
+
+.rs-paper-map li {
+  display: flex;
+  align-items: baseline;
+  gap: 0.6rem;
+  padding: 0.5rem 0;
+  border-top: 1px solid var(--hair);
+  font-size: 0.95rem;
+  line-height: 1.55;
+}
+
+.rs-paper-map li:last-child {
+  border-bottom: 1px solid var(--hair);
+}
+
+.rs-map-verdict {
+  flex: 0 0 auto;
+  min-width: 3.2em;
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  text-align: center;
+  padding: 0.1rem 0.45rem;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+}
+
+.rs-map-verdict.rs-read {
+  color: var(--bg);
+  background: var(--accent);
+  border-color: var(--accent);
+}
+
+.rs-map-verdict.rs-skim {
+  color: var(--accent);
+  border-color: var(--accent);
+}
+
+.rs-map-verdict.rs-skip {
+  color: var(--faint);
+}
+
+.rs-map-target {
+  flex: 0 0 auto;
+  font-family: var(--sans);
+  font-weight: 600;
+  color: var(--ink);
+}
