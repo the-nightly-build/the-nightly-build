@@ -154,7 +154,7 @@ def series_duty(
                 **entry,
                 "commissions": unpublished,
                 "reason": "commissioned items pending — publish "
-                "one of these before a freestyle pick",
+                "one of these before an open pick",
             }
         return True, {
             **entry,

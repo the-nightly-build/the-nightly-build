@@ -125,5 +125,5 @@ jobs:
           for n in $(gh pr list --repo ${{ github.repository }} --base library --state open --json number,files \
                      -q ".[] | select(.files[].path == \"$path\") | .number"); do
             gh pr close "$n" --repo ${{ github.repository }} \
-              --comment "Superseded by #${{ github.event.pull_request.number }} (same edition: \`$path\`)." || true
+              --comment "Superseded by #${{ github.event.pull_request.number }} (same article: \`$path\`)." || true
           done

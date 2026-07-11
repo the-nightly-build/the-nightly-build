@@ -351,7 +351,7 @@ def check_series(repo, registry, *, errors):
         for template in allowed:
             treg = registry.get(template)
             if not treg:
-                errors.append(f"{where}: template '{template}' not in the registry")
+                errors.append(f"{where}: template '{template}' not a known template")
             else:
                 tregs.append(treg)
                 if mode in MODES and mode not in (treg.get("modes") or []):
