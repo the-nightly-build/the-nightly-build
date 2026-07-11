@@ -97,6 +97,9 @@ task or todo tool, so no stage is skipped and each stage-skill fires at its step
    - Every load-bearing claim gets an inline citation that links to a source
      entry. Never fabricate a citation; a dangling cite is a BLOCK.
    - Collect at least the series' source floor; aim past it.
+   - Keep a ledger of every source you read far enough to judge. The ones
+     that never become citations go in the PR body's "Also consulted"
+     section, one line each with the reason.
 4. **Draft.** Render one self-contained HTML file from the template's
    `skeleton.html`, reading the voice brief as you write so the prose is
    anchored, not slop. Start from `press/templates/<template>/skeleton.html` if a
@@ -129,7 +132,8 @@ task or todo tool, so no stage is skipped and each stage-skill fires at its step
    it requests a redraft, act on the reason: a sourcing gap or a wrong direction
    sends you back to research (step 3) for what the claim needs, then redraft; a
    voice or structure problem redrafts from step 4. Run the editor again. Two
-   rounds should converge.
+   rounds should converge. Keep each round's report; the PR body's "Process"
+   section is where it lands.
 6. **The proof loop.**
 
    ```sh
@@ -144,9 +148,14 @@ task or todo tool, so no stage is skipped and each stage-skill fires at its step
 7. **The PR.** Target the `library` branch. Add exactly one file:
    `library/<series>/<slug>.html`.
    - Title: `nb: <series>/<slug> - <Title>`
-   - Body: a fenced `nb-meta` yaml block mirroring the embedded JSON (series,
-     slug, mode, template, date, title, order), your run URL if you have one, and
-     the proof's final WARN summary.
+   - Body: the article's production record, in the shape PROTOCOL step 8
+     defines: the fenced `nb-meta` yaml block mirroring the embedded JSON
+     (series, slug, mode, template, date, title, order), your run URL if you
+     have one, and the proof's final WARN summary; then `## Process` (the
+     coach's exemplars, each edit round's report, any redraft and its
+     reason), `## Voice brief` (the brief verbatim, collapsed in a
+     `<details>` block behind a four-backtick fence), and `## Also
+consulted` (the read-but-uncited ledger from research).
    - Preflight the body before opening the PR. Write your intended body to a file
      and re-run the proof with `--pr-body body.txt`; it must still report
      `BLOCK: 0`.

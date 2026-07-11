@@ -322,7 +322,7 @@ expect(
 )
 
 print("== PR-body preflight (local --pr-body) ==")
-GOOD_BODY = (
+MINIMAL_BODY = (
     "Autonomous night-shift article.\n\n"
     "```nb-meta\n"
     "series: semiconductors\n"
@@ -334,11 +334,27 @@ GOOD_BODY = (
     "order: null\n"
     "```\n"
 )
+# The canonical body carries the production record PROTOCOL step 8 defines.
+GOOD_BODY = (
+    MINIMAL_BODY + "\n## Process\n"
+    "Coach studied two exemplars; one edit round, surgical fixes only.\n\n"
+    "## Voice brief\n"
+    "<details><summary>brief</summary>\n\n````markdown\ncalm, precise\n````\n\n"
+    "</details>\n\n"
+    "## Also consulted\n"
+    "- https://example.org/background — context only, superseded by the filing\n"
+)
 expect(
     "preflight passes when the PR body matches the article",
     run_local(VALID, "semiconductors", pr_body=GOOD_BODY),
     blocks=0,
-    must_not=["B-META-MATCH"],
+    must_not=["B-META-MATCH", "W-BODY-RECORD"],
+)
+expect(
+    "preflight warns when the record sections are missing",
+    run_local(VALID, "semiconductors", pr_body=MINIMAL_BODY),
+    blocks=0,
+    must_have=["W-BODY-RECORD"],
 )
 expect(
     "preflight catches a PR body with no nb-meta block",

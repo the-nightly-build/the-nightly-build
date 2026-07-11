@@ -1189,6 +1189,33 @@ def pr_changed_files(repo, *, base, head):
     return changes
 
 
+RECORD_SECTIONS = ("Process", "Voice brief", "Also consulted")
+
+
+def check_pr_body_record(pr_body_path, rep):
+    """WARN when the PR body lacks a production-record section.
+
+    PROTOCOL step 8 makes the body the article's production record: the edit
+    rounds, the voice brief (gitignored, so the body is where it survives),
+    and the read-but-uncited sources. Presence is the quality bar, never the
+    publishing bar, so a gap is a WARN.
+    """
+    with open(pr_body_path, encoding="utf-8") as fh:
+        body = fh.read()
+    missing = [
+        name
+        for name in RECORD_SECTIONS
+        if not re.search(rf"^#{{2,3}}\s*{re.escape(name)}\b", body, re.I | re.M)
+    ]
+    if missing:
+        rep.warn(
+            "W-BODY-RECORD",
+            f"PR body record missing section(s): {', '.join(missing)}",
+            suggestion="the body is the article's production record; "
+            "PROTOCOL step 8 lists the sections",
+        )
+
+
 def resolve_pr_body(pr_body_path, rep) -> dict | None:
     """Parse a PR body file and flag a missing or unparseable nb-meta block.
 
@@ -1201,6 +1228,7 @@ def resolve_pr_body(pr_body_path, rep) -> dict | None:
     meta = parse_pr_body(pr_body_path)
     if meta is None:
         rep.block("B-META-MATCH", "PR body lacks a parseable ```nb-meta``` yaml block")
+    check_pr_body_record(pr_body_path, rep)
     return meta
 
 

@@ -95,4 +95,6 @@ and your notes should name it rather than settle for it.
 
 Report what you did in a few lines: the surgical fixes you made, per axis, and whether any part
 still needs a redraft. Both can be true at once. When you request a redraft, give the drafter
-specific notes and what a good redraft would change.
+specific notes and what a good redraft would change. Your report outlives the night: it is
+quoted into the PR body's "Process" section as the article's production record, so write it as
+history a reader could follow cold.

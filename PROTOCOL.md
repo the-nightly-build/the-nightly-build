@@ -111,11 +111,24 @@ available, `uv run engine/<script>.py` manages the dependency itself.
 8. **Open one pull request per article, targeting the `library` branch.** Branch
    from `library` and add exactly one file, so the PR's diff is that file alone.
    - Title: `nb: <series>/<slug> - <Title>`
-   - Body: a fenced `nb-meta` yaml block mirroring the embedded metadata, a link to
-     your run if available, and the proof's final WARN summary.
+   - Body: the article's production record, harness-agnostic and readable years
+     later. In order:
+     - a fenced `nb-meta` yaml block mirroring the embedded metadata, a link to
+       your run if available, and the proof's final WARN summary;
+     - `## Process` — how the piece was made: the exemplars the coach studied,
+       each edit round's report, and any redraft with what forced it. A few
+       lines; write it as history, not ceremony.
+     - `## Voice brief` — the article's voice brief verbatim, inside a collapsed
+       `<details>` block in a four-backtick fence (the brief's own code fences
+       nest safely). The brief is gitignored, so the PR body is where it
+       survives.
+     - `## Also consulted` — every source read far enough to judge that did not
+       become a citation, one line each with the reason. Leave out pages you
+       merely bounced off.
    - Preflight the body BEFORE opening the PR: write it to a file and run the
      proof with `--pr-body`. The desk blocks any PR whose body lacks or
-     contradicts that block (`B-META-MATCH`), so verify it locally:
+     contradicts the nb-meta block (`B-META-MATCH`) and WARNs when a record
+     section is missing (`W-BODY-RECORD`), so verify it locally:
      `python3 engine/check.py library/<series>/<slug>.html --series <id> --repo . --library <path> --pr-body body.txt`
 
 9. **Boundaries.** Never merge. Never push to `library` directly. Never modify any other
