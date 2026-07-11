@@ -9,9 +9,9 @@ zero is fine.
 
 The section tags, citation markup, source entries, and nb-meta block are
 protocol, not furniture; they are defined in PROTOCOL.md. This is the engine's
-base catalogue, always available. A paper can add its own furniture too — shared
+base catalogue, always available. A paper can add its own furniture too (shared
 across the paper in `press/furniture/`, or bespoke to one template in that
-template's folder — and instruct sections to use it in prompt.md (see
+template's folder) and instruct sections to use it in prompt.md (see
 docs/customization.md).
 
 ## Stat strip
