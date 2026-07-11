@@ -31,15 +31,12 @@ If your runtime cannot spawn subagents or worktrees, do the same work one series
 at a time, each in a fresh pass. The steps are identical; you lose only the
 isolation and the parallelism, not the pipeline.
 
-## Load your layers (in order)
+## Load your layers
 
-`PROTOCOL.md` → `spec/editorial.md` (house floor) → `press/editorial.md` (the
-paper's voice, if present) → your template package's `manifest.yaml` (the folder
-`templates/<t>/`, replaced wholesale by `press/templates/<t>/` if a press package
-of that id exists) → the package's editorial brief if it ships one
-(`<t>/brief.md`) → `press/series/<id>/prompt.md` → tag fragments in declared
-order → the item's `prompt` if present. Later layers specialize; they never
-override earlier ones.
+The composed layer stack and its order live in PROTOCOL step 2: the contract, the
+house floor, the paper's voice, the template package, the series prompt, the tag
+fragments, then the item prompt. Load them in that order; later layers specialize
+and never override earlier ones.
 
 ## Select work
 
@@ -74,13 +71,10 @@ not failure.**
 Produce each due series' article by these steps, in order. Track them with your
 task or todo tool, so no stage is skipped and each stage-skill fires at its step.
 
-1. **Load the full layer stack** into this fresh context, in order: `PROTOCOL.md`
-   → `spec/editorial.md` (house floor) → `press/editorial.md` (paper voice) →
-   the template package's `manifest.yaml` → its `brief.md` if it ships one → the
-   series prompt → tag fragments in declared order → the item's `prompt` if
-   present. The isolated context starts empty; load these here directly rather
-   than assuming the orchestrator's copy carried over, so the drafter reads the
-   floor and the paper voice firsthand, not only through the voice brief. Later
+1. **Load the full layer stack** into this fresh context, in PROTOCOL step 2's
+   order. The isolated context starts empty, so load these here firsthand rather
+   than assuming the orchestrator's copy carried over: the drafter must read the
+   floor and the paper's voice directly, not only through the voice brief. Later
    layers specialize; they never override earlier ones.
 2. **Writing coach, always.** Spawn a subagent that loads the `writing-coach`
    skill. It studies how the best real writers on this subject actually write and
@@ -105,13 +99,13 @@ task or todo tool, so no stage is skipped and each stage-skill fires at its step
      stands for, fill `nb-meta` honestly, and keep the engine asset
      `<link>`/`<script>` tags exactly as they are (engine-owned). This is the
      universal fill discipline for every template.
-   - The `manifest.yaml` defines the template's geometry. The **article** template
-     is enforced prose: the anchor sections appear once, and where it declares
-     `flex_sections` you name that many more between them (lowercase-hyphen
-     `data-nb-section` labels, each cited). The **brief** template is enforced
-     structure: 4 to 8 tagged items,
-     each cited, each with a why-it-matters line. A custom template follows its
-     own manifest the same way.
+   - The `manifest.yaml` defines the template's geometry; obey its counts, not any
+     number restated elsewhere. The **article** template is enforced prose: fill
+     each anchor section once, and where the manifest declares `flex_sections` add
+     that many more between the anchors (lowercase-hyphen `data-nb-section` labels,
+     each cited). The **brief** template is enforced structure: the tagged items
+     its manifest sets, each cited, each with its why-it-matters line. A custom
+     template follows its own manifest the same way.
    - Your furniture palette is three composed scopes: the engine base catalogue
      (`templates/FURNITURE.md`), the paper's shared furniture
      (`press/furniture/catalog.md`) if present, and this template's bespoke
@@ -122,9 +116,11 @@ task or todo tool, so no stage is skipped and each stage-skill fires at its step
      scripts, styles, iframes, or handlers beyond the engine tags. Write to
      `library/<series>/<slug>.html`.
 5. **Self-edit, always.** Spawn a fresh subagent that loads the `editor` skill on
-   the draft and the voice brief. Apply its surgical edits. If it requests a
-   redraft, the piece needs more than surgery: redraft from step 4 with its
-   feedback and run the editor again. Keep the loop tight, a round or two.
+   the draft and the voice brief. Apply the surgical fixes it made or returned. If
+   it requests a redraft, act on the reason: a sourcing gap or a wrong direction
+   sends you back to research (step 3) for what the claim needs, then redraft; a
+   voice or structure problem redrafts from step 4. Run the editor again. Two
+   rounds should converge.
 6. **The proof loop.**
 
    ```sh
