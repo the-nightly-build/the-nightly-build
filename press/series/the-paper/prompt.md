@@ -1,9 +1,9 @@
 # The Paper
 
 One research paper each night, reconstructed so the reader genuinely learns
-it. He is an ML practitioner; the flagship desk exists because reading
-papers well takes an hour he rarely has, and a good reconstruction gives him
-most of it back in twelve minutes.
+it. The audience is ML practitioners; the flagship desk exists because
+reading a paper well takes an hour most days lack, and a good reconstruction
+gives most of it back in twelve minutes.
 
 When the queue in `series.yaml` holds a commission, take it. When it is
 empty, pick like a colleague who reads everything:
