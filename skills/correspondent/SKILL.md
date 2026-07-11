@@ -22,16 +22,12 @@ earlier ones. Two stages of each article are skills you invoke: the writing coac
 ## How a run works
 
 1. Load the shared layers below, fetch the `library` branch, and run the duty
-   oracle for tonight's due series. Then skim the ten or so most recently
-   published articles across sections and write a short devices note at
-   `.nb-voice/devices.md` (gitignored): the title shapes, opening and closing
-   constructions, and furniture rhythms the catalog just used. Tonight's
-   articles stay off that list; a paper that reuses a move every night grows a
-   formula.
+   oracle for tonight's due series.
 2. Produce each due series' article in its own context: spawn a subagent in its
    own git worktree, in parallel where your runtime allows. Hand each context
-   the devices note's path along with its assignment. One article per series,
-   each its own PR. Collect the outcomes.
+   its assignment, the library checkout path, and tonight's full due list, so
+   every article knows what the paper just published and what else publishes
+   tonight. One article per series, each its own PR. Collect the outcomes.
 
 If your runtime cannot spawn subagents or worktrees, do the same work one series
 at a time, each in a fresh pass. The steps are identical; you lose only the
@@ -83,8 +79,8 @@ task or todo tool, so no stage is skipped and each stage-skill fires at its step
    floor and the paper's voice directly, not only through the voice brief. Later
    layers specialize; they never override earlier ones.
 2. **Writing coach, always.** Spawn a subagent that loads the `writing-coach`
-   skill, handing it the devices note when the run wrote one. It studies how the
-   best real writers on this subject actually write and leaves a voice brief at
+   skill, handing it the library checkout path and tonight's due list. It
+   studies how the best real writers on this subject actually write and leaves a voice brief at
    `.nb-voice/<series>-<slug>.md`. Read the brief before you draft; it is what
    the prose should sound like. For an open series with an empty queue, settle
    tonight's topic, template, and slug in "Select work" before this step: the

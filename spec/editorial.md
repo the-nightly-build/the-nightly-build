@@ -102,7 +102,7 @@ Form serves the reader and the template. Each template's identity sets its own f
 length, how the dek reads, how the piece closes. A press may shadow
 them. The floor holds those choices to a standard, it does not make them: keep the writing
 easy to follow, land on the piece's own conclusion, and leave the reader equipped to go
-further because the teaching and the citations did their work.
+further because the teaching and the citations did their work, never by saying so.
 
 ## Charts
 

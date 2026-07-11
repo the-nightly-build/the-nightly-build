@@ -28,8 +28,8 @@ to the rest, so your judgments match the assignment the drafter was given.
 - The series' composed layer stack (house floor, paper voice, template identity and manifest,
   `series.yaml`, series prompt, tags, item prompt), the same layers the drafter wrote to, so a
   mandated section or an on-beat framing is not read as a fault.
-- The run's devices note (`.nb-voice/devices.md`) when one exists. A move on that list
-  surviving into the draft is a voice fix.
+- The library checkout. Skim the recent nights' titles, deks, and openers; a move the
+  catalog just used surviving into this draft is a voice fix.
 
 ## Work three axes
 
@@ -49,6 +49,7 @@ to the rest, so your judgments match the assignment the drafter was given.
    may name outlets to sweep first; a citation that reaches past them needs a story the piece
    can defend. When the body names a primary ("per a Reuters report"), the citation is that
    primary, never a retelling of it.
+
 2. **Concision, in the paper's register.** Cut fluff and filler openings. Break run-on
    sentences. Remove any sentence that survives being cut. Delete a body sentence a pull-quote
    merely echoes, but keep repetition that does real work. Pull em-dashes down to a

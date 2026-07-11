@@ -103,7 +103,6 @@
   letter-spacing: 0.05em;
   text-transform: uppercase;
   color: var(--accent);
-  white-space: nowrap;
 }
 
 /* Reading map — the read-it-yourself triage of the original. Each entry is a

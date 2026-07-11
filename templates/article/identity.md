@@ -7,7 +7,7 @@ Build the sections as an argument. Each section earns its place by moving the
 argument forward; one that only piles up facts is not doing work. Open on a real
 fact or a live tension, orient fast, go deep where the material demands it, and
 close on the conclusion the argument earned. The reader leaves equipped to go
-further because the piece taught and cited well, never because a closing section
+further because the piece taught and cited well, never because it said so or
 pointed elsewhere; a piece that ends on a reading list has traded away its own
 verdict.
 
