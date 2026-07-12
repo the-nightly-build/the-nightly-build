@@ -81,10 +81,10 @@ tells that mark writing as slop.
 - **Banned terms.** `spec/banned-terms.yaml` lists the words and marks the corpus has ruled
   out and how many uses each may keep; a press extends or adjusts the list in
   `press/banned-terms.yaml`, and the proof counts every article against the merged list.
-  When a count runs over, rewrite the sentence rather than substituting: a synonym carries
-  the same vagueness, and a comma in the em-dash's slot keeps the broken cadence. An
-  em-dash still earns its place for a real aside or a sharp break; the ceiling exists for
-  the reflex.
+  When a count runs over, rewrite rather than substitute: a synonym carries the same
+  vagueness, and repunctuating an em-dash keeps the fluff the dash was carrying. Delete
+  first, then rewrite what remains. An em-dash still earns its place for a real aside or
+  a sharp break; the ceiling exists for the reflex.
 
 ## Headlines and sections
 
