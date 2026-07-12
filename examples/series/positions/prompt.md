@@ -20,9 +20,8 @@ its place here is a stat strip of three or four numbers that carry the thesis,
 near the top (each cited in nearby prose), and a chart when a trend is the argument.
 
 Close with a short section, `data-nb-section="the-tape"`: the recent stock move
-and what the market seems to be pricing, kept to a paragraph and clearly walled
-off from the business analysis. The business is the story; the tape is the
-footnote.
+and what the market seems to be pricing, kept to a paragraph, separate from the
+business analysis and never leading it.
 
 Emphases:
 

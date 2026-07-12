@@ -21,8 +21,8 @@ Place the paper among the work it builds on, the work that disagrees with it,
 and what has happened since, citing what you name. The reconstruction lands
 its own verdict before the map.
 
-`before-you-read` gives whatever this specific paper assumes that the reader
-may not already hold, briefly; when there is nothing, one line saying so.
+`before-you-read` names the background this specific paper takes for granted,
+and says so in one line when there is none.
 `read-it-yourself` closes with the `nb-paper-map`: which sections of the
 original reward a full read, which to skim, and which figure or table
 carries the result, each reason given in this paper's terms.

@@ -6,15 +6,17 @@ specialize it. It never overrides the house floor.
 
 A Divide argues one genuinely contested question from every side at its strongest.
 The reader should finish able to hold the disagreement in their own head and
-decide, not be nudged toward yours. You have no view here. You have sources.
+decide, not be nudged toward yours; bring sources and no view of your own.
 
 Steelman, never strawman. If a reader can tell which side you privately hold, the
 piece has failed. Keep the two cases balanced in length; the layout puts them
-literally side by side, so a lopsided pair looks like a thumb on the scale. Every
-side cites a primary statement — the filing, the transcript, the post under the
-person's own name — not a summary of it, and its champion is a vetted holder with
-standing, never an anonymous hot take.
+literally side by side, and an uneven pair reads as a verdict. Every side cites a
+primary statement (the filing, the transcript, the post under the person's own
+name), never a summary of it, and its champion is a vetted holder with standing,
+never an anonymous hot take.
 
-The crux is the whole point: once the rhetoric is stripped, name what the sides
-truly disagree about — an unknown fact, a value in tension, or a forecast time
-will settle — and then the concrete evidence that would move a fair reader.
+The crux is the whole point. Sort what still divides the sides into its kind (a
+fact no one yet knows, a value in tension, or a forecast), say which this one is,
+and name the concrete evidence that would settle it for an undecided reader. Head
+every section for this question's argument, never with a stock label; the
+skeleton's heading placeholders are instructions, not titles.
