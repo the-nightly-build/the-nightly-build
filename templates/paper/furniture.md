@@ -61,13 +61,13 @@ breaking the layout.
 <ul class="nb-paper-map">
   <li>
     <span class="nb-map-verdict nb-read">read</span>
-    <strong class="nb-map-target">§3 Method</strong>: WHY THIS SECTION PAYS,
-    IN THIS PAPER'S TERMS.
+    <strong class="nb-map-target">§3 Method</strong>: WHY THIS SECTION PAYS, IN
+    THIS PAPER'S TERMS.
   </li>
   <li>
     <span class="nb-map-verdict nb-skim">skim</span>
-    <strong class="nb-map-target">§5 Experiments</strong>: WHAT TO PULL FROM
-    IT (THE ONE TABLE, THE ONE FIGURE).
+    <strong class="nb-map-target">§5 Experiments</strong>: WHAT TO PULL FROM IT
+    (THE ONE TABLE, THE ONE FIGURE).
   </li>
   <li>
     <span class="nb-map-verdict nb-skip">skip</span>
