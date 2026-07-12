@@ -1,0 +1,34 @@
+# The lexical bans the proof counts. Each entry names the exact strings to
+# count, the most uses an article may carry, and the note the writer sees when
+# the count runs over. Counting covers the article's rendered text — title,
+# dek, headings, body — minus the sources section, case-insensitively, so
+# "leverage" also catches "leveraged" and a heading cannot hide a use.
+#
+# A press extends this list in press/banned-terms.yaml. An entry with a new id
+# adds a ban. An entry reusing an id changes only the fields it states (raise
+# max, replace the suggestion). `enabled: false` retires an entry. The proof
+# reports an over-limit count as W-BANNED-TERM, a WARN unless the series is
+# strict. docs/customization.md documents the feature.
+
+- id: em-dash
+  terms: ["—"]
+  max: 4
+  suggestion: >-
+    rebuild each sentence instead of swapping punctuation; a comma or
+    semicolon in the same slot keeps the interrupted cadence. Most of these
+    sentences read cleaner as two. Keep the few asides that earn the break.
+
+- id: leverage
+  terms: [leverage]
+  max: 1
+  suggestion: >-
+    say what the actor does: uses, applies, borrows against, builds on.
+    The one allowed use is the finance term of art (a leveraged position,
+    a leverage ratio).
+
+- id: load-bearing
+  terms: [load-bearing, load bearing]
+  max: 0
+  suggestion: >-
+    name the dependency plainly: the claim the argument rests on, the number
+    the thesis needs.

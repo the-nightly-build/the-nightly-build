@@ -81,7 +81,6 @@ shutil.copytree(
     ignore=shutil.ignore_patterns("__pycache__", "fixtures"),
     dirs_exist_ok=True,
 )
-shutil.copytree(REPO / "spec", pathlib.Path(root) / "spec")
 shutil.copyfile(REPO / "PROTOCOL.md", pathlib.Path(root) / "PROTOCOL.md")
 git("init", "-q", "-b", "main", cwd=root)
 git("config", "user.email", "night@shift", cwd=root)

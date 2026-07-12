@@ -5,8 +5,8 @@
 # ///
 """Validate the press configuration before anything schedules or publishes.
 
-Covers press/site.yaml, the merged template registry, and every
-series/<id>/series.yaml. Both setup.sh and the librarian run it after
+Covers press/site.yaml, the banned-terms lists, the merged template
+registry, and every series/<id>/series.yaml. Both setup.sh and the librarian run it after
 each configuration change; it applies the same constraints the proof enforces
 at publish time, so mistakes surface while a human is watching instead of
 during an unattended nightly run.
@@ -62,6 +62,7 @@ SERIES_KEYS = {
     "selection",
     "section",
 }
+BANNED_TERM_KEYS = {"id", "terms", "max", "suggestion", "enabled"}
 DAY_NAMES = ("mon", "tue", "wed", "thu", "fri", "sat", "sun")
 CADENCE_WORDS = {"daily", "weekdays", "weekends"}
 SELECTIONS = {"in-order", "random"}
@@ -179,6 +180,68 @@ def check_site_directory(directory, *, errors):
             f"{prefix}: directory.description must be a non-empty string "
             f"of at most 280 characters"
         )
+
+
+def check_banned_terms(repo, errors):
+    """Validate the engine's banned-terms list and the press's extension.
+
+    The press file may carry partial entries: reusing an engine id overrides
+    only the fields it states. A new id must arrive complete, so the proof
+    always has strings to count and a suggestion to show the writer.
+    """
+    engine_ids = set()
+    for rel in ("spec/banned-terms.yaml", "press/banned-terms.yaml"):
+        path = os.path.join(repo, *rel.split("/"))
+        if not os.path.isfile(path):
+            continue
+        entries = load(path)
+        if entries is None:
+            continue
+        if not isinstance(entries, list):
+            errors.append(f"{rel}: must be a list of entries")
+            continue
+        is_press = rel.startswith("press/")
+        seen = set()
+        for n, entry in enumerate(entries, 1):
+            where = f"{rel} entry #{n}"
+            if not isinstance(entry, dict):
+                errors.append(f"{where}: must be a mapping")
+                continue
+            unknown = set(entry) - BANNED_TERM_KEYS
+            if unknown:
+                errors.append(f"{where}: unknown keys {sorted(unknown)} — typo?")
+            eid = entry.get("id")
+            if not isinstance(eid, str) or not SLUG_RE.match(eid):
+                errors.append(f"{where}: 'id' must be a short lowercase slug")
+                continue
+            if eid in seen:
+                errors.append(f"{rel}: duplicate id '{eid}'")
+            seen.add(eid)
+            partial = is_press and eid in engine_ids
+            terms = entry.get("terms")
+            if ("terms" in entry or not partial) and not (
+                isinstance(terms, list)
+                and terms
+                and all(isinstance(t, str) and t.strip() for t in terms)
+            ):
+                errors.append(f"{where}: 'terms' must be a non-empty string list")
+            cap = entry.get("max")
+            if ("max" in entry or not partial) and not (
+                isinstance(cap, int) and not isinstance(cap, bool) and cap >= 0
+            ):
+                errors.append(f"{where}: 'max' must be an integer >= 0")
+            note = entry.get("suggestion")
+            if ("suggestion" in entry or not partial) and not (
+                isinstance(note, str) and note.strip()
+            ):
+                errors.append(
+                    f"{where}: 'suggestion' must be a non-empty string — it is "
+                    "the note the writer sees when the count runs over"
+                )
+            if "enabled" in entry and not isinstance(entry["enabled"], bool):
+                errors.append(f"{where}: 'enabled' must be true or false")
+        if not is_press:
+            engine_ids = seen
 
 
 def check_registry(repo, errors):
@@ -428,6 +491,7 @@ def main(argv=None):
 
     errors = []
     check_site(args.repo, errors)
+    check_banned_terms(args.repo, errors)
     registry = check_registry(args.repo, errors)
     check_series(args.repo, registry, errors=errors)
 
@@ -436,7 +500,10 @@ def main(argv=None):
         for e in errors:
             print(f"  ✗ {e}")
         return 1
-    print("configuration valid: site.yaml, registry, and all series check out")
+    print(
+        "configuration valid: site.yaml, banned terms, registry, "
+        "and all series check out"
+    )
     return 0
 
 
