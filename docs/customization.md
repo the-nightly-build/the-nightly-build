@@ -195,7 +195,12 @@ ordered course, rebuilt as your own template.
 2. Scaffold `press/templates/lesson/skeleton.html`. Copy a shipped skeleton's
    `<head>` and header chrome verbatim (asset links, nb-meta skeleton,
    eyebrow, title, dek, byline), then lay out one
-   `<section data-nb-section="...">` per declared section. The objectives
+   `<section data-nb-section="...">` per declared section. Write placeholder
+   prose as instruction (what the slot must contain), never as a model
+   sentence: a placeholder that performs its slot gets lifted verbatim, and
+   the lifted line then opens that section in every article the template
+   renders. The same holds for `identity.md`: describe the move, do not
+   perform it. The objectives
    box, check box, and bridge components in `templates/FURNITURE.md` carry
    the lesson. The sandbox applies unchanged: no scripts beyond the JSON blocks
    and the engine runtime, citations as `sup.nb-cite` anchors into numbered

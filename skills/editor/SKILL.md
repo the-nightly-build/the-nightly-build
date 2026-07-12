@@ -63,9 +63,9 @@ to the rest, so your judgments match the assignment the drafter was given.
    the contrast stays only when the misconception it corrects is real and named, and falls
    wherever the "not" clause is a strawman the sentence invented — one or two earned contrasts
    per piece is the ceiling. Strike any phrase that echoes the briefing layers (the floor, the
-   voice file, the series prompt, the furniture catalog, the voice brief itself): the reader
-   never sees those documents, and their language surfacing in copy is how a paper grows a
-   catchphrase. Restore the specific word and the earned judgment where the draft flattened
+   voice file, the series prompt, the template's identity and skeleton placeholders, the
+   furniture catalog, the voice brief itself): the reader never sees those documents, and
+   their language surfacing in copy is how a paper grows a catchphrase. Restore the specific word and the earned judgment where the draft flattened
    them. Hold the voice to the brief; do not invent a new one.
 
 ## Surgical, never a rewrite
