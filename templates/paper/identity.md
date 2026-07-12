@@ -24,5 +24,5 @@ its own verdict before the map.
 `before-you-read` gives whatever this specific paper assumes that the reader
 may not already hold, briefly; when there is nothing, one line saying so.
 `read-it-yourself` closes with the `nb-paper-map`: which sections of the
-original reward a full read, which to skim, which figure or table to stare
-at, and one thing first-time readers miss.
+original reward a full read, which to skim, and which figure or table
+carries the result, each reason given in this paper's terms.
