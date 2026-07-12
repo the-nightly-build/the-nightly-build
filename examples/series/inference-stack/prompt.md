@@ -11,7 +11,7 @@ the mechanism with the real numbers, then the holds-up grid (nb-holdsup)
 weighing what it buys against what it costs, and close on a verdict box
 (nb-verdict) before the close.
 
-Show the load-bearing idea in code with the rs-code furniture when a few lines
+Show the central idea in code with the rs-code furniture when a few lines
 make it concrete: a kernel signature, a scheduling loop, a quantization step.
 Write it in a language-tagged block (`language-python`, `language-cpp`); Prism
 (loaded via `site.yaml`) highlights it. Keep it short and cited.

@@ -41,7 +41,7 @@ opinion is not. How hard to press a view is the paper's call. That it be earned 
 
 ## Citations
 
-- Every load-bearing claim carries an inline citation linking to a source entry.
+- Every claim the argument rests on carries an inline citation linking to a source entry.
 - Prefer primary sources: filings, papers, official documentation, transcripts, data
   providers. Secondary reporting is acceptable for context, never for contested figures.
 - Never fabricate, pad, or decorate citations. If you cannot source a claim, cut it or state
@@ -78,9 +78,13 @@ tells that mark writing as slop.
   this desk is watching", "the paper's read"), and it never addresses or describes its
   particular reader ("the reader works there", "your son"). Report the subject, not the act of
   reporting, for the audience the reader belongs to.
-- **Em-dashes at a careful-writer rate.** An em-dash earns its place for a real aside or a
-  sharp break. Reaching for one as the default connective is an AI tell; a comma, a period, or
-  a colon usually reads cleaner. Use them far less than the reflex wants.
+- **Banned terms.** `spec/banned-terms.yaml` lists the words and marks the corpus has ruled
+  out and how many uses each may keep; a press extends or adjusts the list in
+  `press/banned-terms.yaml`, and the proof counts every article against the merged list.
+  When a count runs over, rewrite the sentence rather than substituting: a synonym carries
+  the same vagueness, and a comma in the em-dash's slot keeps the broken cadence. An
+  em-dash still earns its place for a real aside or a sharp break; the ceiling exists for
+  the reflex.
 
 ## Headlines and sections
 

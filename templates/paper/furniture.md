@@ -27,7 +27,7 @@ The blockquote holds only the paper's own words.
 
 ## Anchored excerpt (`nb-excerpt`)
 
-The original's actual sentence(s), quoted at a load-bearing moment, with a
+The original's actual sentence(s), quoted where the argument turns, with a
 locator into the source and a one-line gloss of what the passage does and
 does not claim. The blockquote holds only the paper's own words, exactly.
 When the paper has no numbered sections or pages (arXiv HTML often has

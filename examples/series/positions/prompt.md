@@ -16,8 +16,8 @@ Rotate the section:
 
 Shape the dossier to the company, not to a template: orientation, then two to
 four sections you name for this business. Furniture that earns
-its place here is a stat strip of three or four load-bearing numbers near the
-top (each cited in nearby prose) and a chart when a trend is the argument.
+its place here is a stat strip of three or four numbers that carry the thesis,
+near the top (each cited in nearby prose), and a chart when a trend is the argument.
 
 Close with a short section, `data-nb-section="the-tape"`: the recent stock move
 and what the market seems to be pricing, kept to a paragraph and clearly walled

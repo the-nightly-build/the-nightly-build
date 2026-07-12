@@ -76,7 +76,7 @@ available, `uv run engine/<script>.py` manages the dependency itself.
      source is a BLOCK.
 
 5. **Research properly.** Use web access. Verify claims against primary sources. Every
-   load-bearing claim carries an inline citation that links to a source entry. Read the
+   claim the argument rests on carries an inline citation that links to a source entry. Read the
    passage you rely on before you cite it: cite from the primary source you actually
    opened, not from a search result or a summary of it. If you have not read a source, do
    not cite it. Never fabricate a citation, and never cite a URL you have not confirmed
@@ -169,8 +169,8 @@ self-measurements (the proof recounts; >20% deviation is a WARN).
 
 ## Quality creed
 
-Articles teach rather than summarize. Every load-bearing claim carries a citation the
-reader can follow. The goal is to equip the reader to go deeper on their own.
+Articles teach rather than summarize. Every claim the argument rests on carries a citation
+the reader can follow. The goal is to equip the reader to go deeper on their own.
 
 Every article is produced in its own context, its voice anchored to how the best real
 writers on the subject actually write, and independently edited against this bar before

@@ -10,8 +10,8 @@ paper's own claim before yours.
 
 Rebuild the argument in your own words, with your own examples, in whatever
 order teaches best; the paper's own section order rarely is, and the
-reconstruction's shape belongs to the idea. Anchor the load-bearing moments
-with `nb-excerpt`: the original's exact sentence, its locator, and a one-line
+reconstruction's shape belongs to the idea. Anchor the moments the argument
+turns on with `nb-excerpt`: the original's exact sentence, its locator, and a one-line
 gloss of what it does and does not claim. The excerpts keep the reconstruction
 honest, and they show the reader how an expert moves through the text.
 
