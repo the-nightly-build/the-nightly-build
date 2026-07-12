@@ -14,6 +14,12 @@ across the paper in `press/furniture/`, or bespoke to one template in that
 template's folder) and instruct sections to use it in prompt.md (see
 docs/customization.md).
 
+Sample markup below carries two kinds of text. ALL-CAPS runs are placeholders:
+replace every one, in the piece's own words. Sentence-case labels the
+component renders ("Why it matters", "In plain language", "What holds up",
+"Verdict", "Next article", "In this article") are fixed chrome: keep them
+verbatim.
+
 ## Stat strip
 
 Three or four numbers that carry the thesis. Each must be cited in nearby prose.
@@ -57,7 +63,7 @@ A key term or concept the reader should carry forward.
 ```html
 <div class="nb-callout">
   <span class="nb-callout-term">KEY TERM</span>
-  A crisp definition.
+  A CRISP DEFINITION.
 </div>
 ```
 
@@ -66,7 +72,7 @@ A key term or concept the reader should carry forward.
 One sentence from the article itself, promoted for emphasis. Use at most one.
 
 ```html
-<div class="nb-pull"><p>The sentence that earns the space.</p></div>
+<div class="nb-pull"><p>THE SENTENCE THAT EARNS THE SPACE.</p></div>
 ```
 
 ## Epigraph
@@ -76,7 +82,7 @@ An opening quotation, before the first section. Cite it like any claim.
 ```html
 <div class="nb-epigraph">
   <p>
-    The quotation.<sup class="nb-cite"><a href="#s1">1</a></sup>
+    THE QUOTATION, VERBATIM.<sup class="nb-cite"><a href="#s1">1</a></sup>
   </p>
   <span class="nb-epigraph-who">WHO SAID IT, WHERE</span>
 </div>
@@ -88,7 +94,7 @@ A short tangent worth keeping out of the main flow. Floats right on wide
 screens, sits inline on phones. Sans-set, so it reads as apparatus.
 
 ```html
-<div class="nb-aside">The tangent, one to three sentences.</div>
+<div class="nb-aside">THE TANGENT, ONE TO THREE SENTENCES.</div>
 ```
 
 ## Numbered steps
@@ -101,7 +107,7 @@ order; do not use it for unordered lists.
   <li>
     <h3>STAGE</h3>
     <p>
-      What happens and why it matters.<sup class="nb-cite"
+      WHAT HAPPENS AND WHY IT MATTERS.<sup class="nb-cite"
         ><a href="#s2">2</a></sup
       >
     </p>
@@ -134,9 +140,9 @@ grounded in their actual cited statements. Use two or more; never one.
 ```html
 <div class="nb-position">
   <span class="nb-position-who">WHO</span>
-  <span class="nb-position-stance">Their position in one sentence.</span>
+  <span class="nb-position-stance">THEIR POSITION IN ONE SENTENCE.</span>
   <p>
-    What they have actually said and where.<sup class="nb-cite"
+    WHAT THEY HAVE ACTUALLY SAID AND WHERE.<sup class="nb-cite"
       ><a href="#s3">3</a></sup
     >
   </p>
@@ -155,21 +161,21 @@ Add class `major` for filled dots.
     <h3>
       EVENT<sup class="nb-cite"><a href="#s2">2</a></sup>
     </h3>
-    <p>What happened and why it mattered.</p>
+    <p>WHAT HAPPENED AND WHY IT MATTERED.</p>
   </li>
-  <li class="nb-tl-interlude"><p>What the era added up to.</p></li>
+  <li class="nb-tl-interlude"><p>WHAT THE ERA ADDED UP TO.</p></li>
 </ol>
 ```
 
 ## Objectives box
 
-What the reader will be able to do afterwards. Openers for teaching pieces.
+What the reader will be able to do afterwards. For teaching pieces.
 
 ```html
 <div class="nb-objectives">
   <div class="nb-objectives-label">In this article</div>
   <ul>
-    <li>OBJECTIVE, concrete and checkable.</li>
+    <li>OBJECTIVE, CONCRETE AND CHECKABLE.</li>
   </ul>
 </div>
 ```
@@ -181,33 +187,31 @@ Self-test exercises answerable from the article.
 ```html
 <div class="nb-check-box">
   <ol>
-    <li>EXERCISE.</li>
+    <li>EXERCISE, ANSWERABLE FROM THE ARTICLE.</li>
   </ol>
 </div>
 ```
 
 ## Bridge
 
-What comes next and why today's ideas are its prerequisites. Closers for
-sequenced series.
+What comes next and why today's ideas are its prerequisites. For sequenced series.
 
 ```html
 <div class="nb-bridge">
   <span class="nb-bridge-label">Next article</span>
-  One or two sentences.
+  ONE OR TWO SENTENCES.
 </div>
 ```
 
 ## Plain abstract
 
-A jargon-free statement of what a work claims and shows. Openers for
-appraisals.
+A jargon-free statement of what a work claims and shows. For appraisals.
 
 ```html
 <div class="nb-abstract">
   <div class="nb-abstract-label">In plain language</div>
   <p>
-    The claim, the test, the finding.<sup class="nb-cite"
+    THE CLAIM, THE TEST, THE FINDING.<sup class="nb-cite"
       ><a href="#s1">1</a></sup
     >
   </p>
@@ -243,7 +247,7 @@ the assessment.
 ```html
 <div class="nb-verdict">
   <span class="nb-verdict-label">Verdict</span>
-  Two or three sentences.<sup class="nb-cite"><a href="#s3">3</a></sup>
+  TWO OR THREE SENTENCES.<sup class="nb-cite"><a href="#s3">3</a></sup>
 </div>
 ```
 
@@ -257,7 +261,7 @@ If a section makes claims, later articles should grade them (see grade row).
   <h3>
     THE CLAIM<sup class="nb-cite"><a href="#s4">4</a></sup>
   </h3>
-  <p>The reasoning behind it.</p>
+  <p>THE REASONING BEHIND IT.</p>
   <div class="nb-claim-meta">
     <span>confidence 70%</span><span>resolves by 2026-12-31</span>
   </div>
@@ -273,7 +277,7 @@ or `open`.
 <div class="nb-grade hit">
   <span class="nb-grade-verdict">Hit</span>
   <p>
-    The claim, and what actually happened.<sup class="nb-cite"
+    THE CLAIM, AND WHAT ACTUALLY HAPPENED.<sup class="nb-cite"
       ><a href="#s5">5</a></sup
     >
   </p>
