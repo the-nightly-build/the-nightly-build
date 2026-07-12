@@ -238,7 +238,8 @@ def check_banned_terms(repo, errors):
                     f"{where}: 'suggestion' must be a non-empty string — it is "
                     "the note the writer sees when the count runs over"
                 )
-            if "enabled" in entry and not isinstance(entry["enabled"], bool):
+            enabled = entry.get("enabled", True)
+            if not isinstance(enabled, bool):
                 errors.append(f"{where}: 'enabled' must be true or false")
         if not is_press:
             engine_ids = seen
