@@ -22,9 +22,11 @@ available, `uv run engine/<script>.py` manages the dependency itself.
    override rules in this file.)
    1. This file.
    2. `spec/editorial.md`: the house voice and quality bar.
-   3. `press/editorial.md`: the author's voice, if present. It specializes
+   3. `spec/headlines.md`: the floor for headlines, deks, and section
+      headings.
+   4. `press/editorial.md`: the author's voice, if present. It specializes
       the house style.
-   4. Your series' template package: the folder `templates/<t>/`, replaced
+   5. Your series' template package: the folder `templates/<t>/`, replaced
       wholesale by `press/templates/<t>/` if a press package of the same id
       exists (your package wins). Read its `manifest.yaml` (the machine
       contract this file's proof enforces) and its `skeleton.html` (the
@@ -32,9 +34,9 @@ available, `uv run engine/<script>.py` manages the dependency itself.
       (`<t>/identity.md`), read it as the template's voice; it composes here,
       before the series prompt. If the package ships bespoke furniture
       (`<t>/furniture.md`), it joins your furniture palette (step 6).
-   5. `press/series/<id>/prompt.md`: the series' editorial instructions.
-   6. Tag fragments listed in the series config, in declared order.
-   7. The item-level `prompt`, if present.
+   6. `press/series/<id>/prompt.md`: the series' editorial instructions.
+   7. Tag fragments listed in the series config, in declared order.
+   8. The item-level `prompt`, if present.
 
 3. **Select your work.** Fetch the `library` branch and check it out to its own
    path (a `git worktree add`, or a second clone) so the engine can read tonight's

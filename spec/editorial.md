@@ -88,17 +88,9 @@ tells that mark writing as slop.
 
 ## Headlines and sections
 
-The headline may earn attention; the body earns trust. Hook with a real fact or a live
-tension, never a promise the piece does not pay off. Keep it short and specific, and skip the
-slop formulas: the generic colon subtitle ("X: How Y Changed Z"), the superlative ("The
-Ultimate Guide to X"), the vague abstraction. A colon or a strong claim is fine when it names
-something real, slop when it is a template any topic drops into.
-
-The dek is the one-sentence standfirst under the headline (the `dek` in `nb-meta`, on the
-newsstand card): specific to this piece, not a generic summary.
-
-Name each section (`data-nb-section`) for the argument step it carries, short and concrete, not
-a generic slot like "understanding-x", "the-road-ahead", or "key-takeaways".
+The headline may earn attention; the body earns trust. `spec/headlines.md` is the floor
+for the headline, the dek, and every section heading, and it composes directly after this
+file. The short of it: each of those lines commits to something the piece establishes.
 
 ## Form
 
