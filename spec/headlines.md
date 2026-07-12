@@ -61,6 +61,12 @@ executive" decorates without informing. One lean sentence, a stance rather
 than a topic, and no detail that competes with the thesis for the reader's
 first impression.
 
+Molds are tells at the paper's scale even when each instance reads fine
+alone. A semicolon reversal ("X did A; Y refuses B") is a good dek once and
+a stamp by the third night; so is the suspended question ("...and the real
+question is whether"). Check the recent library's deks before settling on
+one shape.
+
 ## Section headings
 
 Each heading is a step of the argument, written in the piece's own nouns. A
@@ -71,3 +77,8 @@ headings deleted, they were scaffolding, and scaffolding slots ("Background",
 `data-nb-section` label mirrors its heading, short and concrete. Fixed
 headings a template mandates ("Sources", "Read it yourself") are furniture
 and exempt; every heading the writer names is held to this standard.
+
+Cadence repeats the same way dek molds do: a paper whose headings keep
+joining two clauses with a comma and "and" ("The scale, and what it is
+compounding against") reads stamped however sharp each line is. Vary the
+shape, and check the recent library's headings the way the deks are checked.
