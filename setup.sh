@@ -20,8 +20,10 @@ command -v python3 >/dev/null 2>&1 || die "python3 is required"
 gh auth status >/dev/null 2>&1 || die "gh is not authenticated. Run: gh auth login"
 git rev-parse --is-inside-work-tree >/dev/null 2>&1 || die "run this from your fork's checkout"
 
-repo=$(gh repo view --json nameWithOwner -q .nameWithOwner 2>/dev/null) ||
-	die "no GitHub repo detected. Is origin set to your fork?"
+origin_url=$(git remote get-url origin 2>/dev/null) ||
+	die "no 'origin' remote. Is this your fork's checkout?"
+repo=$(gh repo view "$origin_url" --json nameWithOwner -q .nameWithOwner 2>/dev/null) ||
+	die "no GitHub repo detected at origin ($origin_url)"
 ok "repo: $repo"
 
 python3 -c 'import yaml' 2>/dev/null ||
@@ -99,20 +101,34 @@ fi
 # Re-running setup.sh re-syncs them after trigger/checkout-step changes on main.
 say "syncing trigger workflows onto library"
 git fetch -q origin library
-wt="$(mktemp -d)/wt"
-git worktree add -q "$wt" library
-git -C "$wt" merge -q --ff-only origin/library 2>/dev/null || true
-mkdir -p "$wt/.github/workflows"
-cp .github/workflows/check.yml .github/workflows/publish.yml "$wt/.github/workflows/"
-if [ -n "$(git -C "$wt" status --porcelain)" ]; then
+in_sync=true
+for f in check.yml publish.yml; do
+	git show "origin/library:.github/workflows/$f" 2>/dev/null |
+		cmp -s - ".github/workflows/$f" || in_sync=false
+done
+if [ "$in_sync" = true ]; then
+	ok "trigger workflows on library already in sync"
+else
+	# A detached worktree of origin/library: re-runs never collide with a
+	# local branch a failed earlier run left behind.
+	wt="$(mktemp -d)/wt"
+	git worktree add -q --detach "$wt" origin/library
+	mkdir -p "$wt/.github/workflows"
+	cp .github/workflows/check.yml .github/workflows/publish.yml "$wt/.github/workflows/"
 	git -C "$wt" add .github
 	git -C "$wt" commit -qm "chore: sync trigger workflows from main [skip ci]"
-	git -C "$wt" push -q origin library
-	ok "trigger workflows seeded onto library"
-else
-	ok "trigger workflows on library already in sync"
+	if git -C "$wt" push -q origin HEAD:refs/heads/library; then
+		git worktree remove --force "$wt"
+		ok "trigger workflows seeded onto library"
+	else
+		git worktree remove --force "$wt"
+		die "the 'library' branch rejected the workflow sync (branch protection).
+  Lift admin enforcement for one push and re-run:
+    gh api -X DELETE repos/$repo/branches/library/protection/enforce_admins
+    ./setup.sh
+    gh api -X POST repos/$repo/branches/library/protection/enforce_admins"
+	fi
 fi
-git worktree remove --force "$wt"
 
 # 4. GitHub Pages (Actions-based deploy; publish.yml uploads site/) ----------
 if gh api "repos/$repo/pages" >/dev/null 2>&1; then
