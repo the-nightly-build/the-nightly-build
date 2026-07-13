@@ -73,6 +73,16 @@ jobs:
           echo "autopublish=$(python3 _main/engine/ci_helpers.py autopublish --repo _main --diff-base origin/${{ github.base_ref }})" >> "$GITHUB_OUTPUT"
           exit $code
 
+      # The render probe sees what the file-level proof cannot: the page as a
+      # browser draws it. Skips itself for curation PRs (no page to build).
+      - name: Render probe
+        run: |
+          pip install websocket-client
+          path=$(git diff --name-only --diff-filter=A "origin/${{ github.base_ref }}...HEAD" | head -1)
+          if [ -z "$path" ]; then echo "no added article; probe skipped"; exit 0; fi
+          python3 _main/engine/build_site.py --repo _main --library . --out /tmp/site
+          python3 _main/engine/render_check.py --site /tmp/site --article "$path" | tee -a /tmp/proof.txt
+
       - name: Comment findings on the PR
         if: always()
         env:

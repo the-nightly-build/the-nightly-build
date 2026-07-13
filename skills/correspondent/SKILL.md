@@ -79,6 +79,12 @@ PROTOCOL step 8 carries: commit the file, run the `--pr` proof against the
 work branch, and route any failure back through the chain: the editor for a
 content block, the writer for the rest. Open the PR only on `BLOCK: 0`.
 
+CI then checks what no local run can; its render probe needs a browser. Stay
+until validate reports on every PR you opened. A red check is yours: read
+the desk's comment, route the finding through the chain, and push the fix to
+the same branch. Two rounds, then leave the PR open with the findings noted
+in a comment; the next night supersedes it.
+
 Never merge. Never push to `library`. Never open a second PR for a series. A
 PR labeled `nb-invalid` is a stop, not a fight.
 

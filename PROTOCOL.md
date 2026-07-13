@@ -132,9 +132,11 @@ available, `uv run engine/<script>.py` manages the dependency itself.
      will run. Commit your one file on the work branch, write the intended
      body to a file, then from the library checkout:
      `python3 engine/check.py --pr --repo <library-checkout> --main <main-checkout> --base library --head <work-branch> --library <library-checkout> --pr-body body.txt`
-     This checks everything CI checks, including the one-file diff shape and
-     the body's nb-meta match. A failure here is yours to fix before any PR
-     exists.
+     This checks everything CI checks at the file level, including the
+     one-file diff shape and the body's nb-meta match. A failure here is
+     yours to fix before any PR exists. CI also render-probes the built page
+     in a browser, which no file check can; stay until its validate check
+     reports on each PR you opened, and fix a failure on the same branch.
 
 9. **Boundaries.** Never merge. Never push to `library` directly. Never modify any other
    file. Never open a second PR for the same series. If your PR is labeled
