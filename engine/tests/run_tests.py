@@ -1968,6 +1968,16 @@ DUP_SLUG = (
 )
 
 
+def manifest_patched_repo(patch, template="article"):
+    tmp = tempfile.mkdtemp()
+    for sub in ("press", "templates", "engine"):
+        shutil.copytree(pathlib.Path(TESTREPO) / sub, pathlib.Path(tmp) / sub)
+    m = pathlib.Path(tmp) / "templates" / template / "manifest.yaml"
+    # A repeated key is fine here: yaml keeps the last one, the patch.
+    m.write_text(m.read_text() + patch)
+    return tmp
+
+
 rc_unparseable, out_unparseable, err_unparseable = vc_output(
     overwrite_series("a: b: c\n")
 )
@@ -2021,6 +2031,19 @@ for name, cond in [
     (
         "a genuine duplicate slug is still caught",
         "duplicate item slug 'alpha'" in out_dup,
+    ),
+    (
+        "chrome quoting the skeleton verbatim validates",
+        vc_rc(manifest_patched_repo("chrome: ['<body class=\"nb-article\">']\n")) == 0,
+    ),
+    (
+        "chrome the skeleton does not contain is the author's error",
+        vc_rc(manifest_patched_repo("chrome: ['<body class=\"nb-elsewhere\">']\n"))
+        == 1,
+    ),
+    (
+        "a scalar chrome is a validation error, never a vacuous pass",
+        vc_rc(manifest_patched_repo('chrome: "<h2>Sources</h2>"\n')) == 1,
     ),
 ]:
     if cond:

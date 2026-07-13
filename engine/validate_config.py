@@ -307,6 +307,24 @@ def check_registry(repo, errors):
         skeleton = os.path.join(folders[tid], "skeleton.html")
         if not os.path.isfile(skeleton):
             errors.append(f"{where}: no skeleton.html in the {tid} template folder")
+            continue
+        chrome = entry.get("chrome")
+        if chrome is not None and not (
+            isinstance(chrome, list) and all(isinstance(x, str) for x in chrome)
+        ):
+            errors.append(f"{where}: 'chrome' must be a list of skeleton substrings")
+        elif chrome:
+            # Anchor each declared string to the skeleton it quotes: reworded
+            # skeleton chrome would otherwise B-CHROME every future article
+            # and land the blame on the writer instead of this manifest.
+            with open(skeleton, encoding="utf-8") as fh:
+                skel = fh.read()
+            for piece in chrome:
+                if piece not in skel:
+                    errors.append(
+                        f"{where}: chrome not found verbatim in "
+                        f"skeleton.html: {piece!r}"
+                    )
     return registry
 
 
