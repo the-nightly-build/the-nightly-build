@@ -24,7 +24,7 @@ PR_PATH_RE = re.compile(r"^library/([a-z0-9-]{1,32})/[a-z0-9-]{1,64}\.html$")
 def autopublish(repo, diff_base):
     out = (
         subprocess.run(
-            ["git", "diff", "--name-only", "--no-renames", f"{diff_base}...HEAD"],
+            ["git", "diff", "--name-status", "--no-renames", f"{diff_base}...HEAD"],
             capture_output=True,
             text=True,
             check=True,
@@ -35,7 +35,11 @@ def autopublish(repo, diff_base):
     if len(out) != 1:
         print("false")
         return
-    m = PR_PATH_RE.match(out[0])
+    status, _, path = out[0].partition("\t")
+    if status != "A":
+        print("false")
+        return
+    m = PR_PATH_RE.match(path)
     if not m:
         print("false")
         return

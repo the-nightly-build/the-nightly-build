@@ -1337,6 +1337,24 @@ def run_pr_mode(args, rep):
     except subprocess.CalledProcessError as e:
         rep.block("B-DIFF-SHAPE", f"git diff failed: {e.stderr or e}")
         return
+    if (
+        getattr(args, "deletions_by_owner", False)
+        and changes
+        and all(status == "D" for status, _ in changes)
+    ):
+        stray = [p for _, p in changes if not PR_PATH_RE.match(p)]
+        if stray:
+            rep.block(
+                "B-DIFF-SHAPE",
+                "an owner curation PR deletes published articles only "
+                f"(library/<series>/<slug>.html); this one also removes {stray}",
+            )
+        else:
+            rep.notes.append(
+                f"owner curation: retracts {len(changes)} published article(s); "
+                "nothing to proof"
+            )
+        return
     if len(changes) != 1:
         rep.block(
             "B-DIFF-SHAPE",
@@ -1426,6 +1444,12 @@ def main(argv=None):
     )
     p.add_argument("--library", help="published library state (branch checkout dir)")
     p.add_argument("--pr", action="store_true", help="CI mode")
+    p.add_argument(
+        "--deletions-by-owner",
+        action="store_true",
+        help="accept a deletion-only diff as owner curation; CI passes this "
+        "flag only when the PR author is the repository owner",
+    )
     p.add_argument("--base", help="PR base ref (pr mode)")
     p.add_argument("--head", default="HEAD", help="PR head ref (pr mode)")
     p.add_argument(

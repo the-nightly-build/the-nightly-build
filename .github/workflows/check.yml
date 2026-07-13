@@ -47,11 +47,16 @@ jobs:
           PR_BODY: ${{ github.event.pull_request.body }}
         run: printf '%s' "$PR_BODY" > /tmp/pr-body.txt
 
+      # The curation gate: a deletion-only PR is legitimate retraction when and
+      # only when the repository owner authored it. The proof checks the shape;
+      # this expression checks the author. Deletions never auto-merge.
       - name: Run the proof
         id: proof
+        env:
+          CURATION: ${{ github.event.pull_request.user.login == github.repository_owner && '--deletions-by-owner' || '' }}
         run: |
           set +e
-          python3 _main/engine/check.py --pr \
+          python3 _main/engine/check.py --pr $CURATION \
             --repo . --main _main \
             --base "origin/${{ github.base_ref }}" \
             --head "HEAD" \
@@ -59,7 +64,7 @@ jobs:
             --pr-body /tmp/pr-body.txt \
             --json > /tmp/proof.json
           code=$?
-          python3 _main/engine/check.py --pr \
+          python3 _main/engine/check.py --pr $CURATION \
             --repo . --main _main \
             --base "origin/${{ github.base_ref }}" \
             --head "HEAD" \

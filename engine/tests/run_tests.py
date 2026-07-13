@@ -1770,6 +1770,51 @@ expect(
     "PR modifying engine code", run_pr(mutate=modify_engine), must_have=["B-DIFF-SHAPE"]
 )
 
+git("reset", "-q", "--hard", "HEAD~1", cwd=prdir)
+
+git("checkout", "-q", "library", cwd=prdir)
+pub = pathlib.Path(prdir, "library", "semiconductors")
+pub.mkdir(parents=True, exist_ok=True)
+(pub / "tsmc.html").write_text(VALID)
+git("add", "-A", cwd=prdir)
+git("commit", "-qm", "published", cwd=prdir)
+git("checkout", "-qb", "owner/curation", cwd=prdir)
+git("rm", "-q", "library/semiconductors/tsmc.html", cwd=prdir)
+git("commit", "-qm", "retract", cwd=prdir)
+
+
+def run_curation(flag):
+    rep = C.Report()
+    args = types.SimpleNamespace(
+        repo=prdir,
+        main=None,
+        base="library",
+        head="owner/curation",
+        pr_body=None,
+        library=None,
+        today=TODAY,
+        check_links=False,
+        deletions_by_owner=flag,
+    )
+    C.run_pr_mode(args, rep)
+    return rep
+
+
+expect(
+    "deletion-only PR without the owner flag",
+    run_curation(False),
+    must_have=["B-DIFF-SHAPE"],
+)
+expect("owner curation deletion-only PR", run_curation(True), blocks=0)
+
+git("rm", "-q", "engine/duty.py", cwd=prdir)
+git("commit", "-qm", "stray deletion", cwd=prdir)
+expect(
+    "owner curation deleting engine files",
+    run_curation(True),
+    must_have=["B-DIFF-SHAPE"],
+)
+
 print("== validate_config ==")
 vc = REPO / "engine" / "validate_config.py"
 # the shipped examples/ must validate when used as a press
