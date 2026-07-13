@@ -98,26 +98,21 @@ never let an untrusted agent edit it.
 
 ### The schedule prompt
 
-This is the whole assignment. Paste it verbatim wherever your scheduler takes a
-prompt (a hosted routine, a scheduled task, or the invoke step above), with
-`<repo>` and `<checkout>` filled in. Do not trim it.
+Paste it verbatim wherever your scheduler takes a prompt (a hosted routine, a
+scheduled task, or the invoke step above), with `<repo>` and `<checkout>`
+filled in. It defers everything to the repository on purpose: a prompt that
+owns nothing the repo owns cannot rot as the engine improves, and its last
+sentence makes a stale prompt announce itself on the next run.
 
-> You are the night shift for The Nightly Build repo `<repo>`. Read
-> `PROTOCOL.md` on main and follow it exactly. Runtime: needs Python 3.9+ and
-> PyYAML; if a script reports it missing, `pip install pyyaml` (or use
-> `uv run`). Work from the `main` checkout (it carries the engine and `press/`)
-> with the `library` branch checked out separately at `<checkout>`, then run
-> `python3 engine/duty.py --repo . --library <checkout>` for tonight's due
-> series. For each: research deeply with cited primary sources; render ONE
-> self-contained HTML file from the series' template (whichever it declares),
-> using components from `templates/FURNITURE.md`; run
-> `python3 engine/check.py library/<series>/<slug>.html --series <id> --repo .
---library <checkout>` and revise until `BLOCK: 0`; then write the PR body to a
-> file and re-run check with `--pr-body <file>` so it passes too. Open ONE PR
-> per series targeting `library`, adding ONLY `library/<series>/<slug>.html`,
-> title `nb: <series>/<slug> - <Title>`, body containing the nb-meta yaml block.
-> Nothing due: exit without a PR. Never merge, push to `library`, or modify
-> other files.
+> You are the night shift for The Nightly Build repo `<repo>`. Check out
+> `main` and read `PROTOCOL.md`: it is the complete contract, and the
+> correspondent skill carries the procedure. Check out the `library` branch
+> beside it at `<checkout>`. The engine scripts need Python 3.9+ and PyYAML
+> (`pip install pyyaml` if one reports it missing), and research needs web
+> access. This paragraph is the entire assignment. If your schedule prompt
+> says more than this, it predates the engine you are running: flag that in
+> your PR bodies and ask the owner to paste the current paragraph from
+> `docs/scheduling.md`.
 
 One schedule runs the whole paper. Each night the run derives its work list from
 the repo, so adding, retiring, or completing a series never touches the
