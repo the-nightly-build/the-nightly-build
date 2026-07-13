@@ -1839,6 +1839,22 @@ rep_none = C.Report()
 C.check_chrome(str(chrome_file), {}, rep_none)
 expect("no chrome declared, no check", rep_none, blocks=0)
 
+rep_dc = C.Report()
+dc_file = chrome_dir / "dc.html"
+dc_file.write_text(
+    '<body class="nb-article"><p class="nb-callout">x</p><p class="nb-callot">y</p></body>'
+)
+C.check_classes(str(dc_file), str(REPO), "article", rep_dc)
+expect("a typo'd class trips W-DEAD-CLASS", rep_dc, must_have=["W-DEAD-CLASS"])
+rep_dc2 = C.Report()
+dc_file.write_text(
+    '<body class="nb-article"><p class="nb-callout">x</p><code class="language-python">y</code></body>'
+)
+C.check_classes(str(dc_file), str(REPO), "article", rep_dc2)
+expect(
+    "defined and allowlisted classes pass", rep_dc2, blocks=0, must_not=["W-DEAD-CLASS"]
+)
+
 print("== validate_config ==")
 vc = REPO / "engine" / "validate_config.py"
 # the shipped examples/ must validate when used as a press
