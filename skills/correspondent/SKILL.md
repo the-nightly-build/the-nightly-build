@@ -61,8 +61,11 @@ context; you lose isolation, not the pipeline.
 Target `library`, branch from it, add exactly one file. Title:
 `nb: <series>/<slug> - <Title>`. Assemble the body from the artifacts in
 exactly PROTOCOL step 8's shape (one section per artifact, each collapsed;
-the size valve is there too). Preflight before opening: write the body to a
-file and rerun the proof with `--pr-body`; it must still report `BLOCK: 0`.
+the size valve is there too). Preflight with CI's own invocation (PROTOCOL
+step 8 carries it): commit the file, run the `--pr` proof against the work
+branch, and route any failure back through the chain — the editor for a
+content block, the writer for the rest. Open the PR only on `BLOCK: 0`; a
+red PR is a failure you chose to publish.
 
 Never merge. Never push to `library`. Never open a second PR for a series. A
 PR labeled `nb-invalid` is a stop, not a fight.

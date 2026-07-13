@@ -131,11 +131,13 @@ available, `uv run engine/<script>.py` manages the dependency itself.
      they survive. If the assembled body would exceed GitHub's body limit
      (~60k characters), elide the research log's verbatim passages in place
      with a note and post the full log as a comment after opening.
-   - Preflight the body BEFORE opening the PR: write it to a file and run the
-     proof with `--pr-body`. The desk blocks any PR whose body lacks or
-     contradicts the nb-meta block (`B-META-MATCH`) and WARNs when a record
-     section is missing (`W-BODY-RECORD`), so verify it locally:
-     `python3 engine/check.py library/<series>/<slug>.html --series <id> --repo . --library <path> --pr-body body.txt`
+   - Preflight BEFORE opening the PR, with the same invocation the desk's CI
+     will run. Commit your one file on the work branch, write the intended
+     body to a file, then from the library checkout:
+     `python3 engine/check.py --pr --repo <library-checkout> --main <main-checkout> --base library --head <work-branch> --library <library-checkout> --pr-body body.txt`
+     This checks everything CI checks, including the one-file diff shape and
+     the body's nb-meta match. A failure here is yours to fix before any PR
+     exists; a red PR teaches the desk nothing it did not already tell you.
 
 9. **Boundaries.** Never merge. Never push to `library` directly. Never modify any other
    file. Never open a second PR for the same series. If your PR is labeled
