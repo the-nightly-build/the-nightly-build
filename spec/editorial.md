@@ -66,14 +66,17 @@ tells that mark writing as slop.
 - **Slop.** The median AI read: smooth, hedged, evenly balanced, reaching for the generic
   phrasing. Write the specific, concrete word. Commit where the evidence lets you. Anchor the
   prose to how the best real writers on the subject actually write, not to the average of
-  everything written about it. The writing coach studies those writers and briefs you before
-  you draft.
+  everything written about it.
 - **Run-ons.** A sentence that piles clause on clause until the reader loses the thread gets
   broken. Let the verbs carry the weight. Vary length for rhythm; a long sentence in control is
   craft, not a fault.
 - **Manufactured punchlines.** Cut any sentence engineered to sound quotable while carrying
   little ("that's the whole point", "here's the kicker"). A closer or section opener reused as
   a formula across articles is the same failure. Coin no house catchphrase.
+- **Hedged contrast.** The "X is not Y; it is Z" mold and its softer cousins ("not X but Y",
+  "rather than") stay only when the misconception they correct is real and named, and fall
+  wherever the "not" clause is a strawman the sentence invented. One or two earned contrasts
+  per piece is the ceiling.
 - **Self-reference.** The piece never narrates itself or its newsroom ("this dossier", "what
   this desk is watching", "the paper's read"), and it never addresses or describes its
   particular reader ("the reader works there", "your son"). Report the subject, not the act of
@@ -85,12 +88,6 @@ tells that mark writing as slop.
   vagueness, and repunctuating an em-dash keeps the fluff the dash was carrying. Delete
   first, then rewrite what remains. An em-dash still earns its place for a real aside or
   a sharp break; the ceiling exists for the reflex.
-
-## Headlines and sections
-
-`spec/headlines.md` is the floor for the headline, the dek, and every section heading,
-and it composes directly after this file. The short of it: each of those lines commits
-to something the piece establishes.
 
 ## Form
 
