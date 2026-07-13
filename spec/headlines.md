@@ -61,11 +61,11 @@ executive" decorates without informing. One lean sentence, a stance rather
 than a topic, and no detail that competes with the thesis for the reader's
 first impression.
 
-Molds are tells at the paper's scale even when each instance reads fine
-alone. A semicolon reversal ("X did A; Y refuses B") is a good dek once and
-a stamp by the third night; so is the suspended question ("...and the real
-question is whether"). Check the recent library's deks before settling on
-one shape.
+Two dek molds are the hedged-contrast reflex the floor already bans in body
+prose, and the dek gets no exemption: the semicolon reversal ("X did A; Y
+refuses B") and the suspended question ("...and the real question is
+whether"). Cut them on sight. Even an earned shape reads stamped once it
+recurs, so check the recent library's deks before settling on one.
 
 ## Section headings
 
