@@ -15,10 +15,10 @@ template's folder) and instruct sections to use it in prompt.md (see
 docs/customization.md).
 
 Sample markup below carries two kinds of text. ALL-CAPS runs are placeholders:
-replace every one, in the piece's own words. Sentence-case labels the
-component renders ("Why it matters", "In plain language", "What holds up",
-"Verdict", "Next article", "In this article") are fixed chrome: keep them
-verbatim.
+replace every one, in the piece's own words; the proof warns on a caps run
+that survives into prose. Sentence-case labels the component renders ("Why it
+matters", "In plain language", "What holds up", "Verdict", "Next article",
+"In this article") are fixed chrome: keep them verbatim.
 
 ## Stat strip
 

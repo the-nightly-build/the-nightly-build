@@ -237,8 +237,10 @@ ordered course, rebuilt as your own template.
    the lifted line then opens that section in every article the template
    renders. Set every placeholder in ALL CAPS, the shipped convention, so
    instruction can never be mistaken for copy; rendered labels a component
-   owns ("Sources", "Why it matters") stay sentence case. The same holds for
-   `identity.md`: describe the move, do not perform it. The objectives
+   owns ("Sources", "Why it matters") stay sentence case. The proof backstops
+   the convention: a caps run surviving into an article's prose is a
+   `W-PLACEHOLDER` warning. The same holds for `identity.md`: describe the
+   move, do not perform it. The objectives
    box, check box, and bridge components in `templates/FURNITURE.md` carry
    the lesson. The sandbox applies unchanged: no scripts beyond the JSON blocks
    and the engine runtime, citations as `sup.nb-cite` anchors into numbered

@@ -936,7 +936,63 @@ def check_cites(ed, rep):
             )
 
 
-def check_warns(ed, meta, *, series, treg, template_id, item_cfg, banned_terms, rep):
+PLACEHOLDER_RUN_WORDS = 4  # a caps run this long warns even off-skeleton
+
+
+def _caps_token(word):
+    core = word.strip("\"'()[]{}.,:;!?§·")
+    return core if re.fullmatch(r"[A-Z][A-Z0-9'&/-]+", core) else None
+
+
+def caps_runs(text):
+    runs, current = [], []
+    for word in text.split():
+        core = _caps_token(word)
+        if core:
+            current.append(core)
+        elif current:
+            runs.append(current)
+            current = []
+    if current:
+        runs.append(current)
+    return runs
+
+
+def placeholder_entries(skeleton_path):
+    """The all-caps placeholder runs a template's skeleton carries.
+
+    Skeletons write placeholder text in caps so it cannot pass as copy; any
+    of these runs surviving into an article is an unfilled slot or a lifted
+    instruction. Single caps words shorter than three characters are noise,
+    not placeholders, and are skipped.
+    """
+    if not skeleton_path:
+        return frozenset()
+    with open(skeleton_path, encoding="utf-8") as fh:
+        ed = Article()
+        ed.feed(fh.read())
+        ed.close()
+    entries = set()
+    for run in caps_runs(" ".join(ed._text_parts)):
+        if len(run) >= 2:
+            entries.add(" ".join(run))
+        elif len(run[0]) >= 3:
+            entries.add(run[0])
+    return frozenset(entries)
+
+
+def check_warns(
+    ed,
+    meta,
+    *,
+    series,
+    treg,
+    template_id,
+    item_cfg,
+    banned_terms,
+    skeleton_placeholders,
+    rep,
+):
     band = series.get("words") or treg.get("words")
     if band:
         lo, hi = band
@@ -1082,6 +1138,25 @@ def check_warns(ed, meta, *, series, treg, template_id, item_cfg, banned_terms, 
                 suggestion=entry.get("suggestion"),
             )
 
+    # leftover placeholders (soft): skeletons write placeholder text in all
+    # caps so it cannot pass as copy. A caps run surviving into the prose is
+    # an unfilled slot or a lifted instruction; long runs warn even when the
+    # skeleton does not carry them, catching lifts from the furniture docs.
+    raw_prose = " ".join(" ".join(ed._prose_text_parts).split())
+    leftovers = set()
+    for run in caps_runs(raw_prose):
+        joined = " ".join(run)
+        if len(run) >= PLACEHOLDER_RUN_WORDS or joined in skeleton_placeholders:
+            leftovers.add(joined)
+    if leftovers:
+        shown = "', '".join(sorted(leftovers)[:4])
+        rep.warn(
+            "W-PLACEHOLDER",
+            f"all-caps placeholder text survives in the prose: '{shown}'",
+            suggestion="replace every caps placeholder with the piece's own "
+            "words; caps exist so an unfilled slot cannot pass as copy",
+        )
+
 
 def check_article(
     html_path,
@@ -1157,6 +1232,7 @@ def check_article(
         template_id=template_id,
         item_cfg=item_cfg,
         banned_terms=load_banned_terms(repo),
+        skeleton_placeholders=placeholder_entries(find_template(repo, template_id)),
         rep=rep,
     )
     return meta

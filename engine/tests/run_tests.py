@@ -1334,6 +1334,57 @@ for name, cond in [
         FAIL.append(name)
         print(f"  FAIL {name}")
 
+print("== placeholder leftovers (caps runs) ==")
+
+expect(
+    "clean article carries no placeholder warn",
+    run_local(VALID, "semiconductors"),
+    must_not=["W-PLACEHOLDER"],
+)
+expect(
+    "a lifted skeleton placeholder trips W-PLACEHOLDER (never a block)",
+    run_local(
+        mut(
+            "<h2>Orientation</h2>",
+            "<h2>Orientation</h2>"
+            "<p>OPENING PARAGRAPH WITH A CONCRETE, CITED ANCHOR CLAIM.</p>",
+        ),
+        "semiconductors",
+    ),
+    must_have=["W-PLACEHOLDER"],
+    blocks=0,
+)
+expect(
+    "a long caps run trips it even off-skeleton",
+    run_local(
+        mut(
+            "<h2>Orientation</h2>",
+            "<h2>Orientation</h2><p>REPLACE THIS ENTIRE SENTENCE TONIGHT.</p>",
+        ),
+        "semiconductors",
+    ),
+    must_have=["W-PLACEHOLDER"],
+)
+expect(
+    "a lone skeleton placeholder word trips it",
+    run_local(
+        mut("<h2>Orientation</h2>", "<h2>Orientation</h2><p>TITLE goes here.</p>"),
+        "semiconductors",
+    ),
+    must_have=["W-PLACEHOLDER"],
+)
+expect(
+    "acronym runs shorter than the generic bar stay clean",
+    run_local(
+        mut(
+            "<h2>Orientation</h2>",
+            "<h2>Orientation</h2><p>Pricing spans HBM DRAM NAND lines.</p>",
+        ),
+        "semiconductors",
+    ),
+    must_not=["W-PLACEHOLDER"],
+)
+
 print("== open mode (the hands-off series) ==")
 
 OPEN_YAML = """name: Wildcard
