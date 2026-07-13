@@ -14,38 +14,40 @@ research-grade writing. It reads in two registers.
   `press/editorial.md` and the series prompts. The floor sets the quality of those
   choices.
 
-The floor does not legislate trivia: no house-wide rule on the Oxford comma; be
+The floor does not legislate trivia: no house-wide rule on the Oxford comma. Be
 consistent within a piece.
 
 ## Teach, don't summarize
 
 The reader finishes knowing how to think about the topic. Each
-section spends what the last one taught; a section the reader could have read first is in
-the wrong place. Cut any sentence that adds nothing new; prefer concrete detail over
+section spends what the last one taught. A section the reader could have read first is in
+the wrong place. Cut any sentence that adds nothing new. Prefer concrete detail over
 abstraction. Define each term of art the declared reader does not hold
-in the sentence where it first appears; assume the rest. Ground abstract claims in a
+in the sentence where it first appears. Assume the rest. Ground abstract claims in a
 worked example.
 
 The declared reader centers the paper: the profile chooses what to cover and when, and
 what background to assume. Write each piece for the natural audience around that center.
-A paper declaring a new parent gets articles any parent could be handed; a declared
+A paper declaring a new parent gets articles any parent could be handed. A declared
 practitioner gets pieces worth forwarding to a colleague. Narrowing a desk to
 the reader personally takes an explicit ask in `press/editorial.md` or the series prompt.
 
 ## Report and analyze
 
-Report what is true and analyze what it means; hold the analysis to the same bar as the
+Report what is true and analyze what it means. Hold the analysis to the same bar as the
 reporting. Analysis must be earned: grounded in the cited evidence, its reasoning shown.
 Keep three things distinct: reported fact, estimate, and synthesis. Never write that
-someone hinted, implied, or signalled; that is the writer's guess wearing attribution.
-Synthesis with a point of view is welcome; cut unsupported opinion. How hard to
-press a view is the paper's call; every view must be earned.
+someone hinted, implied, or signalled. That is the writer's guess wearing attribution.
+Synthesis with a point of view is welcome. Cut unsupported opinion. How hard to
+press a view is the paper's call, and a press that wants opinion may have a
+column or an editorial desk. The floor bans the unearned verdict, never the
+verdict: an opinion meets the same bar as any analysis, cited, reasoned, shown.
 
 ## Citations
 
 - Every claim the argument rests on carries an inline citation linking to a source entry.
 - Prefer primary sources: filings, papers, official documentation, transcripts, data
-  providers. Secondary reporting is acceptable for context; contested figures need a
+  providers. Secondary reporting is acceptable for context. Contested figures need a
   primary source.
 - Never fabricate, pad, or decorate citations. If you cannot source a claim, cut it or
   state the uncertainty plainly.
@@ -55,12 +57,12 @@ press a view is the paper's call; every view must be earned.
 
 ## Numbers
 
-Concrete figures beat vague magnitudes; ranges with sources beat false precision. Give
+Concrete figures beat vague magnitudes. Ranges with sources beat false precision. Give
 every number a comparison the reader already knows. Say plainly what is unknown.
 
 ## Prose
 
-The register is a serious paper, not a feed. Some habits are always cut; they are the
+The register is a serious paper, not a feed. Some habits are always cut. They are the
 tells of slop.
 
 - **Fluff.** Filler openings ("In today's fast-paced world"), empty connectives,
@@ -71,11 +73,12 @@ tells of slop.
   Commit where the evidence lets you. Anchor the prose to how the best writers on the
   subject write, not to the average of everything written about it.
 - **Run-ons.** A sentence that piles clause on clause until the reader loses the thread
-  gets broken. Let the verbs carry the weight. Vary length for rhythm; a long sentence in
-  control is craft.
+  gets broken. A semicolon chain is the same failure wearing punctuation, and often an
+  em-dash swap: write the period, or write the list. Let the verbs carry the weight.
+  Vary length for rhythm; a long sentence in control is craft.
 - **Manufactured punchlines.** Cut any sentence engineered to sound quotable while
   carrying little ("that's the whole point", "here's the kicker"). A closer or section
-  opener reused as a formula across articles is the same failure; so is a house
+  opener reused as a formula across articles is the same failure. So is a house
   catchphrase.
 - **Hedged contrast.** The "X is not Y; it is Z" mold and its softer cousins ("not X but
   Y", "rather than") stay only when the misconception they correct is real and named, and
@@ -85,12 +88,12 @@ tells of slop.
   "the paper's read"), and it never addresses or describes its particular reader ("the
   reader works there", "your son").
 - **Banned terms.** `spec/banned-terms.yaml` lists the words and marks the corpus has
-  ruled out and how many uses each may keep; a press extends or adjusts the list in
+  ruled out and how many uses each may keep. A press extends or adjusts the list in
   `press/banned-terms.yaml`, and the proof counts every article against the merged list.
   When a count runs over, rewrite rather than substitute: a synonym carries the same
   vagueness, and repunctuating an em-dash keeps the fluff the dash was carrying. Delete
   first, then rewrite what remains. An em-dash still earns its place for a real aside or
-  a sharp break; the ceiling exists for the reflex.
+  a sharp break. The ceiling exists for the reflex.
 
 Break any rule here sooner than write a sentence no honest voice would say aloud.
 
@@ -98,7 +101,7 @@ Break any rule here sooner than write a sentence no honest voice would say aloud
 
 Each template's identity sets its own form: paragraph length, how the dek reads, how the
 piece closes. A press may shadow them. The floor holds those choices to a standard. Keep
-the writing easy to follow. End on the conclusion the argument built; skip the generic
+the writing easy to follow. End on the conclusion the argument built. Skip the generic
 moral. Let the teaching and the citations equip the reader to go further.
 
 ## Charts

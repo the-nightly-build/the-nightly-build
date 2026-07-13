@@ -18,7 +18,7 @@ in them, ahead of every qualifier.
   what it delivers.
 - **Let a fresh verb carry it, in the present tense for events.** The classic
   copy-desk pair: "Students applaud later start times" reports the event from
-  the side that felt it; "Officials approve schedule change" files a form.
+  the side that felt it. "Officials approve schedule change" files a form.
 - **Numbers earn their spot when they are the story.** "Building a World Map
   with only 500 bytes" (Simon Willison): the figure is the surprise, so it
   sits in the headline.
@@ -29,11 +29,11 @@ in them, ahead of every qualifier.
 - **The colon subtitle is the loudest machine tell.** "X: How Y Changed Z" and
   "Company: The Adjective Noun and the Adjective Noun" are templates any topic
   drops into. A colon survives only when both halves inform, as in "git
-  branches: intuition & reality" (Evans); when the right half is atmosphere,
+  branches: intuition & reality" (Evans). When the right half is atmosphere,
   cut the colon and write the claim.
 - **A triad of paired adjectives ("Faster Models, Firmer Rules, Tighter
   Supply") performs comprehensiveness.** Pick the one development that matters
-  most and say what happened to it; the other two get their own sentences in
+  most and say what happened to it. The other two get their own sentences in
   the dek or the body.
 - **Anchor wit in the story's own nouns, with a plain dek beside it.** The
   Economist headlined a meat-producer merger "A steak in the market" and
@@ -51,11 +51,11 @@ opposite conclusions."
 ## The dek
 
 The dek adds what the headline left out and never restates it. The headline
-commits to the surprise; the dek supplies the who, the what, and the one
+commits to the surprise. The dek supplies the who, the what, and the one
 detail that makes the piece unmistakable for any other. "The very modern
 corporate tale of what happens when a top executive at a $6 billion
 public company can't stop tweeting" works because the dollar figure and the
-verb do the identifying; "the fascinating tale of a San Francisco-based
+verb do the identifying. "The fascinating tale of a San Francisco-based
 executive" decorates without informing. One lean sentence, a stance and not
 a topic, and no detail that competes with the thesis for the reader's first
 impression.
@@ -75,7 +75,7 @@ headings deleted, they were scaffolding, and scaffolding slots ("Background",
 "Implications", "The Road Ahead", "Key Takeaways") are the machine tell. The
 `data-nb-section` label mirrors its heading, short and concrete. Fixed
 headings a template mandates ("Sources", "Read it yourself") are furniture
-and exempt; every heading the writer names is held to this standard.
+and exempt. Every heading the writer names is held to this standard.
 
 Cadence repeats the same way dek molds do: a paper whose headings keep
 joining two clauses with a comma and "and" ("The scale, and what it is

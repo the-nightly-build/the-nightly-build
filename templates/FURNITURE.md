@@ -3,18 +3,18 @@
 Furniture is the set of pre-designed components an article may use. The
 engine's shared CSS styles every class in both color schemes, so composing
 pieces cannot break the paper's look. Use a piece when it carries information
-better than prose would; skip it when it would decorate. Two or three pieces
-per article is typical; zero is fine.
+better than prose would. Skip it when it would decorate. Two or three pieces
+per article is typical. Zero is fine.
 
 Section tags, citation markup, source entries, and the nb-meta block are
-protocol, not furniture; PROTOCOL.md defines them. This base catalogue is the
+protocol, not furniture. PROTOCOL.md defines them. This base catalogue is the
 engine's, always available to every template. A paper can add its own
 furniture (paper-wide in `press/furniture/`, or bespoke inside one template's
 folder) and instruct sections to use it in prompt.md (see
 docs/customization.md).
 
 In the samples below, ALL-CAPS runs are placeholders: replace every one in
-the article's own words; the proof warns on a caps run that survives into
+the article's own words. The proof warns on a caps run that survives into
 prose. Sentence-case labels the component renders ("In plain language",
 "What holds up", "What to be careful about", "Verdict", "Next article",
 "In this article") are fixed chrome: keep them verbatim. Everything else is
@@ -39,7 +39,7 @@ Three or four numbers that carry the thesis. Each must be cited in nearby prose.
 ## Chart
 
 Declarative data, rendered by the engine runtime. Types: line, bar, scatter.
-Restate the data in caption and prose; the noscript line is fixed chrome.
+Restate the data in caption and prose. The noscript line is fixed chrome.
 
 ```html
 <figure class="nb-chart">
@@ -101,7 +101,7 @@ screens, sits inline on phones. Sans-set, so it reads as apparatus.
 ## Numbered steps
 
 A mechanism or process, one stage per step. The connecting rule implies
-order; do not use it for unordered lists.
+order. Do not use it for unordered lists.
 
 ```html
 <ol class="nb-steps">
@@ -136,7 +136,7 @@ The people and institutions in a story, one line each.
 ## Position block
 
 One participant's stance in a disagreement, stated at its strongest and
-grounded in their cited statements. Use two or more; never one.
+grounded in their cited statements. Use two or more. Never one.
 
 ```html
 <div class="nb-position">

@@ -9,10 +9,10 @@ authors, venue, link) and the abstract verbatim, so the reader holds the
 paper's own claim before yours.
 
 Rebuild the argument in your own words, with your own examples, in the order
-that teaches best; the paper's own section order rarely is. Anchor the moments
+that teaches best. The paper's own section order rarely is. Anchor the moments
 the argument turns on with `nb-excerpt`: the original's exact sentence, its
 locator, and a one-line gloss of what it does and does not claim. The excerpts
-show how an expert moves through the text; use them to keep the reconstruction
+show how an expert moves through the text. Use them to keep the reconstruction
 honest.
 
 Weigh the evidence like a reviewer: what was measured, on what, and what would
@@ -25,5 +25,5 @@ paper before placing it among related work.
 and says so in one line when there is none.
 `read-it-yourself` closes with the `nb-paper-map`: which sections of the
 original reward a full read, which to skim, and which figure or table
-carries the result; give a reason for each, in the terms the article has
+carries the result. Give a reason for each, in the terms the article has
 taught.

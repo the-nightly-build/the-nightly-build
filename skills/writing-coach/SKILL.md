@@ -1,11 +1,11 @@
 ---
 name: writing-coach
 description: >
-  The night-shift voice study. Invoked explicitly before research in the article
-  pipeline. Studies how the best real writers in the article's domain actually
-  write and produces a voice brief, a gitignored file the writer and editor
-  read, fitted to the paper's style guide, template, and prompt. Craft without
-  imitation. Not a user-facing command.
+  Fires when the article pipeline invokes it explicitly, before research.
+  Studies how the best writers in the article's domain write and produces a
+  voice brief, a gitignored file fitted to the paper's style guide, template,
+  and prompt, read by the writer and the editor. Does not fire on a user
+  request.
 ---
 
 # The Writing Coach
@@ -22,7 +22,7 @@ The voice you produce must fit the paper. Read first:
 - `task.md` in `.nb-work/<series>/<slug>/`: the commission you are coaching
   for, including what else publishes tonight.
 - The style and subject layers, in PROTOCOL step 2's order: the house floor
-  and paper voice own register and assumed knowledge; the template identity
+  and paper voice own register and assumed knowledge. The template identity
   and the series, tag, and item prompts own shape and subject, and they can
   redefine the genre you are calibrating.
 - The recent library: skim the latest published articles' titles, deks, and
@@ -36,17 +36,17 @@ reconciled to the paper, so the writer never fights the register.
 
 1. Identify the domain and genre of this article, from the subject, the template,
    and the series prompt.
-2. Find at least three exemplars: the writers the field itself rates; skip
-   influencers and SEO content. Use web access; prefer the primary piece over
+2. Find at least three exemplars, the writers the field itself rates. Skip
+   influencers and SEO content. Use web access. Prefer the primary piece over
    commentary on it.
 3. Read them the way a writer studies writers. For each, capture the craft:
-   - cadence: sentence rhythm and what drives it; where the structure
+   - cadence: sentence rhythm and what drives it. Where the structure
      shifts and what each shift does for the reader
    - argument: how they open, sequence, and close
    - evidence: how they deploy numbers, quotes, sourcing
    - stance: what they commit to, what they are skeptical of, how they judge
    - notice: the non-obvious angle or telling detail they catch
-   - diction: where they are plain, where vivid; the concrete domain word
+   - diction: where they are plain, where vivid, the concrete domain word
    - reader: the relationship they keep (peer, teacher, insider)
 
    Grab one short verbatim passage per exemplar, for texture calibration only.
@@ -60,8 +60,8 @@ in the gitignored brief and never echo into the article.
 ## Write the brief
 
 Write a structured file to `.nb-work/<series>/<slug>/voice.md`. It is
-gitignored, so it never enters the one-file PR; PROTOCOL step 8 pastes it
-into the PR body. Lead with the voice, then the evidence: the writer opens
+gitignored, so it never enters the one-file PR. PROTOCOL step 8 pastes it
+into the PR body. Lead with the voice, then the evidence. The writer opens
 this file for the directive.
 
 Two rules govern the brief's own prose. Specify how to write, never what to
