@@ -15,9 +15,9 @@
   max: 4
   suggestion: >-
     rewrite the sentence whole, and ask first whether the clause the dash
-    carries earns its place at all; the dash is often hanging fluff, and
-    cutting it beats keeping it behind a comma or semicolon. Keep the few
-    asides that earn the break.
+    carries earns its place at all; the dash is often hanging fluff, and a
+    comma or semicolon in its slot only keeps the fluff. Keep the few asides
+    that earn the break.
 
 - id: leverage
   terms: [leverage]
