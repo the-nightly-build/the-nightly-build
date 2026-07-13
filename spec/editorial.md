@@ -88,9 +88,9 @@ tells that mark writing as slop.
 
 ## Headlines and sections
 
-The headline may earn attention; the body earns trust. `spec/headlines.md` is the floor
-for the headline, the dek, and every section heading, and it composes directly after this
-file. The short of it: each of those lines commits to something the piece establishes.
+`spec/headlines.md` is the floor for the headline, the dek, and every section heading,
+and it composes directly after this file. The short of it: each of those lines commits
+to something the piece establishes.
 
 ## Form
 

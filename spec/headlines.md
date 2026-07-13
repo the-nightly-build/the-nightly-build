@@ -51,7 +51,8 @@ opposite conclusions."
 
 ## The dek
 
-The dek adds; it never restates. Headline and dek divide the labor: the
+The dek adds what the headline left out and never restates it. Headline and
+dek divide the labor: the
 headline commits to the surprise, the dek connects the who and the what with
 the one detail that makes the piece unmistakable for any other. "The very
 modern corporate tale of what happens when a top executive at a $6 billion
