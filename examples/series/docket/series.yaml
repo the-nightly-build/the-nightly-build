@@ -1,7 +1,6 @@
-# An open section: the beat in prompt.md is the assignment. Each article tracks one
-# legal matter, chosen by the night shift, on the article template. Its genre is
-# carried by a paper-owned furniture piece, the case docket (rs-docket, defined
-# in themes/newsroom.css).
+# An open section: the beat in prompt.md is the assignment, and the night shift
+# picks tonight's matter. The paper-owned case docket furniture (rs-docket,
+# defined in themes/newsroom.css) carries the genre.
 name: Docket
 mode: open
 section: "AI & the Law"
@@ -12,5 +11,5 @@ strict: false
 words: [1500, 4000]
 min_sources: 8
 cadence: [tue, thu]
-consult: # must-read starting points, read before researching elsewhere
+consult: # read these before researching elsewhere
   - https://www.courtlistener.com/

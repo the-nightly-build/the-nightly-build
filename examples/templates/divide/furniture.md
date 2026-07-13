@@ -1,10 +1,10 @@
 # The Divide's bespoke furniture
 
-The two-sided layout this template renders, styled in `furniture.css` beside this
-file on the `rs-` prefix. It is bespoke to the divide template — only a divide
-article puts two cases side by side — so it lives in the template's folder rather
-than in `press/furniture/`. The engine concatenates it into `assets/theme.css`
-whenever this template is present. A drafter's palette for a divide article is the
+The two-sided layout this template renders, styled in `furniture.css` beside
+this file on the `rs-` prefix. Only a divide article puts two cases side by
+side, so the furniture lives in the template's folder, not in
+`press/furniture/`. The engine concatenates it into `assets/theme.css` whenever
+this template is present. A drafter's palette for a divide article is the
 engine base catalogue plus the paper's shared furniture plus these.
 
 ## The split (`rs-divide` + `rs-side`)
@@ -42,8 +42,8 @@ but still allegiant on phones. Each side is four slots, in order.
 ```
 
 The slots: **camp** (`rs-side-camp`, who holds it), **thesis**
-(`rs-side-thesis`, the position in one sentence), the **argument**
+(`rs-side-thesis`, the position in one sentence), **argument**
 (`rs-side-argument`, a wrapper holding the cited prose in the form its best
-advocate would recognize), and the **champion**
+advocate would recognize), and **champion**
 (`rs-side-champion`, the vetted holder and in one clause why it has standing on
-this question, cited). One accent, mirrored — never two team colors.
+this question, cited). One accent, mirrored, never two team colors.

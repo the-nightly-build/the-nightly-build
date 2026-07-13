@@ -1,10 +1,10 @@
 # A folder package under press/templates/ replaces or adds a template wholesale
 # (a folder of the same id as a shipped one shadows it). This example adds one
-# template: `divide`, an enforced two-sided format. Its point is that the proof,
-# not a promise, guarantees the shape: flex_sections [2, 2] means exactly two
-# sides (left vs right) or the article BLOCKs, and per-section cite_rule means each
-# side (and the crux) must be sourced. Run the section `strict: true` and those
-# citation checks become BLOCKs too — one-sided or uncited never publishes.
+# template: `divide`, an enforced two-sided format. The proof, not a promise,
+# guarantees the shape. flex_sections [2, 2] means exactly two sides, left vs
+# right, or the article BLOCKs. Per-section cite_rule means each side and the
+# crux must be sourced. Under `strict: true` those citation checks become
+# BLOCKs too: one-sided or uncited never publishes.
 about: A both-sides format for one genuinely contested question, argued left vs right from named, vetted sources.
 class: longread
 words: [1200, 3500]

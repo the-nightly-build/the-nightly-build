@@ -27,11 +27,10 @@ The blockquote holds only the paper's own words.
 
 ## Anchored excerpt (`nb-excerpt`)
 
-The original's actual sentence(s), quoted where the argument turns, with a
-locator into the source and a one-line gloss of what the passage does and
-does not claim. The blockquote holds only the paper's own words, exactly.
-When the paper has no numbered sections or pages (arXiv HTML often has
-neither), the locator stays honest: "Abstract", "Introduction · closing
+The original's own sentences, quoted verbatim where the argument turns, with
+a locator into the source and a one-line gloss of what the passage does and
+does not claim. When the paper has no numbered sections or pages (arXiv
+HTML often has neither), the locator stays honest: "Abstract", "Introduction · closing
 paragraph", "Table 2 caption".
 
 ```html
@@ -53,9 +52,9 @@ paragraph", "Table 2 caption".
 The `read-it-yourself` close: the original's sections triaged with a verdict
 each, so the reader opens the source knowing what to read and what to skip.
 Verdicts are `read`, `skim`, or `skip`, one clause of why apiece, each reason
-in this paper's terms rather than a stock note. Entries are plain wrapping
-text behind the badge, so a long section title breaks across lines instead of
-breaking the layout.
+in this paper's terms, not a stock note. Entries are plain wrapping text
+behind the badge, so a long section title wraps instead of breaking the
+layout.
 
 ```html
 <ul class="nb-paper-map">

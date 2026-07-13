@@ -1,6 +1,6 @@
 # A sequence: an ordered course. The night shift reads the published lessons
-# before writing the next, and recaps must reference them concretely. A sequence
-# grows by appending items; published lessons never reorder.
+# before writing the next, and recaps reference them concretely. A sequence
+# grows by appending items. Published lessons never reorder.
 name: Kernels
 mode: sequence
 section: "Foundations"

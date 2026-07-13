@@ -1,5 +1,5 @@
 # A rolling series: one article per night, slugged by UTC date. Missed nights
-# are skipped, never backfilled. No item list; the date is the item.
+# are skipped, never backfilled. No item list. The date is the item.
 name: The Brief
 mode: rolling
 section: "The Daily"

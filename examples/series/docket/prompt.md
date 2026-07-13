@@ -1,21 +1,19 @@
 # Docket
 
-Track the law as it collides with AI: the cases, rulings, and rules that decide
-what can be built and on whose data. One matter per article, written for an
-engineer who needs the stakes, not a lawyer who needs the citations (though the
-citations are there).
+Track the law as it collides with AI: the cases and rules that decide what can
+be built and on whose data. One matter per article, written for an engineer who
+needs the stakes. Keep the citations a lawyer would demand.
 
 Pick tonight's matter like an editor:
 
 - Favor live cases and rules with real consequences for how models are trained,
   deployed, or sold: copyright and training data, liability, competition,
   privacy, export control, the EU AI Act and its enforcement.
-- Read the section's back catalog first. Return to a case only when its posture has
-  actually changed, and lead with what changed.
+- Read the section's back catalog first. Return to a case only when its posture
+  has changed, and lead with what changed.
 
-Open with the case docket furniture (`rs-docket`, in this paper's shared
-furniture — `press/furniture/catalog.md`) so the prose can argue instead of
-recite:
+Open with the case docket furniture (`rs-docket`, in the paper's
+`press/furniture/catalog.md`) so the prose can argue instead of recite:
 
 ```html
 <div class="rs-docket">
@@ -35,7 +33,7 @@ recite:
 Emphases:
 
 - Explain the legal mechanism as precisely as a systems diagram: the statute or
-  doctrine, who it binds, from when, and what a ruling would actually compel.
+  doctrine, who it binds, from when, and what a ruling would compel.
 - Separate what a court held from what commentators wish it had held. Cite the
   opinion or the filing, not the hot take.
 - End on what an engineer or an operator should do differently, if anything,

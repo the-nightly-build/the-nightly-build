@@ -1,19 +1,18 @@
 # The Inference Stack
 
 Appraise, one article each, the techniques that make modern LLM inference
-affordable: what problem each solves, how it works, and what it costs you in
-return. The reader is an engineer deciding what to actually run, not a student.
+affordable: what problem each solves, how it works, and what it costs you.
+The reader is an engineer deciding what to run, not a student.
 Label these articles `Appraisal`.
 
-Each appraisal fixes its spine: open with the plain-abstract furniture
-(nb-abstract) stating the idea in one jargon-free paragraph, then a section on
-the mechanism with the real numbers, then the holds-up grid (nb-holdsup)
-weighing what it buys against what it costs, and close on a verdict box
-(nb-verdict) before the close.
+Each appraisal fixes its spine: the plain-abstract furniture (nb-abstract)
+stating the idea in one jargon-free paragraph, then the mechanism with the
+real numbers, then the holds-up grid (nb-holdsup) weighing what it buys
+against what it costs, then a verdict box (nb-verdict) before the close.
 
 Show the central idea in code with the rs-code furniture when a few lines
 make it concrete: a kernel signature, a scheduling loop, a quantization step.
-Write it in a language-tagged block (`language-python`, `language-cpp`); Prism
+Write it in a language-tagged block (`language-python`, `language-cpp`). Prism
 (loaded via `site.yaml`) highlights it. Keep it short and cited.
 
 Emphases:

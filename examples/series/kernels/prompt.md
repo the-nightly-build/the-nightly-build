@@ -4,17 +4,17 @@ A course in writing fast GPU kernels, from the execution model up to
 FlashAttention, for an engineer who knows deep learning but has never written
 CUDA or Triton. Each article is one lesson that builds on the last. Triton is
 OpenAI's open-source GPU language and the layer PyTorch's `torch.compile` lowers
-to, so the payoff is code the reader could actually run.
+to, so the payoff is code the reader can run.
 
 Every lesson follows the teaching furniture: open with the objectives box
 (nb-objectives) stating what the reader will be able to do, recap the previous
-lesson concretely (you read it, per protocol), teach the core, then close with
+lesson concretely (you read it, per protocol), teach the core, and close with
 the check-yourself box (nb-check-box) and a bridge (nb-bridge) to the next
 lesson.
 
 Show real code with the rs-code furniture. This site loads Prism (declared in
-`site.yaml`), so you write plain code in a language-tagged block and it is
-highlighted for you: `language-python` for Triton, `language-cpp` for CUDA C.
+`site.yaml`). Write plain code in a language-tagged block and Prism highlights
+it: `language-python` for Triton, `language-cpp` for CUDA C.
 Escape `<`, `>`, and `&`. Keep listings short and honest.
 
 ```html
@@ -33,8 +33,8 @@ def add_kernel(x_ptr, y_ptr, out_ptr, n, BLOCK: tl.constexpr):
 
 Emphases:
 
-- Build each idea from one the reader already holds, and reuse a single running
-  example across the whole course. Define each term on first use.
+- Build each idea from one the reader already holds, and reuse one running
+  example across the course. Define each term on first use.
 - Real numbers over hand-waving, each cited: bytes moved, arithmetic intensity,
   achieved versus peak bandwidth, occupancy, kernel time. The `hardware` tag
   makes the roofline the throughline.

@@ -1,7 +1,7 @@
-# An open section that rotates a fixed watchlist. There is no item list because the
-# engine does not rotate a collection (a collection publishes each item once and
-# completes); an open section runs forever, and the beat in prompt.md holds the
-# rotation. Daily cadence over seven names means each comes up about once a week.
+# An open section that rotates a fixed watchlist. There is no item list: a
+# collection publishes each item once and completes, so it cannot rotate. An
+# open section runs forever, and the beat in prompt.md holds the rotation.
+# Daily cadence over seven names brings each up about once a week.
 name: Positions
 mode: open
 section: "Markets"

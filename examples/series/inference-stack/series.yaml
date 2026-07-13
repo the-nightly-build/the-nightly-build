@@ -1,6 +1,6 @@
 # A collection: items publish front-to-back, one per night at the cadence, until
-# the list is done. A curated canon of the techniques behind modern inference,
-# appraised once each. Grow it by appending items; published appraisals stay put.
+# the list is done. A canon of the techniques behind modern inference, appraised
+# once each. Grow it by appending items. Published appraisals stay put.
 name: The Inference Stack
 mode: collection
 section: "Foundations"
@@ -8,7 +8,7 @@ template: article
 prompt: prompt.md
 autopublish: true
 strict: false
-words: [1500, 3500] # appraisals stay tight; the technique does the heavy lifting
+words: [1500, 3500] # appraisals stay tight: the technique carries the piece
 min_sources: 8
 cadence: [sat]
 consult:
