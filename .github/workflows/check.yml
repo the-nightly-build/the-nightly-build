@@ -40,7 +40,7 @@ jobs:
 
       - uses: actions/setup-python@v5
         with: { python-version: "3.12" }
-      - run: pip install pyyaml
+      - run: pip install pyyaml websocket-client
 
       - name: Write PR body to file
         env:
@@ -77,8 +77,7 @@ jobs:
       # browser draws it. Skips itself for curation PRs (no page to build).
       - name: Render probe
         run: |
-          pip install websocket-client
-          path=$(git diff --name-only --diff-filter=A "origin/${{ github.base_ref }}...HEAD" | head -1)
+          path=$(python3 _main/engine/ci_helpers.py article-path --diff-base "origin/${{ github.base_ref }}")
           if [ -z "$path" ]; then echo "no added article; probe skipped"; exit 0; fi
           python3 _main/engine/build_site.py --repo _main --library . --out /tmp/site
           python3 _main/engine/render_check.py --site /tmp/site --article "$path" | tee -a /tmp/proof.txt

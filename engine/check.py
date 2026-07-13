@@ -38,6 +38,7 @@ import urllib.request
 from html.parser import HTMLParser
 from typing import Literal
 
+import build_site
 import nb_meta
 
 try:
@@ -1158,46 +1159,28 @@ def check_warns(
         )
 
 
+# Classes styled by owner-declared external assets (docs/customization.md's
+# syntax-highlighter recipe), so no shipped stylesheet defines them.
 CLASS_ALLOW_PREFIXES = ("language-", "token")
 
 
-def css_class_names(repo, template_id):
-    """Every class the shipped and press stylesheets define."""
+def css_class_names(repo):
+    sheets = [os.path.join(repo, "engine", "assets", "nb.css")]
+    # The page loads exactly nb.css plus theme.css, and build_site owns what
+    # concatenates into theme.css; asking it keeps this list from drifting.
+    sheets += build_site.css_owners(repo, build_site.load_site_config(repo))
     names = set()
-    candidates = [
-        os.path.join(repo, "engine", "assets", "nb.css"),
-        os.path.join(repo, "press", "furniture", "styles.css"),
-        os.path.join(repo, "templates", template_id, "furniture.css"),
-        os.path.join(repo, "press", "templates", template_id, "furniture.css"),
-    ]
-    themes = os.path.join(repo, "engine", "assets", "themes")
-    if os.path.isdir(themes):
-        candidates += [
-            os.path.join(themes, f) for f in os.listdir(themes) if f.endswith(".css")
-        ]
-    press_themes = os.path.join(repo, "press", "themes")
-    if os.path.isdir(press_themes):
-        candidates += [
-            os.path.join(press_themes, f)
-            for f in os.listdir(press_themes)
-            if f.endswith(".css")
-        ]
-    for path in candidates:
-        try:
+    for path in sheets:
+        if os.path.isfile(path):
             with open(path, encoding="utf-8") as fh:
                 names.update(re.findall(r"\.([A-Za-z_][\w-]*)", fh.read()))
-        except OSError:
-            continue
     return names
 
 
-def check_classes(html_path, repo, template_id, rep):
-    """A class no stylesheet defines renders unstyled; usually a typo."""
-    defined = css_class_names(repo, template_id)
+def check_classes(raw, *, repo, rep):
+    defined = css_class_names(repo)
     if not defined:
         return
-    with open(html_path, encoding="utf-8") as fh:
-        raw = fh.read()
     used = set()
     for attr in re.findall(r'class="([^"]+)"', raw):
         used.update(attr.split())
@@ -1212,14 +1195,8 @@ def check_classes(html_path, repo, template_id, rep):
         )
 
 
-def check_chrome(html_path, treg, rep):
-    """Fixed chrome declared in the manifest survives the fill verbatim."""
-    chrome = treg.get("chrome") or []
-    if not chrome:
-        return
-    with open(html_path, encoding="utf-8") as fh:
-        raw = fh.read()
-    for piece in chrome:
+def check_chrome(raw, *, treg, rep):
+    for piece in treg.get("chrome") or []:
         if piece not in raw:
             rep.block(
                 "B-CHROME",
@@ -1292,8 +1269,8 @@ def check_article(
     )
 
     check_required_sections(ed, treg, rep)
-    check_chrome(html_path, treg, rep)
-    check_classes(html_path, repo, template_id, rep)
+    check_chrome(raw, treg=treg, rep=rep)
+    check_classes(raw, repo=repo, rep=rep)
     check_sandbox(ed, rep)
     check_sources(ed, rep, check_links=check_links)
     check_cites(ed, rep)

@@ -1,3 +1,8 @@
+#!/usr/bin/env python3
+# /// script
+# requires-python = ">=3.9"
+# dependencies = ["websocket-client"]
+# ///
 """Probe the PR's rendered article in headless Chrome for CI.
 
 The file-level proof cannot see how a page renders, so validate runs this
@@ -37,10 +42,11 @@ CHROME_CANDIDATES = (
 
 def find_chrome():
     for c in CHROME_CANDIDATES:
-        if c and shutil.which(c):
-            return shutil.which(c)
-        if c and os.path.isfile(c):
-            return c
+        if not c:
+            continue
+        found = shutil.which(c) or (c if os.path.isfile(c) else None)
+        if found:
+            return found
     return None
 
 
@@ -102,7 +108,22 @@ def probe(chrome, page_path):
             {"width": VIEWPORT, "height": 1200, "deviceScaleFactor": 1, "mobile": True},
         )
         send("Page.navigate", {"url": "file://" + os.path.abspath(page_path)})
-        time.sleep(3)
+        # Poll until the file: document (not the about:blank Chrome started
+        # on) finishes loading; a static local page takes tens of ms, and the
+        # 5s cap only defers to the fact checks below, which fail loudly.
+        for _ in range(100):
+            loaded = send(
+                "Runtime.evaluate",
+                {
+                    "expression": (
+                        "location.protocol === 'file:' "
+                        "&& document.readyState === 'complete'"
+                    )
+                },
+            )
+            if loaded.get("result", {}).get("value"):
+                break
+            time.sleep(0.05)
         result = send(
             "Runtime.evaluate",
             {
