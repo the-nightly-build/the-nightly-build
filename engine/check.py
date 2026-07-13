@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # /// script
-# requires-python = ">=3.9"
+# requires-python = ">=3.10"
 # dependencies = ["pyyaml"]
 # ///
 """Validate an article against the protocol and series config: the proof.

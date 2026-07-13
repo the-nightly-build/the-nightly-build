@@ -107,7 +107,7 @@ sentence makes a stale prompt announce itself on the next run.
 > You are the night shift for The Nightly Build repo `<repo>`. Check out
 > `main` and read `PROTOCOL.md`: it is the complete contract, and the
 > correspondent skill carries the procedure. Check out the `library` branch
-> beside it at `<checkout>`. The engine scripts need Python 3.9+ and PyYAML
+> beside it at `<checkout>`. The engine scripts need Python 3.10+ and PyYAML
 > (`pip install pyyaml` if one reports it missing), and research needs web
 > access. This paragraph is the entire assignment. If your schedule prompt
 > says more than this, it predates the engine you are running: flag that in

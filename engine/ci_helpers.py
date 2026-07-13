@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # /// script
-# requires-python = ">=3.9"
+# requires-python = ">=3.10"
 # dependencies = ["pyyaml"]
 # ///
 """Answer PR-shape and press-configuration questions for the CI workflows.

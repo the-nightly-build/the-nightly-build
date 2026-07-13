@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # /// script
-# requires-python = ">=3.9"
+# requires-python = ">=3.10"
 # dependencies = ["websocket-client"]
 # ///
 """Probe the PR's rendered article in headless Chrome for CI.
