@@ -113,20 +113,24 @@ available, `uv run engine/<script>.py` manages the dependency itself.
 8. **Open one pull request per article, targeting the `library` branch.** Branch
    from `library` and add exactly one file, so the PR's diff is that file alone.
    - Title: `nb: <series>/<slug> - <Title>`
-   - Body: the article's production record, harness-agnostic and readable years
+   - Body: the article's production record, assembled from the run's artifacts
+     under `.nb-work/<series>/<slug>/`, harness-agnostic and readable years
      later. In order:
      - a fenced `nb-meta` yaml block mirroring the embedded metadata, a link to
        your run if available, and the proof's final WARN summary;
-     - `## Process` — how the piece was made: the exemplars the coach studied,
-       each edit round's report, and any redraft with what forced it. A few
-       lines; write it as history, not ceremony.
-     - `## Voice brief` — the article's voice brief verbatim, inside a collapsed
-       `<details>` block in a four-backtick fence (the brief's own code fences
-       nest safely). The brief is gitignored, so the PR body is where it
-       survives.
-     - `## Also consulted` — every source read far enough to judge that did not
-       become a citation, one line each with the reason. Leave out pages you
-       merely bounced off.
+     - `## Task` — the commission (`task.md`);
+     - `## Process` — how the piece was made: the editor's
+       `requested-changes.md`, plus any redraft and what forced it;
+     - `## Voice brief` — the coach's `voice.md`;
+     - `## Research` — the researcher's `research.md`;
+     - `## Also consulted` — the research log's Discarded section, one line per
+       source with the reason, plain (never collapsed).
+     Each artifact section is a one-line summary, then the artifact verbatim in
+     a collapsed `<details>` block inside a four-backtick fence (its own code
+     fences nest safely). The artifacts are gitignored, so the PR body is where
+     they survive. If the assembled body would exceed GitHub's body limit
+     (~60k characters), elide the research log's verbatim passages in place
+     with a note and post the full log as a comment after opening.
    - Preflight the body BEFORE opening the PR: write it to a file and run the
      proof with `--pr-body`. The desk blocks any PR whose body lacks or
      contradicts the nb-meta block (`B-META-MATCH`) and WARNs when a record
@@ -174,7 +178,11 @@ self-measurements (the proof recounts; >20% deviation is a WARN).
 Articles teach rather than summarize. Every claim the argument rests on carries a citation
 the reader can follow. The goal is to equip the reader to go deeper on their own.
 
-Every article is produced in its own context, its voice anchored to how the best real
-writers on the subject actually write, and independently edited against this bar before
-it meets the proof. The runtime skill (`skills/correspondent/SKILL.md`) carries the
-procedure; the writing-coach and editor stages are its skills.
+Every article is produced by a chain of roles, each in a fresh context with its own
+skill and its own artifact under `.nb-work/<series>/<slug>/`: the orchestrator
+commissions the piece (`task.md`), the coach studies how the best real writers on the
+subject actually write (`voice.md`), the researcher builds the claims-and-evidence log
+(`research.md`), the writer drafts from that log and proves the result, and the editor
+attacks it (`requested-changes.md`). Artifacts are written for the next agent —
+conclusions first, stable headings — and the PR body is assembled from them.
+`skills/correspondent/SKILL.md` orchestrates; the stage skills carry the roles.
