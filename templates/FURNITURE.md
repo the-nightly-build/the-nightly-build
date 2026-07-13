@@ -1,24 +1,24 @@
 # Furniture
 
-Furniture is the set of pre-designed components an article may use. Every
-class here is styled by the engine's shared CSS in both color schemes, so
-composing them cannot break the paper's look. Any template may use any
-component in this catalogue. Use a piece when it carries information better than prose would;
-skip it when it would decorate. Two or three pieces per article is typical,
-zero is fine.
+Furniture is the set of pre-designed components an article may use. The
+engine's shared CSS styles every class in both color schemes, so composing
+pieces cannot break the paper's look. Use a piece when it carries information
+better than prose would; skip it when it would decorate. Two or three pieces
+per article is typical; zero is fine.
 
-The section tags, citation markup, source entries, and nb-meta block are
-protocol, not furniture; they are defined in PROTOCOL.md. This is the engine's
-base catalogue, always available. A paper can add its own furniture too (shared
-across the paper in `press/furniture/`, or bespoke to one template in that
-template's folder) and instruct sections to use it in prompt.md (see
+Section tags, citation markup, source entries, and the nb-meta block are
+protocol, not furniture; PROTOCOL.md defines them. This base catalogue is the
+engine's, always available to every template. A paper can add its own
+furniture (paper-wide in `press/furniture/`, or bespoke inside one template's
+folder) and instruct sections to use it in prompt.md (see
 docs/customization.md).
 
-Sample markup below carries two kinds of text. ALL-CAPS runs are placeholders:
-replace every one, in the piece's own words; the proof warns on a caps run
-that survives into prose. Sentence-case labels the component renders ("Why it
-matters", "In plain language", "What holds up", "Verdict", "Next article",
-"In this article") are fixed chrome: keep them verbatim.
+In the samples below, ALL-CAPS runs are placeholders: replace every one in
+the article's own words; the proof warns on a caps run that survives into
+prose. Sentence-case labels the component renders ("In plain language",
+"What holds up", "What to be careful about", "Verdict", "Next article",
+"In this article") are fixed chrome: keep them verbatim. Everything else is
+sample data: replace it.
 
 ## Stat strip
 
@@ -39,6 +39,7 @@ Three or four numbers that carry the thesis. Each must be cited in nearby prose.
 ## Chart
 
 Declarative data, rendered by the engine runtime. Types: line, bar, scatter.
+Restate the data in caption and prose; the noscript line is fixed chrome.
 
 ```html
 <figure class="nb-chart">
@@ -58,7 +59,7 @@ Declarative data, rendered by the engine runtime. Types: line, bar, scatter.
 
 ## Callout
 
-A key term or concept the reader should carry forward.
+A term or concept the reader must carry forward.
 
 ```html
 <div class="nb-callout">
@@ -135,7 +136,7 @@ The people and institutions in a story, one line each.
 ## Position block
 
 One participant's stance in a disagreement, stated at its strongest and
-grounded in their actual cited statements. Use two or more; never one.
+grounded in their cited statements. Use two or more; never one.
 
 ```html
 <div class="nb-position">

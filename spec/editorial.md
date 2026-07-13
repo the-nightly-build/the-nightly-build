@@ -5,99 +5,104 @@ The editorial standard every article meets, whatever its template. It composes u
 `press/editorial.md` composes immediately after this file and specializes it.
 
 The floor is prescriptive on purpose. Its job is to make the default professional:
-research-grade writing, never influencer cadence, never AI slop. It reads in two registers.
+research-grade writing. It reads in two registers.
 
 - **Standards a paper cannot loosen.** The quality bar below: sourced claims, teach don't
-  summarize, earned analysis, and prose free of fluff, slop, and run-ons. A paper specializes
-  the house voice; it never opts back out of these.
-- **Defaults a paper may override.** Register, formality, the assumed reader and the
-  background that reader already holds, and how far to press a judgment. These belong to
-  `press/editorial.md` and the series prompts. The floor sets the quality of those choices,
-  not the choices themselves.
+  summarize, earned analysis, and prose free of fluff, slop, and run-ons.
+- **Defaults a paper may override.** Register, formality, the assumed reader and that
+  reader's background, and how far to press a judgment. These belong to
+  `press/editorial.md` and the series prompts. The floor sets the quality of those
+  choices.
 
-The floor does not legislate trivia. It sets no house-wide rule on the Oxford comma or the
-like; be consistent within a piece.
+The floor does not legislate trivia: no house-wide rule on the Oxford comma; be
+consistent within a piece.
 
 ## Teach, don't summarize
 
-The reader should finish knowing how to think about the topic, not just what happened. Build
-from foundations: orient, establish the concepts, go deep, synthesize, conclude.
-Define the terms of art the paper's declared reader does not already hold, and assume the ones
-its stated audience knows. One worked example beats three abstract claims.
+The reader finishes knowing how to think about the topic. Each
+section spends what the last one taught; a section the reader could have read first is in
+the wrong place. Cut any sentence that adds nothing new; prefer concrete detail over
+abstraction. Define each term of art the declared reader does not hold
+in the sentence where it first appears; assume the rest. Ground abstract claims in a
+worked example.
 
-The declared reader centers the paper: the profile chooses what to cover, when it is timely,
-and what background to assume. Write each piece for the natural audience around that center — a
-paper that declares a new parent gets articles any parent of a young child could be handed, and
-a declared practitioner gets pieces worth forwarding to a colleague. Narrowing a desk to the
-reader personally takes an explicit ask in `press/editorial.md` or the series prompt.
+The declared reader centers the paper: the profile chooses what to cover and when, and
+what background to assume. Write each piece for the natural audience around that center.
+A paper declaring a new parent gets articles any parent could be handed; a declared
+practitioner gets pieces worth forwarding to a colleague. Narrowing a desk to
+the reader personally takes an explicit ask in `press/editorial.md` or the series prompt.
 
 ## Report and analyze
 
-Good writing reports what is true and analyzes what it means, and it holds the analysis to the
-same bar as the reporting. Analysis must be earned: grounded in the cited evidence, its
-reasoning shown, never asserted as hype or bare opinion. Keep three things distinct: reported
-fact, estimate, and synthesis. Synthesis is a point of view, and it is welcome; unsupported
-opinion is not. How hard to press a view is the paper's call. That it be earned is not.
+Report what is true and analyze what it means; hold the analysis to the same bar as the
+reporting. Analysis must be earned: grounded in the cited evidence, its reasoning shown.
+Keep three things distinct: reported fact, estimate, and synthesis. Never write that
+someone hinted, implied, or signalled; that is the writer's guess wearing attribution.
+Synthesis with a point of view is welcome; cut unsupported opinion. How hard to
+press a view is the paper's call; every view must be earned.
 
 ## Citations
 
 - Every claim the argument rests on carries an inline citation linking to a source entry.
 - Prefer primary sources: filings, papers, official documentation, transcripts, data
-  providers. Secondary reporting is acceptable for context, never for contested figures.
-- Never fabricate, pad, or decorate citations. If you cannot source a claim, cut it or state
-  the uncertainty plainly.
-- Cite only what you have read. Open the source, find the passage that supports the specific
-  claim, and cite that. Its URL must resolve.
+  providers. Secondary reporting is acceptable for context; contested figures need a
+  primary source.
+- Never fabricate, pad, or decorate citations. If you cannot source a claim, cut it or
+  state the uncertainty plainly.
+- Cite only what you have read. Open the source, find the passage that supports the
+  specific claim, and cite that. Its URL must resolve.
 - On contested questions, steelman the opposing views before you weigh them.
 
 ## Numbers
 
-Concrete figures beat vague magnitudes. Ranges with sources beat false precision. Say plainly
-what is unknown.
+Concrete figures beat vague magnitudes; ranges with sources beat false precision. Give
+every number a comparison the reader already knows. Say plainly what is unknown.
 
 ## Prose
 
-The register is a serious paper, not a feed. Some habits are always cut, because they are the
-tells that mark writing as slop.
+The register is a serious paper, not a feed. Some habits are always cut; they are the
+tells of slop.
 
-- **Fluff.** Filler openings ("In today's fast-paced world"), empty connectives, throat-clearing
-  ("As you might know"), and any sentence that survives being cut. If it carries no information,
-  it goes.
-- **Slop.** The median AI read: smooth, hedged, evenly balanced, reaching for the generic
-  phrasing. Write the specific, concrete word. Commit where the evidence lets you. Anchor the
-  prose to how the best real writers on the subject actually write, not to the average of
-  everything written about it.
-- **Run-ons.** A sentence that piles clause on clause until the reader loses the thread gets
-  broken. Let the verbs carry the weight. Vary length for rhythm; a long sentence in control is
-  craft, not a fault.
-- **Manufactured punchlines.** Cut any sentence engineered to sound quotable while carrying
-  little ("that's the whole point", "here's the kicker"). A closer or section opener reused as
-  a formula across articles is the same failure. Coin no house catchphrase.
-- **Hedged contrast.** The "X is not Y; it is Z" mold and its softer cousins ("not X but Y",
-  "rather than") stay only when the misconception they correct is real and named, and fall
-  wherever the "not" clause is a strawman the sentence invented. One or two earned contrasts
-  per piece is the ceiling.
-- **Self-reference.** The piece never narrates itself or its newsroom ("this dossier", "what
-  this desk is watching", "the paper's read"), and it never addresses or describes its
-  particular reader ("the reader works there", "your son"). Report the subject, not the act of
-  reporting, for the audience the reader belongs to.
-- **Banned terms.** `spec/banned-terms.yaml` lists the words and marks the corpus has ruled
-  out and how many uses each may keep; a press extends or adjusts the list in
+- **Fluff.** Filler openings ("In today's fast-paced world"), empty connectives,
+  throat-clearing ("As you might know"), and openers that lecture: Note, Consider,
+  Imagine. If a sentence carries no information, it goes.
+- **Slop.** The median AI read: smooth, hedged, reaching for the generic phrasing. Write
+  the specific word: the drug's name, not "a treatment"; 40 nanometers, not "tiny".
+  Commit where the evidence lets you. Anchor the prose to how the best writers on the
+  subject write, not to the average of everything written about it.
+- **Run-ons.** A sentence that piles clause on clause until the reader loses the thread
+  gets broken. Let the verbs carry the weight. Vary length for rhythm; a long sentence in
+  control is craft.
+- **Manufactured punchlines.** Cut any sentence engineered to sound quotable while
+  carrying little ("that's the whole point", "here's the kicker"). A closer or section
+  opener reused as a formula across articles is the same failure; so is a house
+  catchphrase.
+- **Hedged contrast.** The "X is not Y; it is Z" mold and its softer cousins ("not X but
+  Y", "rather than") stay only when the misconception they correct is real and named, and
+  fall wherever the "not" clause is a strawman the sentence invented. One or two earned
+  contrasts per piece is the ceiling.
+- **Self-reference.** The piece never narrates itself or its newsroom ("this dossier",
+  "the paper's read"), and it never addresses or describes its particular reader ("the
+  reader works there", "your son").
+- **Banned terms.** `spec/banned-terms.yaml` lists the words and marks the corpus has
+  ruled out and how many uses each may keep; a press extends or adjusts the list in
   `press/banned-terms.yaml`, and the proof counts every article against the merged list.
   When a count runs over, rewrite rather than substitute: a synonym carries the same
   vagueness, and repunctuating an em-dash keeps the fluff the dash was carrying. Delete
   first, then rewrite what remains. An em-dash still earns its place for a real aside or
   a sharp break; the ceiling exists for the reflex.
 
+Break any rule here sooner than write a sentence no honest voice would say aloud.
+
 ## Form
 
-Form serves the reader and the template. Each template's identity sets its own form: paragraph
-length, how the dek reads, how the piece closes. A press may shadow
-them. The floor holds those choices to a standard, it does not make them: keep the writing
-easy to follow, land on the piece's own conclusion, and leave the reader equipped to go
-further because the teaching and the citations did their work, never by saying so.
+Each template's identity sets its own form: paragraph length, how the dek reads, how the
+piece closes. A press may shadow them. The floor holds those choices to a standard. Keep
+the writing easy to follow. End on the conclusion the argument built; skip the generic
+moral. Let the teaching and the citations equip the reader to go further.
 
 ## Charts
 
-Use a chart when a trend or comparison is the point. Charts are declarative `data-nb-chart` JSON
-blocks only. Keep them honest: label axes, note scale, and cite the data source in the caption.
+Use a chart when a trend or comparison is the point. Charts are declarative
+`data-nb-chart` JSON blocks only. Keep them honest: label axes, note scale, and cite the
+data source in the caption.

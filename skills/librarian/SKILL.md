@@ -19,22 +19,22 @@ agents can run it and their costs.
 ## 0. The ownership model (say it once, early)
 
 `press/` is the user's side of the repo; everything else is the engine,
-upstream-owned. Users only ever edit `press/`, which is what makes engine updates
-conflict-free (see §7).
+upstream-owned. Users edit only `press/`; that is what keeps engine updates
+conflict-free (§7).
 
 **Fresh paper?** A fresh fork has no `press/` content of its own: upstream ships
 none and `setup.sh` scaffolds an empty one. The interview writes
 `press/site.yaml` (their title), `press/editorial.md` (their voice, §1), and
 `press/series/` from scratch. The complete working configuration in `examples/`
-is the living reference; crib from it rather than copy it wholesale.
+is the living reference; crib from it, never copy it wholesale.
 
 ## 1. Interview
 
 Ask before writing, and make it a real conversation, not a form. The goal is to
 understand what this person actually wants to read: their interests, their taste,
-what they already follow and what they wish existed. Follow the thread where it
-leads and let it run before you converge on a shape to propose. By the end you
-need enough to design the masthead:
+what they already follow and what they wish existed. Follow the thread and let it
+run before you converge on a shape. By the end you need enough to design the
+masthead:
 
 - What they want to learn or track, and what they would genuinely read every day.
 - Shape: one-off deep dives (**collection**), an ordered course (**sequence**),
@@ -69,14 +69,14 @@ edits the section's `prompt.md`.
 
 **Paywalled sources.** Treat full support as a future feature. A public repo
 (which GitHub Pages needs) rules out committing paywalled full text, and
-credentials never go in the repo. If it comes up, say so honestly rather than
-improvising a workaround.
+credentials never go in the repo. If it comes up, say so; do not improvise a
+workaround.
 
 ## 2. Propose, then write
 
 Propose: series `id`, mode, template (must be legal for the mode per the
 template's `manifest.yaml`), name, cadence if not nightly, and, for
-collection/sequence, the full item list — draft a sequence's complete ordered
+collection/sequence, the full item list. Draft a sequence's complete ordered
 syllabus with the user before writing anything. For an open section, the beat
 description in `prompt.md` IS the config, so invest the interview time there.
 Show the plan; get a yes.
@@ -124,10 +124,10 @@ series never requires touching the harness again. If the paper already has its
 schedule, say so and skip this section; configuring the new series on `main` was
 the whole job.
 
-For a first-time handoff, read `docs/scheduling.md` (the model) and
-`docs/harnesses.md` (which agents work and their costs); those two files own the
-details, so work from them rather than memory. Ask what agent or subscription
-the user already pays for, match it to a harness, and cover four things:
+For a first-time handoff, read `docs/scheduling.md` and `docs/harnesses.md`;
+they own the details, so work from them, not from memory. Ask what agent or
+subscription the user already pays for, match it to a harness, and cover four
+things:
 **connect** (the one-time GitHub connection), **schedule** (one nightly
 schedule, the canonical prompt with `<repo>` and `<checkout>` filled in),
 **model and cost** (strongest available; say plainly whether the run is
@@ -176,8 +176,8 @@ Re-validate after every change.
   `furniture.md`/`furniture.css` optional. A press package replaces a shipped
   one of the same id wholesale. The build-your-own walkthrough in
   `docs/customization.md` covers every manifest field and rebuilds the classic
-  lesson template this way; crib from it rather than improvising the fields
-  here. Validate, then press check before scheduling.
+  lesson template this way; crib from it, do not improvise the fields.
+  Validate, then press check before scheduling.
 - _"Give my paper its own furniture"_: components shared across sections go in
   `press/furniture/` (`styles.css` + `catalog.md`); a piece only one template
   renders goes in that template's folder. Either restyles the whole library on
@@ -206,7 +206,8 @@ it is written.
 
 ## Boundaries
 
-Never push to `library`. Never edit files under `library/`. The escape hatch for
-a bad published article is deleting its file on `library` (the night shift
-rewrites it next run). That is a human decision: offer it, do not do it
-unprompted.
+Never push to `library`. Never edit files under `library/`. The library is a
+source now: an error left up outlives its correction and misleads whatever
+cites it. The escape hatch for a bad published article is deleting its file on
+`library` (the night shift rewrites it next run). That is a human decision:
+offer it promptly, do not do it unprompted.

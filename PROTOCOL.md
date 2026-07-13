@@ -77,12 +77,9 @@ available, `uv run engine/<script>.py` manages the dependency itself.
      set (required docs and consult prefixes). Cite nothing else; an outside
      source is a BLOCK.
 
-5. **Research properly.** Use web access. Verify claims against primary sources. Every
-   claim the argument rests on carries an inline citation that links to a source entry. Read the
-   passage you rely on before you cite it: cite from the primary source you actually
-   opened, not from a search result or a summary of it. If you have not read a source, do
-   not cite it. Never fabricate a citation, and never cite a URL you have not confirmed
-   resolves. Meet the source floor for your series.
+5. **Research properly.** Use web access. Verify claims against primary sources, and
+   cite them by the rules of `spec/editorial.md` § Citations. Meet the source floor
+   for your series.
 
 6. **Render exactly one self-contained HTML file** from your series' template:
    - Fill every anchor section the manifest requires exactly once. If the
@@ -137,7 +134,7 @@ available, `uv run engine/<script>.py` manages the dependency itself.
      `python3 engine/check.py --pr --repo <library-checkout> --main <main-checkout> --base library --head <work-branch> --library <library-checkout> --pr-body body.txt`
      This checks everything CI checks, including the one-file diff shape and
      the body's nb-meta match. A failure here is yours to fix before any PR
-     exists; a red PR teaches the desk nothing it did not already tell you.
+     exists.
 
 9. **Boundaries.** Never merge. Never push to `library` directly. Never modify any other
    file. Never open a second PR for the same series. If your PR is labeled
@@ -154,7 +151,7 @@ Embed in `<head>`:
   "series": "semiconductors",
   "slug": "micron",
   "template": "article",
-  "title": "Micron Technology: The Scarcest Commodity in AI",
+  "title": "The scarcest commodity in AI is made by Micron",
   "mode": "collection",
   "order": null,
   "date": "2026-07-06",
@@ -170,21 +167,25 @@ Embed in `<head>`:
 
 Field notes: `mode` is one of `collection | sequence | rolling | open`. `order` is the
 1-based item index for `sequence` mode, else null. `date` is the UTC date of your run.
-For `open` mode, `template` must be one of the series' declared choices. `sources`
-and `words` are your
-self-measurements (the proof recounts; >20% deviation is a WARN).
-`harness`/`model` are honest provenance.
+For `open` mode, `template` must be one of the series' declared choices. `sources` and
+`words` are your self-measurements (the proof recounts; >20% deviation is a WARN).
+`harness`/`model` are honest provenance, supplied by the orchestrator in the
+commission; a role cannot know its own runtime.
 
 ## Quality creed
 
-Articles teach rather than summarize. Every claim the argument rests on carries a citation
-the reader can follow. The goal is to equip the reader to go deeper on their own.
+Articles teach; they do not summarize. Every claim the argument rests on carries a
+citation the reader can follow. Doubt is a veto: any role may kill a claim on doubt
+alone, and a sentence runs only when every hand that touched it would sign it. Equip
+the reader to go deeper on their own.
 
 Every article is produced by a chain of roles, each in a fresh context with its own
 skill and its own artifact under `.nb-work/<series>/<slug>/`: the orchestrator
 commissions the piece (`task.md`), the coach studies how the best real writers on the
 subject actually write (`voice.md`), the researcher builds the claims-and-evidence log
 (`research.md`), the writer drafts from that log and proves the result, and the editor
-attacks it (`requested-changes.md`). Artifacts are written for the next agent —
-conclusions first, stable headings — and the PR body is assembled from them.
+attacks it (`requested-changes.md`). No stage is licensed to skim because the night is
+long. Artifacts are written for the next agent — conclusions first, stable
+headings — and to the floor's own standard: every role tunes its ear on what
+the others wrote. The PR body is assembled from them.
 `skills/correspondent/SKILL.md` orchestrates; the stage skills carry the roles.
