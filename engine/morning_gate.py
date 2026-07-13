@@ -36,11 +36,12 @@ import subprocess
 import sys
 import urllib.error
 import urllib.request
+from typing import NoReturn
 
 import build_site
 
 
-def out(send, why, *, body="", subject=""):
+def out(send, why, *, body="", subject="") -> NoReturn:
     print(f"send={'true' if send else 'false'}")
     print(f"why={why}")
     print(f"body={body}")

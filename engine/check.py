@@ -49,8 +49,8 @@ except ImportError:
 
 PROTOCOL_MAJOR = "1"
 MAX_BYTES = 2 * 1024 * 1024
-SLUG_RE = re.compile(r"^[a-z0-9-]{1,64}$")
-SERIES_RE = re.compile(r"^[a-z0-9-]{1,32}$")
+SLUG_RE = nb_meta.SLUG_RE
+SERIES_RE = nb_meta.SERIES_RE
 TAG_RE = re.compile(r"^[a-z0-9-]{1,32}$")
 DATE_RE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
 # Off-origin references (link/img) may load only from Google Fonts over https.
@@ -309,25 +309,14 @@ def load_yaml(path):
 def load_registry(repo):
     """Load every template's manifest, press packages shadowing shipped.
 
-    A template is a folder holding a manifest.yaml (the folder name is the
-    id); the manifest carries the geometry the proof enforces. A
-    press/templates/<id> package replaces a shipped one of the same id
-    wholesale, which is both how a press adds templates and how it
-    redefines a shipped template's band press-wide. A folder without a
-    manifest.yaml is not a template and is skipped.
+    build_site.template_dirs owns what counts as a template package and how
+    press/ shadows shipped; the manifests it finds carry the geometry the
+    proof enforces.
     """
-    registry = {}
-    for base in (
-        os.path.join(repo, "templates"),
-        os.path.join(repo, "press", "templates"),  # press shadows shipped
-    ):
-        if not os.path.isdir(base):
-            continue
-        for name in sorted(os.listdir(base)):
-            manifest = os.path.join(base, name, "manifest.yaml")
-            if os.path.isfile(manifest):
-                registry[name] = load_yaml(manifest) or {}
-    return registry
+    return {
+        tid: load_yaml(os.path.join(folder, "manifest.yaml")) or {}
+        for tid, folder in build_site.template_dirs(repo).items()
+    }
 
 
 def find_template(repo, template_id):
@@ -539,7 +528,7 @@ def validate_meta_fields(meta, rep):
     # B-META-MATCH) — user templates in press/templates/ are first-class
     need("template", str)
     need("title", str)
-    need("mode", str, enum=["collection", "sequence", "rolling", "open"])
+    need("mode", str, enum=list(nb_meta.MODES))
     need("date", str, pattern=DATE_RE.pattern)
     need("dek", str)
     need("sources", int)
@@ -1292,7 +1281,7 @@ def check_article(
 # PR mode
 # --------------------------------------------------------------------------- #
 
-PR_PATH_RE = re.compile(r"^library/([a-z0-9-]{1,32})/([a-z0-9-]{1,64})\.html$")
+PR_PATH_RE = nb_meta.PR_PATH_RE
 
 
 def parse_pr_body(path) -> dict | None:

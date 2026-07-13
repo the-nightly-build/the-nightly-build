@@ -13,12 +13,10 @@ instead of inline logic inside workflow definitions.
 """
 
 import argparse
-import re
 import subprocess
 
+import nb_meta
 import yaml
-
-PR_PATH_RE = re.compile(r"^library/([a-z0-9-]{1,32})/[a-z0-9-]{1,64}\.html$")
 
 
 def added_article(diff_base):
@@ -35,7 +33,7 @@ def added_article(diff_base):
     if len(out) != 1:
         return None
     status, _, path = out[0].partition("\t")
-    if status != "A" or not PR_PATH_RE.match(path):
+    if status != "A" or not nb_meta.PR_PATH_RE.match(path):
         return None
     return path
 

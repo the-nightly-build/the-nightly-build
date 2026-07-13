@@ -143,15 +143,10 @@ def render_assets_html(assets):
 
 
 def load_series_configs(repo):
-    root = os.path.join(repo, "press", "series")
-    out = {}
-    if not os.path.isdir(root):
-        return out
-    for sid in sorted(os.listdir(root)):
-        path = os.path.join(root, sid, "series.yaml")
-        if not sid.startswith("_") and os.path.isfile(path):
-            out[sid] = load_yaml(path)
-    return out
+    return {
+        sid: load_yaml(os.path.join(repo, "press", "series", sid, "series.yaml"))
+        for sid in nb_meta.series_ids(repo)
+    }
 
 
 read_meta = nb_meta.read_meta
