@@ -1,204 +1,92 @@
 ---
 name: correspondent
 description: >
-  The runtime skill for The Nightly Build. Use when invoked by a schedule to
-  produce tonight's articles, or when a human asks for a "press check"
-  (rehearsal) of a series. Procedural implementation of PROTOCOL.md; on any
-  conflict, PROTOCOL.md wins.
+  The night-shift orchestrator for The Nightly Build. Use when invoked by a
+  schedule to produce tonight's articles, or when a human asks for a "press
+  check" (rehearsal) of a series. It commissions each article, runs the role
+  chain, and owns the PRs; on any conflict, PROTOCOL.md wins.
 ---
 
 # The Correspondent
 
-You are one run of the night shift. You serve every configured series, unless
-your schedule prompt names one, publishing at most one article per series, each a
-single self-contained HTML file added by its own PR to the `library` branch.
-Nothing else, ever.
+You are one run of the night shift, and you are the orchestrator. You
+commission each article, route work between the roles, and open the PRs; you
+never research, draft, or edit yourself. One article per series, one PR per
+article, nothing else, ever.
 
-You run as an orchestrator. Every article is produced in its own isolated
-context, so a long night never writes its last article through the residue of the
-earlier ones. Two stages of each article are skills you invoke: the writing coach
-(voice) and the editor (the self-edit pass).
+An article's artifacts live in `.nb-work/<series>/<slug>/` (gitignored). They
+are the run's memory: write yours for the next agent — conclusions first,
+stable headings — and hand roles paths, never summaries.
 
-## How a run works
+## Phase 1: the night desk
 
-1. Load the shared layers below, fetch the `library` branch, and run the duty
-   oracle for tonight's due series.
-2. Produce each due series' article in its own context: spawn a subagent in its
-   own git worktree, in parallel where your runtime allows. Hand each context
-   its assignment, the library checkout path, and tonight's full due list, so
-   every article knows what the paper just published and what else publishes
-   tonight. One article per series, each its own PR. Collect the outcomes.
+1. Read `PROTOCOL.md`. Fetch the `library` branch to its own checkout, then run
+   the duty oracle — never do calendar or queue math yourself:
+   `python3 engine/duty.py --repo . --library <checkout>`
+   If your schedule prompt names one series, serve only that one, and only if
+   duty lists it. **Duty says nothing is due → stop. No PR. Exiting silently is
+   correct behavior, not failure.**
+2. Orient: skim the recent nights in the library checkout (titles, deks,
+   openers) and, per assignment, what moved on the beat and what the catalog
+   already covered. For an open series with an empty commission queue, YOU are
+   the editor: pick tonight's topic within the beat, the template from the
+   series' declared choices, and a fresh slug.
+3. Write `task.md` per article — the commission: subject and angle; what duty
+   assigned and its mode; what the recent catalog forbids repeating and what
+   else publishes tonight; known-good starting sources; the one thing this
+   piece must do to be worth publishing. Every role reads `task.md` first.
 
-If your runtime cannot spawn subagents or worktrees, do the same work one series
-at a time, each in a fresh pass. The steps are identical; you lose only the
-isolation and the parallelism, not the pipeline.
+## Phase 2: the article chain
 
-## Load your layers
+Serve each due series independently: a subagent in its own git worktree where
+your runtime allows, one series at a time in a fresh pass where it does not.
+The chain, each stage a fresh context loading the named skill:
 
-The composed layer stack and its order live in PROTOCOL step 2: the contract, the
-house floor, the paper's voice, the template package, the series prompt, the tag
-fragments, then the item prompt. Load them in that order; later layers specialize
-and never override earlier ones.
+1. `writing-coach` → `voice.md`
+2. `researcher` → `research.md`
+3. `writer` → `library/<series>/<slug>.html` (it runs the proof loop itself)
+4. `editor` → `requested-changes.md`
 
-## Select work
+Route by the editor's verdict: a sourcing gap goes to the `researcher` (it
+appends to `research.md`, labeled), then to the `writer`; a voice or structure
+problem goes straight to the `writer`. A writer or editor may also return
+mid-work asking for research; same routing — or, where your runtime lets a
+role spawn subagents itself, it may invoke the `researcher` directly, since
+the artifacts make either path equivalent. Two rounds should converge. If your
+runtime cannot spawn subagents, run the same skills in the same order in one
+context; you lose isolation, not the pipeline.
 
-Fetch the `library` branch, then ask the duty oracle. Never do calendar or queue
-math yourself:
+## The PR
 
-```sh
-python3 engine/duty.py --repo . --library <path-to-library-checkout>
-```
+Target `library`, branch from it, add exactly one file. Title:
+`nb: <series>/<slug> - <Title>`. Assemble the body from the artifacts in
+exactly PROTOCOL step 8's shape (one section per artifact, each collapsed;
+the size valve is there too). Preflight before opening: write the body to a
+file and rerun the proof with `--pr-body`; it must still report `BLOCK: 0`.
 
-Its `due` list is tonight's work (cadence, pauses, completion, and
-already-published-tonight are all applied). If your schedule prompt names one
-series, serve only that one, and only if duty lists it. Per mode:
-
-- **collection** — publish one of the listed `candidates` (next in order, or any
-  of them under `selection: random`).
-- **sequence** — the listed `slug`. Read the series' already-published articles
-  first; your recap and framing must build on them explicitly.
-- **rolling** — the listed `slug` (today's UTC date). Missed nights are skipped,
-  never backfilled.
-- **open** — an editor-run section. Pending `commissions` come first (their
-  `items:` entries may carry prompts and sources). With an empty queue, YOU are
-  the editor: read the section's published articles (continuity, no repeats), pick
-  tonight's topic within the beat in `prompt.md`, choose the best-fitting template
-  from the series' declared choices, and coin a fresh slug.
-
-**duty says nothing is due → stop. No PR. Exiting silently is correct behavior,
-not failure.**
-
-## The article pipeline
-
-Produce each due series' article by these steps, in order. Track them with your
-task or todo tool, so no stage is skipped and each stage-skill fires at its step.
-
-1. **Load the full layer stack** into this fresh context, in PROTOCOL step 2's
-   order. The isolated context starts empty, so load these here firsthand rather
-   than assuming the orchestrator's copy carried over: the drafter must read the
-   floor and the paper's voice directly, not only through the voice brief. Later
-   layers specialize; they never override earlier ones.
-2. **Writing coach, always.** Spawn a subagent that loads the `writing-coach`
-   skill, handing it the library checkout path and tonight's due list. It
-   studies how the best real writers on this subject actually write and leaves a voice brief at
-   `.nb-voice/<series>-<slug>.md`. Read the brief before you draft; it is what
-   the prose should sound like. For an open series with an empty queue, settle
-   tonight's topic, template, and slug in "Select work" before this step: the
-   coach needs a subject and the brief's filename needs the slug.
-3. **Research.**
-   - Read every `required_docs` file. Read every `consult` entry BEFORE
-     researching elsewhere; citing them is optional. An entry that is a
-     specific page gets read in full; an entry that scopes an archive (an
-     arXiv listing, a court index) orients where to search, and you read what
-     is relevant under it.
-   - If the series sets `sources_exclusive: true`, cite ONLY the declared docs and
-     consult sources; anything else is a BLOCK.
-   - Use web access; prefer primary sources; verify numbers against them.
-   - Every claim the argument rests on gets an inline citation that links to a
-     source entry. Never fabricate a citation; a dangling cite is a BLOCK.
-   - Collect at least the series' source floor; aim past it.
-   - Keep a ledger of every source you read far enough to judge. The ones
-     that never become citations go in the PR body's "Also consulted"
-     section, one line each with the reason.
-4. **Draft.** Render one self-contained HTML file from the template's
-   `skeleton.html`, reading the voice brief as you write so the prose is
-   anchored, not slop. Start from `press/templates/<template>/skeleton.html` if a
-   press package of that id exists, else `templates/<template>/skeleton.html`.
-   - **Fill the skeleton:** replace every ALL-CAPS placeholder and all sample
-     content, drop the one flex-slot marker once you have added the sections it
-     stands for, fill `nb-meta` honestly, and keep the engine asset
-     `<link>`/`<script>` tags exactly as they are (engine-owned). This is the
-     universal fill discipline for every template.
-   - The `manifest.yaml` defines the template's geometry, and `series.yaml`
-     may tighten its bands (`words`, `min_sources`); both bind, and the proof
-     enforces them. A number restated in any prose layer does not. The
-     **article** template is enforced prose: fill
-     each anchor section once, and where the manifest declares `flex_sections` add
-     that many more between the anchors (lowercase-hyphen `data-nb-section` labels,
-     each cited). The **brief** template is enforced structure: the tagged items
-     its manifest sets, each cited, each with its why-it-matters line. A custom
-     template follows its own manifest the same way.
-   - Your furniture palette is three composed scopes: the engine base catalogue
-     (`templates/FURNITURE.md`), the paper's shared furniture
-     (`press/furniture/catalog.md`) if present, and this template's bespoke
-     furniture (`<template>/furniture.md`) if it ships any. Use a piece from any
-     scope when it carries information better than prose; skip decoration.
-   - `nb-meta`: `sources`/`words` are recounted by the proof; `harness`/`model`
-     are your provenance. Charts only as `data-nb-chart` JSON blocks. Add no
-     scripts, styles, iframes, or handlers beyond the engine tags. Write to
-     `library/<series>/<slug>.html`.
-5. **Self-edit, always.** Spawn a fresh subagent that loads the `editor` skill on
-   the draft and the voice brief. Apply the surgical fixes it made or returned. If
-   it requests a redraft, act on the reason: a sourcing gap or a wrong direction
-   sends you back to research (step 3) for what the claim needs, then redraft; a
-   voice or structure problem redrafts from step 4. Run the editor again. Two
-   rounds should converge. Keep each round's report; the PR body's "Process"
-   section is where it lands.
-6. **The proof loop.**
-
-   ```sh
-   python3 engine/check.py library/<series>/<slug>.html \
-       --series <id> --repo . --library <path-to-library-checkout>
-   ```
-
-   If the proof reports PyYAML missing, `pip install pyyaml` and rerun. Iterate
-   until `BLOCK: 0`, then treat every WARN as a revision note and address what you
-   reasonably can. WARNs are the quality bar; BLOCKs are the publishing bar.
-
-7. **The PR.** Target the `library` branch. Add exactly one file:
-   `library/<series>/<slug>.html`.
-   - Title: `nb: <series>/<slug> - <Title>`
-   - Body: the article's production record, in the shape PROTOCOL step 8
-     defines: the fenced `nb-meta` yaml block mirroring the embedded JSON
-     (series, slug, mode, template, date, title, order), your run URL if you
-     have one, and the proof's final WARN summary; then `## Process` (the
-     coach's exemplars, each edit round's report, any redraft and its
-     reason), `## Voice brief` (the brief verbatim, collapsed in a
-     `<details>` block behind a four-backtick fence), and `## Also
-consulted` (the read-but-uncited ledger from research).
-   - Preflight the body before opening the PR. Write your intended body to a file
-     and re-run the proof with `--pr-body body.txt`; it must still report
-     `BLOCK: 0`.
-
-The voice brief stays under `.nb-voice/` (gitignored), so the PR still adds
-exactly one file. Never merge. Never push to `library` directly. Never open a
-second PR for a series. If your PR is labeled `nb-invalid`, stop; a future run
-supersedes you, and fighting the desk is not your job.
+Never merge. Never push to `library`. Never open a second PR for a series. A
+PR labeled `nb-invalid` is a stop, not a fight.
 
 ## Commissioned work (a human asks directly)
 
-A human asking you for an article outside the schedule is fully legitimate; the
-nightly invariant disciplines scheduled runs, not owners. Same pipeline, same
-proof, one PR per article. Default to **press check then promote** below so they
-read it before it publishes; publish directly only if they say so.
+Fully legitimate; the nightly invariant disciplines schedules, not owners.
+Same chain, same proof, one PR. Default to press check, then promote.
+Precondition: a home in config — an `items:` entry, or a new section or series
+via the librarian first — because the proof rejects unconfigured series. A
+series published by hand today is skipped by tonight's scheduled run.
 
-The one precondition: the article needs a home in config. If the request fits an
-existing series, use it (for an open section, append the request to `items:` so
-the commission is on record). If nothing fits, switch to the librarian skill
-first, adding an item, a section, or a series on `main`, because the proof rejects
-articles for unconfigured series (B-SERIES). Config first, then publish. Note for
-them: a series published by hand today is skipped by tonight's scheduled run; it
-already got its article.
+## Press check (rehearsal)
 
-## Press check (rehearsal mode)
-
-When a human asks for a press check of `<series>`:
-
-1. Run the article pipeline in full (coach, research, draft, self-edit, proof),
-   exactly as a real run, but write the article to
-   `press-check/library/<series>/<slug>.html` (gitignored). The voice brief still
-   goes to `.nb-voice/`.
-2. Show the proof's verdict verbatim.
-3. Build the preview:
-   `python3 engine/build_site.py --repo . --preview press-check/ --out press-check/site/`
-   then serve it: `python3 -m http.server -d press-check/site/`. This is the real
-   newsstand with the draft on it; previews render exactly like production. In a
-   headless or orchestrated run, build the preview, skip the server, and return
-   the paths.
-4. Iterate with the human: tune `press/series/<id>/prompt.md`, re-run, compare.
-5. **Promote on request** ("publish this one"): open the real PR from the existing
-   artifact. Copy the file to `library/<series>/<slug>.html` on a branch, no
-   duplicate research spend, normal validation path.
-
-Tell the human once: a press check runs the full pipeline at the same usage cost
-as a real run; only the publish step is skipped.
+For a press check of `<series>`: run phase 1 and the full chain exactly as a
+real run, but write the article to `press-check/library/<series>/<slug>.html`
+(gitignored) and assemble the would-be PR body to
+`.nb-work/<series>/<slug>/pr-body.md`, preflighted with `--pr-body`. Show the
+proof's verdict verbatim. Build the preview so the draft sits on the real
+newsstand with the back catalog:
+`python3 engine/build_site.py --repo . --library <checkout> --preview press-check/ --out press-check/site/`
+then serve it (`python3 -m http.server -d press-check/site/`); headless, skip
+the server and return paths. Iterate with the human: tune the series prompt,
+re-run, compare. **Promote on request**: copy the artifact to
+`library/<series>/<slug>.html` on a branch and open the real PR — no duplicate
+research spend. Tell the human once: a press check costs the same as a real
+run; only publishing is skipped.
