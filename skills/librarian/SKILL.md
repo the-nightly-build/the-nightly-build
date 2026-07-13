@@ -22,14 +22,11 @@ agents can run it and their costs.
 upstream-owned. Users only ever edit `press/`, which is what makes engine updates
 conflict-free (see §7).
 
-**Fresh paper?** A fresh fork has no `press/` content of its own to reset.
-Upstream ships no `press/` at all (the directory does not exist there, which keeps
-engine updates conflict-free), and `setup.sh` scaffolds an empty one. So the
-interview writes `press/site.yaml` (their title), `press/editorial.md` (their
-voice, §1), and `press/series/` from scratch. The complete working configuration
-in `examples/` is the living reference: every file there demonstrates part of the
-config surface, including commented-out advanced options, so crib from it rather
-than copy it wholesale.
+**Fresh paper?** A fresh fork has no `press/` content of its own: upstream ships
+none and `setup.sh` scaffolds an empty one. The interview writes
+`press/site.yaml` (their title), `press/editorial.md` (their voice, §1), and
+`press/series/` from scratch. The complete working configuration in `examples/`
+is the living reference; crib from it rather than copy it wholesale.
 
 ## 1. Interview
 
@@ -43,11 +40,9 @@ need enough to design the masthead:
 - Shape: one-off deep dives (**collection**), an ordered course (**sequence**),
   ongoing briefings (**rolling**), or an editor-run section (**open**: they
   describe a beat, the night shift picks each night's topic and genre)?
-  Nearly everything is the `article` template; the genre (dossier, chronicle,
-  lesson, appraisal, essay...) is something the series prompt describes, not an
-  engine setting. `brief` is for itemized nightly roundups. For structure the
-  proof should enforce, a series can point at a custom `press/templates/`
-  template (see §6).
+  Nearly everything is the `article` template; `brief` is for itemized nightly
+  roundups; genre (dossier, lesson, essay...) is series-prompt prose, not an
+  engine setting (custom templates: §6).
 - Rhythm: nightly everything, or should some series breathe? Per-series
   `cadence:` takes `daily`, `weekdays`, `weekends`, or a day list (`[mon, thu]`);
   a weekly deep dive plus a daily brief is a common pairing.
@@ -79,13 +74,12 @@ improvising a workaround.
 
 ## 2. Propose, then write
 
-Propose: series `id` (`[a-z0-9-]{1,32}`), mode, template (must be legal for the
-mode per the template's `manifest.yaml`; open series may declare a `templates:`
-choice list instead), name, cadence if not nightly, and, for collection/sequence,
-the full item list (slugs `[a-z0-9-]{1,64}`, titles, tags, per-item prompts). For
-a sequence, draft the complete ordered syllabus with the user before writing
-anything. For an open section, the beat description in `prompt.md` IS the config,
-so invest the interview time there. Show the plan; get a yes.
+Propose: series `id`, mode, template (must be legal for the mode per the
+template's `manifest.yaml`), name, cadence if not nightly, and, for
+collection/sequence, the full item list — draft a sequence's complete ordered
+syllabus with the user before writing anything. For an open section, the beat
+description in `prompt.md` IS the config, so invest the interview time there.
+Show the plan; get a yes.
 
 Then write:
 
@@ -131,25 +125,14 @@ schedule, say so and skip this section; configuring the new series on `main` was
 the whole job.
 
 For a first-time handoff, read `docs/scheduling.md` (the model) and
-`docs/harnesses.md` (which agents work and their costs). Ask what agent or
-subscription the user already pays for, match it to a harness there (a native
-scheduler when the provider hosts one, else the universal GitHub Actions cron),
-and cover four things:
-
-1. **Connect**: the one-time GitHub connection for the chosen path.
-2. **Schedule**: one nightly schedule for the whole paper, using the canonical
-   prompt in `docs/scheduling.md` with `<repo>` and `<checkout>` filled in.
-3. **Model and cost**: pick the strongest model available; nb-meta records what
-   actually ran. Say plainly whether the run is included in a subscription or
-   bills a metered key (the coverage table in `docs/harnesses.md` has it per agent).
-4. **First run now**: do not make them wait for tonight. If your harness lets you
-   fire a one-off run yourself, do it and watch today's article publish; otherwise
-   tell them exactly how.
-
-If you (the running agent) can create the schedule and fire the first run
-yourself, do it. Otherwise the human pastes the filled prompt into their
-scheduler; say that plainly. The prompt lives in `docs/scheduling.md` and the
-per-agent paths in `docs/harnesses.md`, so they are not repeated here.
+`docs/harnesses.md` (which agents work and their costs); those two files own the
+details, so work from them rather than memory. Ask what agent or subscription
+the user already pays for, match it to a harness, and cover four things:
+**connect** (the one-time GitHub connection), **schedule** (one nightly
+schedule, the canonical prompt with `<repo>` and `<checkout>` filled in),
+**model and cost** (strongest available; say plainly whether the run is
+subscription-included or metered), and **first run now** (fire a one-off run if
+your harness can, so today's article publishes instead of waiting for tonight).
 
 ## 6. Curation verbs
 
@@ -188,27 +171,18 @@ Re-validate after every change.
   `prompt.md` (outline conventions, furniture) and rely on `article`'s flex
   sections. That is how the examples run chronicles, lessons, and appraisals.
 - _"Make a new template"_: for structure the proof should ENFORCE, create a
-  package folder `press/templates/<id>/` (the folder name is the id) with a
-  `manifest.yaml` (`class`, `words` size band, `sections` anchors incl. `sources`,
-  optional `flex_sections: [min, max]` for an agent-named middle, `cite_rule`,
-  `modes`) and a `skeleton.html` scaffold (crib a shipped template's head and
-  chrome; keep the asset links and sandbox rules). A press package replaces a
-  shipped one of the same id wholesale. Omit `flex_sections` for a fully fixed
-  outline. Two optional manifest fields declare requirements the engine reads
-  (never from a template name): `cite_exempt: [names]` for sections that carry no
-  citations (on top of the always-exempt `sources`) and `require_why: true` to
-  require a `data-nb-why` line on each item. The build-your-own walkthrough in
-  `docs/customization.md` rebuilds the classic lesson template this way. An
-  optional `<id>/identity.md` gives the template its voice and character (crib
-  `templates/article/identity.md`): specific about stance and craft, permissive
-  about structure. A `<id>/furniture.md` + `furniture.css` adds bespoke furniture
-  only this template renders. Validate, then press check before scheduling.
-- _"Give my paper its own furniture"_: for pieces shared across sections, add
-  component classes to `press/furniture/styles.css` and catalogue them in
-  `press/furniture/catalog.md`; for a piece only one template renders, put it in
-  that template's folder (`furniture.md` + `furniture.css`). Either restyles the
-  whole library on every publish. Instruct the sections to use them in
-  `prompt.md`; see `docs/customization.md`.
+  package folder `press/templates/<id>/` (the folder name is the id):
+  `manifest.yaml` + `skeleton.html` required, `identity.md` and
+  `furniture.md`/`furniture.css` optional. A press package replaces a shipped
+  one of the same id wholesale. The build-your-own walkthrough in
+  `docs/customization.md` covers every manifest field and rebuilds the classic
+  lesson template this way; crib from it rather than improvising the fields
+  here. Validate, then press check before scheduling.
+- _"Give my paper its own furniture"_: components shared across sections go in
+  `press/furniture/` (`styles.css` + `catalog.md`); a piece only one template
+  renders goes in that template's folder. Either restyles the whole library on
+  every publish. Instruct the sections to use them in `prompt.md`; see
+  `docs/customization.md`.
 
 ## 7. Update my engine (plain git)
 
