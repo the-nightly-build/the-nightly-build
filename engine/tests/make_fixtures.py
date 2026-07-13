@@ -156,7 +156,7 @@ def article():
 {meta}
 </script>
 <style>body{{font-family:serif}}</style>
-</head><body>
+</head><body class="nb-article">
 <article>
 {"".join(body)}
 <figure>
@@ -198,9 +198,9 @@ def brief(date="2026-07-06"):
 <script type="application/json" id="nb-meta">
 {meta}
 </script>
-</head><body>
+</head><body class="nb-article">
 <section data-nb-section="items">{"".join(items)}</section>
-<section data-nb-section="sources"><ol>{src}</ol></section>
+<section data-nb-section="sources"><h2>Sources</h2><ol>{src}</ol></section>
 </body></html>"""
 
 

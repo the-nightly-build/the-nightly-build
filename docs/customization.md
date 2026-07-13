@@ -222,6 +222,9 @@ ordered course, rebuilt as your own template.
    Two optional fields let a template declare requirements the engine would
    otherwise not know: `cite_exempt: [names]` (sections that need no citations,
    on top of the always-exempt `sources`) and `require_why: true` (each
+   An optional `chrome:` list names raw
+   substrings of the skeleton (the body class, fixed labels and headings) that
+   must survive the fill verbatim; the proof blocks an article that alters them.
    `data-nb-item` must carry a `data-nb-why` line, as `brief` does). The engine
    reads these from the manifest, so any template can use them. An optional
    `about:` one-liner documents the template for a browsing human; the engine

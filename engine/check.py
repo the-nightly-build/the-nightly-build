@@ -1158,6 +1158,24 @@ def check_warns(
         )
 
 
+
+def check_chrome(html_path, treg, rep):
+    """Fixed chrome declared in the manifest survives the fill verbatim."""
+    chrome = treg.get("chrome") or []
+    if not chrome:
+        return
+    with open(html_path, encoding="utf-8") as fh:
+        raw = fh.read()
+    for piece in chrome:
+        if piece not in raw:
+            rep.block(
+                "B-CHROME",
+                f"fixed chrome missing or altered: {piece!r}. The skeleton's "
+                "chrome belongs to the template; fill the placeholders and "
+                "leave the chrome exactly as shipped.",
+            )
+
+
 def check_article(
     html_path,
     series_id,
@@ -1221,6 +1239,7 @@ def check_article(
     )
 
     check_required_sections(ed, treg, rep)
+    check_chrome(html_path, treg, rep)
     check_sandbox(ed, rep)
     check_sources(ed, rep, check_links=check_links)
     check_cites(ed, rep)

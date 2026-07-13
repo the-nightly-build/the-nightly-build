@@ -30,6 +30,7 @@ SERIES_ID_RE = re.compile(r"^[a-z0-9-]{1,32}$")
 SLUG_RE = re.compile(r"^[a-z0-9-]{1,64}$")
 MODES = {"collection", "sequence", "rolling", "open"}
 TEMPLATE_KEYS = {
+    "chrome",
     "class",
     "words",
     "items",

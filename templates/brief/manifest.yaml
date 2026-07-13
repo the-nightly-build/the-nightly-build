@@ -12,3 +12,7 @@ sections: [items, sources]
 cite_rule: per-item
 require_why: true # each item needs a "why it matters" line (data-nb-why)
 modes: [rolling, open]
+chrome:
+  - '<body class="nb-article">'
+  - "<b>Why it matters</b>:"
+  - "<h2>Sources</h2>"

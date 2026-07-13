@@ -12,3 +12,6 @@ sections: [orientation, crux, what-would-change-my-mind, sources]
 flex_sections: [2, 2] # exactly two sides, rendered left vs right
 cite_rule: per-section
 modes: [open]
+chrome:
+  - '<body class="nb-article">'
+  - "<h2>Sources</h2>"

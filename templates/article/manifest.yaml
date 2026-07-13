@@ -12,3 +12,6 @@ sections: [orientation, sources]
 flex_sections: [2, 6]
 cite_rule: per-section
 modes: [collection, sequence, rolling, open]
+chrome:
+  - '<body class="nb-article">'
+  - "<h2>Sources</h2>"
