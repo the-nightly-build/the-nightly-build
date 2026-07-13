@@ -1158,7 +1158,6 @@ def check_warns(
         )
 
 
-
 def check_chrome(html_path, treg, rep):
     """Fixed chrome declared in the manifest survives the fill verbatim."""
     chrome = treg.get("chrome") or []

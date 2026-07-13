@@ -38,7 +38,8 @@ discipline, every template:
 
 - Replace every ALL-CAPS placeholder and all sample content. Drop the
   flex-slot marker once the sections it stands for exist. Keep the engine
-  asset `<link>`/`<script>` tags exactly as they are.
+  asset `<link>`/`<script>` tags and the manifest's `chrome:` strings
+  exactly as they are; the proof blocks a reworded label or body class.
 - `manifest.yaml` defines the geometry and `series.yaml` may tighten its
   bands. Both bind: their values are authoritative and machine-checked by
   the proof. A number restated in prose anywhere carries no force. Obey

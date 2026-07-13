@@ -74,8 +74,7 @@ piece argues and in what order. When the piece would read the same with its
 headings deleted, they were scaffolding, and scaffolding slots ("Background",
 "Implications", "The Road Ahead", "Key Takeaways") are the machine tell. The
 `data-nb-section` label mirrors its heading, short and concrete. Fixed
-headings a template mandates ("Sources", "Read it yourself") are furniture
-and exempt. Every heading the writer names is held to this standard.
+headings a template mandates ("Sources") are furniture and exempt. Every heading the writer names is held to this standard.
 
 Cadence repeats the same way dek molds do: a paper whose headings keep
 joining two clauses with a comma and "and" ("The scale, and what it is

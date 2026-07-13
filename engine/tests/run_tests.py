@@ -1821,11 +1821,19 @@ chrome_dir = pathlib.Path(tempfile.mkdtemp())
 chrome_file = chrome_dir / "x.html"
 chrome_file.write_text('<body class="nb-article"><b>Why it matters</b>: y</body>')
 rep_ok = C.Report()
-C.check_chrome(str(chrome_file), {"chrome": ['<body class="nb-article">', "<b>Why it matters</b>:"]}, rep_ok)
+C.check_chrome(
+    str(chrome_file),
+    {"chrome": ['<body class="nb-article">', "<b>Why it matters</b>:"]},
+    rep_ok,
+)
 expect("chrome intact passes", rep_ok, blocks=0)
 chrome_file.write_text('<body class="nb-edition"><b>Why it matters \u2192</b> y</body>')
 rep_bad = C.Report()
-C.check_chrome(str(chrome_file), {"chrome": ['<body class="nb-article">', "<b>Why it matters</b>:"]}, rep_bad)
+C.check_chrome(
+    str(chrome_file),
+    {"chrome": ['<body class="nb-article">', "<b>Why it matters</b>:"]},
+    rep_bad,
+)
 expect("mutated chrome blocks", rep_bad, must_have=["B-CHROME"])
 rep_none = C.Report()
 C.check_chrome(str(chrome_file), {}, rep_none)
