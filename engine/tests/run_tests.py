@@ -23,6 +23,7 @@ import types
 import _bootstrap
 import check as C
 import make_fixtures
+import morning_gate as MG
 import validate_config as V
 import yaml
 
@@ -1651,6 +1652,45 @@ for name, cond in [
     (
         "sequence progress counts syllabus items, not library extras",
         duty_of(d_seq_extra, "semiconductors")["reason"].startswith("1 of 5 published"),
+    ),
+]:
+    if cond:
+        PASS += 1
+        print(f"  ok   {name}")
+    else:
+        FAIL.append(name)
+        print(f"  FAIL {name}")
+
+print("== morning gate (the mail's decision, out of the workflow) ==")
+
+
+def gate_out(**kwargs):
+    buf = io.StringIO()
+    with contextlib.redirect_stdout(buf), contextlib.suppress(SystemExit):
+        MG.out(**kwargs)
+    return buf.getvalue()
+
+
+notice = MG.quiet_notice(
+    "The Test Build", missed="the-wire, the-world", latest="2026-07-10", age=3
+)
+for name, cond in [
+    (
+        "latest build is the newest date, never the dateless bucket",
+        MG.latest_build(["unknown", "2026-07-10", "2026-07-12"]) == "2026-07-12",
+    ),
+    (
+        "a library of only dateless articles has no latest build",
+        MG.latest_build(["unknown"]) is None and MG.latest_build([]) is None,
+    ),
+    (
+        "quiet notice names the missed series and the staleness",
+        "the-wire, the-world" in notice and "2026-07-10 (3 nights ago)" in notice,
+    ),
+    (
+        "out() speaks the workflow's four-output contract",
+        gate_out(send=True, why="w", body="b.html", subject="s")
+        == "send=true\nwhy=w\nbody=b.html\nsubject=s\n",
     ),
 ]:
     if cond:
