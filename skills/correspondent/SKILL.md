@@ -94,8 +94,8 @@ task or todo tool, so no stage is skipped and each stage-skill fires at its step
    - If the series sets `sources_exclusive: true`, cite ONLY the declared docs and
      consult sources; anything else is a BLOCK.
    - Use web access; prefer primary sources; verify numbers against them.
-   - Every load-bearing claim gets an inline citation that links to a source
-     entry. Never fabricate a citation; a dangling cite is a BLOCK.
+   - Every claim the argument rests on gets an inline citation that links to a
+     source entry. Never fabricate a citation; a dangling cite is a BLOCK.
    - Collect at least the series' source floor; aim past it.
    - Keep a ledger of every source you read far enough to judge. The ones
      that never become citations go in the PR body's "Also consulted"

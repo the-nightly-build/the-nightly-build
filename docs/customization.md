@@ -136,6 +136,42 @@ template package itself (its editorial character, opener, and structure notes),
 distinct from the machine contract in the `manifest.yaml` above it. A
 `press/templates/` package supplies its own.
 
+## Banned terms: press/banned-terms.yaml
+
+One banned habit gets mechanical teeth. The proof counts every article against
+a list of ruled-out strings, each entry carrying the exact strings to match,
+the most uses an article may keep, and the note the writer sees when the count
+runs over. The engine seeds the list in `spec/banned-terms.yaml` (the em-dash
+as a default connective, "leverage", "load-bearing"); an over-limit count is a
+`W-BANNED-TERM` warning, promoted to a block when the series sets `strict`.
+Counting covers the rendered text (title, dek, headings, body) minus the
+sources section, case-insensitively.
+
+Your press layers `press/banned-terms.yaml` over the seed, by `id`:
+
+```yaml
+# A new id adds a ban. State every field: the strings to count, the
+# ceiling, and the note the writer acts on.
+- id: synergy
+  terms: [synergy, synergies]
+  max: 0
+  suggestion: name the mechanism; what does the combination actually do?
+
+# Reusing an engine id changes only the fields you state.
+- id: em-dash
+  max: 8
+
+# Retire an engine entry outright.
+- id: leverage
+  enabled: false
+```
+
+Write each `suggestion` as the correction you would give a writer, and aim it
+at the rewrite. A ban enforced by swapping in a synonym or a comma trades one
+tell for another; the sentence that reached for the term is the thing to fix.
+`validate_config.py` checks both files, so a typo surfaces before a nightly
+run trips on it.
+
 ## Your own templates
 
 A template is a self-contained folder — the folder name is the template id —

@@ -67,6 +67,7 @@ appearance: auto
 def test_repo():
     root = pathlib.Path(tempfile.mkdtemp())
     shutil.copytree(REPO / "templates", root / "templates")
+    shutil.copytree(REPO / "spec", root / "spec")
     shutil.copytree(REPO / "engine" / "assets", root / "engine" / "assets")
     (root / "press" / "series").mkdir(parents=True)
     (root / "press" / "site.yaml").write_text(SITE_YAML)

@@ -16,7 +16,7 @@ docs/customization.md).
 
 ## Stat strip
 
-Three or four load-bearing numbers. Each must be cited in nearby prose.
+Three or four numbers that carry the thesis. Each must be cited in nearby prose.
 
 ```html
 <div class="nb-stat-strip">

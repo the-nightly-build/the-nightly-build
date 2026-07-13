@@ -130,20 +130,20 @@ expect(
     must_not=["W-LENGTH-LOW", "W-SOURCES-MIN", "W-CITE-DENSITY"],
 )
 expect(
-    "clean prose does not trip the em-dash warn",
+    "clean prose does not trip the banned-terms warn",
     run_local(VALID, "semiconductors"),
-    must_not=["W-EM-DASH"],
+    must_not=["W-BANNED-TERM"],
 )
 expect(
-    "em-dash overuse trips the soft W-EM-DASH warn (never a block)",
+    "em-dash overuse trips the soft W-BANNED-TERM warn (never a block)",
     run_local(
         mut(
             "<h2>Orientation</h2>",
-            "<h2>Orientation</h2><p>" + "clause — " * 40 + "</p>",
+            "<h2>Orientation</h2><p>" + "clause — " * 5 + "</p>",
         ),
         "semiconductors",
     ),
-    must_have=["W-EM-DASH"],
+    must_have=["W-BANNED-TERM"],
     blocks=0,
 )
 expect(
@@ -1227,6 +1227,104 @@ for name, cond in [
     (
         "unknown series key (typo) rejected",
         vc_rc(patched_repo("cadance: daily\n")) == 1,
+    ),
+]:
+    if cond:
+        PASS += 1
+        print(f"  ok   {name}")
+    else:
+        FAIL.append(name)
+        print(f"  FAIL {name}")
+
+print("== banned terms (spec list, press overrides) ==")
+
+
+def banned_repo(press_yaml=None):
+    tmp = tempfile.mkdtemp()
+    for sub in ("press", "templates", "spec", "engine"):
+        shutil.copytree(pathlib.Path(TESTREPO) / sub, pathlib.Path(tmp) / sub)
+    if press_yaml is not None:
+        (pathlib.Path(tmp) / "press" / "banned-terms.yaml").write_text(press_yaml)
+    return tmp
+
+
+LEVERAGE_HEADING = mut("<h2>Orientation</h2>", "<h2>Leverage on leverage</h2>")
+expect(
+    "a banned term is counted in headings, case-insensitively",
+    run_local(LEVERAGE_HEADING, "semiconductors"),
+    must_have=["W-BANNED-TERM"],
+    blocks=0,
+)
+expect(
+    "a use within the limit passes",
+    run_local(
+        mut("<h2>Orientation</h2>", "<h2>Leverage economics</h2>"), "semiconductors"
+    ),
+    must_not=["W-BANNED-TERM"],
+)
+expect(
+    "a zero-limit term trips on first use, spaced variant included",
+    run_local(
+        mut("<h2>Orientation</h2>", "<h2>The load bearing wall</h2>"),
+        "semiconductors",
+    ),
+    must_have=["W-BANNED-TERM"],
+)
+expect(
+    "press override raises an engine limit",
+    run_local(
+        LEVERAGE_HEADING,
+        "semiconductors",
+        repo=banned_repo("- id: leverage\n  max: 5\n"),
+    ),
+    must_not=["W-BANNED-TERM"],
+)
+expect(
+    "press disables an engine entry",
+    run_local(
+        mut("<h2>Orientation</h2>", "<h2>The load bearing wall</h2>"),
+        "semiconductors",
+        repo=banned_repo("- id: load-bearing\n  enabled: false\n"),
+    ),
+    must_not=["W-BANNED-TERM"],
+)
+expect(
+    "press adds its own ban",
+    run_local(
+        mut("<h2>Orientation</h2>", "<h2>Synergy in memory</h2>"),
+        "semiconductors",
+        repo=banned_repo(
+            "- id: synergy\n  terms: [synergy]\n  max: 0\n"
+            "  suggestion: name the mechanism\n"
+        ),
+    ),
+    must_have=["W-BANNED-TERM"],
+)
+for name, cond in [
+    (
+        "press partial override validates",
+        vc_rc(banned_repo("- id: em-dash\n  max: 8\n")) == 0,
+    ),
+    (
+        "press new ban missing its suggestion rejected",
+        vc_rc(banned_repo("- id: synergy\n  terms: [synergy]\n  max: 0\n")) == 1,
+    ),
+    (
+        "banned-terms unknown key rejected",
+        vc_rc(banned_repo("- id: em-dash\n  maximum: 8\n")) == 1,
+    ),
+    (
+        "banned-terms negative max rejected",
+        vc_rc(
+            banned_repo(
+                "- id: synergy\n  terms: [synergy]\n  max: -1\n  suggestion: s\n"
+            )
+        )
+        == 1,
+    ),
+    (
+        "banned-terms duplicate id rejected",
+        vc_rc(banned_repo("- id: em-dash\n  max: 8\n- id: em-dash\n  max: 9\n")) == 1,
     ),
 ]:
     if cond:

@@ -62,8 +62,6 @@ ALLOWED_EXTERNAL_HOSTS = frozenset({"fonts.googleapis.com", "fonts.gstatic.com"}
 ENGINE_SCRIPT_RE = re.compile(r"^(?:(?:\.\./)+|/)assets/nb\.js$")
 DEFAULT_MIN_SOURCES = {"longread": 8, "shortread": 5}
 DEFAULT_CITE_EXEMPT = ("sources",)  # a template extends this via registry cite_exempt
-EM_DASH_PER_1000 = 4.0  # soft WARN threshold: em-dashes per 1000 words of body prose
-EM_DASH_MIN_WORDS = 100  # skip the check on very short text where the rate is noisy
 SELF_COUNT_TOLERANCE = 0.20
 
 
@@ -340,6 +338,31 @@ def find_template(repo, template_id):
         if os.path.isfile(path):
             return path
     return None
+
+
+def load_banned_terms(repo):
+    """Merge the engine's banned-terms list with the press's.
+
+    spec/banned-terms.yaml seeds the list; press/banned-terms.yaml layers
+    over it by id — a new id adds a ban, a repeated id updates only the
+    fields it states, and enabled false retires an entry. Malformed entries
+    are skipped here; validate_config.py is where authors hear about them.
+    """
+    merged = {}
+    for path in (
+        os.path.join(repo, "spec", "banned-terms.yaml"),
+        os.path.join(repo, "press", "banned-terms.yaml"),
+    ):
+        if not os.path.isfile(path):
+            continue
+        entries = load_yaml(path) or []
+        if not isinstance(entries, list):
+            continue
+        for entry in entries:
+            if not isinstance(entry, dict) or not entry.get("id"):
+                continue
+            merged.setdefault(entry["id"], {}).update(entry)
+    return [e for e in merged.values() if e.get("enabled", True) and e.get("terms")]
 
 
 def load_series(repo, series_id) -> tuple[dict | None, str]:
@@ -913,7 +936,7 @@ def check_cites(ed, rep):
             )
 
 
-def check_warns(ed, meta, *, series, treg, template_id, item_cfg, rep):
+def check_warns(ed, meta, *, series, treg, template_id, item_cfg, banned_terms, rep):
     band = series.get("words") or treg.get("words")
     if band:
         lo, hi = band
@@ -1045,19 +1068,18 @@ def check_warns(ed, meta, *, series, treg, template_id, item_cfg, rep):
                 suggestion="update nb-meta words to the counted total",
             )
 
-    # em-dash overuse (soft): AI drafts reach for the em-dash as a default
-    # connective. WARN only, never a BLOCK; some em-dashes earn their place.
-    prose = " ".join(ed._prose_text_parts)
-    prose_words = len(re.findall(r"\S+", prose))
-    if prose_words >= EM_DASH_MIN_WORDS:
-        dashes = prose.count("—")
-        rate = dashes * 1000 / prose_words
-        if rate > EM_DASH_PER_1000:
+    # banned terms (soft): the lexical tells spec/banned-terms.yaml rules out,
+    # extended by press/banned-terms.yaml. Counting covers the rendered text
+    # minus the sources section, so a heading counts and a cited title does not.
+    prose = " ".join(" ".join(ed._prose_text_parts).split()).casefold()
+    for entry in banned_terms:
+        count = sum(prose.count(str(term).casefold()) for term in entry["terms"])
+        limit = int(entry.get("max", 0))
+        if count > limit:
             rep.warn(
-                "W-EM-DASH",
-                f"{dashes} em-dashes in {prose_words} words ({rate:.1f} per 1000)",
-                suggestion="AI drafts overuse the em-dash as a default connective; "
-                "cut the reflexive ones, keep the few that earn their place",
+                "W-BANNED-TERM",
+                f"'{entry['id']}': {count} uses; the limit is {limit}",
+                suggestion=entry.get("suggestion"),
             )
 
 
@@ -1134,6 +1156,7 @@ def check_article(
         treg=treg,
         template_id=template_id,
         item_cfg=item_cfg,
+        banned_terms=load_banned_terms(repo),
         rep=rep,
     )
     return meta
