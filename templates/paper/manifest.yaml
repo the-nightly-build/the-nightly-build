@@ -1,14 +1,14 @@
 # The machine contract for the paper template: the geometry engine/check.py
-# enforces (PROTOCOL step 2.4 reads it). A guided reconstruction of one research
-# paper: the abstract anchor puts the source's link and its own words up front,
-# the flex sections carry the reconstruction, and the reading map closes on a
-# triage of the original. The primer and the map orient and direct rather than
-# claim, so they are cite-exempt; the abstract cites the paper it quotes.
-about: "A guided reconstruction of one research paper: its abstract and link up front, the idea rebuilt in this paper's own words anchored by the original's, and a map for reading the source."
+# enforces (PROTOCOL step 2.4 reads it). Reporting on one research paper:
+# the abstract anchor puts the source's link and its own words up front,
+# and the flex sections carry the reconstruction and land its verdict.
+about: "Reporting on one research paper: its abstract and link up front, the idea rebuilt in the piece's own words and weighed as a reviewer would."
 class: longread
 words: [1800, 3400]
-sections: [abstract, before-you-read, orientation, read-it-yourself, sources]
+sections: [abstract, orientation, sources]
 flex_sections: [2, 6]
 cite_rule: per-section
-cite_exempt: [before-you-read, read-it-yourself]
 modes: [collection, sequence, open]
+chrome:
+  - '<body class="nb-article">'
+  - "<h2>Sources</h2>"

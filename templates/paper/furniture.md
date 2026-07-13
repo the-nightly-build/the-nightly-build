@@ -46,32 +46,3 @@ paragraph", "Table 2 caption".
   </figcaption>
 </figure>
 ```
-
-## Reading map (`nb-paper-map`)
-
-The `read-it-yourself` close: the original's sections triaged with a verdict
-each, so the reader opens the source knowing what to read and what to skip.
-Verdicts are `read`, `skim`, or `skip`, one clause of why apiece, each reason
-in this paper's terms, not a stock note. Entries are plain wrapping text
-behind the badge, so a long section title wraps instead of breaking the
-layout.
-
-```html
-<ul class="nb-paper-map">
-  <li>
-    <span class="nb-map-verdict nb-read">read</span>
-    <strong class="nb-map-target">§3 Method</strong>: WHY THIS SECTION PAYS, IN
-    THIS PAPER'S TERMS.
-  </li>
-  <li>
-    <span class="nb-map-verdict nb-skim">skim</span>
-    <strong class="nb-map-target">§5 Experiments</strong>: WHAT TO PULL FROM IT
-    (THE ONE TABLE, THE ONE FIGURE).
-  </li>
-  <li>
-    <span class="nb-map-verdict nb-skip">skip</span>
-    <strong class="nb-map-target">§6 Related work</strong>: WHAT MAKES IT
-    SKIPPABLE HERE.
-  </li>
-</ul>
-```
