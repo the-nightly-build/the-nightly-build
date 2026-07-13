@@ -719,7 +719,8 @@ hostile = {
     "reading_minutes": 3,
     "meta": {"title": "T", "dek": "d", "sources": 2},
 }
-item_html, lead_html = B.story_item(hostile, {}), B.lead_cell(hostile, {})
+item_html = B.story_item(hostile, {})
+lead_html = B.story_item(hostile, {}, lead=True)
 check(
     "story_item escapes a hostile href",
     'library/a"&b/c"&d' not in item_html and "a&quot;&amp;b/c&quot;&amp;d" in item_html,

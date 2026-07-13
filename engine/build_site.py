@@ -531,28 +531,20 @@ def item_meta_row(ed):
     )
 
 
-def story_item(ed, series_cfgs, *, depth=0):
+def story_item(ed, series_cfgs, *, depth=0, lead=False):
     rel = "../" * depth
     dek = str(ed["meta"].get("dek", ""))
-    dek_html = f'<p class="nb-dek nb-cell-dek">{esc(dek)}</p>' if dek else ""
+    if lead:
+        cls, tag = " nb-lead-cell", "h2"
+        dek_html = f'<p class="nb-dek">{esc(dek)}</p>'
+    else:
+        cls, tag = "", "h3"
+        dek_html = f'<p class="nb-dek nb-cell-dek">{esc(dek)}</p>' if dek else ""
     return (
-        f'<a class="nb-item" href="{rel}library/{esc(ed["series"])}/{esc(ed["slug"])}.html">'
+        f'<a class="nb-item{cls}" href="{rel}library/{esc(ed["series"])}/{esc(ed["slug"])}.html">'
         f'<div class="nb-kicker">{esc(kicker_text(ed, series_cfgs))}</div>'
-        f"<h3>{esc(str(ed['meta'].get('title', ed['slug'])))}</h3>"
+        f"<{tag}>{esc(str(ed['meta'].get('title', ed['slug'])))}</{tag}>"
         f"{dek_html}{item_meta_row(ed)}</a>"
-    )
-
-
-def lead_cell(ed, series_cfgs, *, depth=0):
-    rel = "../" * depth
-    meta = ed["meta"]
-    return (
-        f'<a class="nb-item nb-lead-cell" '
-        f'href="{rel}library/{esc(ed["series"])}/{esc(ed["slug"])}.html">'
-        f'<div class="nb-kicker">{esc(kicker_text(ed, series_cfgs))}</div>'
-        f"<h2>{esc(str(meta.get('title', ed['slug'])))}</h2>"
-        f'<p class="nb-dek">{esc(str(meta.get("dek", "")))}</p>'
-        f"{item_meta_row(ed)}</a>"
     )
 
 
@@ -569,9 +561,7 @@ def night_body(eds, series_cfgs, *, depth, date):
         f'<div class="nb-articleline"><span>{esc(pretty_date(date))}</span>'
         f'<span class="nb-articleline-facts">{total} min read</span></div>'
     )
-    if not eds:
-        return body + '<div class="nb-empty"><p>No articles this night.</p></div>'
-    cells = lead_cell(eds[0], series_cfgs, depth=depth) + "".join(
+    cells = story_item(eds[0], series_cfgs, depth=depth, lead=True) + "".join(
         story_item(e, series_cfgs, depth=depth) for e in eds[1:]
     )
     return body + f'<div class="nb-grid">{cells}</div>'
@@ -1366,8 +1356,7 @@ def main(argv=None):
     p.add_argument("--out", default="site", help="output directory")
     p.add_argument(
         "--preview",
-        help="press-check dir; its library/ drafts are merged in "
-        "and every page is bannered",
+        help="press-check dir; its library/ drafts are merged in",
     )
     p.add_argument(
         "--base-url",

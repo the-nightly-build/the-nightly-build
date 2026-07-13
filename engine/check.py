@@ -246,14 +246,13 @@ class Article(HTMLParser):
                         "required": a.get("data-nb-required") or None,
                     }
                 )
-                for e in self.stack:
-                    if e.get("id"):
-                        self.source_container_ids.add(e["id"])
+                nearest = None
                 for e in reversed(self.stack):
                     if e.get("id"):
-                        if e["id"] not in self.source_ids:
-                            self.source_ids.append(e["id"])
-                        break
+                        self.source_container_ids.add(e["id"])
+                        nearest = nearest or e["id"]
+                if nearest and nearest not in self.source_ids:
+                    self.source_ids.append(nearest)
 
         if tag in ("script", "style"):
             self._suppress_text_depth += 1
@@ -1117,7 +1116,8 @@ def check_warns(
     # banned terms (soft): the lexical tells spec/banned-terms.yaml rules out,
     # extended by press/banned-terms.yaml. Counting covers the rendered text
     # minus the sources section, so a heading counts and a cited title does not.
-    prose = " ".join(" ".join(ed._prose_text_parts).split()).casefold()
+    raw_prose = " ".join(" ".join(ed._prose_text_parts).split())
+    prose = raw_prose.casefold()
     for entry in banned_terms:
         count = sum(prose.count(str(term).casefold()) for term in entry["terms"])
         limit = int(entry.get("max", 0))
@@ -1132,7 +1132,6 @@ def check_warns(
     # caps so it cannot pass as copy. A caps run surviving into the prose is
     # an unfilled slot or a lifted instruction; long runs warn even when the
     # skeleton does not carry them, catching lifts from the furniture docs.
-    raw_prose = " ".join(" ".join(ed._prose_text_parts).split())
     leftovers = set()
     for run in caps_runs(raw_prose):
         joined = " ".join(run)
@@ -1452,16 +1451,12 @@ def emit(rep, as_json):
             )
         )
     else:
-        print(f"BLOCK: {len(blocks)}")
-        for f in blocks:
-            print(f"  {f.code:<18} {f.message}")
-            if f.suggestion:
-                print(f"  {'':<18} → {f.suggestion}")
-        print(f"WARN:  {len(warns)}")
-        for f in warns:
-            print(f"  {f.code:<18} {f.message}")
-            if f.suggestion:
-                print(f"  {'':<18} → {f.suggestion}")
+        for label, findings in (("BLOCK:", blocks), ("WARN: ", warns)):
+            print(f"{label} {len(findings)}")
+            for f in findings:
+                print(f"  {f.code:<18} {f.message}")
+                if f.suggestion:
+                    print(f"  {'':<18} → {f.suggestion}")
         for n in rep.notes:
             print(f"note: {n}")
         print("verdict:", "PUBLISHABLE" if not blocks else "BLOCKED")

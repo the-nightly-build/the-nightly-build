@@ -143,7 +143,7 @@ def series_duty(
     if mode == "sequence":
         if not unpublished:
             return False, {**entry, "reason": "complete"}
-        nxt = next(it["slug"] for it in items if it.get("slug") not in pub)
+        nxt = unpublished[0]
         order = next(i for i, it in enumerate(items, 1) if it.get("slug") == nxt)
         return True, {
             **entry,
