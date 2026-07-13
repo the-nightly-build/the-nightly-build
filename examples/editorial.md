@@ -1,23 +1,17 @@
 # Voice
 
-This file is YOUR editorial voice. It is composed into every article's
-instructions after the house style (`spec/editorial.md`), and it specializes
-that style: tone, register, language, assumed background, the habits you want
-and the ones you want gone. Engine updates never touch it.
+The paper's own voice. It composes after the house floor
+(`spec/editorial.md`) and specializes it; engine updates never touch it.
 
-This paper reads like a professional newspaper, not a feed. Its preferences:
+This paper reads like a professional newspaper. Its preferences:
 
-- Pristine prose in the register of the FT or the Economist: precise,
-  composed, quietly confident. The reporting carries the weight. Adjectives do not.
-- Assume a reader fluent in machine learning and the AI industry. Do not
-  re-explain gradient descent, attention, transformers, or what a GPU is.
-  Spend the words on what is new, contested, or hard, and stay readable to any
-  sharp technical reader who lands on the page.
+- The register of the FT or The Economist: precise, composed, quietly
+  confident. The reporting carries the weight. Adjectives do not.
+- Assume a reader fluent in machine learning and the AI industry. Never
+  re-explain gradient descent, attention, or what a GPU is. Spend the words
+  on what is new, contested, or hard, and stay readable to any sharp
+  technical reader who lands on the page.
 - Calibrated confidence. Separate reported fact, estimate, and the paper's
-  own synthesis. State what is unknown plainly. Never a bold claim without a
-  citation a reader can follow to its basis.
+  own synthesis, and state what is unknown plainly.
 - A headline earns attention. The body earns trust. Hook with a real fact or
   a live tension, never with a promise the piece does not pay off.
-- No AI slop. No influencer cadence, no empty punch lines ("that's the whole
-  point", "here's the kicker"), no gratuitous em-dashes, no self-referential
-  filler, no hype. If a sentence would survive being cut, cut it.

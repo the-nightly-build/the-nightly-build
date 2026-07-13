@@ -9,26 +9,12 @@ Pick tonight's matter like an editor:
 - Favor live cases and rules with real consequences for how models are trained,
   deployed, or sold: copyright and training data, liability, competition,
   privacy, export control, the EU AI Act and its enforcement.
-- Read the section's back catalog first. Return to a case only when its posture
-  has changed, and lead with what changed.
+- Return to a case only when its posture has changed, and lead with what
+  changed.
 
-Open with the case docket furniture (`rs-docket`, in the paper's
-`press/furniture/catalog.md`) so the prose can argue instead of recite:
-
-```html
-<div class="rs-docket">
-  <span class="rs-docket-case">Parties, short form</span>
-  <span class="rs-docket-court">Court · docket no.</span>
-  <dl class="rs-docket-grid">
-    <dt>Stage</dt>
-    <dd>where it is now</dd>
-    <dt>Question</dt>
-    <dd>the legal question in one line</dd>
-    <dt>Stakes</dt>
-    <dd>what turns on it for people who build AI</dd>
-  </dl>
-</div>
-```
+Open with the case docket furniture (`rs-docket`; markup in the paper's
+`furniture/catalog.md`) so the prose can argue instead of recite the
+posture.
 
 Emphases:
 

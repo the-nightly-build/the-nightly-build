@@ -12,24 +12,11 @@ lesson concretely (you read it, per protocol), teach the core, and close with
 the check-yourself box (nb-check-box) and a bridge (nb-bridge) to the next
 lesson.
 
-Show real code with the rs-code furniture. This site loads Prism (declared in
-`site.yaml`). Write plain code in a language-tagged block and Prism highlights
-it: `language-python` for Triton, `language-cpp` for CUDA C.
-Escape `<`, `>`, and `&`. Keep listings short and honest.
-
-```html
-<div class="rs-code">
-  <div class="rs-code-head">
-    <span class="rs-code-file">add_kernel.py</span><span>Triton</span>
-  </div>
-  <pre><code class="language-python">@triton.jit
-def add_kernel(x_ptr, y_ptr, out_ptr, n, BLOCK: tl.constexpr):
-    pid = tl.program_id(axis=0)  # one instance per block
-    offs = pid * BLOCK + tl.arange(0, BLOCK)
-    return tl.load(x_ptr + offs) + tl.load(y_ptr + offs)</code></pre>
-  <span class="rs-code-cap">Fig. 1 · what to notice, with a source.</span>
-</div>
-```
+Show real code with the rs-code furniture; its markup is in
+`furniture/catalog.md`. Write plain code in a language-tagged block
+(`language-python` for Triton, `language-cpp` for CUDA C) and Prism,
+declared in `site.yaml`, highlights it. Escape `<`, `>`, and `&`. Keep
+listings short and honest.
 
 Emphases:
 

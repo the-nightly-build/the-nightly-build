@@ -10,10 +10,9 @@ stating the idea in one jargon-free paragraph, then the mechanism with the
 real numbers, then the holds-up grid (nb-holdsup) weighing what it buys
 against what it costs, then a verdict box (nb-verdict) before the close.
 
-Show the central idea in code with the rs-code furniture when a few lines
-make it concrete: a kernel signature, a scheduling loop, a quantization step.
-Write it in a language-tagged block (`language-python`, `language-cpp`). Prism
-(loaded via `site.yaml`) highlights it. Keep it short and cited.
+Show the central idea in code with the rs-code furniture (markup in
+`furniture/catalog.md`) when a few lines make it concrete: a kernel
+signature, a scheduling loop, a quantization step. Keep it short and cited.
 
 Emphases:
 
