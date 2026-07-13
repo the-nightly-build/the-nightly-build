@@ -1,11 +1,4 @@
-# The Divide's bespoke furniture
-
-The two-sided layout this template renders, styled in `furniture.css` beside
-this file on the `rs-` prefix. Only a divide article puts two cases side by
-side, so the furniture lives in the template's folder, not in
-`press/furniture/`. The engine concatenates it into `assets/theme.css` whenever
-this template is present. A drafter's palette for a divide article is the
-engine base catalogue plus the paper's shared furniture plus these.
+# The divide template's furniture
 
 ## The split (`rs-divide` + `rs-side`)
 

@@ -1,8 +1,5 @@
 # Voice
 
-The paper's own voice. It composes after the house floor
-(`spec/editorial.md`) and specializes it; engine updates never touch it.
-
 This paper reads like a professional newspaper. Its preferences:
 
 - The register of the FT or The Economist: precise, composed, quietly

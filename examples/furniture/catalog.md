@@ -1,13 +1,5 @@
 # This paper's shared furniture
 
-Two components this paper adds to the engine's base catalogue
-(`templates/FURNITURE.md`), styled in `styles.css` beside this file on the `rs-`
-prefix (`nb-` is the engine's). Any section may reach for them, so they live
-here, not in one template's folder. A section that uses one
-says so in its `prompt.md`. The engine concatenates this styles.css into
-`assets/theme.css` on every build, so a class defined here restyles past articles
-too.
-
 ## Code block (`rs-code`)
 
 A real code listing with a header (file · language) and an optional cited
