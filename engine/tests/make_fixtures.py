@@ -85,9 +85,6 @@ def test_repo():
     return str(root)
 
 
-FIX = pathlib.Path(__file__).parent / "fixtures"
-FIX.mkdir(parents=True, exist_ok=True)
-
 LOREM = (
     "The memory industry operates on a brutal capacity cycle that has bankrupted "
     "dozens of firms over four decades, and understanding that cycle is the "
@@ -286,10 +283,3 @@ def chronicle():
         n_sources=8,
     )
     return _page("A History of Unix", meta=meta, body=body)
-
-
-if __name__ == "__main__":
-    (FIX / "valid-article.html").write_text(article())
-    (FIX / "valid-brief.html").write_text(brief())
-    (FIX / "valid-chronicle.html").write_text(chronicle())
-    print("fixtures written:", sorted(p.name for p in FIX.iterdir()))

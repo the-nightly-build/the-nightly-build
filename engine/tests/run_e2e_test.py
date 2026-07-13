@@ -29,43 +29,11 @@ import xml.etree.ElementTree as ET
 import _bootstrap
 import build_site as B
 import make_fixtures
+from _harness import check, git, summary
 
 REPO = _bootstrap.REPO
 
-PASS, FAIL = 0, []
 NS = "{http://www.w3.org/2005/Atom}"
-
-
-def snippet(haystack, needle=None, *, width=240):
-    text = haystack if isinstance(haystack, str) else str(haystack)
-    if needle:
-        i = text.find(needle if isinstance(needle, str) else str(needle))
-        if i != -1:
-            lo = max(0, i - width // 2)
-            hi = i + len(str(needle)) + width // 2
-            return ("…" if lo else "") + text[lo:hi] + ("…" if hi < len(text) else "")
-    return text[:width] + ("…" if len(text) > width else "")
-
-
-def check(name, condition, *, detail="", needle=None, haystack=None):
-    global PASS
-    if condition:
-        PASS += 1
-        print(f"  ok   {name}")
-        return
-    FAIL.append(name)
-    print(f"  FAIL {name}")
-    if needle is not None:
-        print(f"        looked for: {needle!r}")
-    if haystack is not None:
-        print(f"        in: {snippet(haystack, needle)}")
-    if detail:
-        print(f"        {detail}")
-
-
-def git(*args, cwd):
-    cmd = ["git", *args]
-    subprocess.run(cmd, cwd=cwd, check=True, capture_output=True)
 
 
 def run(cmd, cwd=None):
@@ -78,7 +46,7 @@ root = make_fixtures.test_repo()
 shutil.copytree(
     REPO / "engine",
     pathlib.Path(root) / "engine",
-    ignore=shutil.ignore_patterns("__pycache__", "fixtures"),
+    ignore=shutil.ignore_patterns("__pycache__"),
     dirs_exist_ok=True,
 )
 shutil.copyfile(REPO / "PROTOCOL.md", pathlib.Path(root) / "PROTOCOL.md")
@@ -295,8 +263,4 @@ check(
     and "1 of 5" not in secs,
 )
 
-print()
-print(f"{PASS} passed, {len(FAIL)} failed")
-if FAIL:
-    print("FAILED:", FAIL)
-    sys.exit(1)
+sys.exit(summary())
