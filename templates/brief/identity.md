@@ -10,5 +10,4 @@ paper, over any coverage), and a why-it-matters line, the required `data-nb-why`
 Cover only what actually moved; a short honest brief beats a padded one, and
 inventing an item to hit a count is a failure.
 
-When a story you have covered develops, say so and build on it. Continuity turns a
-nightly list into a running record.
+When a story you have covered develops, say so and build on it.

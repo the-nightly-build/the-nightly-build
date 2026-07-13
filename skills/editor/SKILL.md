@@ -63,7 +63,7 @@ to the rest, so your judgments match the assignment the drafter was given.
    opener that reads as a coined catchphrase; strike self-reference to the piece, the desk, the
    paper, or the particular reader. Break the "X is not Y; it is Z" mold with a working test:
    the contrast stays only when the misconception it corrects is real and named, and falls
-   wherever the "not" clause is a strawman the sentence invented — one or two earned contrasts
+   wherever the "not" clause is a strawman the sentence invented. One or two earned contrasts
    per piece is the ceiling. Strike any phrase that echoes the briefing layers (the floor, the
    voice file, the series prompt, the template's identity and skeleton placeholders, the
    furniture catalog, the voice brief itself): the reader never sees those documents, and
@@ -90,8 +90,7 @@ and your notes should name it rather than settle for it.
 - Keep nb-meta honest. If your cuts materially change the word count, update it; the proof
   recounts and will flag a stale number.
 - Do not touch a citation you have not verified. Leave it as-is unless you have opened the source.
-- Do not run the proof. The correspondent runs it after your pass; you supply the judgment it
-  cannot.
+- Do not run the proof. The correspondent runs it after your pass.
 
 ## Output
 

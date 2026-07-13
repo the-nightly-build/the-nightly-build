@@ -51,7 +51,7 @@ paragraph", "Table 2 caption".
 ## Reading map (`nb-paper-map`)
 
 The `read-it-yourself` close: the original's sections triaged with a verdict
-each, so the reader opens the source knowing where their attention pays.
+each, so the reader opens the source knowing what to read and what to skip.
 Verdicts are `read`, `skim`, or `skip`, one clause of why apiece, each reason
 in this paper's terms rather than a stock note. Entries are plain wrapping
 text behind the badge, so a long section title breaks across lines instead of
