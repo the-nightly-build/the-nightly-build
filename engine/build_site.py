@@ -258,11 +258,9 @@ def derive_self_repository(explicit, base_url) -> str | None:
     return f"{match.group(1)}/{match.group(2)}" if match else None
 
 
-def build_catalog(site_cfg, series_cfgs, *, articles, generated, repository=None):
-    by_series = {}
-    for ed in articles.values():
-        by_series.setdefault(ed["series"], []).append(ed)
-
+def build_catalog(
+    site_cfg, series_cfgs, *, articles, by_series, generated, repository=None
+):
     series_entries = []
     for sid, cfg in series_cfgs.items():
         items = cfg.get("items") or []
@@ -579,7 +577,7 @@ def night_body(eds, series_cfgs, *, depth, date):
     return body + f'<div class="nb-grid">{cells}</div>'
 
 
-def render_newsstand(site, catalog, *, series_cfgs, articles):
+def render_newsstand(site, catalog, *, series_cfgs, articles, by_night):
     if not articles:
         body = (
             '<div class="nb-empty" style="margin-top:26px">'
@@ -590,7 +588,7 @@ def render_newsstand(site, catalog, *, series_cfgs, articles):
         return page(site, site["title"], body=body, active="Today")
     dates = sorted(catalog["builds"], key=date_sort_key)
     latest = dates[-1]
-    tonight = [ed for ed in articles.values() if night_date(ed["meta"]) == latest]
+    tonight = by_night.get(latest, [])
     body = night_body(tonight, series_cfgs, depth=0, date=latest)
     if len(dates) > 1:
         prev = dates[-2]
@@ -601,11 +599,8 @@ def render_newsstand(site, catalog, *, series_cfgs, articles):
     return page(site, site["title"], body=body, active="Today")
 
 
-def render_build_page(site, date, *, dates, articles, series_cfgs):
-    eds = [e for e in articles.values() if night_date(e["meta"]) == date]
+def render_build_page(site, date, *, ordered, i, eds, series_cfgs):
     body = night_body(eds, series_cfgs, depth=2, date=date)
-    ordered = sorted(dates, key=date_sort_key)
-    i = ordered.index(date)
     prev_d = ordered[i - 1] if i > 0 else None
     next_d = ordered[i + 1] if i < len(ordered) - 1 else None
     left = (
@@ -1212,10 +1207,17 @@ def build(
     series_cfgs = load_series_configs(repo)
     articles = collect_articles(series_cfgs, library_root, preview_root=preview_root)
     repository = derive_self_repository(repository, base_url)
+    # One pass groups the library both ways; every per-night and per-series
+    # consumer below reuses these instead of rescanning all articles per key.
+    by_series, by_night = {}, {}
+    for ed in articles.values():
+        by_series.setdefault(ed["series"], []).append(ed)
+        by_night.setdefault(night_date(ed["meta"]), []).append(ed)
     catalog = build_catalog(
         site_cfg,
         series_cfgs,
         articles=articles,
+        by_series=by_series,
         generated=now,
         repository=repository,
     )
@@ -1239,20 +1241,24 @@ def build(
     write(os.path.join(out, "catalog.json"), json.dumps(catalog, indent=2) + "\n")
     write(
         os.path.join(out, "index.html"),
-        render_newsstand(site, catalog, series_cfgs=series_cfgs, articles=articles),
+        render_newsstand(
+            site, catalog, series_cfgs=series_cfgs, articles=articles, by_night=by_night
+        ),
     )
     write(
         os.path.join(out, "builds", "index.html"),
         render_build_archive(site, list(catalog["builds"])),
     )
-    for date in catalog["builds"]:
+    ordered = sorted(catalog["builds"], key=date_sort_key)
+    for i, date in enumerate(ordered):
         write(
             os.path.join(out, "builds", date, "index.html"),
             render_build_page(
                 site,
                 date,
-                dates=list(catalog["builds"]),
-                articles=articles,
+                ordered=ordered,
+                i=i,
+                eds=by_night.get(date, []),
                 series_cfgs=series_cfgs,
             ),
         )
@@ -1260,9 +1266,6 @@ def build(
         os.path.join(out, "series", "index.html"),
         render_series_index(site, catalog, series_cfgs=series_cfgs, articles=articles),
     )
-    by_series = {}
-    for ed in articles.values():
-        by_series.setdefault(ed["series"], []).append(ed)
     for s in catalog["series"]:
         sid = s["id"]
         write(
@@ -1325,37 +1328,25 @@ def build(
         )
 
     # email digests: one per build (permanent) + the latest at a stable path
-    # for the morning-mail workflow
-    for date in catalog["builds"]:
-        eds = [e for e in articles.values() if night_date(e["meta"]) == date]
-        write(
-            os.path.join(out, "builds", date, "email.html"),
-            render_email(
-                site_cfg["title"],
-                date,
-                eds=eds,
-                series_cfgs=series_cfgs,
-                base_url=base_url,
-            ),
-        )
+    # for the morning-mail workflow, reusing the latest night's render
     latest = max(catalog["builds"], key=date_sort_key, default=None)
-    if latest:
-        eds = [e for e in articles.values() if night_date(e["meta"]) == latest]
-        write(
-            os.path.join(out, "email-latest.html"),
-            render_email(
-                site_cfg["title"],
-                latest,
-                eds=eds,
-                series_cfgs=series_cfgs,
-                base_url=base_url,
-            ),
+    for date in catalog["builds"]:
+        eds = by_night.get(date, [])
+        rendered = render_email(
+            site_cfg["title"],
+            date,
+            eds=eds,
+            series_cfgs=series_cfgs,
+            base_url=base_url,
         )
-        write(
-            os.path.join(out, "email-latest-subject.txt"),
-            f"{site_cfg['title']} · {latest}: {len(eds)} "
-            f"article{'s' if len(eds) != 1 else ''}\n",
-        )
+        write(os.path.join(out, "builds", date, "email.html"), rendered)
+        if date == latest:
+            write(os.path.join(out, "email-latest.html"), rendered)
+            write(
+                os.path.join(out, "email-latest-subject.txt"),
+                f"{site_cfg['title']} · {latest}: {len(eds)} "
+                f"article{'s' if len(eds) != 1 else ''}\n",
+            )
 
     copy_assets(repo, site_cfg, out=out)
     copy_articles(articles, out, stamp=site["stamp"], assets_html=site["assets_html"])
