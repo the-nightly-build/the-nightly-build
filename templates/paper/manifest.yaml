@@ -6,7 +6,7 @@ about: "Reporting on one research paper: its abstract and link up front, the ide
 class: longread
 words: [1800, 3400]
 sections: [abstract, orientation, sources]
-flex_sections: [2, 6]
+flex_sections: [2, 8]
 cite_rule: per-section
 modes: [collection, sequence, open]
 chrome:
