@@ -33,7 +33,9 @@ metric was discontinued. A conclusion that omits the known fact that would
 weaken it is a broken claim. Report it as one.
 
 While a source is open, verification comes free. Confirm the passage supports
-the claim. Recompute what the numbers imply: components against the total,
+the claim, then read the rest of its sentence and the paragraph around it:
+the half the piece did not quote is the first place a broken thesis hides.
+Recompute what the numbers imply: components against the total,
 percentages against 100, millions against billions. A verbatim quote aimed at
 a different object than the source's fails however clean it reads. Scale the
 check to the cost of being wrong. Any claim that could damage or credit a
@@ -81,7 +83,9 @@ open `research.md § Original work` and check the writer's sentence against
 the draft. If neither sentence survives, the article restates its sources.
 That is a redraft. Name the act of work it is missing. Judge the voice here
 too. State in `requested-changes.md` whether the prose sounds closer to the
-exemplars in `voice.md` or to a median AI summary.
+exemplars in `voice.md` or to a median AI summary. Last, reread the headline
+as the piece's largest claim: it must survive everything the piece just
+established.
 
 Line: `Reader: this gives me …` (or `nothing beyond the sources; redraft`).
 
