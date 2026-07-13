@@ -85,8 +85,9 @@ tells of slop.
   fall wherever the "not" clause is a strawman the sentence invented. One or two earned
   contrasts per piece is the ceiling.
 - **Self-reference.** The piece never narrates itself or its newsroom ("this dossier",
-  "the paper's read"), and it never addresses or describes its particular reader ("the
-  reader works there", "your son").
+  "what follows"), never addresses its audience, and never mentions a reader at all
+  ("a reader will notice", "where a reader's scrutiny belongs"). Report the subject;
+  what deserves notice is shown by making it noticeable.
 - **Banned terms.** `spec/banned-terms.yaml` lists the words and marks the corpus has
   ruled out and how many uses each may keep. A press extends or adjusts the list in
   `press/banned-terms.yaml`, and the proof counts every article against the merged list.
