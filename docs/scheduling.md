@@ -68,8 +68,7 @@ jobs:
 The trigger lives on `main` (or in a separate repo). Never put it on the
 `library` PR path: the editor validates untrusted article PRs with read-only
 permissions and no secrets, and that boundary is the security model. A scheduled
-workflow on `main` holding your API key is the trusted side of the same line the
-morning mailer already sits on.
+workflow on `main` holding your API key is the trusted side of that line.
 
 ### Security: the night shift is untrusted by design
 

@@ -281,8 +281,6 @@ assets: # optional; page-injected JS/CSS libraries (see "Furniture that needs
   # a JavaScript library" above). Every entry is https + SRI-pinned.
   scripts: []
   styles: []
-email: # optional, see docs/delivery.md
-  send_utc_hour: 12
 directory: # optional, see docs/delivery.md
   description: "One line for your directory card (<= 280 chars)."
   publish: true # set false to opt out of the shared directory

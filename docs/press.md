@@ -17,7 +17,7 @@ library. The maintainer dogfoods by copying it like any other user.
 
 ```text
 press/
-  site.yaml          masthead title, theme, appearance, front density, email
+  site.yaml          masthead title, theme, appearance, front density
   editorial.md       your voice, composed into every article's instructions
   series/<id>/       series.yaml + prompt.md + sources/ per series
   series/_tags/      reusable prompt fragments shared across series

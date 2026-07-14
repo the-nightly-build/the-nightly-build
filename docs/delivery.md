@@ -1,4 +1,4 @@
-# Delivery: feeds, email, and the catalog API
+# Delivery: feeds, the directory, and the catalog API
 
 ## Feeds (zero setup)
 
@@ -8,49 +8,9 @@ Every paper publishes Atom feeds:
 - `https://<you>.github.io/<repo>/series/<id>/feed.xml` for one series
 
 The newest entries embed the full article content, so feed readers get the
-whole article, not a teaser. Subscribe in any reader, or recreate morning
-email delivery with an RSS-to-email service. No secrets, no configuration
-in the repo.
-
-## The morning email (opt-in)
-
-The press builds an inline-styled email digest of every night's build:
-headline, dek, and reading time per article, plus a total. The paperboy
-workflow (`morning-mail.yml`) delivers the latest digest once per day.
-
-Enable it with two steps.
-
-1. Pick a send hour in `press/site.yaml`:
-
-   ```yaml
-   email:
-     send_utc_hour: 12 # 12:00 UTC is 8am ET / 5am PT
-   ```
-
-2. Add repo Actions secrets (Settings, Secrets and variables, Actions):
-
-| Secret               | Example                                           |
-| -------------------- | ------------------------------------------------- |
-| `MAIL_TO`            | `you@example.com`                                 |
-| `MAIL_FROM`          | `The Nightly Build <you@gmail.com>`               |
-| `MAIL_SMTP_SERVER`   | `smtp.gmail.com`                                  |
-| `MAIL_SMTP_PORT`     | `465`                                             |
-| `MAIL_SMTP_USERNAME` | `you@gmail.com`                                   |
-| `MAIL_SMTP_PASSWORD` | a Gmail App Password, or your provider's SMTP key |
-
-Without both the config block and `MAIL_TO`, the workflow gates itself off
-silently. On mornings with no fresh build it asks `engine/duty.py` whether
-last night was quiet by design (a cadence gap, a completed or paused paper)
-or a missed night. Quiet by design sends nothing. A missed night sends a
-short notice, for up to 14 days, so a broken schedule never fails silently.
-
-Test a send anytime by running the workflow manually from the Actions tab.
-`workflow_dispatch` bypasses the hour and freshness gates, not the secrets
-gate. Credentials live only in GitHub Actions secrets, never in the repo,
-and never anywhere the desk's untrusted-PR validation can see them.
-
-Every night's digest is also archived at `builds/<date>/email.html` on the
-site.
+whole article, not a teaser. Subscribe in any reader. The feed is the push
+channel: it needs no secrets and no configuration in the repo. If you want
+the paper in your inbox, point an RSS-to-email service at the feed.
 
 ## catalog.json: the API
 

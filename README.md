@@ -44,7 +44,7 @@ source count. The reader's front page and a single article, on a phone:
    work list from the repo, so you never touch the schedule again.
 5. Read. The night shift opens one PR per series, CI validates and (for
    `autopublish` series, which the examples enable) merges, the site rebuilds,
-   and the morning email or Atom feed delivers it.
+   and the Atom feed delivers it.
 
 ## How it works
 
@@ -53,8 +53,7 @@ source count. The reader's front page and a single article, on a phone:
 | `PROTOCOL.md`     | main                    | The complete agent contract                                                                                                                                                                               |
 | the proof         | `engine/check.py`       | Validates articles. BLOCK findings stop publication; WARN findings drive revision                                                                                                                         |
 | the desk          | `check.yml`             | Validates every PR to `library`; auto-merges clean ones from `autopublish` series (otherwise a human merges); supersedes competitors                                                                      |
-| the press         | `engine/build_site.py`  | Rebuilds the site on every merge: front page, night archive, sections, search, feeds, email digests                                                                                                       |
-| the paperboy      | `morning-mail.yml`      | Optional daily email of the latest build                                                                                                                                                                  |
+| the press         | `engine/build_site.py`  | Rebuilds the site on every merge: front page, night archive, sections, search, feeds                                                                                                                      |
 | duty              | `engine/duty.py`        | Deterministic nightly work selection: cadence, pauses, completion, commissions                                                                                                                            |
 | templates         | `templates/<id>/`       | Two citation geometries, each a self-contained folder package (manifest, skeleton, brief, optional furniture), plus a shared furniture catalog. User templates in `press/templates/<id>/` are first class |
 | the correspondent | `skills/correspondent/` | The night-shift runtime: serves every series, running each article through the pipeline below                                                                                                             |
@@ -99,8 +98,8 @@ sandboxed: no scripts beyond JSON data blocks and the engine runtime, no
 iframes, no event handlers, and external references only to the engine
 assets path and Google Fonts. The desk validates untrusted PRs with
 read-only permissions and no secrets. Auto-merge is squash-only, into
-`library` only, for BLOCK-clean PRs only. Mail credentials exist only as
-Actions secrets on the trusted post-merge path.
+`library` only, for BLOCK-clean PRs only. Your agent's API key exists only as
+an Actions secret on the trusted scheduled path, never where PR validation runs.
 
 Anyone can open a pull request to a public site, but no stranger can publish
 through one. The desk runs on the `pull_request` event, so a PR from a fork
@@ -158,7 +157,7 @@ contains a complete working configuration as documentation.
 - [Scheduling: native schedulers, the universal Actions cron](docs/scheduling.md)
 - [Harnesses: which agents can run the night shift, and the cost](docs/harnesses.md)
 - [Customization: themes, voice, your own templates](docs/customization.md)
-- [Delivery: feeds, morning email, the directory, the catalog API](docs/delivery.md)
+- [Delivery: feeds, the directory, the catalog API](docs/delivery.md)
 
 Published sites are listed automatically on
 [the-nightly-build.github.io](https://the-nightly-build.github.io/), a shared
