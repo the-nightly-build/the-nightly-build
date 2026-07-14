@@ -945,21 +945,6 @@ def check_cites(ed, rep):
             )
 
 
-def source_host(href) -> str | None:
-    """The host a source lives on, lowercased and stripped of a leading www.
-
-    An honest hostname comparison, not a public-suffix parse: it reads
-    arxiv.org and www.arxiv.org as one host, and reads blog.example.com and
-    example.com as two. Enough to catch the case the rule exists for — a paper
-    and its own lab's announcement of it, offered as two sources.
-    """
-    m = re.match(r"https://([^/?#]+)", href or "", re.IGNORECASE)
-    if not m:
-        return None
-    host = m.group(1).rsplit("@", 1)[-1].split(":", 1)[0].lower()
-    return host.removeprefix("www.")
-
-
 def band_text(band) -> str:
     lo, hi = band
     if hi is None:
@@ -1009,31 +994,16 @@ def check_item_kinds(cited, *, number, per_item, rep):
                 f"item #{number} cites {count} {kind} source(s); this series "
                 f"asks every item for {band_text(band)}",
             )
-    # Independence, structurally: a secondary is reporting by someone with no
-    # stake in the primary, so sharing the primary's host makes it an extension
-    # of that primary — one voice wearing two hats — not a second one. This is a
-    # misclassification check, not a diversity rule: how many outlets an item
-    # draws on is the writer's call, and max_sources_per_host nudges it.
-    primary_hosts = {source_host(s["href"]) for s in cited if s["kind"] == "primary"}
-    for s in cited:
-        host = source_host(s["href"])
-        if s["kind"] == "secondary" and host and host in primary_hosts:
-            rep.block(
-                "B-SOURCE-KIND",
-                f"item #{number}: secondary {s['href']} shares the domain "
-                f"'{host}' with the item's own primary",
-                suggestion="a secondary reports on a primary from outside it; "
-                "cite someone with no stake in the document",
-            )
 
 
 def check_source_kinds(ed, *, series, treg, rep):
     """B-SOURCE-KIND: source composition, per article and per item.
 
-    A count cannot see composition: min_sources is satisfied by ten sources
-    from one advocacy shop, or by an arXiv listing read end to end. A series
-    constrains the mix instead, and the mix blocks regardless of `strict`,
-    because sourcing is not a matter of calibration.
+    min_sources counts. A series can also declare the mix it wants, and the mix
+    blocks regardless of `strict`, because sourcing is not a matter of
+    calibration. Whether a declared kind is the TRUE kind is judgment: the
+    research log makes the call and the editor audits it. The engine counts the
+    labels the writer declared, and says nothing about their honesty.
     """
     by_kind = series.get("sources_by_kind")
     per_item = series.get("per_item_sources")
@@ -1078,35 +1048,6 @@ def check_source_kinds(ed, *, series, treg, rep):
     for number, it in enumerate(ed.items, 1):
         cited = [by_id[ref] for ref in dict.fromkeys(it["cites"]) if ref in by_id]
         check_item_kinds(cited, number=number, per_item=bands, rep=rep)
-
-
-def check_source_concentration(ed, *, series, rep):
-    """W-SOURCE-CONCENTRATION: how much of the article one host supplies.
-
-    Citing an outlet several times is sometimes exactly right, so a hard block is
-    the wrong instrument: this is a revision note the writer answers or the editor
-    justifies — and a BLOCK where a series has already set `strict`.
-    """
-    limit = series.get("max_sources_per_host")
-    if limit is None:
-        return
-    if not is_count(limit) or limit < 1:
-        rep.block("B-SERIES", "series 'max_sources_per_host' must be an integer >= 1")
-        return
-    tally = {}
-    for s in ed.sources:
-        host = source_host(s["href"])
-        if host:
-            tally[host] = tally.get(host, 0) + 1
-    for host, count in sorted(tally.items()):
-        if count > limit:
-            rep.warn(
-                "W-SOURCE-CONCENTRATION",
-                f"{count} of {len(ed.sources)} sources are on '{host}'; this "
-                f"series asks for at most {limit} per host",
-                suggestion="one house's account of a story is one account; "
-                "reach for a source outside it",
-            )
 
 
 PLACEHOLDER_RUN_WORDS = 4  # a caps run this long warns even off-skeleton
@@ -1446,7 +1387,6 @@ def check_article(
     check_sources(ed, rep, check_links=check_links)
     check_cites(ed, rep)
     check_source_kinds(ed, series=series, treg=treg, rep=rep)
-    check_source_concentration(ed, series=series, rep=rep)
     check_warns(
         ed,
         meta,

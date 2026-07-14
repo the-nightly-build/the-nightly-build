@@ -61,7 +61,6 @@ SERIES_KEYS = {
     "min_sources",
     "sources_by_kind",
     "per_item_sources",
-    "max_sources_per_host",
     "words",
     "items",
     "tags",
@@ -437,9 +436,6 @@ def check_series(repo, registry, *, errors):
             not isinstance(min_sources, int) or isinstance(min_sources, bool)
         ):
             errors.append(f"{where}: 'min_sources' must be an integer")
-        per_host = cfg.get("max_sources_per_host")
-        if per_host is not None and not (check.is_count(per_host) and per_host >= 1):
-            errors.append(f"{where}: 'max_sources_per_host' must be an integer >= 1")
         section = cfg.get("section")
         if section is not None and (
             not isinstance(section, str) or not section.strip()

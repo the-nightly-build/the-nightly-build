@@ -38,12 +38,17 @@ The prose floor belongs to the writer and editor.
    paywall) as gated, never as dead. Try a browser user agent first.
 4. Classify every source you log as primary or secondary, and write the reason
    in the same line. PROTOCOL step 4 defines the two: a primary owns the claim,
-   a secondary reports on a primary from outside it. The test is independence,
-   never document type. A lab's post about its own paper is an extension of that
-   paper. A trade group's white paper on the rule it is fighting is a party's
-   filing, not a read of one. Nothing carries a kind by its URL, which is why
-   the reason is the entry. Your call becomes `data-nb-kind` in the markup and a
-   series may hold the piece to a composition (`sources_by_kind`,
+   a secondary reports on a primary from outside it. The test is independence
+   from the primary's AUTHOR, never document type and never the website. A lab's
+   post about its own paper is an extension of that paper however it is hosted,
+   and moving it to a press-release wire does not make it a second voice. A
+   journal's news desk writing up a paper the journal published IS a secondary:
+   different author, no stake, whatever the domain says. A trade group's white
+   paper on the rule it is fighting is a party's filing, not a read of one — and
+   it is a primary, because the group owns the claims in it. Nothing carries a
+   kind by its URL, which is why the reason is the entry. The engine cannot see
+   any of this; it counts the labels. Your call becomes `data-nb-kind` in the
+   markup and a series may hold the piece to a composition (`sources_by_kind`,
    `per_item_sources`), so a wrong call is a wrong article, not a mislabel.
 5. Read for what breaks the piece as well as what feeds it. A source that
    undercuts the commission's angle — a discontinued metric, a retracted

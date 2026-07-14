@@ -66,10 +66,9 @@ demonstrated across `examples/series/`.
 
 ## Source composition
 
-`min_sources` counts. It cannot see where the sources came from, so ten
-citations from one advocacy shop clear a floor of ten, and six items lifted
-from a single day's arXiv listing clear it too. Three keys constrain the mix
-instead. They read the kind each source declares in the markup
+`min_sources` counts. It cannot see what kind of sources came in, so six items
+lifted from a single day's arXiv listing clear a floor of six. Two keys constrain
+the mix instead. They read the kind each source declares in the markup
 (`data-nb-kind`), which PROTOCOL step 4 defines: a **primary** owns the claim
 (the filing, the ruling, the paper), and a **secondary** reports on a primary
 from outside it. The distinction is independence, not document type, so a lab's
@@ -83,26 +82,25 @@ sources_by_kind: # the composition of what the article cites, any series
 per_item_sources: # only on a per-item template (the brief's cite_rule)
   primary: [1, 1] # every item: exactly one document that owns its claim
   secondary: [1, 2] # and one or two independent reads of it
-
-max_sources_per_host: 3 # no host supplies more than three of the sources
 ```
 
 `per_item_sources` applies uniformly to every item, so it holds however many
-items the night's writer chose. On top of the bands, a secondary may not share
-a domain with its item's primary: the arXiv paper plus the lab's own
-announcement is one voice, and the check says so. Both bands are BLOCKs
-regardless of `strict`, and a `per_item_sources` on a series that may cite per
-section is a configuration error, caught by `engine/validate_config.py` rather
-than at 2am — as is a band set on a series whose template ships source entries
-without `data-nb-kind`. Once either band is set, a source that declares no kind
-blocks: a source that will not say what it is escapes every rule written about
-the mix. A series that sets neither band never asks.
+items the night's writer chose. Both bands are BLOCKs regardless of `strict`,
+and a `per_item_sources` on a series that may cite per section is a
+configuration error, caught by `engine/validate_config.py` rather than at 2am —
+as is a band set on a series whose template ships source entries without
+`data-nb-kind`. Once either band is set, a source that declares no kind blocks:
+a source that will not say what it is escapes every rule written about the mix.
+A series that sets neither band never asks.
 
-`max_sources_per_host` is the softer instrument, and deliberately so. Citing one
-outlet several times is sometimes exactly right, so passing the limit is a WARN
-(`W-SOURCE-CONCENTRATION`) — a revision note the writer answers or the editor
-justifies. In a `strict: true` series it blocks, like every other WARN. Set the
-number where you want the argument to start.
+The proof counts the kinds the article declares. It does not judge them, and
+there is no rule here about hosts or domains: a paper and its own lab's write-up
+of it can sit on two websites, and a journal's news desk reporting on a paper it
+published is genuinely independent of that paper's authors while sharing their
+domain. No counter can tell those apart. The research log makes the call and
+records the reason, and the editor's skeptic read audits it. A source labeled
+`secondary` that is the primary's own author speaking again is a broken claim
+about the sourcing, and it is caught by a reader or not at all.
 
 ## Commissioning extras by hand
 

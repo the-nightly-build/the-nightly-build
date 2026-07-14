@@ -1294,9 +1294,9 @@ for name, cond in [
     check(name, cond)
 
 print("== source kinds (B-SOURCE-KIND: composition, not count) ==")
-# The 2026-07-14 failures min_sources cannot see: a brief whose items all came
-# off one arXiv listing, and a piece where five of twelve sources belonged to
-# one side's own institution. A series constrains the mix instead.
+# min_sources counts and cannot see composition: a brief whose every item came
+# off one arXiv listing clears any floor. A series declares the mix it wants
+# instead. Whether a declared kind is honest is the editor's read, not a count.
 
 ARXIV = "https://arxiv.org/abs/2601.00001"
 PER_ITEM_BRIEFS = patched_repo(
@@ -1407,35 +1407,6 @@ expect(
     blocks=True,
 )
 expect(
-    "the paper plus the lab's own post about it is one voice, not two",
-    run_local(
-        brief_with(
-            [(ARXIV, "primary"), ("https://www.arxiv.org/announce", "secondary")]
-        ),
-        "ai-briefs",
-        slug=TODAY,
-        repo=PER_ITEM_BRIEFS,
-    ),
-    must_have=["B-SOURCE-KIND"],
-    blocks=True,
-)
-expect(
-    "two secondaries from one outlet are the writer's call, not a block",
-    run_local(
-        brief_with(
-            [
-                (ARXIV, "primary"),
-                ("https://reuters.com/a", "secondary"),
-                ("https://reuters.com/b", "secondary"),
-            ]
-        ),
-        "ai-briefs",
-        slug=TODAY,
-        repo=PER_ITEM_BRIEFS,
-    ),
-    blocks=0,
-)
-expect(
     "an item citing its one primary twice still cites one primary",
     run_local(
         brief_with([(ARXIV, "primary"), (ARXIV, "primary"), *CONFORMING_ITEM[1:]]),
@@ -1469,29 +1440,15 @@ expect(
     blocks=True,
 )
 
-# The fixture's sources all live on example.org, which is the very shape a
-# composition rule exists to catch; spread them across real hosts so a passing
-# mix is a mix.
-SPREAD = {
-    1: "https://arxiv.org/abs/2601.00002",
-    3: "https://www.federalregister.gov/d/1",
-    4: "https://curia.europa.eu/r/1",
-    5: "https://eur-lex.europa.eu/l/1",
-    6: "https://uspto.gov/p/1",
-    7: "https://reuters.com/a",
-    8: "https://ft.com/b",
-}
 ALL_PRIMARY = VALID.replace(
     "<a data-nb-source", '<a data-nb-source data-nb-kind="primary"'
 )
-for i, host in SPREAD.items():
-    ALL_PRIMARY = ALL_PRIMARY.replace(f"https://example.org/src{i}", host)
 MIXED = ALL_PRIMARY.replace(
-    f'data-nb-kind="primary" href="{SPREAD[7]}"',
-    f'data-nb-kind="secondary" href="{SPREAD[7]}"',
+    'data-nb-kind="primary" href="https://example.org/src7"',
+    'data-nb-kind="secondary" href="https://example.org/src7"',
 ).replace(
-    f'data-nb-kind="primary" href="{SPREAD[8]}"',
-    f'data-nb-kind="secondary" href="{SPREAD[8]}"',
+    'data-nb-kind="primary" href="https://example.org/src8"',
+    'data-nb-kind="secondary" href="https://example.org/src8"',
 )
 expect(
     "sources_by_kind: an article sourced only to the documents it reports on blocks",
@@ -1518,7 +1475,8 @@ expect(
     "sources_by_kind: a source with no kind escapes the mix, so it blocks",
     run_local(
         MIXED.replace(
-            f'data-nb-kind="primary" href="{SPREAD[4]}"', f'href="{SPREAD[4]}"'
+            'data-nb-kind="primary" href="https://example.org/src4"',
+            'href="https://example.org/src4"',
         ),
         "semiconductors",
         repo=BY_KIND_SEMIS,
@@ -1551,33 +1509,6 @@ expect(
     blocks=True,
 )
 
-# Five of an article's sources on one advocacy shop's host: legitimate often
-# enough that the engine argues rather than refuses — unless the series is strict.
-CONCENTRATED = MIXED
-for i in (3, 4, 5, 6, 7):
-    CONCENTRATED = CONCENTRATED.replace(SPREAD[i], f"https://policyshop.example/p{i}")
-CONC_REPO = patched_repo("max_sources_per_host: 3\n")
-CONC_STRICT = patched_repo("max_sources_per_host: 3\n")
-csy = pathlib.Path(CONC_STRICT) / "press" / "series" / "semiconductors" / "series.yaml"
-csy.write_text(csy.read_text().replace("strict: false", "strict: true"))
-expect(
-    "max_sources_per_host: one host past the cap is a revision note, not a refusal",
-    run_local(CONCENTRATED, "semiconductors", repo=CONC_REPO),
-    must_have=["W-SOURCE-CONCENTRATION"],
-    blocks=0,
-)
-expect(
-    "max_sources_per_host: the same concentration blocks in a strict series",
-    run_local(CONCENTRATED, "semiconductors", repo=CONC_STRICT),
-    must_have=["W-SOURCE-CONCENTRATION"],
-    blocks=True,
-)
-expect(
-    "max_sources_per_host: a spread of hosts under the cap passes",
-    run_local(MIXED, "semiconductors", repo=CONC_REPO),
-    must_not=["W-SOURCE-CONCENTRATION"],
-    blocks=0,
-)
 expect(
     "a band the config botched is a finding, not a traceback",
     run_local(
@@ -1642,11 +1573,6 @@ for name, cond in [
         "a composition on a template whose skeleton omits data-nb-kind is a "
         "config error",
         vc_rc(unkinded_template_repo()) == 1,
-    ),
-    ("max_sources_per_host validates", vc_rc(CONC_REPO) == 0),
-    (
-        "max_sources_per_host below one is rejected",
-        vc_rc(patched_repo("max_sources_per_host: 0\n")) == 1,
     ),
 ]:
     check(name, cond)
