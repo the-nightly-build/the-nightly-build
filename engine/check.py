@@ -129,6 +129,10 @@ VOID = {
 }
 
 
+def collapse_space(text: str) -> str:
+    return " ".join(text.split())
+
+
 class Article(HTMLParser):
     """Single-pass structural parse of one article file.
 
@@ -159,6 +163,7 @@ class Article(HTMLParser):
         self.forbidden_tags = []
         self.external_refs = []  # (tag, url) for script src / link href / img src
         self._capture = None  # ("meta"|"chart", buffer) while inside a JSON script
+        self._dek_parts = None  # text of the first .nb-dekline; None until one opens
         self._text_parts = []
         self._prose_text_parts = []  # body prose only, excludes the sources section
         self._suppress_text_depth = 0  # inside script/style
@@ -222,6 +227,12 @@ class Article(HTMLParser):
 
         if tag == "sup" and "nb-cite" in a.get("class", "").split():
             el["cite_sup"] = True
+
+        # the class is the whole contract: a press writes its own template and may
+        # render the dek in any element, so the tag is not ours to require
+        if self._dek_parts is None and "nb-dekline" in a.get("class", "").split():
+            self._dek_parts = []
+            el["dekline"] = True
 
         if tag == "a":
             in_sup = any(e.get("cite_sup") for e in self.stack)
@@ -287,11 +298,18 @@ class Article(HTMLParser):
             sec = self._current("section")
             if sec is None or sec.get("section") != "sources":
                 self._prose_text_parts.append(data)
+            if self._dek_parts is not None and self._current("dekline") is not None:
+                self._dek_parts.append(data)
 
     @property
     def word_count(self):
         text = " ".join(self._text_parts)
         return len(re.findall(r"\S+", text))
+
+    @property
+    def dekline(self) -> str:
+        # the space keeps a tag boundary (a <br>, an <em>) from fusing two words
+        return collapse_space(" ".join(self._dek_parts or []))
 
 
 # --------------------------------------------------------------------------- #
@@ -690,7 +708,16 @@ def bind_open_template(meta, registry, allowed_templates, rep):
 
 
 def check_meta_agreement(
-    meta, *, series, series_id, template_id, slug_from_path, parent, pr_body_meta, rep
+    meta,
+    *,
+    series,
+    series_id,
+    template_id,
+    slug_from_path,
+    parent,
+    dekline,
+    pr_body_meta,
+    rep,
 ):
     if meta.get("slug") != slug_from_path:
         rep.block(
@@ -715,6 +742,17 @@ def check_meta_agreement(
         rep.block(
             "B-META-MATCH",
             f"nb-meta template '{meta.get('template')}' != series template '{template_id}'",
+        )
+    # The index card and the RSS summary are built from nb-meta's dek, so an
+    # article whose body was fixed and whose meta was not ships the abandoned dek
+    # on the front page and the feed. Nothing to compare against is nothing to say.
+    dek = collapse_space(str(meta.get("dek", "")))
+    if dekline and dek != dekline:
+        rep.block(
+            "B-META-MATCH",
+            f"nb-meta dek {dek!r} != the rendered dekline {dekline!r}",
+            suggestion="the front page and the feed render nb-meta's dek, not "
+            "the body's; carry every dek edit back into nb-meta",
         )
     if pr_body_meta is not None:
         for field in ("series", "slug", "mode", "template", "date", "title"):
@@ -1364,6 +1402,7 @@ def check_article(
         template_id=template_id,
         slug_from_path=slug_from_path,
         parent=parent,
+        dekline=ed.dekline,
         pr_body_meta=pr_body_meta,
         rep=rep,
     )

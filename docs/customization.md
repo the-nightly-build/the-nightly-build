@@ -234,7 +234,9 @@ ordered course, rebuilt as your own template.
 
 2. Scaffold `press/templates/lesson/skeleton.html`. Copy a shipped skeleton's
    `<head>` and header chrome verbatim (asset links, nb-meta skeleton,
-   eyebrow, title, dek, byline), then lay out one
+   eyebrow, title, dek, byline). Keep `class="nb-dekline"` on whatever element
+   renders the dek: the front page and the feed print nb-meta's dek, and the
+   proof blocks an article whose rendered dekline says something else. Lay out one
    `<section data-nb-section="...">` per declared section. Write placeholder
    prose as instruction (what the slot must contain), never as a model
    sentence: a placeholder that performs its slot gets lifted verbatim, and

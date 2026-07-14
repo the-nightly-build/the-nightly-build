@@ -8,6 +8,10 @@ caption. The article writes plain `<pre><code class="language-python">`. Prism
 `.token` spans and `styles.css` colors them. No-JS readers still get clean
 monospace. Used by Kernels and The Inference Stack.
 
+The listing is markup, so escape `<`, `>`, and `&` in the code as `&lt;`,
+`&gt;`, and `&amp;`. An unescaped `if (i < n)` or `kernel<<<blocks, threads>>>`
+is read as a tag and silently eaten.
+
 ```html
 <figure class="rs-code">
   <div class="rs-code-head">

@@ -8,8 +8,7 @@ what it sells, to whom, what protects it, and what is changing.
 Rotate the section:
 
 - Cover whichever name has waited longest and has real news to carry, so each
-  comes up about once a week. Read the last article on that company first. Build
-  on it and say what changed since.
+  comes up about once a week. Lead with what changed since that name last ran.
 - If nothing material happened for the name that is due, cover its most
   important standing question instead: the moat, the risk, the bet. No filler.
 
@@ -18,9 +17,9 @@ four sections you name for this business. Furniture that earns its place: a
 stat strip near the top, three or four numbers that carry the thesis, each
 cited in nearby prose, and a chart when a trend is the argument.
 
-Close with a section, `data-nb-section="the-tape"`: one paragraph on the recent
-stock move and what the market seems to be pricing. It stays apart from the
-business analysis and never leads it.
+Close with a section named `the-tape`: one paragraph on the recent stock move
+and what the market seems to be pricing. It stays apart from the business
+analysis and never leads it.
 
 Emphases:
 

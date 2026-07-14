@@ -77,9 +77,11 @@ tells of slop.
   em-dash swap: write the period, or write the list. Let the verbs carry the weight.
   Vary length for rhythm; a long sentence in control is craft.
 - **Manufactured punchlines.** Cut any sentence engineered to sound quotable while
-  carrying little ("that's the whole point", "here's the kicker"). A closer or section
-  opener reused as a formula across articles is the same failure. So is a house
-  catchphrase.
+  carrying little ("that's the whole point", "here's the kicker", "the catch is"). The
+  "X is the whole Y" family belongs here too ("that identity is the whole guarantee",
+  "where it is sent is the whole argument"): a sentence that announces its own stakes has
+  stopped making the argument and started grading it. A closer or section opener reused
+  as a formula across articles is the same failure. So is a house catchphrase.
 - **Hedged contrast.** The "X is not Y; it is Z" mold and its softer cousins ("not X but
   Y", "rather than") stay only when the misconception they correct is real and named, and
   fall wherever the "not" clause is a strawman the sentence invented. One or two earned

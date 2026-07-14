@@ -119,6 +119,47 @@ test("buildToc renders a hostile heading and a hostile section id as inert text"
   );
 });
 
+test("buildToc lists sections led by any heading level and nests the deeper ones", async () => {
+  const sections =
+    '<section data-nb-section="orientation"><h2>Orientation</h2></section>' +
+    '<section data-nb-section="for-x"><h3>The case for X</h3></section>' +
+    '<section data-nb-section="for-y"><h3>The case for Y</h3></section>' +
+    '<section data-nb-section="crux"><h2>Crux</h2></section>';
+  const html = articlePage(
+    `<p class="nb-byline"><span>2026-07-10</span></p><article>${sections}</article>`,
+  );
+  const w = await loadNb(html, {
+    fetch: fetchRouter({ catalog: { site_title: "T", articles: [] } }),
+  });
+
+  const toc = w.document.querySelector("details.nb-toc");
+  const labels = [...toc.querySelectorAll("li a")].map((a) => a.textContent);
+  assert.deepEqual(labels, [
+    "Orientation",
+    "The case for X",
+    "The case for Y",
+    "Crux",
+  ]);
+
+  const top = toc.querySelector("ol");
+  assert.deepEqual(
+    [...top.children].map((li) => li.querySelector("a").textContent),
+    ["Orientation", "Crux"],
+    "h2 sections are top level",
+  );
+  const nested = top.querySelectorAll(":scope > li > ol > li > a");
+  assert.deepEqual(
+    [...nested].map((a) => a.textContent),
+    ["The case for X", "The case for Y"],
+    "the h3 sides nest under the h2 above them",
+  );
+  assert.equal(
+    nested[0].getAttribute("href"),
+    "#nb-for-x",
+    "sections without an id get one and the link points at it",
+  );
+});
+
 test("bindSequenceNav renders a hostile catalog neighbor title as inert text", async () => {
   const html = articlePage("<article><h1>Two</h1></article>", {
     series: "s",

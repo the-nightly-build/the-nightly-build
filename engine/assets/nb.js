@@ -267,34 +267,49 @@
     );
   }
 
+  /* nested <ol> from items in document order: a deeper heading level opens a
+     sublist inside the shallower item above it */
+  function tocList(items) {
+    var html = "";
+    var levels = [];
+    items.forEach(function (i) {
+      if (!levels.length || i.level > levels[levels.length - 1]) {
+        html += "<ol>";
+        levels.push(i.level);
+      } else {
+        html += "</li>";
+        while (levels.length > 1 && i.level < levels[levels.length - 1]) {
+          html += "</ol></li>";
+          levels.pop();
+        }
+      }
+      html +=
+        '<li><a href="#' + escHtml(i.id) + '">' + escHtml(i.label) + "</a>";
+    });
+    html += "</li>";
+    while (levels.length > 1) {
+      html += "</ol></li>";
+      levels.pop();
+    }
+    return html + "</ol>";
+  }
+
   function buildToc() {
     var items = [];
     document.querySelectorAll("section[data-nb-section]").forEach(function (s) {
-      var h = s.querySelector("h2");
+      var h = s.querySelector("h1,h2,h3,h4,h5,h6");
       if (!h) return;
       if (!s.id) s.id = "nb-" + s.getAttribute("data-nb-section");
       items.push({
         id: s.id,
+        level: parseInt(h.tagName.slice(1), 10),
         label: h.textContent.replace(/^\s*\d+\s*/, "").trim(),
       });
     });
     if (items.length < 3) return;
     var d = document.createElement("details");
     d.className = "nb-toc";
-    d.innerHTML =
-      "<summary>Contents</summary><ol>" +
-      items
-        .map(function (i) {
-          return (
-            '<li><a href="#' +
-            escHtml(i.id) +
-            '">' +
-            escHtml(i.label) +
-            "</a></li>"
-          );
-        })
-        .join("") +
-      "</ol>";
+    d.innerHTML = "<summary>Contents</summary>" + tocList(items);
     var byline = document.querySelector(".nb-byline");
     if (byline && byline.parentNode)
       byline.parentNode.insertBefore(d, byline.nextSibling);

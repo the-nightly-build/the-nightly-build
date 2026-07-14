@@ -12,9 +12,8 @@ Pick tonight's matter like an editor:
 - Return to a case only when its posture has changed, and lead with what
   changed.
 
-Open with the case docket furniture (`rs-docket`; markup in the paper's
-`furniture/catalog.md`) so the prose can argue instead of recite the
-posture.
+Open with the case docket furniture (`rs-docket`) so the prose can argue instead
+of recite the posture.
 
 Emphases:
 
