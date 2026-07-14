@@ -1387,6 +1387,7 @@ expect(
         repo=PER_ITEM_BRIEFS,
     ),
     must_have=["B-SOURCE-KIND"],
+    blocks=True,
 )
 expect(
     "an item over the secondary ceiling blocks",
@@ -1403,6 +1404,7 @@ expect(
         repo=PER_ITEM_BRIEFS,
     ),
     must_have=["B-SOURCE-KIND"],
+    blocks=True,
 )
 expect(
     "the paper plus the lab's own post about it is one voice, not two",
@@ -1415,6 +1417,7 @@ expect(
         repo=PER_ITEM_BRIEFS,
     ),
     must_have=["B-SOURCE-KIND"],
+    blocks=True,
 )
 expect(
     "two secondaries from one outlet are the writer's call, not a block",
@@ -1452,6 +1455,7 @@ expect(
         slug=TODAY,
     ),
     must_have=["B-SOURCE-KIND"],
+    blocks=True,
 )
 expect(
     "a source that declares no kind blocks where the series constrains the mix",
@@ -1462,6 +1466,7 @@ expect(
         repo=PER_ITEM_BRIEFS,
     ),
     must_have=["B-SOURCE-KIND"],
+    blocks=True,
 )
 
 # The fixture's sources all live on example.org, which is the very shape a
@@ -1492,6 +1497,7 @@ expect(
     "sources_by_kind: an article sourced only to the documents it reports on blocks",
     run_local(ALL_PRIMARY, "semiconductors", repo=BY_KIND_SEMIS),
     must_have=["B-SOURCE-KIND"],
+    blocks=True,
 )
 expect(
     "sources_by_kind: a conforming mix passes, and a null ceiling means no ceiling",
@@ -1506,6 +1512,7 @@ expect(
         repo=patched_repo("sources_by_kind:\n  secondary: [0, 1]\n"),
     ),
     must_have=["B-SOURCE-KIND"],
+    blocks=True,
 )
 expect(
     "sources_by_kind: a source with no kind escapes the mix, so it blocks",
@@ -1517,12 +1524,31 @@ expect(
         repo=BY_KIND_SEMIS,
     ),
     must_have=["B-SOURCE-KIND"],
+    blocks=True,
 )
 expect(
-    "a series that constrains nothing nudges an unkinded source, and no more",
+    "a series that constrains nothing has nothing to say about an unkinded source",
     run_local(VALID, "semiconductors"),
-    must_have=["W-SOURCE-KIND-MISSING"],
+    must_not=["B-SOURCE-KIND"],
     blocks=0,
+)
+# A floor met by an entry no line cites is not met: the mix is what the article
+# rests on, not what its list advertises.
+LISTED_NOT_CITED = MIXED.replace(
+    "</ol>",
+    '<li id="s9"><a data-nb-source data-nb-kind="secondary" '
+    'href="https://apnews.com/x">src</a></li></ol>',
+    1,
+)
+expect(
+    "sources_by_kind counts the sources the article cites, not the ones it lists",
+    run_local(
+        LISTED_NOT_CITED,
+        "semiconductors",
+        repo=patched_repo("sources_by_kind:\n  secondary: [3, null]\n"),
+    ),
+    must_have=["B-SOURCE-KIND"],
+    blocks=True,
 )
 
 # Five of an article's sources on one advocacy shop's host: legitimate often
@@ -1572,6 +1598,14 @@ def open_briefs_repo(templates, patch=""):
     return tmp
 
 
+def unkinded_template_repo():
+    """A series constraining the mix, on a template whose sources carry no kind."""
+    tmp = patched_repo("sources_by_kind:\n  primary: [4, null]\n")
+    skel = pathlib.Path(tmp) / "templates" / "article" / "skeleton.html"
+    skel.write_text(skel.read_text().replace(' data-nb-kind="primary"', ""))
+    return tmp
+
+
 PER_ITEM_PATCH = "per_item_sources:\n  primary: [1, 1]\n  secondary: [1, 2]\n"
 for name, cond in [
     (
@@ -1603,6 +1637,11 @@ for name, cond in [
     (
         "a scalar where a band belongs is rejected",
         vc_rc(patched_repo("sources_by_kind:\n  primary: 4\n")) == 1,
+    ),
+    (
+        "a composition on a template whose skeleton omits data-nb-kind is a "
+        "config error",
+        vc_rc(unkinded_template_repo()) == 1,
     ),
     ("max_sources_per_host validates", vc_rc(CONC_REPO) == 0),
     (

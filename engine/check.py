@@ -1017,7 +1017,7 @@ def check_item_kinds(cited, *, number, per_item, rep):
     primary_hosts = {source_host(s["href"]) for s in cited if s["kind"] == "primary"}
     for s in cited:
         host = source_host(s["href"])
-        if s["kind"] == "secondary" and host in primary_hosts:
+        if s["kind"] == "secondary" and host and host in primary_hosts:
             rep.block(
                 "B-SOURCE-KIND",
                 f"item #{number}: secondary {s['href']} shares the domain "
@@ -1054,20 +1054,19 @@ def check_source_kinds(ed, *, series, treg, rep):
                 f"constrains the source mix, which a source that will not say "
                 f"what it is escapes",
             )
-        else:
-            rep.warn(
-                "W-SOURCE-KIND-MISSING",
-                f"source {s['href']} declares no data-nb-kind",
-                suggestion="declare primary or secondary on the source entry",
-            )
 
+    # The mix is what the article rests on, so count what it cites: a listed
+    # source no line calls on carries none of the piece.
+    cited_ids = set(ed.cite_hrefs)
+    cited = [s for s in ed.sources if s["id"] in cited_ids]
     for kind, band in kind_bands(by_kind or {}, key="sources_by_kind", rep=rep).items():
-        count = sum(1 for s in ed.sources if s["kind"] == kind)
+        count = sum(1 for s in cited if s["kind"] == kind)
         lo, hi = band
         if count < lo or (hi is not None and count > hi):
             rep.block(
                 "B-SOURCE-KIND",
-                f"{count} {kind} source(s); this series asks for {band_text(band)}",
+                f"{count} {kind} source(s) cited; this series asks for "
+                f"{band_text(band)}",
             )
 
     if per_item is None:

@@ -81,9 +81,10 @@ available, `uv run engine/<script>.py` manages the dependency itself.
 
    You declare the kind on the source entry, `data-nb-kind="primary"` or
    `data-nb-kind="secondary"`. The research log makes the call and records why.
-   A source with no kind is a WARN (`W-SOURCE-KIND-MISSING`) — and a BLOCK in a
-   series that constrains the mix, because a source that will not say what it is
-   escapes every rule written about the mix.
+   Where a series constrains the mix (`sources_by_kind`, `per_item_sources`), a
+   source with no kind is a BLOCK: a source that will not say what it is escapes
+   every rule written about the mix. Where a series constrains nothing, an
+   undeclared kind is nobody's business, and the proof says nothing.
 
    Six controls, per series and per item:
    - `required_docs`: committed files you read and represent, each by a source
@@ -101,8 +102,9 @@ available, `uv run engine/<script>.py` manages the dependency itself.
    - `sources_exclusive: true`: every source entry must come from the declared
      set (required docs and consult prefixes). Cite nothing else. An outside
      source is a BLOCK.
-   - `sources_by_kind`: the article's own composition, a `[low, high]` band per
-     kind (`primary: [4, null]` sets a floor and no ceiling).
+   - `sources_by_kind`: the composition of the sources the article CITES, a
+     `[low, high]` band per kind (`primary: [4, null]` sets a floor and no
+     ceiling). A listed source no line cites counts toward nothing.
    - `per_item_sources`: the same bands, applied uniformly to EVERY item you
      write on a per-item template. `primary: [1, 1]` with `secondary: [2, 3]`
      means each item carries exactly one primary and two or three secondaries,

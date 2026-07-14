@@ -76,7 +76,7 @@ from outside it. The distinction is independence, not document type, so a lab's
 post about its own paper is an extension of that paper, never a second source.
 
 ```yaml
-sources_by_kind: # the article's composition, any series
+sources_by_kind: # the composition of what the article cites, any series
   primary: [4, null] # at least four primaries; null means no ceiling
   secondary: [2, null]
 
@@ -93,9 +93,10 @@ a domain with its item's primary: the arXiv paper plus the lab's own
 announcement is one voice, and the check says so. Both bands are BLOCKs
 regardless of `strict`, and a `per_item_sources` on a series that may cite per
 section is a configuration error, caught by `engine/validate_config.py` rather
-than at 2am. A source that declares no kind at all is a WARN in a plain series
-and a BLOCK once either band is set: a source that will not say what it is
-escapes every rule written about the mix.
+than at 2am — as is a band set on a series whose template ships source entries
+without `data-nb-kind`. Once either band is set, a source that declares no kind
+blocks: a source that will not say what it is escapes every rule written about
+the mix. A series that sets neither band never asks.
 
 `max_sources_per_host` is the softer instrument, and deliberately so. Citing one
 outlet several times is sometimes exactly right, so passing the limit is a WARN
