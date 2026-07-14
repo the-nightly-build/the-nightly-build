@@ -13,8 +13,8 @@ Lanes (label each item with its lane):
 
 Emphases:
 
-- Four to eight items, each with a real "why it matters" line. A short honest
-  brief beats a padded one. Never invent an item to reach the count.
+- A short honest brief beats a padded one. Never invent an item to reach the
+  count. If you cannot say why an item matters, it is not news yet.
 - Link each headline to its primary source, and cite the original announcement
   or paper over coverage of it.
 - Assume the reader already saw the tweet. Add what it left out: the number,

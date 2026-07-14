@@ -1,8 +1,7 @@
 # The Divide
 
 Take one genuinely contested question in technology, AI, or the policy around
-them, and argue every side at its strongest. The divide template owns the
-form; this desk owns the pick.
+them, and argue every side at its strongest.
 
 Pick tonight's question like an editor:
 
@@ -10,3 +9,6 @@ Pick tonight's question like an editor:
   item for The Brief, not a Divide.
 - Prefer questions where credentialed people disagree in public, so each side
   has a named holder to quote at full strength.
+- Argue each side from the sources its own believers cite, never from its
+  opponents' summary of it. A side you would not sign is a side you did not
+  research.

@@ -10,17 +10,17 @@ stating the idea in one jargon-free paragraph, then the mechanism with the
 real numbers, then the holds-up grid (nb-holdsup) weighing what it buys
 against what it costs, then a verdict box (nb-verdict) before the close.
 
-Show the central idea in code with the rs-code furniture (markup in
-`furniture/catalog.md`) when a few lines make it concrete: a kernel
-signature, a scheduling loop, a quantization step. Keep it short and cited.
+Show the central idea in code with the rs-code furniture when a few lines make
+it concrete: a kernel signature, a scheduling loop, a quantization step. Keep it
+short and cited.
 
 Emphases:
 
 - The plain-language abstract is for a reader who will never open the paper: no
   notation, the actual idea in a sentence.
-- Ground every performance claim in the `benchmarks` discipline: the eval setup,
-  the baseline, the hardware. A speedup without its harness does not go in.
-- The `hardware` tag keeps the analysis honest about where the technique sits in
-  the memory hierarchy and which bottleneck it relieves.
+- Cite the paper or the reference implementation for how the technique works.
+  Vendor benchmarks are a claim, not a result.
+- An appraisal is a verdict, not a summary. Name the workload where the
+  technique wins and the one where it does not.
 - The verdict says when to reach for this in production and when not to, and
   names the result that would change the call.
