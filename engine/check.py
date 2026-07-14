@@ -1347,16 +1347,41 @@ def pr_changed_files(repo, *, base, head):
     return changes
 
 
-RECORD_SECTIONS = ("Process", "Voice brief", "Also consulted")
+RECORD_SECTIONS = ("Task", "Process", "Voice brief", "Research", "Also consulted")
+VOICE_EXEMPLARS_MIN = 3
+SOURCE_LINE_RE = re.compile(r"^\s*Source:\s*\S+", re.I | re.M)
+
+
+def section_text(body, name):
+    """One record section's text, ending only at the next record heading.
+
+    The artifacts carry their own markdown inside the collapsed block, and the
+    voice brief's exemplars are themselves `##` headings, so cutting at any
+    heading would slice the artifact in half and hide most of it.
+    """
+    others = "|".join(re.escape(s) for s in RECORD_SECTIONS if s != name)
+    m = re.search(
+        rf"^#{{2,3}}\s*{re.escape(name)}\b(.*?)(?=^#{{2,3}}\s*(?:{others})\b|\Z)",
+        body,
+        re.I | re.M | re.S,
+    )
+    return m.group(1) if m else ""
 
 
 def check_pr_body_record(pr_body_path, rep):
-    """WARN when the PR body lacks a production-record section.
+    """WARN when the PR body's production record is missing or hollow.
 
-    PROTOCOL step 8 makes the body the article's production record: the edit
-    rounds, the voice brief (gitignored, so the body is where it survives),
-    and the read-but-uncited sources. Presence is the quality bar, never the
-    publishing bar, so a gap is a WARN.
+    PROTOCOL step 8 makes the body the article's production record, and the
+    artifacts are gitignored, so the body is the only place they survive.
+    Presence is the quality bar, never the publishing bar, so a gap is a WARN.
+
+    The voice section gets one structural check on top of presence. The coach
+    must study at least three real writers and cite each piece it read, so a
+    real brief carries `Source:` lines. On 2026-07-14 an orchestrator skipped
+    the coach and wrote the brief itself: six lines naming two mastheads, no
+    writers, no sources. It passed every gate. Counting the `Source:` lines is
+    the cheapest thing that can tell a studied brief from an invented one. It
+    reads structure, never quality: judging the prose is the editor's job.
     """
     with open(pr_body_path, encoding="utf-8") as fh:
         body = fh.read()
@@ -1371,6 +1396,17 @@ def check_pr_body_record(pr_body_path, rep):
             f"PR body record missing section(s): {', '.join(missing)}",
             suggestion="the body is the article's production record; "
             "PROTOCOL step 8 lists the sections",
+        )
+    if "Voice brief" in missing:
+        return
+    exemplars = len(SOURCE_LINE_RE.findall(section_text(body, "Voice brief")))
+    if exemplars < VOICE_EXEMPLARS_MIN:
+        rep.warn(
+            "W-VOICE-THIN",
+            f"the voice brief cites {exemplars} exemplar(s); the coach studies "
+            f"at least {VOICE_EXEMPLARS_MIN} real writers and cites each piece",
+            suggestion="a brief naming outlets instead of writers, with no "
+            "Source: lines, was not written by the coach. Run the coach",
         )
 
 

@@ -128,7 +128,10 @@ available, `uv run engine/<script>.py` manages the dependency itself.
      - `## Task`: the commission (`task.md`).
      - `## Process`: the editor's `requested-changes.md`, plus any redraft
        and what forced it.
-     - `## Voice brief`: the coach's `voice.md`.
+     - `## Voice brief`: the coach's `voice.md`. It cites the writers it studied,
+       at least three, each with a `Source:` line. A brief that names outlets
+       instead of writers was not studied, and the proof says so
+       (`W-VOICE-THIN`).
      - `## Research`: the researcher's `research.md`.
      - `## Also consulted`: the research log's Discarded section, one line per
        source with the reason, plain (never collapsed).

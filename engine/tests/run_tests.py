@@ -336,15 +336,42 @@ MINIMAL_BODY = (
     "order: null\n"
     "```\n"
 )
-# The canonical body carries the production record PROTOCOL step 8 defines.
-GOOD_BODY = (
-    MINIMAL_BODY + "\n## Process\n"
-    "Coach studied two exemplars; one edit round, surgical fixes only.\n\n"
+# The canonical body carries the production record PROTOCOL step 8 defines: every
+# artifact the chain produced, including a voice brief that studied real writers.
+STUDIED_VOICE = (
     "## Voice brief\n"
-    "<details><summary>brief</summary>\n\n````markdown\ncalm, precise\n````\n\n"
-    "</details>\n\n"
+    "<details><summary>brief</summary>\n\n````markdown\n"
+    '## Jane Reporter, "The Cycle That Ate Memory"\n'
+    "Source: https://example.org/exemplar-1\n"
+    "Craft: leads on the number, spends the second line on the caveat.\n\n"
+    '## Sam Analyst, "What Fabs Cost"\n'
+    "Source: https://example.org/exemplar-2\n"
+    "Craft: every claim carries its denominator.\n\n"
+    '## Lee Critic, "The Capex Mirage"\n'
+    "Source: https://example.org/exemplar-3\n"
+    "Craft: names the mechanism, never the adjective.\n"
+    "````\n\n</details>\n\n"
+)
+GOOD_BODY = (
+    MINIMAL_BODY + "\n## Task\n"
+    "Commission: what Micron's cycle costs, for a public-market reader.\n\n"
+    "## Process\n"
+    "Coach studied three exemplars; one edit round, surgical fixes only.\n\n"
+    + STUDIED_VOICE
+    + "## Research\n"
+    "Nine sources read; every number checked against the filing.\n\n"
     "## Also consulted\n"
     "- https://example.org/background — context only, superseded by the filing\n"
+)
+# The 2026-07-14 forgery: an orchestrator skipped the coach and wrote the brief
+# itself. Six lines, two mastheads named, no writers, no sources, and it passed.
+FORGED_VOICE_BODY = GOOD_BODY.replace(
+    STUDIED_VOICE,
+    "## Voice brief\n"
+    "<details><summary>brief</summary>\n\n````markdown\n"
+    "The best daily writers (Economist Espresso, FT's #techFT) lead with the\n"
+    "number, then spend the second sentence on the caveat. No hype.\n"
+    "````\n\n</details>\n\n",
 )
 expect(
     "preflight passes when the PR body matches the article",
@@ -356,6 +383,29 @@ expect(
     "preflight warns when the record sections are missing",
     run_local(VALID, "semiconductors", pr_body=MINIMAL_BODY),
     blocks=0,
+    must_have=["W-BODY-RECORD"],
+)
+expect(
+    "a voice brief naming outlets instead of writers is caught as unstudied",
+    run_local(VALID, "semiconductors", pr_body=FORGED_VOICE_BODY),
+    blocks=0,
+    must_have=["W-VOICE-THIN"],
+    must_not=["W-BODY-RECORD"],
+)
+expect(
+    "a brief citing three studied writers passes",
+    run_local(VALID, "semiconductors", pr_body=GOOD_BODY),
+    must_not=["W-VOICE-THIN"],
+)
+expect(
+    "the commission and the research log are part of the record",
+    run_local(
+        VALID,
+        "semiconductors",
+        pr_body=GOOD_BODY.replace("## Task\n", "## Notes\n").replace(
+            "## Research\n", "## Notes\n"
+        ),
+    ),
     must_have=["W-BODY-RECORD"],
 )
 expect(
