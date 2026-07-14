@@ -42,6 +42,10 @@ available, `uv run engine/<script>.py` manages the dependency itself.
    path (a `git worktree add`, or a second clone) so the engine can read tonight's
    published state, then run the duty oracle:
    `python3 engine/duty.py --repo . --library <path-to-library-checkout>`
+   Duty exits 2 and prints nothing when your checkout is behind `origin/main`.
+   A cached workspace serves a press, prompts, and an engine this paper has
+   moved past, and every article you write from it is confidently wrong. Sync
+   the tree as duty instructs and run it again. Never work around a refusal.
    It applies every scheduling rule deterministically (per-series `cadence`,
    `paused`, completion, already-published-tonight) and prints the series due,
    with what to publish:

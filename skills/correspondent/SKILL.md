@@ -26,7 +26,9 @@ the file paths, not summaries.
    `python3 engine/duty.py --repo . --library <checkout>`
    If your schedule prompt names one series, serve only that one, and only if
    duty lists it. **Duty says nothing is due → stop. No PR. Exiting silently
-   here is correct behavior.**
+   here is correct behavior.** **Duty refuses a stale checkout → sync as it
+   says, then rerun it.** Your runtime may hand you a cached workspace; the
+   press it holds may have been retired days ago.
 2. Orient. Skim the recent nights in the library checkout (titles, deks,
    openers) and learn, per assignment, what moved on the beat and what the
    catalog already covered. For an open series with an empty commission

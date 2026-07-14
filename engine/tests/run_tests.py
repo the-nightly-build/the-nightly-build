@@ -1613,6 +1613,75 @@ for name, cond in [
 ]:
     check(name, cond)
 
+print("== duty refuses a checkout behind origin/main ==")
+# The 2026-07-14 failure: a cached workspace gave the night shift a press that
+# had been retired days earlier. duty read it faithfully, every local proof
+# passed, and CI blocked the whole edition. A stale tree must die at step one.
+
+
+DUTY = [sys.executable, str(REPO / "engine" / "duty.py")]
+
+origin_dir = tempfile.mkdtemp()
+git("init", "--bare", "-q", "-b", "main", cwd=origin_dir)
+night = clone_testrepo("press", "templates")
+git("init", "-q", "-b", "main", cwd=night)
+git("config", "user.email", "t@t", cwd=night)
+git("config", "user.name", "t", cwd=night)
+git("remote", "add", "origin", origin_dir, cwd=night)
+git("add", "-A", cwd=night)
+git("commit", "-qm", "the press as the night shift sees it", cwd=night)
+git("push", "-q", "origin", "main", cwd=night)
+
+fresh = subprocess.run(
+    [*DUTY, "--repo", night, "--library", empty_lib], capture_output=True, text=True
+)
+
+# the owner retires a series on main; the night shift's clone never hears about it
+owner = tempfile.mkdtemp()
+git("clone", "-q", origin_dir, owner, cwd=tempfile.gettempdir())
+git("config", "user.email", "t@t", cwd=owner)
+git("config", "user.name", "t", cwd=owner)
+shutil.rmtree(pathlib.Path(owner) / "press" / "series" / "ai-briefs")
+git("add", "-A", cwd=owner)
+git("commit", "-qm", "retire the old press", cwd=owner)
+git("push", "-q", "origin", "main", cwd=owner)
+
+stale = subprocess.run(
+    [*DUTY, "--repo", night, "--library", empty_lib], capture_output=True, text=True
+)
+overridden = subprocess.run(
+    [*DUTY, "--repo", night, "--library", empty_lib, "--allow-stale"],
+    capture_output=True,
+    text=True,
+)
+
+check("a checkout level with origin/main computes the work list", fresh.returncode == 0)
+check(
+    "a checkout behind origin/main refuses to compute a work list",
+    stale.returncode == 2 and not stale.stdout.strip(),
+    detail=f"rc={stale.returncode} stdout={stale.stdout[:80]!r}",
+)
+check(
+    "the refusal names the drift and the command that fixes it",
+    "stale checkout" in stale.stderr
+    and "1 commits behind" in stale.stderr
+    and "reset --hard origin/main" in stale.stderr,
+    detail=stale.stderr[:200],
+)
+check(
+    "--allow-stale is the offline escape hatch",
+    overridden.returncode == 0 and json.loads(overridden.stdout)["due"],
+)
+check(
+    "a tree with no git (press check, temp fixture) is never called stale",
+    subprocess.run(
+        [*DUTY, "--repo", TESTREPO, "--library", empty_lib],
+        capture_output=True,
+        text=True,
+    ).returncode
+    == 0,
+)
+
 print("== PR mode (real git repo) ==")
 
 prdir = clone_testrepo("press", "templates")

@@ -9,8 +9,16 @@ The correspondent runs this before researching anything. It is the single
 source of truth for cadence, pauses, completion, commission queues, and
 rerun safety, so no agent ever does calendar math on its own.
 
+Because it runs first, it is also where a stale checkout is caught. A night
+shift handed a cached workspace reads a press that no longer exists and
+writes a confident, internally consistent, entirely wrong edition: every
+article cites retired series, every local proof passes, and CI blocks all of
+it (this happened on 2026-07-14). So duty refuses to compute a work list from
+a tree that is behind origin/main, and says how to fix it.
+
 Run: python3 engine/duty.py --repo . --library <library-checkout> [--date YYYY-MM-DD]
-Prints JSON: {"date", "weekday", "due": [...], "idle": [...]}. Always exits 0.
+Prints JSON: {"date", "weekday", "due": [...], "idle": [...]}. Exits 0, except
+2 when the checkout is stale (--allow-stale skips the check, for offline work).
 """
 
 from __future__ import annotations
@@ -19,6 +27,7 @@ import argparse
 import datetime as _dt
 import json
 import os
+import subprocess
 import sys
 
 import nb_meta
@@ -178,6 +187,45 @@ def series_duty(
     return False, {**entry, "reason": f"unknown mode {mode!r}"}
 
 
+def git(repo, *args) -> str | None:
+    try:
+        done = subprocess.run(
+            ["git", "-C", repo, *args], capture_output=True, text=True, timeout=60
+        )
+    except (OSError, subprocess.SubprocessError):
+        return None
+    return done.stdout.strip() if done.returncode == 0 else None
+
+
+def stale_checkout(repo) -> str | None:
+    """Say how the tree is behind origin/main, or None when it is not.
+
+    Only a strict ancestor of origin/main is stale: a branch with local work
+    is ahead or diverged, and a press check on a feature branch must keep
+    working. A tree with no git, no origin, or no reachable remote cannot be
+    judged, so it passes rather than blocking an offline run.
+    """
+    if git(repo, "rev-parse", "--git-dir") is None:
+        return None
+    if git(repo, "remote", "get-url", "origin") is None:
+        return None
+    git(repo, "fetch", "--quiet", "origin", "main")
+    head = git(repo, "rev-parse", "HEAD")
+    remote = git(repo, "rev-parse", "origin/main")
+    if head is None or remote is None or head == remote:
+        return None
+    if git(repo, "merge-base", "HEAD", "origin/main") != head:
+        return None  # ahead or diverged: local work, not a stale clone
+    behind = git(repo, "rev-list", "--count", f"{head}..origin/main") or "?"
+    return (
+        f"stale checkout: HEAD is {head[:8]}, {behind} commits behind "
+        f"origin/main ({remote[:8]}). The press, the prompts, and the engine "
+        f"in this tree are not the ones this paper runs. Sync first:\n"
+        f"    git -C {repo} fetch origin && git -C {repo} reset --hard origin/main\n"
+        f"then run duty again. (--allow-stale overrides, for offline work only.)"
+    )
+
+
 def main(argv=None) -> int:
     p = argparse.ArgumentParser(description="Tonight's deterministic work list")
     p.add_argument("--repo", default=".", help="repo root (main checkout)")
@@ -185,7 +233,18 @@ def main(argv=None) -> int:
         "--library", required=True, help="library-branch checkout (published state)"
     )
     p.add_argument("--date", default=None, help="UTC date, default today")
+    p.add_argument(
+        "--allow-stale",
+        action="store_true",
+        help="compute a work list even from a tree behind origin/main",
+    )
     args = p.parse_args(argv)
+
+    if not args.allow_stale:
+        stale = stale_checkout(args.repo)
+        if stale:
+            sys.stderr.write(f"duty.py: {stale}\n")
+            return 2
 
     date = (
         _dt.date.fromisoformat(args.date)
