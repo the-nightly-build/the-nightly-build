@@ -22,10 +22,9 @@ Emphases:
 
 - Build each idea from one the reader already holds, and reuse one running
   example across the course. Define each term on first use.
-- Real numbers over hand-waving, each cited: bytes moved, arithmetic intensity,
-  achieved versus peak bandwidth, occupancy, kernel time. The `hardware` tag
-  makes the roofline the throughline.
+- Real numbers over hand-waving, each cited. Every claim about speed names the
+  quantity it is measured in and where that quantity was read. The `hardware`
+  tag makes the roofline the throughline.
 - Check-yourself exercises must be answerable from the lesson alone. A reader
   who can do them has learned the thing.
-- nb-steps suits any mechanism walked in order: a kernel's phases, a memory
-  access pattern, a tiling scheme.
+- nb-steps suits any mechanism the reader must walk in order.

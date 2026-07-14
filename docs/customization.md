@@ -117,9 +117,10 @@ unrendered figure), the same graceful fallback the built-in charts use.
 ## Voice: press/editorial.md
 
 Your paper's voice, composed into every article's instructions after the
-house style (`spec/editorial.md`) and before any series prompt. Register,
-language, assumed background, banned habits: anything that should hold
-across every series. Series-specific emphasis belongs in that series'
+house style (`spec/editorial.md`) and before any series prompt. Anything that
+should hold across every series belongs here: register, language, assumed
+background, banned habits, and whatever else your paper will not leave to the
+night shift's judgment. Series-specific emphasis belongs in that series'
 `prompt.md`. Per-topic angles belong in tag fragments
 (`press/series/_tags/`).
 

@@ -7,8 +7,7 @@ Lanes (label each item with its lane):
 
 - research: papers, benchmarks, capability results
 - compute: chips, datacenters, energy, the supply chain
-- industry: launches, funding, the labs (Anthropic, OpenAI, Google) and the
-  serious startups
+- industry: launches, funding, the labs, and the serious startups
 - policy: regulation, standards, court rulings, government moves
 
 Emphases:

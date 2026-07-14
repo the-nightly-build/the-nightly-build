@@ -36,10 +36,10 @@ The prose floor belongs to the writer and editor.
    retellings of one origin count as one. Never record a URL you have not
    confirmed resolves. Log a page that refuses fetchers (a 403, a
    paywall) as gated, never as dead. Try a browser user agent first.
-4. Read for what breaks the piece as well as what feeds it. A source that
-   undercuts the commission's angle — a discontinued metric, a retracted
-   figure, a quote whose context points elsewhere — is the log's most valuable
-   line. Record it under Contradictions, especially when it is inconvenient.
+4. Read for what breaks the piece as well as what feeds it. The source that
+   undercuts the commission's angle is the log's most valuable line, and
+   finding it is the part of the job nobody else can do for you. Record it
+   under Contradictions, especially when it is inconvenient.
 5. Meet or exceed the series' source floor.
 
 ## The log

@@ -5,7 +5,7 @@
 # at the WARN tier: a series may tighten `words:` but never loosen below these
 # floors. A press adds or redefines templates as folder packages under
 # press/templates/<id>/; `flex_sections` is optional (omit it for a fixed outline).
-about: "Enforced prose for anything told in sections: an investigation, a history, an explainer, a profile, an argued essay, an appraisal, or a debate."
+about: "Enforced prose for anything told in sections. The geometry is fixed; the genre is whatever the series prompt asks for."
 class: longread
 words: [800, 6000]
 sections: [orientation, sources]

@@ -39,15 +39,12 @@ reconciled to the paper, so the writer never fights the register.
 2. Find at least three exemplars, the writers the field itself rates. Skip
    influencers and SEO content. Use web access. Prefer the primary piece over
    commentary on it.
-3. Read them the way a writer studies writers. For each, capture the craft:
-   - cadence: sentence rhythm and what drives it. Where the structure
-     shifts and what each shift does for the reader
-   - argument: how they open, sequence, and close
-   - evidence: how they deploy numbers, quotes, sourcing
-   - stance: what they commit to, what they are skeptical of, how they judge
-   - notice: the non-obvious angle or telling detail they catch
-   - diction: where they are plain, where vivid, the concrete domain word
-   - reader: the relationship they keep (peer, teacher, insider)
+3. Read them the way a writer studies writers. For each, capture the craft.
+   These axes are the floor, never the shape of the answer: cadence, argument,
+   evidence, stance, notice, diction, and the relationship they keep with the
+   reader. Then write the line the axes miss. What a writer is imitable FOR is
+   usually the move no checklist named, and if your notes on two exemplars
+   differ only in their adjectives, you read them as a form and not as a writer.
 
    Grab one short verbatim passage per exemplar, for texture calibration only.
 
@@ -79,8 +76,8 @@ Format:
 
 Open with the register and the reader in one line. Then the handful of moves the
 writer writes by, distilled from the exemplars below so the paper sounds more
-like itself: cadence, how to open and close, what to commit to,
-the habits to keep and the tells to avoid. Describe moves to write by; a
+like itself. Name only the moves that will change a sentence in this article. A
+brief that covers everything directs nothing. Describe moves to write by; a
 catchphrase or a reusable line coined here becomes a house tic the
 next article repeats. An image you have seen in print arrives pre-written;
 build your own or use none. Close this section with
@@ -97,6 +94,7 @@ Craft:
 - notice: ...
 - diction: ...
 - reader: ...
+- <the move the axes above missed, named in your own words>
 Calibration: <one short verbatim passage, texture only>
 ```
 

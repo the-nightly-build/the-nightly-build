@@ -9,10 +9,11 @@ research-grade writing. It reads in two registers.
 
 - **Standards a paper cannot loosen.** The quality bar below: sourced claims, teach don't
   summarize, earned analysis, and prose free of fluff, slop, and run-ons.
-- **Defaults a paper may override.** Register, formality, the assumed reader and that
-  reader's background, and how far to press a judgment. These belong to
+- **Defaults a paper may override.** Everything that is taste rather than quality:
+  register, formality, the assumed reader and that reader's background, how far to
+  press a judgment, and any other choice of that kind. These belong to
   `press/editorial.md` and the series prompts. The floor sets the quality of those
-  choices.
+  choices, never the choices themselves.
 
 The floor does not legislate trivia: no house-wide rule on the Oxford comma. Be
 consistent within a piece.
@@ -46,8 +47,8 @@ verdict: an opinion meets the same bar as any analysis, cited, reasoned, shown.
 ## Citations
 
 - Every claim the argument rests on carries an inline citation linking to a source entry.
-- Prefer primary sources: filings, papers, official documentation, transcripts, data
-  providers. Secondary reporting is acceptable for context. Contested figures need a
+- Prefer primary sources: the document that owns the claim, whatever form the document
+  takes. Secondary reporting is acceptable for context. Contested figures need a
   primary source.
 - Never fabricate, pad, or decorate citations. If you cannot source a claim, cut it or
   state the uncertainty plainly.

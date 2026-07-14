@@ -51,16 +51,18 @@ masthead:
 
 **The hands-off paper** (they say "just give me ~N good reads a day about X and
 surprise me"): propose a masthead of open sections instead of enumerating items.
-For example a daily rolling brief plus open sections with distinct beats (deep
-dives, explainers, history, papers, a wildcard), each with a template choice list
-and a cadence so the nightly mix varies. One article per section per night is the
+Give each section a beat of its own, a template choice list, and a cadence, so
+the nightly mix varies. The beats come from what the interview surfaced about
+this reader, and a masthead you could have written before the interview is the
+wrong one. One article per section per night is the
 invariant, so "six things a day" means six sections. They govern it later in
 prose, not YAML: commissioning drops an item into a section's queue, steering
 edits the section's `prompt.md`.
 
-- **Voice** (written into `press/editorial.md`): how should the paper sound
-  (register, wit, language), and what should it assume they already know? This is
-  a paper-wide layer composed into every article.
+- **Voice** (written into `press/editorial.md`): how should the paper sound to
+  them, and what should it assume they already know? Push until you have
+  something a stranger could not have guessed. This is a paper-wide layer
+  composed into every article.
 - Depth and per-series emphases go in the series prompt, not the voice
   file.
 - Must-read documents or must-check sites? These become `required_docs`

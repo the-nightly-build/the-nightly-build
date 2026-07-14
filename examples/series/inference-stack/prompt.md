@@ -11,15 +11,15 @@ real numbers, then the holds-up grid (nb-holdsup) weighing what it buys
 against what it costs, then a verdict box (nb-verdict) before the close.
 
 Show the central idea in code with the rs-code furniture (markup in
-`furniture/catalog.md`) when a few lines make it concrete: a kernel
-signature, a scheduling loop, a quantization step. Keep it short and cited.
+`furniture/catalog.md`) when a few lines make it concrete. Show the part of the
+technique the prose cannot carry. Keep it short and cited.
 
 Emphases:
 
 - The plain-language abstract is for a reader who will never open the paper: no
   notation, the actual idea in a sentence.
-- Ground every performance claim in the `benchmarks` discipline: the eval setup,
-  the baseline, the hardware. A speedup without its harness does not go in.
+- Ground every performance claim in the `benchmarks` discipline. A speedup
+  without its harness does not go in.
 - The `hardware` tag keeps the analysis honest about where the technique sits in
   the memory hierarchy and which bottleneck it relieves.
 - The verdict says when to reach for this in production and when not to, and
