@@ -36,7 +36,10 @@ While a source is open, verification comes free. Confirm the passage supports
 the claim, then read the rest of its sentence and the paragraph around it:
 the half the piece did not quote is the first place a broken thesis hides.
 Recompute what the numbers imply: components against the total,
-percentages against 100, millions against billions. A verbatim quote aimed at
+percentages against 100, millions against billions. Check a figure against the
+document that owns it and not a convenient summary of it. An interval absent
+from an abstract is not an interval absent from the paper, and a figure you
+recompute yourself is a second estimate, not a verdict on the first. A verbatim quote aimed at
 a different object than the source's fails however clean it reads. Scale the
 check to the cost of being wrong. Any claim that could damage or credit a
 named person gets the deepest check. When the body names a primary ("per a
@@ -64,8 +67,12 @@ placeholders, prompt phrases, taxonomy labels.
 Then trim inside the survivors. Cut from the middles, never the end, and stop
 before a reader could point to a scar.
 
-Read the paragraph endings in sequence and against the recent nights' openers
-and closers in the library checkout. A repeated shape is a formula. Break it.
+Read the paragraph endings in sequence, then read the draft against the library
+checkout. The checkout holds the whole paper, so the comparison does too: this
+piece's openers, closers, section heading shapes, and dek against every series'
+recent nights, not only its own. Desks draft in isolation, and a catchphrase
+forms across them where one series' history shows nothing. A repeated shape is
+a formula. Break it.
 An ending gone soft usually finished a paragraph earlier. Strike everything
 after the true last line. Hold the register `voice.md` encodes throughout. The
 fix for a voiced sentence with no cargo is deletion, not flattening. Restore
