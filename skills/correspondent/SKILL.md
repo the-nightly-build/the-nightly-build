@@ -60,17 +60,25 @@ here, on the card, and nowhere else.
 
 ## Phase 2: hand each article to a desk
 
-Launch one `desk` subagent per commissioned article, **all of them in the same
-turn, together**. Each owns its article end to end and returns an open PR. No
-desk waits on another. Give each desk an isolated tree so their proof runs and
-work branches cannot collide:
+Launch one desk per commissioned article, **all of them in the same turn,
+together**. Each owns its article end to end and returns an open PR. No desk
+waits on another.
+
+**There is almost certainly no registered agent type called `desk`.** The
+skills are files, not runtime plugins. Spawn a _general_ subagent with whatever
+tool your runtime gives you, and put three things in its prompt: the path to
+`skills/desk/SKILL.md` (its instructions, to read first), the path to its
+`task.md`, and its worktree. Finding no agent named `desk` is not evidence that
+you cannot delegate. Look for the tool that spawns one, and use it. Give each
+desk an isolated tree so their proof runs and work branches cannot collide:
 
 ```sh
 git worktree add ../desk-<series> -b nb/<series>-<slug> origin/library
 ```
 
-and a prompt naming exactly three things: the path to `skills/desk/SKILL.md`,
-the path to its `task.md`, and its worktree.
+Give the desks the model you are running on. A cheap model in the coach's chair
+produces exactly the thin, studied-nothing brief this pipeline exists to
+prevent, and it will pass every check but the one that matters.
 
 Then wait. While the desks work you do nothing but wait; you do not draft
 alongside them, and you do not review their drafts.

@@ -123,8 +123,18 @@ available, `uv run engine/<script>.py` manages the dependency itself.
    - Body: the article's production record, assembled from the run's artifacts
      under `.nb-work/<series>/<slug>/`, harness-agnostic and readable years
      later. In order:
-     - a fenced `nb-meta` yaml block mirroring the embedded metadata, a link to
-       your run if available, and the proof's final WARN summary.
+     - a code fence tagged `nb-meta` (not `yaml`: the proof matches the tag)
+       holding YAML that mirrors the embedded metadata, a link to your run if
+       available, and the proof's final WARN summary:
+
+       ````text
+       ```nb-meta
+       series: the-wire
+       slug: 2026-07-14
+       title: "…"
+       ```
+       ````
+
      - `## Task`: the commission (`task.md`).
      - `## Process`: the editor's `requested-changes.md`, plus any redraft
        and what forced it.

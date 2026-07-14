@@ -21,6 +21,18 @@ every automated check, and it will quietly cost the article the one thing the
 chain exists to produce. If you find yourself writing prose, you have taken
 someone else's job.
 
+Routing the chain, running the proof, assembling the production record, and
+opening the PR are yours. Writing the article and its artifacts is not.
+
+**There is almost certainly no registered agent type called `writing-coach`,
+`researcher`, `writer`, or `editor`.** The skills are files, not runtime
+plugins. For each stage, spawn a _general_ subagent with whatever tool your
+runtime gives you and put two things in its prompt: the path to that stage's
+`skills/<role>/SKILL.md`, and the path to its `task.md`. Finding no agent by
+that name is not evidence that you cannot delegate. Run each role on the model
+you are running on: a cheap model in the coach's chair produces exactly the
+thin brief this pipeline exists to prevent.
+
 Read `task.md` first. It is the commission, and every role reads it first too.
 Hand roles file paths, never summaries.
 

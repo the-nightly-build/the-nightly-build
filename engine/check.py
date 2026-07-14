@@ -1226,7 +1226,15 @@ def check_article(
     today=None,
     check_links=False,
 ) -> dict | None:
-    today = today or _dt.date.today()
+    """Run every check against one article and record the findings on rep.
+
+    `today` defaults to the date in UTC, which is the clock duty.py keeps and
+    the clock PROTOCOL's rolling-slug rule names. The local clock would fail a
+    correct article: a night shift running west of UTC, after its own evening
+    rollover, computes yesterday and then reads tonight's rolling slug as a
+    date in the future.
+    """
+    today = today or _dt.datetime.now(_dt.timezone.utc).date()
 
     resolved = resolve_series_and_template(repo, series_id, rep)
     if resolved is None:

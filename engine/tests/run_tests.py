@@ -10,8 +10,10 @@ Run: python3 engine/tests/run_tests.py
 """
 
 import contextlib
+import datetime as _dt
 import io
 import json
+import os
 import pathlib
 import re as _re
 import shutil
@@ -186,6 +188,36 @@ expect(
     "rolling: not a real date",
     run_local(VALID_BRIEF.replace(TODAY, "2026-13-99"), "ai-briefs", slug="2026-13-99"),
     must_have=["B-SLUG"],
+)
+
+# The proof keeps duty's clock: UTC. It used to keep the machine's, so a night
+# shift running west of UTC — after its own evening rollover, when the local
+# date is still yesterday — read tonight's correct rolling slug as a date in the
+# future and blocked it. TZ forces that machine, so the bug is reproducible
+# rather than a thing that only bites after 8pm in New York.
+utc_now = _dt.datetime.now(_dt.timezone.utc).date().isoformat()
+tonight_dir = pathlib.Path(tempfile.mkdtemp()) / "library" / "ai-briefs"
+tonight_dir.mkdir(parents=True)
+(tonight_dir / f"{utc_now}.html").write_text(make_fixtures.brief(utc_now))
+west_of_utc = subprocess.run(
+    [
+        sys.executable,
+        str(REPO / "engine" / "check.py"),
+        str(tonight_dir / f"{utc_now}.html"),
+        "--series",
+        "ai-briefs",
+        "--repo",
+        TESTREPO,
+        "--no-check-links",
+    ],
+    capture_output=True,
+    text=True,
+    env={**os.environ, "TZ": "Pacific/Honolulu"},
+)
+check(
+    "tonight's rolling slug passes on a machine whose local clock is still yesterday",
+    "B-SLUG" not in west_of_utc.stdout,
+    detail=west_of_utc.stdout[:200],
 )
 expect(
     "rolling: already published",
