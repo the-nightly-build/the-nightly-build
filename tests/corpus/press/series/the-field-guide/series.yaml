@@ -1,0 +1,10 @@
+# The weekend desk: where to go with a baby, in Westchester and the city.
+name: The Field Guide
+mode: open
+section: "Family"
+template: article
+prompt: prompt.md
+autopublish: true
+strict: false
+words: [1200, 2400]
+cadence: [sat, sun]

@@ -1,0 +1,18 @@
+# The two-sided desk, on the press's own `unbiased` template. Strict on
+# purpose: the per-side citation checks become hard BLOCKs, so a one-sided or
+# thinly sourced piece never publishes.
+name: Unbiased
+mode: open
+section: "Opinion"
+template: unbiased
+prompt: prompt.md
+autopublish: true
+strict: true
+min_sources: 10
+words: [1800, 3000]
+cadence: daily
+# A desk that quotes each side at its strongest has to read what each side
+# actually filed, said, and ruled. No ceiling: the more of the record the
+# article stands on, the less room there is for one shop to speak for a side.
+sources_by_kind:
+  primary: [4, null]

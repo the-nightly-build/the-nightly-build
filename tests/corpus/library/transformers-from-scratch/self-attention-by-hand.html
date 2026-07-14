@@ -1,0 +1,558 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Self-Attention by Hand: Queries, Keys, and Values — Transformers from Scratch</title>
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400..700;1,6..72,400..700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="../../assets/theme.css" />
+    <link rel="stylesheet" href="../../assets/nb.css" />
+    <script defer src="../../assets/nb.js"></script>
+    <script type="application/json" id="nb-meta">
+      {
+        "protocol": "1.1",
+        "series": "transformers-from-scratch",
+        "slug": "self-attention-by-hand",
+        "template": "article",
+        "title": "Self-Attention by Hand: Queries, Keys, and Values",
+        "mode": "sequence",
+        "order": 2,
+        "date": "2026-07-10",
+        "tags": ["course", "transformers", "attention"],
+        "sources": 9,
+        "words": 3050,
+        "reading_minutes": 15,
+        "dek": "Lesson two builds a single attention head from a plain average of past tokens, deriving queries, keys, values, the 1/sqrt(d_k) scaling, and the causal mask in short, shape-annotated PyTorch.",
+        "harness": "claude-code-routine",
+        "model": "claude-opus-4-8"
+      }
+    </script>
+  </head>
+  <body class="nb-article">
+    <article class="nb-reading">
+      <header>
+        <div class="nb-eyebrow">Transformers from Scratch · Foundations</div>
+        <h1 class="nb-title">Self-Attention by Hand: Queries, Keys, and Values</h1>
+        <p class="nb-dekline">
+          Lesson two builds a single attention head from a plain average of past
+          tokens, deriving queries, keys, values, the 1/√d_k scaling, and the
+          causal mask in short, shape-annotated PyTorch.
+        </p>
+        <div class="nb-byline"><span>15 min read</span><span>2026-07-10</span></div>
+      </header>
+
+      <section data-nb-section="orientation" id="orientation">
+        <h2>Where lesson one left off</h2>
+        <p>
+          Lesson one ended with a single tensor. A batch of character sequences
+          was tokenized to integer ids of shape <code>(B, T)</code>, a token
+          embedding table turned each id into a vector, a position embedding
+          table added order, and the sum was
+          <code>x = tok_emb + pos_emb</code> of shape <code>(B, T, C)</code> —
+          our running character-level GPT on tiny-Shakespeare, with
+          <code>B</code> the batch, <code>T</code> the time or sequence axis, and
+          <code>C</code> the channel width we call <code>d_model</code>, fixed at
+          384 for this course. Every value in that tensor describes one token in
+          isolation. Position 5 does not yet know that position 2 was a comma or
+          that position 0 was a capital letter. The whole purpose of attention is
+          to fix exactly that: to let each position gather information from the
+          other positions before it.<sup class="nb-cite"><a href="#s1">1</a></sup>
+        </p>
+        <div class="nb-objectives">
+          <div class="nb-objectives-label">In this article</div>
+          <ul>
+            <li>
+              Derive attention as a content-dependent weighted average, starting
+              from a plain mean over past tokens and adding one idea at a time.
+            </li>
+            <li>
+              Construct the query, key, and value projections with
+              <code>nn.Linear</code>, and track every tensor as it moves through a
+              head with its shape annotated at each step.
+            </li>
+            <li>
+              Explain, not assert, why the scores are divided by
+              <code>√d_k</code> and why the causal mask is lower-triangular.
+            </li>
+            <li>
+              Write a single attention head as a short, runnable PyTorch module
+              consistent with lesson one's <code>(B, T, C)</code> and
+              <code>C = 384</code>.
+            </li>
+          </ul>
+        </div>
+        <p>
+          The mechanism we build is the one Vaswani and colleagues named
+          scaled dot-product attention in "Attention Is All You Need," and the
+          concrete code follows the causal self-attention in Andrej Karpathy's
+          nanoGPT, the same reference implementation lesson one drew its running
+          example from.<sup class="nb-cite"><a href="#s1">1</a></sup><sup
+            class="nb-cite"
+            ><a href="#s2">2</a></sup
+          >
+          We stay with one head for the whole lesson; splitting a head into many
+          is the next lesson's job.
+        </p>
+      </section>
+
+      <section data-nb-section="from-averaging-to-attention" id="from-averaging-to-attention">
+        <h2>Start with a plain average</h2>
+        <p>
+          Before attention, take the crudest thing that lets a token see its
+          past: replace each token's vector with the average of itself and every
+          token before it. It throws away word order within the window and weights
+          every past token equally, so it is a poor model — but it is a real
+          operation on the lesson-one tensor, and it is the seed the rest of the
+          lesson grows from. This staged reveal, from a loop to a matrix multiply
+          to learned weights, follows Karpathy's "Let's build GPT" walkthrough.<sup
+            class="nb-cite"
+            ><a href="#s3">3</a></sup
+          >
+        </p>
+        <div class="rs-code">
+          <div class="rs-code-head">
+            <span class="rs-code-file">averaging.py</span><span>PyTorch</span>
+          </div>
+          <pre><code class="language-python">import torch
+
+B, T, C = 4, 8, 384                  # batch, time (sequence), channels (d_model)
+x = torch.randn(B, T, C)             # stands in for tok_emb + pos_emb from lesson 1
+
+# a plain causal average, written as the loop it literally is
+xbow = torch.zeros(B, T, C)          # "bag of words": (B, T, C)
+for b in range(B):
+    for t in range(T):
+        past = x[b, : t + 1]         # (t+1, C): this token and everything before it
+        xbow[b, t] = past.mean(dim=0)  # (C,): mean over the time axis</code></pre>
+          <span class="rs-code-cap">
+            Fig. 1 · Each position becomes the average of itself and its past.
+            Order within the window is discarded; every past token counts the
+            same.
+          </span>
+        </div>
+        <p>
+          The loop hides a piece of linear algebra. Averaging position
+          <code>t</code> over positions <code>0..t</code> is a matrix multiply by
+          a lower-triangular matrix whose rows sum to one. Build a
+          <code>(T, T)</code> matrix of ones on and below the diagonal, normalize
+          each row by its own sum, and multiplying it into <code>x</code>
+          produces the identical result — the same average, now as one batched
+          operation instead of a double loop.<sup class="nb-cite"
+            ><a href="#s3">3</a></sup
+          >
+        </p>
+        <div class="rs-code">
+          <div class="rs-code-head">
+            <span class="rs-code-file">averaging_matmul.py</span><span>PyTorch</span>
+          </div>
+          <pre><code class="language-python">w = torch.tril(torch.ones(T, T))       # (T, T): 1 on/below the diagonal, 0 above
+w = w / w.sum(dim=1, keepdim=True)     # normalize each row so it sums to 1
+xbow2 = w @ x                          # (T, T) @ (B, T, C) -&gt; (B, T, C)
+
+torch.allclose(xbow, xbow2)            # True: same average, one matmul</code></pre>
+          <span class="rs-code-cap">
+            Fig. 2 · A causal average is a lower-triangular weight matrix applied
+            to the sequence. Row <code>t</code> holds <code>1/(t+1)</code> in its
+            first <code>t+1</code> columns and zero after.
+          </span>
+        </div>
+        <p>
+          Now the whole idea of attention is visible in one sentence: those
+          weights do not have to be uniform. If row <code>t</code> could hold any
+          non-negative numbers that sum to one, the output at position
+          <code>t</code> would be a <em>weighted</em> average of the past, and if
+          those numbers were computed from the tokens themselves, the average
+          would be <em>content-dependent</em>. Position <code>t</code> could lean
+          hard on the one past token that matters and ignore the rest. That is
+          self-attention. The rest of the lesson is the machinery that turns the
+          fixed <code>1/(t+1)</code> weights of Fig. 2 into learned, per-pair
+          weights.
+        </p>
+        <div class="nb-callout">
+          <span class="nb-callout-term">Self-attention</span>
+          A layer that replaces each position's vector with a weighted average of
+          the other positions' vectors, where the weights are computed from the
+          content of the positions themselves and, in a decoder, are zero for the
+          future.<sup class="nb-cite"><a href="#s2">2</a></sup>
+        </div>
+      </section>
+
+      <section data-nb-section="queries-keys-values" id="queries-keys-values">
+        <h2>Queries, keys, and values</h2>
+        <p>
+          To make the weights content-dependent we give every token three
+          learned roles, each a linear projection of its <code>(C,)</code> vector.
+          The <em>query</em> is what a token is looking for. The <em>key</em> is
+          what a token offers to others as a label for itself. The <em>value</em>
+          is the information a token actually contributes if it is attended to. A
+          query meets a key to decide <em>how much</em>; the value is the
+          <em>what</em> that then gets averaged. These are not physical quantities
+          in the data; they are useful roles, and each is produced by its own
+          weight matrix <code>W_q</code>, <code>W_k</code>, <code>W_v</code>.<sup
+            class="nb-cite"
+            ><a href="#s2">2</a></sup
+          >
+        </p>
+        <p>
+          In PyTorch each projection is an <code>nn.Linear</code> layer, which
+          applies <code>x @ W</code> (we drop the bias, as attention projections
+          conventionally do); its two arguments are the input width and the output
+          width.<sup class="nb-cite"><a href="#s4">4</a></sup> The output width is
+          the <em>head size</em>, written <code>d_k</code> in the paper — the
+          dimension the query and key live in, and the length over which their dot
+          product is taken. It is a hyperparameter, smaller than <code>C</code>;
+          we use 16 here so the tensors stay small enough to reason about.
+        </p>
+        <div class="rs-code">
+          <div class="rs-code-head">
+            <span class="rs-code-file">projections.py</span><span>PyTorch</span>
+          </div>
+          <pre><code class="language-python">import torch.nn as nn
+
+head_size = 16                         # d_k: the width of one attention head
+key   = nn.Linear(C, head_size, bias=False)   # W_k: (C, head_size)
+query = nn.Linear(C, head_size, bias=False)   # W_q: (C, head_size)
+value = nn.Linear(C, head_size, bias=False)   # W_v: (C, head_size)
+
+k = key(x)     # (B, T, head_size): what each token offers
+q = query(x)   # (B, T, head_size): what each token wants
+v = value(x)   # (B, T, head_size): what each token would contribute</code></pre>
+          <span class="rs-code-cap">
+            Fig. 3 · Three linear projections turn the shared
+            <code>(B, T, C)</code> input into per-token queries, keys, and values,
+            each of width <code>d_k = 16</code>.
+          </span>
+        </div>
+        <div class="nb-callout">
+          <span class="nb-callout-term">Query, key, value (q, k, v)</span>
+          Three learned linear projections of a token's vector. The query
+          <code>q</code> and key <code>k</code> share a width <code>d_k</code> so
+          their dot product measures compatibility; the value <code>v</code> is
+          what a matched token passes forward.<sup class="nb-cite"
+            ><a href="#s2">2</a></sup
+          >
+        </div>
+      </section>
+
+      <section data-nb-section="the-scaled-dot-product" id="the-scaled-dot-product">
+        <h2>The scaled dot-product</h2>
+        <p>
+          Compatibility between a query and a key is their dot product: it is
+          large and positive when the two vectors point the same way, so it reads
+          as "this key answers this query." Every query dotted against every key
+          is a single matmul, <code>q @ k</code> transposed on its last two axes,
+          giving a <code>(T, T)</code> grid of raw scores per batch element. Entry
+          <code>(i, j)</code> is how much position <code>i</code>'s query matches
+          position <code>j</code>'s key. These raw scores are the attention
+          <em>logits</em>.<sup class="nb-cite"><a href="#s2">2</a></sup>
+        </p>
+        <div class="rs-code">
+          <div class="rs-code-head">
+            <span class="rs-code-file">scores.py</span><span>PyTorch</span>
+          </div>
+          <pre><code class="language-python">import math
+
+scores = q @ k.transpose(-2, -1)       # (B, T, hs) @ (B, hs, T) -&gt; (B, T, T)
+scores = scores / math.sqrt(head_size) # divide by sqrt(d_k): the 1/sqrt(d_k) scaling</code></pre>
+          <span class="rs-code-cap">
+            Fig. 4 · Raw attention logits are query-key dot products, one scalar
+            per ordered pair of positions, then divided by <code>√d_k</code>.
+          </span>
+        </div>
+        <p>
+          A grid of logits is not yet a set of averaging weights; the weights must
+          be non-negative and sum to one along each row. The softmax function
+          delivers exactly that. For a row of logits <code>z</code>, softmax
+          returns <code>exp(z_j) / Σ exp(z)</code>: every output is positive
+          because <code>exp</code> is positive, and the outputs sum to one because
+          they share the denominator. PyTorch's <code>softmax</code> takes the
+          <code>dim</code> to normalize over, and here that is the last axis, the
+          keys.<sup class="nb-cite"><a href="#s5">5</a></sup> Applying it to each
+          row of the score grid turns compatibilities into a proper weighted
+          average over the values.
+        </p>
+        <p>
+          Why divide by <code>√d_k</code> first? Suppose the components of
+          <code>q</code> and <code>k</code> are independent with mean 0 and
+          variance 1. Their dot product <code>Σ q_i k_i</code> is a sum of
+          <code>d_k</code> such terms, so it has mean 0 and variance
+          <code>d_k</code>: its typical magnitude grows like <code>√d_k</code>.
+          The paper states the consequence directly — "for large values of
+          <code>d_k</code>, the dot products grow large in magnitude, pushing the
+          softmax function into regions where it has extremely small gradients" —
+          and so it scales the logits by <code>1/√d_k</code> to hold their
+          variance near one.<sup class="nb-cite"><a href="#s1">1</a></sup> The
+          picture is concrete: feed softmax logits like <code>[8, 0]</code> and it
+          returns roughly <code>[0.9997, 0.0003]</code>, a near one-hot vector
+          whose gradient with respect to the logits is almost zero, and learning
+          stalls. Dividing by <code>√d_k</code> keeps the logits in the range
+          where softmax stays soft and its gradients stay usable.
+        </p>
+        <div class="nb-pull">
+          <p>
+            The scaling is not cosmetic. Without it, a wide head saturates its own
+            softmax and stops learning.
+          </p>
+        </div>
+      </section>
+
+      <section data-nb-section="causal-masking" id="causal-masking">
+        <h2>Masking the future</h2>
+        <p>
+          The score grid as built is dense: position <code>i</code> has a weight
+          for every position <code>j</code>, including positions after it. For a
+          model trained to predict the next token, that is cheating: position
+          <code>i</code> would see its own future, and the task would be trivial at
+          train time and impossible at generation time, when the future does not
+          exist yet. A decoder must be <em>causal</em>: position <code>i</code>
+          may attend only to positions <code>0..i</code>. This is the same
+          lower-triangular structure as the averaging matrix in Fig. 2, now
+          imposed on learned scores.<sup class="nb-cite"><a href="#s2">2</a></sup>
+        </p>
+        <p>
+          The trick is to set the forbidden scores to negative infinity
+          <em>before</em> the softmax. Since <code>exp(-inf) = 0</code>, those
+          positions receive exactly zero weight, and the surviving weights in each
+          row still sum to one on their own. <code>torch.tril</code> gives the
+          lower-triangular mask of allowed positions, and
+          <code>masked_fill</code> writes <code>float("-inf")</code> everywhere
+          the mask is zero.<sup class="nb-cite"><a href="#s6">6</a></sup><sup
+            class="nb-cite"
+            ><a href="#s7">7</a></sup
+          >
+        </p>
+        <div class="rs-code">
+          <div class="rs-code-head">
+            <span class="rs-code-file">masking.py</span><span>PyTorch</span>
+          </div>
+          <pre><code class="language-python">import torch.nn.functional as F
+
+tril = torch.tril(torch.ones(T, T))                    # (T, T): 1 where j &lt;= i
+scores = scores.masked_fill(tril == 0, float("-inf"))  # (B, T, T): future -&gt; -inf
+weights = F.softmax(scores, dim=-1)                    # (B, T, T): each row sums to 1
+out = weights @ v                                       # (B, T, T) @ (B, T, hs) -&gt; (B, T, hs)</code></pre>
+          <span class="rs-code-cap">
+            Fig. 5 · Fill the strictly-upper triangle with <code>-inf</code>, then
+            softmax. Row 0 attends only to token 0; row <code>t</code> spreads its
+            weight over tokens <code>0..t</code>.
+          </span>
+        </div>
+        <p>
+          Read the first row of the weight matrix after masking and it is
+          <code>[1, 0, 0, ...]</code>: the first token has only itself to attend
+          to, so its output is its own value unchanged. The last row is a full
+          learned distribution over the whole sequence. Between them, each row
+          <code>t</code> is a content-dependent weighted average over exactly the
+          tokens at or before <code>t</code> — the Fig. 2 average, but with the
+          weights now chosen by the data.
+        </p>
+      </section>
+
+      <section data-nb-section="a-single-head-in-code" id="a-single-head-in-code">
+        <h2>A single head, end to end</h2>
+        <p>
+          Assemble the pieces into one module and the whole head is a dozen lines.
+          The forward pass reads as the five moves we derived: project to
+          <code>q</code>, <code>k</code>, <code>v</code>; score with the scaled dot
+          product; mask the future; softmax to weights; take the weighted average
+          of the values. This mirrors nanoGPT's <code>CausalSelfAttention</code>,
+          reduced to a single head and written for readability.<sup
+            class="nb-cite"
+            ><a href="#s2">2</a></sup
+          >
+        </p>
+        <div class="rs-code">
+          <div class="rs-code-head">
+            <span class="rs-code-file">head.py</span><span>PyTorch</span>
+          </div>
+          <pre><code class="language-python">class Head(nn.Module):
+    """One causal self-attention head."""
+
+    def __init__(self, C, head_size, block_size):
+        super().__init__()
+        self.key   = nn.Linear(C, head_size, bias=False)
+        self.query = nn.Linear(C, head_size, bias=False)
+        self.value = nn.Linear(C, head_size, bias=False)
+        # a (block_size, block_size) lower-triangular buffer, not a parameter
+        self.register_buffer("tril", torch.tril(torch.ones(block_size, block_size)))
+
+    def forward(self, x):                       # x: (B, T, C)
+        B, T, C = x.shape
+        k = self.key(x)                          # (B, T, head_size)
+        q = self.query(x)                        # (B, T, head_size)
+        v = self.value(x)                        # (B, T, head_size)
+
+        scores = q @ k.transpose(-2, -1)         # (B, T, T)
+        scores = scores / k.shape[-1] ** 0.5     # scale by 1/sqrt(d_k)
+        scores = scores.masked_fill(self.tril[:T, :T] == 0, float("-inf"))
+        weights = F.softmax(scores, dim=-1)      # (B, T, T), rows sum to 1
+        return weights @ v                       # (B, T, head_size)</code></pre>
+          <span class="rs-code-cap">
+            Fig. 6 · The full head. Input <code>(B, T, C)</code> in, output
+            <code>(B, T, head_size)</code> out. The <code>tril</code> buffer is
+            sliced to the live sequence length <code>T</code> so the module works
+            for any sequence up to <code>block_size</code>.
+          </span>
+        </div>
+        <p>
+          Every tensor's shape is annotated at the point it is made, and the
+          shapes are the proof the code is right: <code>(B, T, C)</code> enters,
+          three <code>(B, T, head_size)</code> projections come out, the score
+          grid is <code>(B, T, T)</code>, and the final weighted average returns
+          to <code>(B, T, head_size)</code>. In production this exact computation
+          is one fused call, <code>F.scaled_dot_product_attention(q, k, v,
+          is_causal=True)</code>, which applies the same scaling and causal mask
+          and runs a memory-efficient kernel; writing it by hand first is how you
+          earn the right to trust the one-liner.<sup class="nb-cite"
+            ><a href="#s8">8</a></sup
+          >
+        </p>
+        <div class="nb-check-box">
+          <ol>
+            <li>
+              With <code>x</code> of shape <code>(B=4, T=8, C=384)</code> and
+              <code>head_size = 16</code>, give the shape of <code>q</code>,
+              <code>k</code>, <code>v</code>, <code>scores</code>,
+              <code>weights</code>, and the head output. Which of these does
+              <em>not</em> depend on <code>head_size</code>?
+            </li>
+            <li>
+              Why is the mask lower-triangular rather than upper-triangular? State
+              what would leak if you filled the lower triangle with
+              <code>-inf</code> instead.
+            </li>
+            <li>
+              A colleague removes the <code>/ math.sqrt(head_size)</code> line and
+              trains with <code>head_size = 4096</code>. Predict what happens to
+              the softmax weights and to the gradients, and name the paper section
+              that explains it.
+            </li>
+            <li>
+              Hand-compute a length-2 head with <code>head_size = 1</code>. The
+              scaled scores before masking are
+              <code>[[2, 6], [4, 4]]</code> and the values are
+              <code>v = [[10], [20]]</code>. Apply the causal mask, softmax each
+              row, and give the two output scalars.
+            </li>
+            <li>
+              In Fig. 6, why is <code>tril</code> registered as a buffer rather
+              than created with <code>nn.Parameter</code>? What would go wrong if
+              it were a parameter?
+            </li>
+          </ol>
+        </div>
+      </section>
+
+      <section data-nb-section="go-deeper" id="go-deeper">
+        <h2>Go deeper</h2>
+        <p>
+          Read Section 3.2.1 of "Attention Is All You Need": it is the half-page
+          that defines <code>softmax(QK^T/√d_k)V</code> and gives the variance
+          argument for the scaling you just derived.<sup class="nb-cite"
+            ><a href="#s1">1</a></sup
+          >
+          Then open nanoGPT's <code>model.py</code> and read
+          <code>CausalSelfAttention</code>; every line of Fig. 6 is there, and the
+          parts this lesson deferred — reshaping into multiple heads and the
+          output projection — are the few lines you cannot yet fully account
+          for.<sup class="nb-cite"><a href="#s2">2</a></sup> To feel the mechanism
+          in your hands, print the <code>weights</code> matrix from Fig. 5 for a
+          real batch and confirm each row is lower-triangular and sums to one,
+          then swap the hand-rolled block for
+          <code>F.scaled_dot_product_attention</code> and check the outputs
+          agree.<sup class="nb-cite"><a href="#s8">8</a></sup> For lineage, the
+          idea of a learned, content-dependent weighting over a sequence predates
+          the transformer: Bahdanau, Cho, and Bengio introduced an attention
+          mechanism for machine translation in 2014, which "Attention Is All You
+          Need" distilled into the pure dot-product form used here.<sup
+            class="nb-cite"
+            ><a href="#s9">9</a></sup
+          >
+        </p>
+        <div class="nb-bridge">
+          <span class="nb-bridge-label">Next lesson</span>
+          One head can track only one kind of relationship at a time: a single
+          <code>(T, T)</code> weight matrix forces the whole sequence through one
+          notion of relevance. "Multi-Head Attention: Many Views of One Sequence"
+          runs several of these heads in parallel over slices of
+          <code>C</code>, then concatenates and projects their outputs — letting
+          one layer attend to syntax, position, and content at once. It consumes
+          exactly the <code>Head</code> you built here.
+        </div>
+      </section>
+
+      <section class="nb-sources" data-nb-section="sources" id="sources">
+        <h2>Sources</h2>
+        <ol>
+          <li id="s1">
+            <a data-nb-source href="https://arxiv.org/abs/1706.03762"
+              >Vaswani et al. — "Attention Is All You Need" (§3.2.1
+              scaled dot-product attention; <code>softmax(QK^T/√d_k)V</code>; the
+              <code>1/√d_k</code> scaling and its small-gradient rationale)</a
+            >
+          </li>
+          <li id="s2">
+            <a data-nb-source href="https://github.com/karpathy/nanoGPT/blob/master/model.py"
+              >Karpathy — nanoGPT <code>model.py</code>
+              (<code>CausalSelfAttention</code>: query/key/value linear
+              projections, scaled scores, lower-triangular causal mask, softmax,
+              weighted sum of values)</a
+            >
+          </li>
+          <li id="s3">
+            <a data-nb-source href="https://www.youtube.com/watch?v=kCc8FmEb1nY"
+              >Karpathy — "Let's build GPT: from scratch, in code, spelled out"
+              (the averaging trick: a causal mean as a lower-triangular matrix
+              multiply, generalized to learned attention weights)</a
+            >
+          </li>
+          <li id="s4">
+            <a data-nb-source href="https://docs.pytorch.org/docs/stable/generated/torch.nn.Linear.html"
+              >PyTorch — <code>torch.nn.Linear</code> documentation (applies
+              <code>y = xA^T + b</code>; <code>in_features</code> and
+              <code>out_features</code>; <code>bias</code> optional)</a
+            >
+          </li>
+          <li id="s5">
+            <a data-nb-source href="https://docs.pytorch.org/docs/stable/generated/torch.nn.functional.softmax.html"
+              >PyTorch — <code>torch.nn.functional.softmax</code> documentation
+              (rescales along <code>dim</code> so outputs are in
+              <code>[0, 1]</code> and sum to 1)</a
+            >
+          </li>
+          <li id="s6">
+            <a data-nb-source href="https://docs.pytorch.org/docs/stable/generated/torch.tril.html"
+              >PyTorch — <code>torch.tril</code> documentation (lower-triangular
+              part of a matrix; elements above the diagonal set to zero)</a
+            >
+          </li>
+          <li id="s7">
+            <a data-nb-source href="https://docs.pytorch.org/docs/stable/generated/torch.Tensor.masked_fill.html"
+              >PyTorch — <code>torch.Tensor.masked_fill</code> documentation
+              (fills elements where a boolean mask is true with a given value,
+              here <code>float("-inf")</code>)</a
+            >
+          </li>
+          <li id="s8">
+            <a data-nb-source href="https://docs.pytorch.org/docs/stable/generated/torch.nn.functional.scaled_dot_product_attention.html"
+              >PyTorch — <code>F.scaled_dot_product_attention</code> documentation
+              (fused scaled dot-product attention with <code>is_causal</code>
+              masking; the production equivalent of Fig. 6)</a
+            >
+          </li>
+          <li id="s9">
+            <a data-nb-source href="https://arxiv.org/abs/1409.0473"
+              >Bahdanau, Cho &amp; Bengio — "Neural Machine Translation by Jointly
+              Learning to Align and Translate" (the origin of learned,
+              content-dependent attention weights over a sequence)</a
+            >
+          </li>
+        </ol>
+      </section>
+    </article>
+  </body>
+</html>

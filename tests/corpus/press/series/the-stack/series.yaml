@@ -1,0 +1,10 @@
+# The games desk: Magic and game design, data over vibes.
+name: The Stack
+mode: open
+section: "Games"
+template: article
+prompt: prompt.md
+autopublish: true
+strict: false
+words: [1200, 2600]
+cadence: [fri]

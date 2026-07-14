@@ -1,0 +1,278 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>The Wire · 2026-07-12</title>
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400..700;1,6..72,400..700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="../../assets/theme.css" />
+    <link rel="stylesheet" href="../../assets/nb.css" />
+    <script defer src="../../assets/nb.js"></script>
+    <script type="application/json" id="nb-meta">
+      {
+        "protocol": "1.1",
+        "series": "the-wire",
+        "slug": "2026-07-12",
+        "template": "brief",
+        "title": "The Tools Got Concrete, the Guarantees Got Softer",
+        "mode": "rolling",
+        "order": null,
+        "date": "2026-07-12",
+        "tags": [],
+        "sources": 7,
+        "words": 950,
+        "reading_minutes": 4,
+        "dek": "A training-free decoder, a benchmark that grades agents step by step, and a release an agent debugged itself, set against a safety index that tops out at C+ and a lab reinforcing the trust that can seat its board.",
+        "harness": "claude-code-routine",
+        "model": "claude-opus-4-8"
+      }
+    </script>
+  </head>
+  <body class="nb-edition">
+    <article class="nb-reading">
+      <header>
+        <div class="nb-eyebrow">The Wire</div>
+        <h1 class="nb-title">The Tools Got Concrete, the Guarantees Got Softer</h1>
+        <p class="nb-dekline">
+          A training-free decoder, a benchmark that grades agents step by step,
+          and a release an agent debugged itself, set against a safety index
+          that tops out at C+ and a lab reinforcing the trust that can seat its
+          board.
+        </p>
+        <div class="nb-byline">
+          <span>4 min read</span><span>2026-07-12</span>
+        </div>
+      </header>
+
+      <section data-nb-section="items" id="items">
+        <div class="nb-brief-item" data-nb-item>
+          <span class="nb-brief-tag">research</span>
+          <h3>
+            <a href="https://arxiv.org/abs/2607.08642"
+              >DominoTree speeds up speculative decoding, if you read the right
+              baseline</a
+            ><sup class="nb-cite"><a href="#s1">1</a></sup>
+          </h3>
+          <p>
+            DominoTree combines tree-structured drafting with path-dependent
+            token corrections, tracking conditional probabilities along each
+            branch rather than the factorised marginals earlier drafters assume,
+            and capping the work at the top-M candidates per node. On Qwen3-4B
+            across eight benchmarks the authors report up to a 6.6x speedup over
+            plain autoregressive decoding and a mean accepted length of 10.7
+            tokens per round; the method is training-free.<sup class="nb-cite"
+              ><a href="#s1">1</a></sup
+            >
+            The comparison that matters is narrower: against Domino, the released
+            method it extends, the gain is 9 to 10 percent throughput at every
+            temperature and up to 22 percent on Alpaca.<sup class="nb-cite"
+              ><a href="#s1">1</a></sup
+            >
+          </p>
+          <p data-nb-why>
+            <b>Why it matters →</b> speculative decoding is now a stack of
+            increments over a shared draft-and-verify baseline, and the headline
+            multiple is measured against naive decoding by convention. Read the
+            single-digit delta over the previous best before you budget the
+            speedup; training-free means you can test that delta on your own
+            traffic without retraining anything.
+          </p>
+        </div>
+
+        <div class="nb-brief-item" data-nb-item>
+          <span class="nb-brief-tag">research</span>
+          <h3>
+            <a href="https://arxiv.org/abs/2607.08768"
+              >A proactive-agent benchmark grades the steps, not just the
+              answer</a
+            ><sup class="nb-cite"><a href="#s2">2</a></sup>
+          </h3>
+          <p>
+            UniClawBench runs agents through 400 bilingual, real-world tasks
+            inside live Docker containers, scoring them against fine-grained
+            step-by-step checkpoints instead of a stored final answer, with a
+            hidden supervisor and a simulated user driving multi-turn feedback.
+            It probes five capabilities, among them exploration, long-context
+            reasoning and cross-platform coordination, and concludes that base
+            model capability and agent-framework design jointly shape
+            performance rather than either alone.<sup class="nb-cite"
+              ><a href="#s2">2</a></sup
+            >
+          </p>
+          <p data-nb-why>
+            <b>Why it matters →</b> an eval that checks only the last message
+            cannot tell you where an agent went wrong. Live-environment,
+            checkpointed grading separates the two knobs you actually control: if
+            your agent underperforms, this framing says measure the model and the
+            scaffold before you replace either.
+          </p>
+        </div>
+
+        <div class="nb-brief-item" data-nb-item>
+          <span class="nb-brief-tag">engineering</span>
+          <h3>
+            <a href="https://github.com/simonw/sqlite-utils/releases/tag/4.1"
+              >sqlite-utils 4.1, and an agent told to break its own change</a
+            ><sup class="nb-cite"><a href="#s3">3</a></sup>
+          </h3>
+          <p>
+            A week after the 4.0 breaking release we noted yesterday, Simon
+            Willison shipped sqlite-utils 4.1: a <code>--code</code> option that
+            runs a Python <code>rows()</code> function during insert and upsert,
+            per-column type overrides, a <code>drop_index()</code> method, and a
+            <code>strict=</code> flag on <code>transform()</code>. He had Codex
+            triage the open issues and write the strict-mode patch, then prompted
+            the model to manually exercise the new option, which surfaced two
+            edge-case bugs it had otherwise missed.<sup class="nb-cite"
+              ><a href="#s3">3</a></sup
+            >
+          </p>
+          <p data-nb-why>
+            <b>Why it matters →</b> the transferable practice is not that an
+            agent wrote the release but that it found its own defects only after
+            a human instructed it to test the specific change. Delegating the
+            code is cheap; delegating the skepticism is the part you still have
+            to prompt for.
+          </p>
+        </div>
+
+        <div class="nb-brief-item" data-nb-item>
+          <span class="nb-brief-tag">engineering</span>
+          <h3>
+            <a href="https://simonwillison.net/2026/Jul/10/openai/"
+              >Where your ChatGPT Work data lives now needs a diagram</a
+            ><sup class="nb-cite"><a href="#s4">4</a></sup>
+          </h3>
+          <p>
+            OpenAI published a help document trying to clarify how ChatGPT Work
+            and Codex handle data across surfaces: cloud Work conversations do
+            not appear in desktop Work, and desktop Work threads and local files
+            stay on that machine. Willison, reading it closely, found the
+            explanation itself hard to follow, a sign of how tangled the
+            cloud-versus-local boundary has become as the desktop app absorbs
+            Codex.<sup class="nb-cite"><a href="#s4">4</a></sup>
+          </p>
+          <p data-nb-why>
+            <b>Why it matters →</b> for anyone rolling ChatGPT Work across an
+            organisation, where a conversation and its files physically sit is
+            the whole data-governance story. The distinction is now documented
+            but not intuitive, so confirm what syncs before you assume a desktop
+            thread ever leaves the laptop.
+          </p>
+        </div>
+
+        <div class="nb-brief-item" data-nb-item>
+          <span class="nb-brief-tag">policy</span>
+          <h3>
+            <a href="https://futureoflife.org/ai-safety-index-summer-2026/"
+              >The best safety grade in the field is a C+</a
+            ><sup class="nb-cite"><a href="#s5">5</a></sup>
+          </h3>
+          <p>
+            The Future of Life Institute's Summer 2026 AI Safety Index scores
+            nine labs against 37 indicators across six domains. Anthropic tops it
+            at C+ and leads five of six domains; OpenAI and Google DeepMind take
+            a C, Meta a D+, and xAI, DeepSeek and Mistral fail outright. The
+            reviewers' central finding is that leaders have weakened or voided
+            pledges to pause unilaterally when a redline is approached, several
+            now attaching competitor-contingent conditions the panel calls
+            moving-goalpost behaviour.<sup class="nb-cite"
+              ><a href="#s5">5</a></sup
+            >
+          </p>
+          <p data-nb-why>
+            <b>Why it matters →</b> if you lean on a lab's responsible-scaling
+            commitment in a procurement or risk argument, the index is telling
+            you that commitment is softening across the industry, and that the
+            firm with the strongest framework still only clears a C+. Treat the
+            published policy as a ceiling, not a floor.
+          </p>
+        </div>
+
+        <div class="nb-brief-item" data-nb-item>
+          <span class="nb-brief-tag">industry</span>
+          <h3>
+            <a href="https://www.anthropic.com/news/ben-bernanke"
+              >Anthropic hands a former Fed chair a seat over its board</a
+            ><sup class="nb-cite"><a href="#s6">6</a></sup>
+          </h3>
+          <p>
+            Anthropic appointed Ben Bernanke, who chaired the Federal Reserve
+            through the 2008 crisis and shared the 2022 Nobel in economics, to
+            its Long-Term Benefit Trust, the independent body that can appoint
+            members to the company's board. He joins trustees drawn from national
+            security, law and global health.<sup class="nb-cite"
+              ><a href="#s6">6</a></sup
+            >
+            The same day, the company opened a public channel inviting hard
+            questions about AI's effect on jobs and society, backed by a survey
+            of 52,000 Americans and interviews with 81,000 Claude users.<sup
+              class="nb-cite"
+              ><a href="#s7">7</a></sup
+            >
+          </p>
+          <p data-nb-why>
+            <b>Why it matters →</b> a trust that can seat directors is
+            Anthropic's structural answer to who enforces the mission, and a
+            central banker is a credibility signal. Read against the same week's
+            index, the open question is whether any such structure binds when a
+            commitment turns inconvenient, which is precisely the discipline the
+            index says is eroding.
+          </p>
+        </div>
+      </section>
+
+      <section class="nb-sources" data-nb-section="sources" id="sources">
+        <h2>Sources</h2>
+        <ol>
+          <li id="s1">
+            <a data-nb-source href="https://arxiv.org/abs/2607.08642"
+              >arXiv · DominoTree: Conditional Tree-Structured Drafting with
+              Domino for Speculative Decoding</a
+            >
+          </li>
+          <li id="s2">
+            <a data-nb-source href="https://arxiv.org/abs/2607.08768"
+              >arXiv · UniClawBench: A Universal Benchmark for Proactive Agents
+              on Real-World Tasks</a
+            >
+          </li>
+          <li id="s3">
+            <a
+              data-nb-source
+              href="https://github.com/simonw/sqlite-utils/releases/tag/4.1"
+              >GitHub · sqlite-utils 4.1 release notes</a
+            >
+          </li>
+          <li id="s4">
+            <a data-nb-source href="https://simonwillison.net/2026/Jul/10/openai/"
+              >Simon Willison · OpenAI on how ChatGPT Work and Codex handle
+              data</a
+            >
+          </li>
+          <li id="s5">
+            <a
+              data-nb-source
+              href="https://futureoflife.org/ai-safety-index-summer-2026/"
+              >Future of Life Institute · AI Safety Index, Summer 2026</a
+            >
+          </li>
+          <li id="s6">
+            <a data-nb-source href="https://www.anthropic.com/news/ben-bernanke"
+              >Anthropic · Ben Bernanke joins the Long-Term Benefit Trust</a
+            >
+          </li>
+          <li id="s7">
+            <a data-nb-source href="https://www.anthropic.com/news/hard-questions"
+              >Anthropic · Inviting hard questions</a
+            >
+          </li>
+        </ol>
+      </section>
+    </article>
+  </body>
+</html>

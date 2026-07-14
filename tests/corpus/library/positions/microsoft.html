@@ -1,0 +1,383 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Microsoft: The Backlog Is the Moat — Positions</title>
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400..700;1,6..72,400..700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="../../assets/theme.css" />
+    <link rel="stylesheet" href="../../assets/nb.css" />
+    <script defer src="../../assets/nb.js"></script>
+    <script type="application/json" id="nb-meta">
+      {
+        "protocol": "1.1",
+        "series": "positions",
+        "slug": "microsoft",
+        "template": "article",
+        "title": "Microsoft: The Backlog Is the Moat",
+        "mode": "open",
+        "order": null,
+        "date": "2026-07-09",
+        "tags": ["equity", "cloud", "ai-infrastructure"],
+        "sources": 8,
+        "words": 1520,
+        "reading_minutes": 8,
+        "dek": "Azure grew 40% and Microsoft Cloud crossed $50 billion in a quarter, but the number that describes the moat is a $627 billion book of contracted, not-yet-delivered revenue.",
+        "harness": "claude-code-routine",
+        "model": "claude-opus-4-8"
+      }
+    </script>
+  </head>
+  <body class="nb-article">
+    <article class="nb-reading">
+      <header>
+        <div class="nb-eyebrow">Positions · Markets</div>
+        <h1 class="nb-title">Microsoft: The Backlog Is the Moat</h1>
+        <p class="nb-dekline">
+          Azure grew 40% and Microsoft Cloud crossed $50 billion in a quarter,
+          but the number that describes the moat is a $627 billion book of
+          contracted, not-yet-delivered revenue.
+        </p>
+        <div class="nb-byline"><span>8 min read</span><span>2026-07-09</span></div>
+      </header>
+
+      <section data-nb-section="orientation" id="orientation">
+        <p>
+          Microsoft sells three things: the software an enterprise runs its
+          people on (Microsoft 365, LinkedIn, Dynamics), the cloud it runs its
+          systems on (Azure, server products, GitHub), and the consumer surface
+          of Windows, Xbox and search. The company reports them as three
+          segments, and in the quarter ended 31 March 2026 they diverged
+          sharply: Productivity and Business Processes revenue was $35.0 billion,
+          up 17%; Intelligent Cloud was $34.7 billion, up 30%; and More Personal
+          Computing was $13.2 billion, down 1%.<sup class="nb-cite"
+            ><a href="#s1">1</a></sup
+          ><sup class="nb-cite"><a href="#s6">6</a></sup>
+        </p>
+        <div class="nb-stat-strip">
+          <div class="nb-stat">
+            <span class="nb-stat-n">40%</span
+            ><span class="nb-stat-l">AZURE &amp; CLOUD GROWTH, YoY</span>
+          </div>
+          <div class="nb-stat">
+            <span class="nb-stat-n">$54.5B</span
+            ><span class="nb-stat-l">MICROSOFT CLOUD REVENUE</span>
+          </div>
+          <div class="nb-stat">
+            <span class="nb-stat-n">$627B</span
+            ><span class="nb-stat-l">COMMERCIAL BACKLOG (RPO)</span>
+          </div>
+          <div class="nb-stat">
+            <span class="nb-stat-n">$30.9B</span
+            ><span class="nb-stat-l">CAPEX, ONE QUARTER</span>
+          </div>
+        </div>
+        <p>
+          Total revenue was $82.9 billion, up 18%, with operating income of
+          $38.4 billion (up 20%), net income of $31.8 billion, and diluted
+          earnings of $4.27 a share.<sup class="nb-cite"><a href="#s1">1</a></sup>
+          Microsoft's own summary attributes the $12.8 billion of added revenue
+          to "growth in Microsoft Cloud," with Intelligent Cloud "driven by
+          Azure" and Productivity "driven by Microsoft 365 Commercial
+          cloud."<sup class="nb-cite"><a href="#s4">4</a></sup> The headline
+          numbers are strong. The point of this dossier is that the interesting
+          questions sit underneath them: what actually protects Microsoft's
+          cloud business, and what it is spending to defend it.
+        </p>
+      </section>
+
+      <section data-nb-section="the-cloud-engine" id="the-cloud-engine">
+        <h2>The engine is Azure, and it is still accelerating</h2>
+        <p>
+          Microsoft Cloud — the company's roll-up of Azure, the commercial
+          portions of Microsoft 365 and Dynamics, and LinkedIn's commercial
+          services — reached $54.5 billion in the quarter, up 29%, the first time
+          it has cleared $50 billion in three months.<sup class="nb-cite"
+            ><a href="#s1">1</a></sup
+          >
+          Inside that figure, Azure and other cloud services grew 40% year over
+          year, a rate that has, unusually for a business this large,
+          <em>risen</em>: the prior quarter grew 39% on a Microsoft Cloud base of
+          $51.5 billion, and Intelligent Cloud stepped up from $32.9 billion to
+          $34.7 billion in a single quarter.<sup class="nb-cite"
+            ><a href="#s3">3</a></sup
+          >
+          A $200-billion-a-year run-rate accelerating rather than fading is the
+          single most important fact about the company. It matters because
+          acceleration at scale usually signals genuine demand rather than a
+          one-off migration: the base is already so large that only a broad,
+          repeated buying pattern — new AI workloads layered on top of existing
+          Azure consumption — can move the growth rate up rather than letting the
+          law of large numbers drag it down.
+        </p>
+        <figure class="nb-chart">
+          <figcaption>
+            Fig. 1 · Segment revenue, quarter ended 31 Mar 2026 ($B). Source:
+            Microsoft FY26 Q3 press release.
+          </figcaption>
+          <canvas></canvas>
+          <noscript>
+            Productivity &amp; Business Processes $35.0B; Intelligent Cloud
+            $34.7B; More Personal Computing $13.2B.
+          </noscript>
+          <script type="application/json" data-nb-chart>
+            {
+              "type": "bar",
+              "labels": [
+                "Productivity & Business Processes",
+                "Intelligent Cloud",
+                "More Personal Computing"
+              ],
+              "series": [
+                { "name": "Revenue ($B)", "values": [35.0, 34.7, 13.2] }
+              ],
+              "y": { "scale": "linear", "label": "USD billions" }
+            }
+          </script>
+        </figure>
+        <p>
+          The chart shows why the mix matters. Intelligent Cloud has drawn level
+          with the historically dominant Productivity segment, and the gap
+          between them and the stagnant consumer business is now enormous. Growth
+          and the growth <em>narrative</em> both run through Azure.
+        </p>
+      </section>
+
+      <section
+        data-nb-section="the-backlog-and-lock-in"
+        id="the-backlog-and-lock-in"
+      >
+        <h2>The moat: switching costs you can measure</h2>
+        <p>
+          "Strong business" is not analysis. The precise moat mechanism here is
+          contracted lock-in, and it has a number. Microsoft's
+          <span class="nb-callout"
+            ><span class="nb-callout-term"
+              >commercial remaining performance obligation</span
+            >
+            the dollar value of contracted revenue a company has sold but not yet
+            delivered — future Azure consumption, multi-year Microsoft 365 seats,
+            signed but unrecognised bookings</span
+          >
+          rose 99% year over year to $627 billion in the quarter.<sup
+            class="nb-cite"
+            ><a href="#s1">1</a></sup
+          >
+          That backlog is roughly twice the company's annual revenue, already
+          under contract. It is the clearest evidence that customers are not
+          renting Azure month to month but committing to it for years — the
+          definition of a switching cost. The near-doubling matters as much as
+          the level: a backlog growing far faster than reported revenue means
+          customers are signing longer and larger commitments than they are
+          currently consuming, which is exactly the pattern you would expect if
+          enterprises were reserving AI capacity ahead of deploying it.
+        </p>
+        <p>
+          The Productivity segment shows the same lock-in from the other side.
+          At $35.0 billion and 17% growth, it is driven by Microsoft 365
+          Commercial, where AI features are sold as an add-on to a seat an
+          enterprise has already standardised on for identity, mail and
+          documents.<sup class="nb-cite"><a href="#s4">4</a></sup> Displacing
+          that means re-tooling how a company's employees work, which is why so
+          little of it churns.
+        </p>
+        <div class="nb-holdsup">
+          <div class="good">
+            <span class="nb-holdsup-label">What holds up</span>
+            <ul>
+              <li>
+                A $627B contracted backlog and an accelerating 40% Azure — demand
+                is real and forward-committed.
+              </li>
+              <li>
+                Distribution: AI sold into an installed base that already pays
+                for identity and productivity.
+              </li>
+            </ul>
+          </div>
+          <div class="careful">
+            <span class="nb-holdsup-label">What to be careful about</span>
+            <ul>
+              <li>
+                Microsoft's own 10-K warns that "barriers to entry in many of our
+                businesses are low" and competition is "intense."
+              </li>
+              <li>
+                Backlog is a promise, not cash; it assumes Microsoft can build
+                the capacity to deliver it.
+              </li>
+            </ul>
+          </div>
+        </div>
+        <p>
+          The steelman for the bear is Microsoft's own language: it competes in
+          markets where technology shifts fast and entry is cheap, and it says
+          so in its annual report.<sup class="nb-cite"><a href="#s6">6</a></sup>
+          The backlog is the counter-evidence — but only if the company can
+          physically serve it.
+        </p>
+      </section>
+
+      <section data-nb-section="the-capex-bet" id="the-capex-bet">
+        <h2>The bet: build the capacity or forfeit the backlog</h2>
+        <p>
+          Serving that demand is extraordinarily capital-intensive. Microsoft
+          spent $30.9 billion on property and equipment in the single quarter,
+          and $80.1 billion over the nine months to 31 March 2026 — sums that
+          would have been an entire year's capital budget a few years ago.<sup
+            class="nb-cite"
+            ><a href="#s2">2</a></sup
+          >
+          The cost is already visible in margins: Microsoft Cloud gross margin
+          slipped to 68%, which management attributes to "scaling our AI
+          infrastructure and growing usage of AI product features," down from 69%
+          a year earlier.<sup class="nb-cite"><a href="#s5">5</a></sup
+          ><sup class="nb-cite"><a href="#s7">7</a></sup>
+        </p>
+        <p>
+          What keeps the story from being a simple margin-compression trade is
+          operating leverage: even while absorbing that capex and the
+          lower-margin AI mix, operating income still grew 20% — faster than the
+          18% on revenue — so the software business is expanding profit fast
+          enough to fund the build without the whole model de-rating.<sup
+            class="nb-cite"
+            ><a href="#s1">1</a></sup
+          >
+          The depreciation from today's data centres, however, will land on the
+          income statement for years, whether or not the AI revenue arrives on
+          schedule; that timing mismatch is the crux of the bet.
+        </p>
+        <div class="nb-pull">
+          <p>
+            The bull and bear case are the same sentence read at different
+            speeds: Microsoft is spending a hyperscaler's entire history of
+            capex every few quarters to serve a backlog it has already sold.
+          </p>
+        </div>
+        <p>
+          A large part of that AI demand — and a large part of the spend — runs
+          through Microsoft's relationship with OpenAI, whose models power
+          Copilot and much of Azure's AI revenue and whose training and inference
+          run on Azure hardware. Microsoft accounts for its OpenAI stake under
+          the equity method, so its share of OpenAI's losses lands in "other
+          income (expense), net," which the company reported at $942 million for
+          the quarter.<sup class="nb-cite"><a href="#s2">2</a></sup> The paper's
+          read: this is the central tension in the stock. The capital is being
+          committed years ahead of the revenue it is meant to earn, and a
+          meaningful share of the demand thesis rests on a single partner. If the
+          backlog converts, the spend is the cheapest moat money can buy; if AI
+          consumption softens, Microsoft will own the most expensive
+          under-utilised infrastructure in the industry.
+        </p>
+      </section>
+
+      <section data-nb-section="the-tape" id="the-tape">
+        <h2>The tape</h2>
+        <p>
+          Walled off from the business above: the market's reaction to this
+          quarter turned not on the growth line but on the capital line. A clean
+          beat on revenue, Azure and margins was met with a soft share reaction,
+          because investors are now underwriting tens of billions of quarterly
+          capex against revenue that is contracted but not yet delivered — the
+          $627 billion backlog is precisely the promise the spend is meant to
+          fulfil.<sup class="nb-cite"><a href="#s8">8</a></sup> The tape, in
+          other words, is pricing conversion risk, not demand risk. That is a
+          narrower worry than it looks, and a real one: the market has largely
+          conceded that Microsoft can sell the capacity, and is now asking only
+          whether it can build and depreciate it at an acceptable return. The
+          business is the story; the tape is the footnote.
+        </p>
+      </section>
+
+      <section data-nb-section="go-deeper" id="go-deeper">
+        <h2>Go deeper</h2>
+        <p>
+          Read the FY26 Q3 10-Q's cash-flow statement and its investments note
+          to see the capex line and how the OpenAI equity-method losses flow
+          through other income.<sup class="nb-cite"><a href="#s2">2</a></sup>
+          Then read the segment and competition sections of the FY2025 10-K to
+          hold Microsoft's own account of its moat against the market's.<sup
+            class="nb-cite"
+            ><a href="#s6">6</a></sup
+          >
+          The numbers to track next quarter: whether Azure growth holds near 40%,
+          whether Microsoft Cloud gross margin keeps sliding as AI capacity comes
+          online, and whether the commercial backlog keeps compounding — that
+          trio, together, tells you if the capital bet is working.
+        </p>
+      </section>
+
+      <section class="nb-sources" data-nb-section="sources" id="sources">
+        <h2>Sources</h2>
+        <ol>
+          <li id="s1">
+            <a
+              data-nb-source
+              href="https://www.sec.gov/Archives/edgar/data/0000789019/000119312526191457/msft-ex99_1.htm"
+              >U.S. SEC / Microsoft — FY26 Q3 earnings press release (Form 8-K,
+              Ex. 99.1, quarter ended 31 Mar. 2026)</a
+            >
+          </li>
+          <li id="s2">
+            <a
+              data-nb-source
+              href="https://www.sec.gov/Archives/edgar/data/789019/000119312526191507/msft-20260331.htm"
+              >U.S. SEC / Microsoft — Form 10-Q for the quarter ended 31 Mar.
+              2026 (income statement, cash flows, investments)</a
+            >
+          </li>
+          <li id="s3">
+            <a
+              data-nb-source
+              href="https://www.sec.gov/Archives/edgar/data/0000789019/000119312526027198/msft-ex99_1.htm"
+              >U.S. SEC / Microsoft — FY26 Q2 earnings press release (Form 8-K,
+              Ex. 99.1, quarter ended 31 Dec. 2025)</a
+            >
+          </li>
+          <li id="s4">
+            <a
+              data-nb-source
+              href="https://www.microsoft.com/en-us/investor/earnings/fy-2026-q3/performance"
+              >Microsoft Investor Relations — FY26 Q3 performance summary</a
+            >
+          </li>
+          <li id="s5">
+            <a
+              data-nb-source
+              href="https://www.microsoft.com/en-us/investor/earnings/fy-2026-q1/performance"
+              >Microsoft Investor Relations — FY26 Q1 performance summary
+              (Microsoft Cloud gross margin commentary)</a
+            >
+          </li>
+          <li id="s6">
+            <a
+              data-nb-source
+              href="https://www.sec.gov/Archives/edgar/data/789019/000095017025100235/msft-20250630.htm"
+              >U.S. SEC / Microsoft — Form 10-K for fiscal year ended 30 Jun.
+              2025 (segments, competition)</a
+            >
+          </li>
+          <li id="s7">
+            <a
+              data-nb-source
+              href="https://www.microsoft.com/en-us/investor/earnings/fy-2025-q4/performance"
+              >Microsoft Investor Relations — FY25 Q4 performance summary
+              (prior-year Microsoft Cloud gross margin)</a
+            >
+          </li>
+          <li id="s8">
+            <a
+              data-nb-source
+              href="https://www.nasdaq.com/market-activity/stocks/msft"
+              >Nasdaq — Microsoft Corporation (MSFT) market activity</a
+            >
+          </li>
+        </ol>
+      </section>
+    </article>
+  </body>
+</html>

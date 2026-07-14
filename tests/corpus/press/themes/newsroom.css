@@ -1,0 +1,73 @@
+/* Newsroom — this paper's theme: the color tokens and nothing else.
+   The palette below is the shipped newspaper palette, UNCHANGED: this paper
+   keeps the default look on purpose, so anyone copying this example sees the
+   familiar paper and re-skins only if they want to (edit the tokens in all four
+   blocks; fonts and radius live in the base block). site.yaml points `theme:` at
+   this file and the engine publishes it, concatenated with every furniture owner,
+   as assets/theme.css on each build. This paper's furniture rides alongside it,
+   not inside it: shared pieces live in press/furniture/ (rs-code, rs-docket) and a
+   template's bespoke pieces live in its own folder (rs-side, in templates/divide/). */
+:root {
+  /* DAY — the base and universal fallback */
+  --bg: #f4f7fb;
+  --panel: #fcfdff;
+  --wash: #e9eff7;
+  --ink: #161d28;
+  --ink-soft: #4e5866;
+  --faint: #8794a4;
+  --accent: #8a5c08;
+  --accent-2: #935f00;
+  --line: #d9e2ee;
+  --hair: #e7edf5;
+  --serif: "Newsreader", georgia, serif;
+  --sans: "Inter", system-ui, sans-serif;
+  --mono: "IBM Plex Mono", monospace;
+  --radius: 4px;
+}
+
+@media (prefers-color-scheme: dark) {
+  /* NIGHT: only when the system asks */
+  :root {
+    --bg: #101724;
+    --panel: #161f30;
+    --wash: #1b2537;
+    --ink: #e9e4d8;
+    --ink-soft: #a7a79f;
+    --faint: #6e7280;
+    --accent: #d9a94e;
+    --accent-2: #ddb262;
+    --line: #242f45;
+    --hair: #1c2638;
+  }
+}
+
+:root[data-mode="light"] {
+  /* manual override; beats the media query by specificity */
+  --bg: #f4f7fb;
+  --panel: #fcfdff;
+  --wash: #e9eff7;
+  --ink: #161d28;
+  --ink-soft: #4e5866;
+  --faint: #8794a4;
+  --accent: #8a5c08;
+  --accent-2: #935f00;
+  --line: #d9e2ee;
+  --hair: #e7edf5;
+
+  color-scheme: light;
+}
+
+:root[data-mode="dark"] {
+  --bg: #101724;
+  --panel: #161f30;
+  --wash: #1b2537;
+  --ink: #e9e4d8;
+  --ink-soft: #a7a79f;
+  --faint: #6e7280;
+  --accent: #d9a94e;
+  --accent-2: #ddb262;
+  --line: #242f45;
+  --hair: #1c2638;
+
+  color-scheme: dark;
+}

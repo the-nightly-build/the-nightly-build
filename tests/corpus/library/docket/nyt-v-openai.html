@@ -1,0 +1,366 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>The New York Times v. OpenAI: The Fair-Use Question the Bartz Settlement Left Open — Docket</title>
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400..700;1,6..72,400..700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="../../assets/theme.css" />
+    <link rel="stylesheet" href="../../assets/nb.css" />
+    <script defer src="../../assets/nb.js"></script>
+    <script type="application/json" id="nb-meta">
+      {
+        "protocol": "1.1",
+        "series": "docket",
+        "slug": "nyt-v-openai",
+        "template": "article",
+        "title": "The New York Times v. OpenAI: The Fair-Use Question the Bartz Settlement Left Open",
+        "mode": "open",
+        "order": null,
+        "date": "2026-07-09",
+        "tags": ["copyright", "training-data", "fair-use", "discovery"],
+        "sources": 9,
+        "words": 1650,
+        "reading_minutes": 7,
+        "dek": "Anthropic paid $1.5 billion to make its book problem go away; the Times refuses to, and its case is the one that will force a jury to rule on whether training on the news is fair use.",
+        "harness": "claude-code-routine",
+        "model": "claude-opus-4-8"
+      }
+    </script>
+  </head>
+  <body class="nb-article">
+    <article class="nb-reading">
+      <header>
+        <div class="nb-eyebrow">Docket · AI &amp; the Law</div>
+        <h1 class="nb-title">
+          The New York Times v. OpenAI: The Fair-Use Question the Bartz
+          Settlement Left Open
+        </h1>
+        <p class="nb-dekline">
+          Anthropic paid $1.5 billion to make its book problem go away; the
+          Times refuses to, and its case is the one that will force a jury to
+          rule on whether training on the news is fair use.
+        </p>
+        <div class="nb-byline"><span>7 min read</span><span>2026-07-09</span></div>
+      </header>
+
+      <section data-nb-section="orientation" id="orientation">
+        <div class="rs-docket">
+          <span class="rs-docket-case"
+            >The New York Times Co. v. Microsoft Corp. &amp; OpenAI</span
+          >
+          <span class="rs-docket-court"
+            >S.D.N.Y. · No. 1:23-cv-11195, consolidated in In re OpenAI, Inc.
+            Copyright Infringement Litigation, MDL No. 25-md-3143</span
+          >
+          <dl class="rs-docket-grid">
+            <dt>Stage</dt>
+            <dd>
+              Discovery. Motion to dismiss largely denied March 2025; the Times
+              moved for leave to file a third amended complaint in June 2026; no
+              trial date set.
+            </dd>
+            <dt>Question</dt>
+            <dd>
+              Is copying news articles to train and operate an LLM fair use — and
+              did Microsoft induce the copying by building the machine that did
+              it?
+            </dd>
+            <dt>Stakes</dt>
+            <dd>
+              Whether the largest English-language news archive can be ingested
+              into a frontier model without a licence, and who pays if it cannot.
+            </dd>
+          </dl>
+        </div>
+        <p>
+          When three authors settled
+          <em>Bartz v. Anthropic</em> for $1.5 billion, they closed the first
+          great AI copyright case before a jury could rule on the merits: the
+          court had held that training on books was fair use, and the settlement
+          bought off only the separate sin of having pirated the copies. The
+          question of whether the training itself is lawful was left standing.
+          The case most likely to answer it is the one the Times filed in
+          December 2023, now the lead action in a consolidated docket of a dozen
+          newspaper and author suits before Judge Sidney H. Stein in
+          Manhattan.<sup class="nb-cite"><a href="#s6">6</a></sup>
+        </p>
+        <p>
+          Two things make this the case to watch. In January 2026 the court
+          handed the plaintiffs an extraordinary discovery win, ordering OpenAI
+          to produce twenty million de-identified ChatGPT conversation logs.<sup
+            class="nb-cite"
+            ><a href="#s1">1</a></sup
+          >
+          And in June 2026 the Times sharpened its theory, dropping a weaker
+          claim and recasting Microsoft not as a bystander but as the party that
+          built the supercomputer to make the copying possible.<sup
+            class="nb-cite"
+            ><a href="#s4">4</a></sup
+          >
+          By the end of this piece you should be able to say precisely what a
+          court has already decided here, what it has not, and why the fair-use
+          verdict — when it comes — will be the one that governs the news.
+        </p>
+      </section>
+
+      <section data-nb-section="what-survived" id="what-survived">
+        <h2>What the court has already held</h2>
+        <p>
+          The defendants moved to dismiss in early 2024. On 26 March 2025 Judge
+          Stein rejected most of the motion, letting the core copyright claims
+          proceed to a jury; from the bench he did not release an opinion but
+          promised one "expeditiously," and the Times said it welcomed the
+          chance to "present a jury with the facts."<sup class="nb-cite"
+            ><a href="#s2">2</a></sup
+          >
+        </p>
+        <p>
+          The written opinion, filed days later, drew the lines that still shape
+          the case. Direct and
+          <span class="nb-callout"
+            ><span class="nb-callout-term">contributory infringement</span>
+            liability for materially contributing to someone else's infringement
+            while knowing of it — here, the theory that ChatGPT itself emits
+            copies of Times articles and that OpenAI had reason to know it
+            would</span
+          >
+          both survived. What the court trimmed was the Digital Millennium
+          Copyright Act theory: Stein dismissed the §1202(b) "removal of
+          copyright-management information" claim against OpenAI in the Times
+          action, reasoning that treating a paraphrased excerpt as a distributed
+          "copy" would risk "boundless DMCA liability," while letting the same
+          claim stand in the parallel Daily News and Center for Investigative
+          Reporting suits.<sup class="nb-cite"><a href="#s3">3</a></sup>
+          The surviving spine is the ordinary one: reproduction during training,
+          and reproduction in output.
+        </p>
+      </section>
+
+      <section data-nb-section="the-logs-order" id="the-logs-order">
+        <h2>Why discovery became the battlefield</h2>
+        <p>
+          A fair-use defence is decided on facts, and the facts here are usage
+          data. In July 2025 the news plaintiffs moved to compel a sample of 120
+          million consumer ChatGPT logs; OpenAI countered that a 20-million
+          sample — roughly half a percent of the tens of billions of logs it
+          retains — was "surely more than enough," and the plaintiffs accepted
+          that number.<sup class="nb-cite"><a href="#s1">1</a></sup> The fight
+          then moved to a subtler ground. In October 2025 OpenAI said it would
+          not hand over the whole 20-million sample after all, proposing instead
+          to run search terms across it and produce only the conversations that
+          mentioned the plaintiffs' works.
+        </p>
+        <p>
+          Magistrate Judge Ona Wang refused, and on 5 January 2026 Judge Stein
+          affirmed her, in an order worth reading for its reasoning rather than
+          its result. The court held that even "output logs that do not contain
+          reproductions of News Plaintiffs' works may still be relevant to
+          OpenAI's fair use defense" — because the frequency with which ordinary
+          prompts do <em>not</em> reproduce the news bears directly on whether
+          the model is a market substitute for it.<sup class="nb-cite"
+            ><a href="#s1">1</a></sup
+          >
+          Users' privacy interests were real, the court found, but "one factor
+          in the proportionality analysis," adequately protected by three
+          safeguards: cutting the set from tens of billions to twenty million,
+          OpenAI's de-identification tool, and the existing protective order.
+          OpenAI's lead authority, a Second Circuit wiretap case, was
+          distinguished on the ground that ChatGPT users "voluntarily disclosed"
+          their conversations, unlike the targets of a wiretap.<sup
+            class="nb-cite"
+            ><a href="#s1">1</a></sup
+          >
+        </p>
+        <div class="nb-pull">
+          <p>
+            A fair-use defence is decided on facts, and the facts here are the
+            usage data the defendant would most like to keep private.
+          </p>
+        </div>
+        <p>
+          OpenAI has cast the demand as an assault on user privacy, arguing that
+          the Times wants it to retain even deleted chats indefinitely and that
+          it will store the historical data locked down, audited, and handed to
+          no one "at this time."<sup class="nb-cite"><a href="#s8">8</a></sup>
+          That framing matters for public opinion; it did not move the court,
+          which treated the logs as ordinary business records held in the normal
+          course.
+        </p>
+      </section>
+
+      <section data-nb-section="the-microsoft-turn" id="the-microsoft-turn">
+        <h2>The turn toward Microsoft</h2>
+        <p>
+          The consolidation itself changed the stakes. What began as three
+          newspaper suits is now a single multidistrict proceeding gathering the
+          Times, the Daily News and other Alden titles, the Center for
+          Investigative Reporting, the Authors Guild class, and further
+          publishers under one judge and one discovery schedule.<sup
+            class="nb-cite"
+            ><a href="#s6">6</a></sup
+          >
+          A finding on fair use in this forum will not be confined to one
+          plaintiff.
+        </p>
+        <p>
+          On 25 June 2026 the Times moved for leave to file a third amended
+          complaint that narrows and sharpens. It dropped a claim that OpenAI
+          "secondarily" infringed by failing to stop users from generating
+          protected text, and expanded its contributory-infringement case
+          against Microsoft, alleging that Microsoft did not merely benefit from
+          the training but actively encouraged it — building bespoke
+          supercomputing infrastructure and providing "services" tailored to
+          download copyrighted works at scale.<sup class="nb-cite"
+            ><a href="#s4">4</a></sup
+          >
+          "Microsoft actively encouraged OpenAI to steal our copyrighted works,"
+          a Times spokesman said; "our core claims remain the same from the day
+          we filed."<sup class="nb-cite"><a href="#s5">5</a></sup>
+          The legal logic is deliberate: inducement liability reaches the party
+          that supplies the means with knowledge of the infringing end, and
+          Microsoft is both the deeper pocket and the owner of the Azure
+          hardware on which the models were trained.
+        </p>
+      </section>
+
+      <section data-nb-section="the-crux" id="the-crux">
+        <h2>The fair-use crux, steelmanned</h2>
+        <p>
+          Strip away the discovery skirmishes and one question remains, the same
+          one <em>Bartz</em> settled around. OpenAI's strongest case is that
+          training is a "transformative, non-expressive" use: the model learns
+          statistical structure, not prose, and reproduces articles only when a
+          user works to extract them, which is a misuse rather than the product.
+          It builds, in its words, on "publicly available data, in a manner
+          grounded in fair use."<sup class="nb-cite"><a href="#s2">2</a></sup>
+        </p>
+        <p>
+          The Times's strongest case is the fourth fair-use factor: market
+          effect. Its complaint documents ChatGPT reproducing article passages
+          near-verbatim and, more damaging, substituting for the paper — a
+          chatbot that answers "what did the Times report" is competing with the
+          subscription, and the paper has a live licensing market that Amazon and
+          others already pay into.<sup class="nb-cite"><a href="#s9">9</a></sup>
+          The DMCA ruling already gives a preview of how Stein reasons about the
+          line between learning and copying, and the logs order tells you the
+          jury will see how often, in real use, the model actually reproduces
+          the news.<sup class="nb-cite"><a href="#s3">3</a></sup> That is why
+          this case, not the settled ones, is the one to watch: it is on a path
+          to a verdict, and the verdict will be about the news.
+        </p>
+      </section>
+
+      <section data-nb-section="go-deeper" id="go-deeper">
+        <h2>Go deeper</h2>
+        <p>
+          Read Judge Stein's 5 January 2026 order affirming production of the
+          twenty-million-log sample — four pages, and the clearest window into
+          how the court weighs relevance against user privacy.<sup
+            class="nb-cite"
+            ><a href="#s1">1</a></sup
+          >
+          Then read the March 2025 motion-to-dismiss opinion for the
+          "boundless DMCA liability" passage and the contours of the surviving
+          claims.<sup class="nb-cite"><a href="#s3">3</a></sup> Track the live
+          docket on CourtListener, where the third-amended-complaint motion and
+          OpenAI's response will land, to watch whether the Microsoft-inducement
+          theory survives.<sup class="nb-cite"><a href="#s7">7</a></sup> The
+          number to watch for an engineer: what fraction of the twenty million
+          logs, once analysed, actually reproduces protected text — that ratio
+          is the market-substitution argument in empirical form.
+        </p>
+        <div class="nb-aside">
+          What should a team building on frontier models do while this is
+          unsettled? Treat provenance as the live risk, as Bartz taught: the
+          fair-use defence protects the learning, not the acquisition, and output
+          filters that suppress verbatim reproduction go to the exact factor —
+          market substitution — on which this case now turns.
+        </div>
+      </section>
+
+      <section class="nb-sources" data-nb-section="sources" id="sources">
+        <h2>Sources</h2>
+        <ol>
+          <li id="s1">
+            <a
+              data-nb-source
+              href="https://cdn.arstechnica.net/wp-content/uploads/2026/01/NYT-v-OpenAI-Order-1-5-26.pdf"
+              >S.D.N.Y. — Order affirming production of the 20-million-log
+              sample, In re OpenAI Copyright Infringement Litigation (Doc. 1087,
+              filed 5 Jan. 2026)</a
+            >
+          </li>
+          <li id="s2">
+            <a
+              data-nb-source
+              href="https://www.npr.org/2025/03/26/nx-s1-5288157/new-york-times-openai-copyright-case-goes-forward"
+              >NPR — "Judge allows New York Times copyright case against OpenAI to
+              go forward" (26 Mar. 2025)</a
+            >
+          </li>
+          <li id="s3">
+            <a
+              data-nb-source
+              href="https://law.justia.com/cases/federal/district-courts/new-york/nysdce/1:2023cv11195/612697/514/"
+              >Justia — The New York Times Co. v. Microsoft Corp., Opinion &amp;
+              Order on motions to dismiss (Doc. 514, S.D.N.Y. 2025)</a
+            >
+          </li>
+          <li id="s4">
+            <a
+              data-nb-source
+              href="https://www.mediapost.com/publications/article/416117/new-york-times-alters-complaint-against-openai-a.html"
+              >MediaPost — "New York Times Alters Complaint Against OpenAI And
+              Microsoft" (26 Jun. 2026)</a
+            >
+          </li>
+          <li id="s5">
+            <a
+              data-nb-source
+              href="https://news.bloomberglaw.com/ip-law/new-york-times-narrows-openai-suit-targets-microsofts-conduct"
+              >Bloomberg Law — "New York Times Trims OpenAI Suit, Targets
+              Microsoft Conduct" (Jun. 2026)</a
+            >
+          </li>
+          <li id="s6">
+            <a
+              data-nb-source
+              href="https://www.courtlistener.com/docket/69879510/in-re-openai-inc-copyright-infringement-litigation/"
+              >CourtListener — In re OpenAI, Inc. Copyright Infringement
+              Litigation, MDL No. 25-md-3143 (docket)</a
+            >
+          </li>
+          <li id="s7">
+            <a
+              data-nb-source
+              href="https://www.courtlistener.com/docket/68117049/the-new-york-times-company-v-microsoft-corporation/"
+              >CourtListener — The New York Times Company v. Microsoft
+              Corporation, No. 1:23-cv-11195 (docket)</a
+            >
+          </li>
+          <li id="s8">
+            <a
+              data-nb-source
+              href="https://openai.com/index/response-to-nyt-data-demands/"
+              >OpenAI — "How we're responding to The New York Times' data demands
+              in order to protect user privacy"</a
+            >
+          </li>
+          <li id="s9">
+            <a
+              data-nb-source
+              href="https://en.wikipedia.org/wiki/The_New_York_Times_v._Microsoft_and_OpenAI"
+              >Wikipedia — The New York Times v. Microsoft and OpenAI (case
+              background and licensing context)</a
+            >
+          </li>
+        </ol>
+      </section>
+    </article>
+  </body>
+</html>
