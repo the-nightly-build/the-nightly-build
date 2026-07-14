@@ -219,10 +219,8 @@ ordered course, rebuilt as your own template.
 
    Rules: `sections` must include `sources`. Bands are `[low, high]`.
    `cite_rule` is `per-section` or `per-item` (needs `data-nb-item` markers).
-   Two optional fields let a template declare requirements the engine would
-   otherwise not know: `cite_exempt: [names]` (sections that need no citations,
-   on top of the always-exempt `sources`) and `require_why: true` (each
-   `data-nb-item` must carry a `data-nb-why` line, as `brief` does). A
+   An optional `cite_exempt: [names]` lets a template declare sections that
+   need no citations, on top of the always-exempt `sources`. A
    `chrome:` list names raw substrings of the skeleton — the body class,
    fixed labels, fixed headings — that must survive the fill verbatim; the
    proof blocks an article that alters them, so a writer can never unstyle
@@ -236,17 +234,19 @@ ordered course, rebuilt as your own template.
 
 2. Scaffold `press/templates/lesson/skeleton.html`. Copy a shipped skeleton's
    `<head>` and header chrome verbatim (asset links, nb-meta skeleton,
-   eyebrow, title, dek, byline), then lay out one
+   eyebrow, title, dek, byline). Keep `class="nb-dekline"` on whatever element
+   renders the dek: the front page and the feed print nb-meta's dek, and the
+   proof blocks an article whose rendered dekline says something else. Lay out one
    `<section data-nb-section="...">` per declared section. Write placeholder
    prose as instruction (what the slot must contain), never as a model
    sentence: a placeholder that performs its slot gets lifted verbatim, and
    the lifted line then opens that section in every article the template
    renders. Set every placeholder in ALL CAPS, the shipped convention, so
    instruction can never be mistaken for copy; rendered labels a component
-   owns ("Sources", "Why it matters") stay sentence case. The proof backstops
-   the convention: a caps run surviving into an article's prose is a
-   `W-PLACEHOLDER` warning. The same holds for `identity.md`: describe the
-   move, do not perform it. The objectives
+   owns (a heading like "Sources", a component's fixed label) stay sentence
+   case. The proof backstops the convention: a caps run surviving into an
+   article's prose is a `W-PLACEHOLDER` warning. The same holds for
+   `identity.md`: describe the move, do not perform it. The objectives
    box, check box, and bridge components in `templates/FURNITURE.md` carry
    the lesson. The sandbox applies unchanged: no scripts beyond the JSON blocks
    and the engine runtime, citations as `sup.nb-cite` anchors into numbered

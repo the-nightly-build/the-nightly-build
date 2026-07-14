@@ -906,6 +906,13 @@ sup.nb-cite a[id],
   padding-left: 24px;
 }
 
+.nb-toc ol ol {
+  margin: 8px 0 0;
+  padding-left: 18px;
+  list-style: lower-alpha;
+  color: var(--ink-soft);
+}
+
 .nb-toc li {
   margin: 0 0 8px;
   font-size: 14px;
@@ -1232,14 +1239,6 @@ figure.nb-chart noscript {
   font-size: 15px;
   color: var(--ink-soft);
   margin: 0 0 8px;
-}
-
-.nb-brief-item p[data-nb-why] {
-  color: var(--ink);
-}
-
-.nb-brief-item p[data-nb-why] b {
-  color: var(--accent);
 }
 
 @media (width >=640px) {

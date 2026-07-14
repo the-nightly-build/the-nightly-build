@@ -306,6 +306,30 @@ expect(
     run_local(mut('"template": "article"', '"template": "brief"'), "semiconductors"),
     must_have=["B-META-MATCH"],
 )
+RENDERED_DEK = """<p class="nb-dekline">
+  How a cyclical commodity maker became the AI era&#39;s<br>
+  bottleneck.
+</p>"""
+expect(
+    "wrapped, escaped, tag-broken dekline agreeing with nb-meta is clean",
+    run_local(VALID, "semiconductors"),
+    must_not=["B-META-MATCH"],
+    blocks=0,
+)
+expect(
+    "meta dek disagrees with the rendered dekline",
+    run_local(
+        mut(RENDERED_DEK, '<p class="nb-dekline">A better sentence, body only.</p>'),
+        "semiconductors",
+    ),
+    must_have=["B-META-MATCH"],
+)
+expect(
+    "an article with no dekline element is not held to nb-meta's dek",
+    run_local(mut(RENDERED_DEK, ""), "semiconductors"),
+    must_not=["B-META-MATCH"],
+    blocks=0,
+)
 expect(
     "slug-style tag is accepted",
     run_local(
@@ -717,17 +741,13 @@ expect(
     blocks=0,
 )
 expect(
-    "W-WHY-MISSING + W-CITE-DENSITY (per-item)",
+    "W-CITE-DENSITY (per-item)",
     run_local(
-        VALID_BRIEF.replace(
-            "<p data-nb-why><b>Why it matters</b>: it moves the larger story we track.</p>",
-            "",
-            1,
-        ).replace('<sup class="nb-cite"><a href="#s2">2</a></sup>', "", 1),
+        VALID_BRIEF.replace('<sup class="nb-cite"><a href="#s2">2</a></sup>', "", 1),
         "ai-briefs",
         slug=TODAY,
     ),
-    must_have=["W-WHY-MISSING", "W-CITE-DENSITY"],
+    must_have=["W-CITE-DENSITY"],
     blocks=0,
 )
 expect(
@@ -945,13 +965,13 @@ user_template(
     "cite_rule: per-section\ncite_exempt: [objectives]\nmodes: [sequence]\n",
     skeleton_of("objectives", "recap", "teach", "check", "bridge", "sources"),
 )
-# a per-item template NOT named 'brief', to prove require_why is manifest-driven
-# rather than hardcoded to the shipped brief template
+# a per-item template NOT named 'brief', to prove the per-item cite rule is
+# manifest-driven rather than hardcoded to the shipped brief template
 user_template(
     "digest",
     "class: shortread\nitems: [2, 4]\n"
     "sections: [entries, sources]\ncite_rule: per-item\n"
-    "require_why: true\nmodes: [collection]\n",
+    "modes: [collection]\n",
     skeleton_of("entries", "sources"),
 )
 ut_series = pathlib.Path(ut_repo) / "press" / "series" / "memos"
@@ -1172,20 +1192,19 @@ expect(
     blocks=0,
 )
 
-print("== require_why is registry-driven, not tied to the 'brief' template ==")
+print("== the per-item cite rule is registry-driven, not tied to 'brief' ==")
 
 
-def digest_article(withhold_why):
+def digest_article(withhold_cite):
     items = "".join(
         f"<div data-nb-item><span>t{i}</span>"
-        f'<h3>Item {i}<sup class="nb-cite"><a href="#s{i}">{i}</a></sup></h3>'
-        f"<p>{make_fixtures.LOREM}</p>"
+        f"<h3>Item {i}"
         + (
             ""
-            if (withhold_why and i == 1)
-            else "<p data-nb-why><b>Why</b> it matters.</p>"
+            if (withhold_cite and i == 1)
+            else f'<sup class="nb-cite"><a href="#s{i}">{i}</a></sup>'
         )
-        + "</div>"
+        + f"</h3><p>{make_fixtures.LOREM}</p></div>"
         for i in (1, 2)
     )
     return f"""<!DOCTYPE html>
@@ -1209,19 +1228,22 @@ def digest_article(withhold_why):
 
 
 expect(
-    "a full digest passes (require_why satisfied)",
+    "a fully cited digest passes",
     run_local(
-        digest_article(withhold_why=False), "digests", slug="first-digest", repo=ut_repo
+        digest_article(withhold_cite=False),
+        "digests",
+        slug="first-digest",
+        repo=ut_repo,
     ),
     blocks=0,
-    must_not=["W-WHY-MISSING"],
+    must_not=["W-CITE-DENSITY"],
 )
 expect(
-    "require_why warns for a non-brief template missing a why line",
+    "per-item cite density warns for a non-brief template",
     run_local(
-        digest_article(withhold_why=True), "digests", slug="first-digest", repo=ut_repo
+        digest_article(withhold_cite=True), "digests", slug="first-digest", repo=ut_repo
     ),
-    must_have=["W-WHY-MISSING"],
+    must_have=["W-CITE-DENSITY"],
 )
 
 ut_rc = subprocess.run(
@@ -1956,17 +1978,17 @@ expect(
 
 print("== chrome ==")
 
-declared = {"chrome": ['<body class="nb-article">', "<b>Why it matters</b>:"]}
+declared = {"chrome": ['<body class="nb-article">', "<h2>Sources</h2>"]}
 rep_ok = C.Report()
 C.check_chrome(
-    '<body class="nb-article"><b>Why it matters</b>: y</body>',
+    '<body class="nb-article"><h2>Sources</h2></body>',
     treg=declared,
     rep=rep_ok,
 )
 expect("chrome intact passes", rep_ok, blocks=0)
 rep_bad = C.Report()
 C.check_chrome(
-    '<body class="nb-edition"><b>Why it matters \u2192</b> y</body>',
+    '<body class="nb-edition"><h2>Sources \u2192</h2></body>',
     treg=declared,
     rep=rep_bad,
 )
