@@ -21,7 +21,15 @@ from collections.abc import Callable
 import check
 import pytest
 from findings import Findings
-from press import REPO, TODAY, article, git, make_full_library, make_press
+from press import (
+    OPEN_YAML,
+    REPO,
+    TODAY,
+    article,
+    git,
+    make_full_library,
+    make_press,
+)
 
 DUTY = [sys.executable, str(REPO / "engine" / "duty.py")]
 VALIDATE_CONFIG = [sys.executable, str(REPO / "engine" / "validate_config.py")]
@@ -156,6 +164,21 @@ def seq_repo(clone_testrepo: Callable[..., str]) -> Callable[[], str]:
         return tmp
 
     return sequence
+
+
+@pytest.fixture
+def open_press(clone_testrepo: Callable[..., str]) -> Callable[..., str]:
+    """A press carrying a `wildcard` open series. Pass a series.yaml to vary it."""
+
+    def press(series_yaml: str = OPEN_YAML) -> str:
+        tmp = clone_testrepo("press", "templates", "engine")
+        d = pathlib.Path(tmp) / "press" / "series" / "wildcard"
+        d.mkdir()
+        (d / "series.yaml").write_text(series_yaml)
+        (d / "prompt.md").write_text("Anything about the AI stack.\n")
+        return tmp
+
+    return press
 
 
 @pytest.fixture

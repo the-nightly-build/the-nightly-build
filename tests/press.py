@@ -53,6 +53,16 @@ items:
     tags: [equity]
 """
 
+OPEN_YAML = """\
+name: Wildcard
+mode: open
+templates: [article, brief]
+prompt: prompt.md
+autopublish: true
+strict: false
+min_sources: 8
+"""
+
 AI_BRIEFS_YAML = """\
 name: AI & Semiconductors
 mode: rolling
