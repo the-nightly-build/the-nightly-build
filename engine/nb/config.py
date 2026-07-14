@@ -3,9 +3,8 @@
 import os
 import sys
 
-import build_site
-
 from nb import meta as nb_meta
+from nb.site.assets import template_dirs
 
 try:
     import yaml
@@ -22,13 +21,13 @@ def load_yaml(path):
 def load_registry(repo):
     """Load every template's manifest, press packages shadowing shipped.
 
-    build_site.template_dirs owns what counts as a template package and how
-    press/ shadows shipped; the manifests it finds carry the geometry the
-    proof enforces.
+    template_dirs owns what counts as a template package and how press/
+    shadows shipped; the manifests it finds carry the geometry the proof
+    enforces.
     """
     return {
         tid: load_yaml(os.path.join(folder, "manifest.yaml")) or {}
-        for tid, folder in build_site.template_dirs(repo).items()
+        for tid, folder in template_dirs(repo).items()
     }
 
 

@@ -4,7 +4,8 @@ import json
 import os
 import re
 
-import build_site
+from nb.site.assets import css_owners
+from nb.site.library import load_site_config
 
 # Off-origin references (link/img) may load only from Google Fonts over https.
 # Matched by exact host after browser-style normalization, never by string
@@ -143,9 +144,9 @@ def check_cites(ed, rep):
 
 def css_class_names(repo):
     sheets = [os.path.join(repo, "engine", "assets", "nb.css")]
-    # The page loads exactly nb.css plus theme.css, and build_site owns what
+    # The page loads exactly nb.css plus theme.css, and nb/site owns what
     # concatenates into theme.css; asking it keeps this list from drifting.
-    sheets += build_site.css_owners(repo, build_site.load_site_config(repo))
+    sheets += css_owners(repo, load_site_config(repo))
     names = set()
     for path in sheets:
         if os.path.isfile(path):
