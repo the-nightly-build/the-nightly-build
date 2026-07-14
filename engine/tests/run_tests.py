@@ -334,7 +334,9 @@ DEK_TEXT = "How a cyclical commodity maker became the AI era&#39;s bottleneck."
 expect(
     "a dekline in a non-p element is held to nb-meta's dek",
     run_local(
-        mut(RENDERED_DEK, '<div class="nb-dekline">A better sentence, body only.</div>'),
+        mut(
+            RENDERED_DEK, '<div class="nb-dekline">A better sentence, body only.</div>'
+        ),
         "semiconductors",
     ),
     must_have=["B-META-MATCH"],
