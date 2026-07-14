@@ -12,6 +12,6 @@ min_sources: 6
 # meets any floor. Every item carries the document that owns its claim, plus
 # someone with no stake in it reading the same thing.
 per_item_sources:
-  primary: [1, 1]
-  secondary: [1, 2]
+  primary: [1, null]
+  secondary: [1, null]
 cadence: daily
