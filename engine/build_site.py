@@ -48,66 +48,47 @@ import re
 import shutil
 import sys
 
-from nb import meta as nb_meta
+from nb.site.catalog import (
+    DIRECTORY_URL,
+    UPSTREAM_REPOSITORY,
+    build_catalog,
+    derive_self_repository,
+    is_safe_tag,
+)
+from nb.site.library import (
+    article_body_html,
+    article_text,
+    by_date_and_slug,
+    collect_articles,
+    date_sort_key,
+    load_series_configs,
+    load_site_config,
+    night_date,
+    read_meta,
+)
 
-try:
-    import yaml
-except ImportError:
-    sys.stderr.write("build_site.py requires PyYAML (pip install pyyaml)\n")
-    sys.exit(2)
-
-PROTOCOL = "1.3"
-WORDS_PER_MINUTE = 230
 FEED_LIMIT = 50
 FEED_CONTENT_LIMIT = 10  # newest N entries carry full content
 FEED_CONTENT_MAX = 150_000  # per-entry cap after stripping, bytes
-UPSTREAM_REPOSITORY = os.getenv(
-    "UPSTREAM_REPOSITORY", "the-nightly-build/the-nightly-build"
-)
-DIRECTORY_URL = os.getenv("DIRECTORY_URL", "https://the-nightly-build.github.io/")
 esc = html.escape
 
-NO_DATE = "unknown"
-
-
-def night_date(meta):
-    """The build-date bucket for an article: its nb-meta date, or the
-    NO_DATE sentinel when the date is absent. build_catalog and every
-    renderer bucket and filter on this one value, so a dateless article
-    lands in exactly one night instead of being lost between a `None`
-    date and an `"unknown"` bucket.
-    """
-    return meta.get("date") or NO_DATE
-
-
-def date_sort_key(date):
-    return "" if date == NO_DATE else date  # dateless sorts first, never wins "latest"
-
-
-def by_date_and_slug(ed):
-    return (ed["meta"].get("date", ""), ed["slug"])
-
-
-# --------------------------------------------------------------------------- #
-# Loading
-# --------------------------------------------------------------------------- #
-
-
-def load_yaml(path):
-    with open(path, encoding="utf-8") as fh:
-        return yaml.safe_load(fh) or {}
-
-
-def load_site_config(repo):
-    cfg = {}
-    path = os.path.join(repo, "press", "site.yaml")
-    if os.path.isfile(path):
-        cfg = load_yaml(path)
-    cfg.setdefault("title", "The Nightly Build")
-    cfg.setdefault("theme", "engine/assets/themes/newspaper.css")
-    cfg.setdefault("appearance", "auto")
-    cfg.setdefault("front", "compact")
-    return cfg
+# `import build_site` is how the suite and validate_config.py reach the press.
+# These names are that surface; the code behind them is in nb/site/.
+__all__ = [
+    "DIRECTORY_URL",
+    "UPSTREAM_REPOSITORY",
+    "atom_feed",
+    "build",
+    "date_sort_key",
+    "derive_self_repository",
+    "dress_article",
+    "is_safe_tag",
+    "main",
+    "read_meta",
+    "render_assets_html",
+    "story_item",
+    "template_dirs",
+]
 
 
 def render_assets_html(assets):
@@ -140,218 +121,6 @@ def render_assets_html(assets):
             f'crossorigin="anonymous" referrerpolicy="no-referrer"{defer}></script>'
         )
     return "\n".join(parts)
-
-
-def load_series_configs(repo):
-    return {
-        sid: load_yaml(os.path.join(repo, "press", "series", sid, "series.yaml"))
-        for sid in nb_meta.series_ids(repo)
-    }
-
-
-read_meta = nb_meta.read_meta
-
-
-def scan_library(root):
-    """Yield (series_id, slug, file_path) for every article under root.
-
-    Accepts a library checkout (contains library/) or a bare library folder
-    (itself named 'library') — never an arbitrary directory, or a repo
-    checkout's templates/ would be ingested as a series.
-    """
-    lib = os.path.join(root, "library")
-    if os.path.isdir(lib):
-        base = lib
-    elif os.path.basename(os.path.normpath(root)) == "library":
-        base = root
-    else:
-        return
-    for sid in sorted(os.listdir(base)):
-        d = os.path.join(base, sid)
-        if not os.path.isdir(d):
-            continue
-        for f in sorted(os.listdir(d)):
-            if f.endswith(".html"):
-                yield sid, f[:-5], os.path.join(d, f)
-
-
-def reading_minutes(meta):
-    rm = meta.get("reading_minutes")
-    if isinstance(rm, (int, float)) and rm > 0:
-        return int(round(rm))
-    words = meta.get("words") or 0
-    return max(1, round(words / WORDS_PER_MINUTE)) if words else 1
-
-
-def collect_articles(
-    series_cfgs, library_root, *, preview_root=None
-) -> dict[tuple[str, str], dict]:
-    """Load every article under the library root, preview drafts included.
-
-    Returns {(series_id, slug): article dict} where each dict carries the
-    parsed nb-meta, the source file path, reading minutes, and a draft
-    flag. A preview draft with the same (series, slug) as a published
-    article replaces it, which is how press-check promotion previews work.
-    """
-    articles = {}
-    sources = [(library_root, False)]
-    if preview_root:
-        sources.append((preview_root, True))
-    for root, is_draft in sources:
-        if not root:
-            continue
-        for sid, slug, path in scan_library(root):
-            meta = read_meta(path)
-            if meta is None:
-                sys.stderr.write(f"warning: skipping {path} (no parseable nb-meta)\n")
-                continue
-            articles[(sid, slug)] = {
-                "meta": meta,
-                "series": sid,
-                "slug": slug,
-                "file": path,
-                "draft": is_draft,
-                "reading_minutes": reading_minutes(meta),
-            }
-    assign_positions(articles, series_cfgs)
-    return articles
-
-
-def assign_positions(articles, series_cfgs):
-    """Assign each article its 1-based position in the series' canonical order.
-
-    Sequences order by nb-meta order, collections by config item order
-    with unknown slugs last, open series by publication date, rolling
-    series by their date slugs. The position feeds catalog.json and the
-    'Ed. N of M' labels, so it must be stable across rebuilds.
-    """
-    by_series = {}
-    for ed in articles.values():
-        by_series.setdefault(ed["series"], []).append(ed)
-    for sid, eds in by_series.items():
-        cfg = series_cfgs.get(sid, {})
-        mode = cfg.get("mode") or eds[0]["meta"].get("mode", "collection")
-        if mode == "sequence":
-            eds.sort(key=lambda e: (e["meta"].get("order") or 10**6, e["slug"]))
-        elif mode == "collection":
-            order = {it.get("slug"): i for i, it in enumerate(cfg.get("items") or [])}
-            eds.sort(key=lambda e: (order.get(e["slug"], 10**6), e["slug"]))
-        elif mode == "open":  # topical slugs; publication date is the order
-            eds.sort(key=by_date_and_slug)
-        else:  # rolling
-            eds.sort(key=lambda e: e["slug"])
-        for i, ed in enumerate(eds, 1):
-            ed["position"] = i
-
-
-# --------------------------------------------------------------------------- #
-# Catalog
-# --------------------------------------------------------------------------- #
-
-
-def derive_self_repository(explicit, base_url) -> str | None:
-    if explicit:
-        return explicit
-    # Parse a Pages project URL https://<owner>.github.io/<repo>/; a user or org
-    # Pages site has no repo path, so this yields None and chrome omits the star link.
-    match = re.match(r"https?://([^./]+)\.github\.io/([^/]+)", base_url or "")
-    return f"{match.group(1)}/{match.group(2)}" if match else None
-
-
-def build_catalog(
-    site_cfg, series_cfgs, *, articles, by_series, generated, repository=None
-):
-    series_entries = []
-    for sid, cfg in series_cfgs.items():
-        items = cfg.get("items") or []
-        entry = {
-            "id": sid,
-            "name": cfg.get("name", sid),
-            "mode": cfg.get("mode"),
-            "template": cfg.get("template"),
-            "count": len(by_series.get(sid, [])),
-            "total": len(items)
-            if cfg.get("mode") in ("collection", "sequence")
-            else None,
-        }
-        for key in ("templates", "cadence", "paused", "section"):
-            if cfg.get(key):
-                entry[key] = cfg[key]
-        series_entries.append(entry)
-    # articles published for series no longer configured still belong to the site
-    for sid in sorted(set(by_series) - set(series_cfgs)):
-        eds = by_series[sid]
-        series_entries.append(
-            {
-                "id": sid,
-                "name": sid,
-                "mode": eds[0]["meta"].get("mode"),
-                "template": eds[0]["meta"].get("template"),
-                "count": len(eds),
-                "total": None,
-            }
-        )
-
-    article_entries = []
-    for ed in sorted(
-        articles.values(),
-        key=lambda e: (e["meta"].get("date", ""), e["series"], e["slug"]),
-        reverse=True,
-    ):
-        entry = dict(ed["meta"])
-        entry["path"] = f"/library/{ed['series']}/{ed['slug']}.html"
-        entry["position"] = ed["position"]
-        entry["reading_minutes"] = ed["reading_minutes"]
-        if ed["draft"]:
-            entry["draft"] = True
-        article_entries.append(entry)
-
-    builds = {}
-    for ed in articles.values():
-        d = night_date(ed["meta"])
-        builds.setdefault(d, []).append(f"{ed['series']}/{ed['slug']}")
-    builds = {
-        d: sorted(v)
-        for d, v in sorted(
-            builds.items(), key=lambda kv: date_sort_key(kv[0]), reverse=True
-        )
-    }
-
-    tags = {}
-    for ed in articles.values():
-        for t in ed["meta"].get("tags") or []:
-            if not is_safe_tag(t):
-                continue
-            tags.setdefault(t, []).append(f"{ed['series']}/{ed['slug']}")
-    tags = {t: sorted(v) for t, v in sorted(tags.items())}
-
-    catalog = {
-        "generated": generated.strftime("%Y-%m-%dT%H:%M:%SZ"),
-        "protocol": PROTOCOL,
-        "site_title": site_cfg["title"],
-        "footer": site_cfg.get("footer"),
-        "repository": repository,
-        "upstream": UPSTREAM_REPOSITORY,
-        "directory_url": DIRECTORY_URL,
-        "series": series_entries,
-        "articles": article_entries,
-        "builds": builds,
-        "tags": tags,
-    }
-    # Listing on the directory is opt-out: a paper is listed unless it sets
-    # directory.publish: false. The block carries only that signal and an optional
-    # description; the public URL is never in the catalog. The directory derives
-    # each paper's URL from GitHub identity, so no catalog field can point a
-    # reader off the paper's own site.
-    directory = site_cfg.get("directory") or {}
-    if directory.get("publish") is False:
-        catalog["directory"] = {"publish": False}
-    else:
-        catalog["directory"] = {
-            "publish": True,
-            "description": (directory.get("description") or "").strip(),
-        }
-    return catalog
 
 
 # --------------------------------------------------------------------------- #
@@ -823,24 +592,6 @@ def render_tags_index(site, catalog):
     return page(site, f"Tags · {site['title']}", body=body, depth=1)
 
 
-def is_safe_tag(tag):
-    """Whether a tag can be turned into a tags/<tag>/index.html page safely.
-
-    Tags are untrusted (they come from auto-merged night-shift content and
-    check.py does not constrain them), and the builder writes each one as a
-    directory under tags/. A tag whose segments escape that tree — `..`,
-    `.`, an absolute path, a backslash, or an empty segment from a leading/
-    trailing/double slash — is dropped from the catalog entirely, so no
-    page, link, or os.makedirs is ever created outside --out. A plain
-    nested tag like `a/b` is safe and renders at its true depth.
-    """
-    if not isinstance(tag, str) or not tag or tag != tag.strip():
-        return False
-    if "\\" in tag or tag.startswith("/"):
-        return False
-    return all(seg and seg not in (".", "..") for seg in tag.split("/"))
-
-
 def render_tag_page(site, tag, *, refs, articles, series_cfgs):
     depth = 1 + len(tag.split("/"))
     # A plain tag sits at depth 2 (tags/ + tag); a nested a/b is one deeper per
@@ -876,27 +627,6 @@ def render_search_page(site):
         '<div class="nb-results" id="nb-results"></div>'
     )
     return page(site, f"Search · {site['title']}", body=body, depth=1, active="Search")
-
-
-TEXT_STRIP_RE = re.compile(
-    r"<!--[\s\S]*?-->|<script[\s\S]*?</script>|<style[\s\S]*?</style>"
-    r"|<[^>]+>",
-    re.I,
-)
-BODY_RE = re.compile(r"<body[^>]*>([\s\S]*?)</body>", re.I)
-
-
-def article_body_html(path):
-    with open(path, encoding="utf-8", errors="replace") as fh:
-        raw = fh.read()
-    m = BODY_RE.search(raw)
-    return m.group(1) if m else raw
-
-
-def article_text(path):
-    text = TEXT_STRIP_RE.sub(" ", article_body_html(path))
-    text = html.unescape(text)
-    return re.sub(r"\s+", " ", text).strip()
 
 
 def build_search_index(articles, series_cfgs):
