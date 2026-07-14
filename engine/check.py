@@ -62,6 +62,7 @@ ALLOWED_EXTERNAL_HOSTS = frozenset({"fonts.googleapis.com", "fonts.gstatic.com"}
 # (§7.4 — contextual nav + chart renderer), by relative or root-absolute path.
 ENGINE_SCRIPT_RE = re.compile(r"^(?:(?:\.\./)+|/)assets/nb\.js$")
 DEFAULT_MIN_SOURCES = {"longread": 8, "shortread": 5}
+SOURCE_KINDS = ("primary", "secondary")
 DEFAULT_CITE_EXEMPT = ("sources",)  # a template extends this via registry cite_exempt
 SELF_COUNT_TOLERANCE = 0.20
 
@@ -128,6 +129,10 @@ VOID = {
 }
 
 
+def collapse_space(text: str) -> str:
+    return " ".join(text.split())
+
+
 class Article(HTMLParser):
     """Single-pass structural parse of one article file.
 
@@ -147,17 +152,18 @@ class Article(HTMLParser):
         self.script_tags = []  # (attrs_dict) for every <script>
         self.sections = []  # data-nb-section values in order
         self.section_cites = {}  # section -> inline cite count
-        self.items = []  # per data-nb-item: {"cites": int, "why": bool}
+        self.items = []  # per data-nb-item: {"cites": [source entry id, ...]}
         self.ids = set()
         self.source_container_ids = set()
         self.source_ids = []  # source entry ids in declaration order
-        self.sources = []  # {"href":, "required":}
+        self.sources = []  # {"href":, "required":, "kind":, "id":}
         self.cite_hrefs = []  # hrefs of anchors inside sup.nb-cite
         self.bad_event_attrs = []
         self.bad_js_urls = []
         self.forbidden_tags = []
         self.external_refs = []  # (tag, url) for script src / link href / img src
         self._capture = None  # ("meta"|"chart", buffer) while inside a JSON script
+        self._dek_parts = None  # text of the first .nb-dekline; None until one opens
         self._text_parts = []
         self._prose_text_parts = []  # body prose only, excludes the sources section
         self._suppress_text_depth = 0  # inside script/style
@@ -216,15 +222,17 @@ class Article(HTMLParser):
             self.section_cites.setdefault(name, 0)
             el["section"] = name
         if "data-nb-item" in a:
-            self.items.append({"cites": 0, "why": False})
+            self.items.append({"cites": []})
             el["item"] = len(self.items) - 1
-        if "data-nb-why" in a:
-            cur = self._current("item")
-            if cur is not None:
-                self.items[cur["item"]]["why"] = True
 
         if tag == "sup" and "nb-cite" in a.get("class", "").split():
             el["cite_sup"] = True
+
+        # the class is the whole contract: a press writes its own template and may
+        # render the dek in any element, so the tag is not ours to require
+        if self._dek_parts is None and "nb-dekline" in a.get("class", "").split():
+            self._dek_parts = []
+            el["dekline"] = True
 
         if tag == "a":
             in_sup = any(e.get("cite_sup") for e in self.stack)
@@ -238,19 +246,21 @@ class Article(HTMLParser):
                     )
                 it = self._current("item")
                 if it is not None:
-                    self.items[it["item"]]["cites"] += 1
+                    self.items[it["item"]]["cites"].append(href[1:])
             if "data-nb-source" in a:
-                self.sources.append(
-                    {
-                        "href": href,
-                        "required": a.get("data-nb-required") or None,
-                    }
-                )
                 nearest = None
                 for e in reversed(self.stack):
                     if e.get("id"):
                         self.source_container_ids.add(e["id"])
                         nearest = nearest or e["id"]
+                self.sources.append(
+                    {
+                        "href": href,
+                        "required": a.get("data-nb-required") or None,
+                        "kind": a.get("data-nb-kind") or None,
+                        "id": nearest,
+                    }
+                )
                 if nearest and nearest not in self.source_ids:
                     self.source_ids.append(nearest)
 
@@ -288,11 +298,18 @@ class Article(HTMLParser):
             sec = self._current("section")
             if sec is None or sec.get("section") != "sources":
                 self._prose_text_parts.append(data)
+            if self._dek_parts is not None and self._current("dekline") is not None:
+                self._dek_parts.append(data)
 
     @property
     def word_count(self):
         text = " ".join(self._text_parts)
         return len(re.findall(r"\S+", text))
+
+    @property
+    def dekline(self) -> str:
+        # the space keeps a tag boundary (a <br>, an <em>) from fusing two words
+        return collapse_space(" ".join(self._dek_parts or []))
 
 
 # --------------------------------------------------------------------------- #
@@ -691,7 +708,16 @@ def bind_open_template(meta, registry, allowed_templates, rep):
 
 
 def check_meta_agreement(
-    meta, *, series, series_id, template_id, slug_from_path, parent, pr_body_meta, rep
+    meta,
+    *,
+    series,
+    series_id,
+    template_id,
+    slug_from_path,
+    parent,
+    dekline,
+    pr_body_meta,
+    rep,
 ):
     if meta.get("slug") != slug_from_path:
         rep.block(
@@ -716,6 +742,17 @@ def check_meta_agreement(
         rep.block(
             "B-META-MATCH",
             f"nb-meta template '{meta.get('template')}' != series template '{template_id}'",
+        )
+    # The index card and the RSS summary are built from nb-meta's dek, so an
+    # article whose body was fixed and whose meta was not ships the abandoned dek
+    # on the front page and the feed. Nothing to compare against is nothing to say.
+    dek = collapse_space(str(meta.get("dek", "")))
+    if dekline and dek != dekline:
+        rep.block(
+            "B-META-MATCH",
+            f"nb-meta dek {dek!r} != the rendered dekline {dekline!r}",
+            suggestion="the front page and the feed render nb-meta's dek, not "
+            "the body's; carry every dek edit back into nb-meta",
         )
     if pr_body_meta is not None:
         for field in ("series", "slug", "mode", "template", "date", "title"):
@@ -946,6 +983,111 @@ def check_cites(ed, rep):
             )
 
 
+def band_text(band) -> str:
+    lo, hi = band
+    if hi is None:
+        return f"at least {lo}"
+    if lo == hi:
+        return f"exactly {lo}"
+    return f"{lo} to {hi}"
+
+
+def is_count(value) -> bool:
+    return isinstance(value, int) and not isinstance(value, bool) and value >= 0
+
+
+def kind_bands(bands, *, key, rep) -> dict[str, tuple[int, int | None]]:
+    """The series' [low, high] bands per kind, blocking on a malformed config.
+
+    validate_config says all of this in daylight; a press that skipped it gets a
+    finding here rather than a traceback.
+    """
+    if not isinstance(bands, dict):
+        rep.block("B-SERIES", f"series '{key}' must be a mapping of kind to band")
+        return {}
+    resolved = {}
+    for kind, band in bands.items():
+        if not isinstance(band, list) or len(band) != 2:
+            rep.block("B-SERIES", f"series {key}.{kind} must be [low, high]")
+            continue
+        lo, hi = band
+        if not is_count(lo) or (hi is not None and (not is_count(hi) or hi < lo)):
+            rep.block(
+                "B-SERIES",
+                f"series {key}.{kind} must be [low, high]: a count, then null "
+                f"or a count no lower than it",
+            )
+            continue
+        resolved[kind] = (lo, hi)
+    return resolved
+
+
+def check_item_kinds(cited, *, number, per_item, rep):
+    for kind, band in per_item.items():
+        count = sum(1 for s in cited if s["kind"] == kind)
+        lo, hi = band
+        if count < lo or (hi is not None and count > hi):
+            rep.block(
+                "B-SOURCE-KIND",
+                f"item #{number} cites {count} {kind} source(s); this series "
+                f"asks every item for {band_text(band)}",
+            )
+
+
+def check_source_kinds(ed, *, series, treg, rep):
+    """B-SOURCE-KIND: source composition, per article and per item.
+
+    min_sources counts. A series can also declare the mix it wants, and the mix
+    blocks regardless of `strict`, because sourcing is not a matter of
+    calibration. Whether a declared kind is the TRUE kind is judgment: the
+    research log makes the call and the editor audits it. The engine counts the
+    labels the writer declared, and says nothing about their honesty.
+    """
+    by_kind = series.get("sources_by_kind")
+    per_item = series.get("per_item_sources")
+    constrained = by_kind is not None or per_item is not None
+    for s in ed.sources:
+        if s["kind"] in SOURCE_KINDS:
+            continue
+        if s["kind"] is not None:
+            rep.block(
+                "B-SOURCE-KIND",
+                f'source {s["href"]} declares data-nb-kind="{s["kind"]}"; '
+                f"the kinds are {' and '.join(SOURCE_KINDS)}",
+            )
+        elif constrained:
+            rep.block(
+                "B-SOURCE-KIND",
+                f"source {s['href']} declares no data-nb-kind; this series "
+                f"constrains the source mix, which a source that will not say "
+                f"what it is escapes",
+            )
+
+    # The mix is what the article rests on, so count what it cites: a listed
+    # source no line calls on carries none of the piece.
+    cited_ids = set(ed.cite_hrefs)
+    cited = [s for s in ed.sources if s["id"] in cited_ids]
+    for kind, band in kind_bands(by_kind or {}, key="sources_by_kind", rep=rep).items():
+        count = sum(1 for s in cited if s["kind"] == kind)
+        lo, hi = band
+        if count < lo or (hi is not None and count > hi):
+            rep.block(
+                "B-SOURCE-KIND",
+                f"{count} {kind} source(s) cited; this series asks for "
+                f"{band_text(band)}",
+            )
+
+    if per_item is None:
+        return
+    bands = kind_bands(per_item, key="per_item_sources", rep=rep)
+    if not bands or treg.get("cite_rule") != "per-item":
+        return  # validate_config rejects a series that may cite per section
+    by_id = {s["id"]: s for s in ed.sources if s["id"]}
+    for number, it in enumerate(ed.items, 1):
+        cited = [by_id[ref] for ref in dict.fromkeys(it["cites"]) if ref in by_id]
+        check_item_kinds(cited, number=number, per_item=bands, rep=rep)
+
+
 PLACEHOLDER_RUN_WORDS = 4  # a caps run this long warns even off-skeleton
 
 
@@ -1056,7 +1198,7 @@ def check_warns(
                 rep.warn("W-CITE-DENSITY", f"section '{s}' has no inline citations")
     elif rule == "per-item":
         for i, it in enumerate(ed.items, 1):
-            if it["cites"] == 0:
+            if not it["cites"]:
                 rep.warn("W-CITE-DENSITY", f"item #{i} has no inline citations")
 
     # citation order: sources should be numbered in order of first appearance
@@ -1077,15 +1219,6 @@ def check_warns(
                 )
                 break
             frontier += 1
-
-    # per-item "why it matters", when the template's registry entry requires it
-    if treg.get("require_why"):
-        for i, it in enumerate(ed.items, 1):
-            if not it["why"]:
-                rep.warn(
-                    "W-WHY-MISSING",
-                    f"item #{i} lacks a 'why it matters' line (data-nb-why)",
-                )
 
     # source policy: required docs must be read AND cited; consult prefixes
     # must be read first but citing them is optional (no check here); with
@@ -1269,6 +1402,7 @@ def check_article(
         template_id=template_id,
         slug_from_path=slug_from_path,
         parent=parent,
+        dekline=ed.dekline,
         pr_body_meta=pr_body_meta,
         rep=rep,
     )
@@ -1291,6 +1425,7 @@ def check_article(
     check_sandbox(ed, rep)
     check_sources(ed, rep, check_links=check_links)
     check_cites(ed, rep)
+    check_source_kinds(ed, series=series, treg=treg, rep=rep)
     check_warns(
         ed,
         meta,

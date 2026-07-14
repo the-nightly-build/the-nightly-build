@@ -21,6 +21,7 @@ import re
 import sys
 
 import build_site
+import check
 import duty
 import nb_meta
 
@@ -44,11 +45,11 @@ TEMPLATE_KEYS = {
     "flex_sections",
     "cite_rule",
     "cite_exempt",
-    "require_why",
     "modes",
     "about",
 }
 CITE_RULES = {"per-section", "per-item"}
+SOURCE_KINDS = frozenset(check.SOURCE_KINDS)
 SERIES_KEYS = {
     "name",
     "mode",
@@ -58,6 +59,8 @@ SERIES_KEYS = {
     "autopublish",
     "strict",
     "min_sources",
+    "sources_by_kind",
+    "per_item_sources",
     "words",
     "items",
     "tags",
@@ -275,8 +278,6 @@ def check_registry(repo, errors):
             and all(isinstance(x, str) for x in cite_exempt)
         ):
             errors.append(f"{where}: 'cite_exempt' must be a list of section names")
-        if not isinstance(entry.get("require_why", False), bool):
-            errors.append(f"{where}: 'require_why' must be true or false")
         for band_key in ("words", "items", "flex_sections"):
             band = entry.get(band_key)
             if band is not None and not (
@@ -327,6 +328,59 @@ def check_required_docs(docs, root, sid, where, errors):
             errors.append(
                 f"{where}: required_doc "
                 f"{doc.get('id')!r} file not found: {doc.get('path')!r}"
+            )
+
+
+def check_kind_bands(bands, *, key, where, errors):
+    """Validate a source-composition mapping: kind -> [low, high|null]."""
+    if bands is None:
+        return
+    if not isinstance(bands, dict) or not bands:
+        errors.append(
+            f"{where}: '{key}' must be a mapping of source kind to [low, high], "
+            f"e.g. primary: [1, 1]"
+        )
+        return
+    unknown = sorted(set(bands) - SOURCE_KINDS)
+    if unknown:
+        errors.append(
+            f"{where}: {key}: unknown source kind(s) {unknown} "
+            f"(the kinds are {sorted(SOURCE_KINDS)})"
+        )
+    for kind in sorted(set(bands) & SOURCE_KINDS):
+        band = bands[kind]
+        if not isinstance(band, list) or len(band) != 2:
+            errors.append(f"{where}: {key}.{kind} must be [low, high]")
+            continue
+        low, high = band
+        if not check.is_count(low):
+            errors.append(f"{where}: {key}.{kind} low must be an integer >= 0")
+        elif high is not None and (not check.is_count(high) or high < low):
+            errors.append(
+                f"{where}: {key}.{kind} high must be null (no upper "
+                f"bound) or an integer >= the low"
+            )
+
+
+def check_kinded_skeletons(repo, templates, *, where, errors):
+    """A composition rule needs source entries that declare a kind.
+
+    A skeleton whose sources carry no `data-nb-kind` renders an article the
+    writer fills faithfully and the proof then blocks for "0 primary source(s)".
+    Say it at the author's desk instead.
+    """
+    for tid, folder in build_site.template_dirs(repo).items():
+        skeleton = os.path.join(folder, "skeleton.html")
+        if tid not in templates or not os.path.isfile(skeleton):
+            continue
+        ed = check.Article()
+        with open(skeleton, encoding="utf-8") as fh:
+            ed.feed(fh.read())
+        ed.close()
+        if any(s["kind"] is None for s in ed.sources):
+            errors.append(
+                f"{where}: a source composition needs a template whose skeleton "
+                f"declares data-nb-kind on its source entries; '{tid}' does not"
             )
 
 
@@ -425,6 +479,32 @@ def check_series(repo, registry, *, errors):
                         f"template '{template}' "
                         f"(allowed: {treg.get('modes')})"
                     )
+        check_kind_bands(
+            cfg.get("sources_by_kind"),
+            key="sources_by_kind",
+            where=where,
+            errors=errors,
+        )
+        per_item_sources = cfg.get("per_item_sources")
+        check_kind_bands(
+            per_item_sources, key="per_item_sources", where=where, errors=errors
+        )
+        # per_item_sources constrains what each data-nb-item cites, which only a
+        # per-item template has. EVERY template the series may use must cite per
+        # item: a rule the night's template choice can dodge is not a rule.
+        per_section = [
+            t
+            for t in allowed
+            if isinstance(t, str)
+            and (registry.get(t) or {}).get("cite_rule") != "per-item"
+        ]
+        if per_item_sources is not None and tregs and per_section:
+            errors.append(
+                f"{where}: 'per_item_sources' needs every template the series may "
+                f"use to cite per item; {', '.join(per_section)} cite(s) per section"
+            )
+        if per_item_sources is not None or cfg.get("sources_by_kind") is not None:
+            check_kinded_skeletons(repo, allowed, where=where, errors=errors)
         prompt = cfg.get("prompt")
         if prompt and not os.path.isfile(os.path.join(root, sid, prompt)):
             errors.append(f"{where}: prompt file '{prompt}' not found")

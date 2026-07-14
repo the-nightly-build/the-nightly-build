@@ -98,6 +98,38 @@ Then write:
 - Tag fragments under `press/series/_tags/` if shared angles apply.
 - Sources for `required_docs` under `press/series/<id>/sources/`.
 
+**A prompt carries only what the engine cannot know.** Config is not prose. The
+prompt is one layer in a stack the night shift reads in order
+(`docs/customization.md`):
+
+```text
+PROTOCOL.md > spec/editorial.md > spec/headlines.md > press/editorial.md >
+template manifest > template identity > press/series/<id>/prompt.md
+> tag fragments > item prompt
+```
+
+Every other layer already holds, and so does the config the engine reads for
+itself: `series.yaml` (`template`, `cadence`, `words`, `min_sources`, `consult`,
+`required_docs`, `strict`, `tags`), `site.yaml`, and the furniture catalogues.
+If a fact lives in any of them, the prompt relies on it and never restates it:
+not PROTOCOL's rules (read the section's published articles first, meet the
+source floor, escape the markup), not the manifest's machine contract (the anchor
+sections, the item count, the required "why it matters" line), not where a
+furniture component's markup is catalogued, not what a tag fragment already
+disciplines. A restated rule drifts from the rule it copies, and the copy has no
+owner.
+
+What belongs here is the editorial judgment no schema holds: the beat, the angle,
+the reader, the genre and the furniture that carries it, the standard a source
+must clear, what this desk refuses to do. Naming a furniture component is
+editorial; explaining its markup is not. And an open section's beat IS its
+config, so its watchlist, its rotation, and its lanes live in the prompt and
+nowhere else.
+
+Test every line before it goes in. Could the engine already know this? Then it
+does not go here. The prompts in `examples/series/` hold this standard. Keep them
+holding it.
+
 Validate: `python3 engine/validate_config.py`. Fix anything it flags before
 proceeding. Commit the configuration to `main` via the user's normal review
 flow. Configuration is code-review territory, not an agent PR to `library`.

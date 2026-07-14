@@ -127,6 +127,16 @@ def article():
             f'<a data-nb-source{req} href="{href}">link</a></li>'
         )
 
+    # the dekline renders wrapped, entity-escaped and broken by a tag; nb-meta's
+    # dek is one JSON string, and the proof must still see the two as one sentence
+    header = """<header>
+<h1 class="nb-title">Micron Technology: The Scarcest Commodity in AI</h1>
+<p class="nb-dekline">
+  How a cyclical commodity maker became the AI era&#39;s<br>
+  bottleneck.
+</p>
+</header>"""
+
     meta = """{
   "protocol": "1.0", "series": "semiconductors", "slug": "micron",
   "template": "article",
@@ -155,6 +165,7 @@ def article():
 <style>body{{font-family:serif}}</style>
 </head><body class="nb-article">
 <article>
+{header}
 {"".join(body)}
 <figure>
 <script type="application/json" data-nb-chart>
@@ -175,7 +186,6 @@ def brief(date="2026-07-06"):
             f'<sup class="nb-cite"><a href="#s{i}">{i}</a></sup></h4>'
             f"<p>Two sentences of what happened and the immediate context around it. "
             f"The specifics are grounded in the cited source.</p>"
-            f"<p data-nb-why><b>Why it matters</b>: it moves the larger story we track.</p>"
             f"</div>"
         )
     src = "".join(
@@ -187,7 +197,7 @@ def brief(date="2026-07-06"):
   "template": "brief", "title": "Daily brief for {date}",
   "mode": "rolling", "order": null, "date": "{date}", "tags": [],
   "sources": 5, "words": 300, "reading_minutes": 5,
-  "dek": "Five items, each with why it matters.",
+  "dek": "Five items, each cited to its primary source.",
   "harness": "test-fixture", "model": "claude-fable-5"
 }}"""
     return f"""<!DOCTYPE html>

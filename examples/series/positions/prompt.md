@@ -8,8 +8,7 @@ what it sells, to whom, what protects it, and what is changing.
 Rotate the section:
 
 - Cover whichever name has waited longest and has real news to carry, so each
-  comes up about once a week. Read the last article on that company first. Build
-  on it and say what changed since.
+  comes up about once a week. Lead with what changed since that name last ran.
 - If nothing material happened for the name that is due, cover the standing
   question that would most change how a reader values the business. No filler.
 
@@ -19,9 +18,9 @@ component carries the argument better than a paragraph would. Nothing here is
 standard issue, and any number that carries the thesis is cited in nearby prose
 wherever it sits.
 
-Close with a section, `data-nb-section="the-tape"`: one paragraph on the recent
-stock move and what the market seems to be pricing. It stays apart from the
-business analysis and never leads it.
+Close with a section named `the-tape`: one paragraph on the recent stock move
+and what the market seems to be pricing. It stays apart from the business
+analysis and never leads it.
 
 Emphases:
 

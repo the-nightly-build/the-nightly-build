@@ -108,9 +108,7 @@ order. Do not use it for unordered lists.
   <li>
     <h3>STAGE</h3>
     <p>
-      WHAT HAPPENS AND WHY IT MATTERS.<sup class="nb-cite"
-        ><a href="#s2">2</a></sup
-      >
+      WHAT HAPPENS AT THIS STAGE.<sup class="nb-cite"><a href="#s2">2</a></sup>
     </p>
   </li>
   <li>
@@ -162,7 +160,7 @@ Add class `major` for filled dots.
     <h3>
       EVENT<sup class="nb-cite"><a href="#s2">2</a></sup>
     </h3>
-    <p>WHAT HAPPENED AND WHY IT MATTERED.</p>
+    <p>WHAT HAPPENED, IN ONE OR TWO SENTENCES.</p>
   </li>
   <li class="nb-tl-interlude"><p>WHAT THE ERA ADDED UP TO.</p></li>
 </ol>
