@@ -23,7 +23,7 @@ import sys
 import build_site
 import check
 import duty
-import nb_meta
+from nb import meta as nb_meta
 
 try:
     import yaml

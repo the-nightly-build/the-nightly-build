@@ -15,8 +15,8 @@ instead of inline logic inside workflow definitions.
 import argparse
 import subprocess
 
-import nb_meta
 import yaml
+from nb import meta as nb_meta
 
 
 def added_article(diff_base):
