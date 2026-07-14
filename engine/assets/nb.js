@@ -6,10 +6,11 @@
  *   2. Declarative charts: renders <script type="application/json"
  *      data-nb-chart> blocks with version-pinned Chart.js from cdnjs — the
  *      ONLY third-party script, loaded here, never by articles.
- *   3. Article chrome, retrofitted onto every article ever published:
+ *   3. Article furniture, retrofitted onto every article ever published:
  *      collapsible Contents, citation source-sheets with backrefs, byline
  *      normalization, series-linked eyebrow, sequence prev/next from
- *      catalog.json, external links in new tabs.
+ *      catalog.json, external links in new tabs. The bar and footer are not
+ *      here: the builder splices them into the article copy it publishes.
  *   4. The Search page: scoped fuzzy search over the builder-emitted index.
  *   5. Menu niceties (close on outside tap / Escape).
  *
@@ -245,84 +246,6 @@
   function articleUrl(entry) {
     /* catalog paths are site-root-relative ("/library/…"); resolve against ROOT */
     return ROOT + entry.path.replace(/^\//, "");
-  }
-
-  /* ---------------------------------------------------------- article chrome */
-
-  /* Articles are standalone frozen files: the bar and footer that site pages
-     get from the builder are injected here, so every article ever published
-     wears the current chrome. Site title comes from catalog.json. */
-  function injectChrome() {
-    if (document.querySelector(".nb-bar")) return Promise.resolve();
-    return catalog().then(function (cat) {
-      var title = (cat && cat.site_title) || "The Nightly Build";
-      var upstream =
-        (cat && cat.upstream) || "the-nightly-build/the-nightly-build";
-      var repo = cat && cat.repository;
-      var ext = 'target="_blank" rel="noopener noreferrer"';
-      /* Ecosystem links under the nav (mirrors build_site.chrome_eco_links).
-         Star on GitHub is omitted when the repo is unknown; the last link points
-         at the directory directory. */
-      var directory =
-        (cat && cat.directory_url) || "https://the-nightly-build.github.io/";
-      var eco = repo
-        ? '<a href="https://github.com/' +
-          repo +
-          '" ' +
-          ext +
-          ">Star on GitHub ↗</a>"
-        : "";
-      eco +=
-        '<a href="https://github.com/' +
-        upstream +
-        '" ' +
-        ext +
-        ">Start your own ↗</a>";
-      eco +=
-        '<a href="' + directory + '" ' + ext + ">The whole newspaper ↗</a>";
-      var imprint =
-        cat && cat.footer
-          ? '<span class="nb-imprint">' + escHtml(cat.footer) + "</span>"
-          : '<a class="nb-imprint" href="https://github.com/' +
-            upstream +
-            '" ' +
-            ext +
-            ">A Nightly Build paper</a>";
-      var bar = document.createElement("header");
-      bar.className = "nb-bar";
-      bar.innerHTML =
-        '<div class="nb-bar-in"><a class="nb-wordmark" href="' +
-        ROOT +
-        '">' +
-        escHtml(title) +
-        '<span class="nb-period">.</span></a>' +
-        '<details class="nb-menu"><summary aria-label="Menu">' +
-        '<span class="nb-burger"></span></summary>' +
-        '<nav class="nb-menu-panel"><div class="nb-menu-nav">' +
-        '<a href="' +
-        ROOT +
-        '">Today</a>' +
-        '<a href="' +
-        ROOT +
-        'series/">Sections</a>' +
-        '<a href="' +
-        ROOT +
-        'search/">Search</a>' +
-        '<a href="' +
-        ROOT +
-        'feed.xml">RSS</a></div>' +
-        '<div class="nb-menu-eco">' +
-        eco +
-        "</div></nav></details></div>";
-      document.body.insertBefore(bar, document.body.firstChild);
-      var foot = document.createElement("footer");
-      foot.className = "nb-footer";
-      foot.innerHTML =
-        '<div class="nb-footer-in">' +
-        imprint +
-        '<button class="nb-appearance" type="button">◐ auto</button></div>';
-      document.body.appendChild(foot);
-    });
   }
 
   function articleMeta() {
@@ -736,16 +659,15 @@
 
   /* ------------------------------------------------------------------ init */
 
+  /* The chrome itself is in the HTML on every page, articles included: the
+     builder splices it into the article copies. This only binds behaviour. */
   function bindChrome() {
     document.querySelectorAll(".nb-appearance").forEach(function (btn) {
-      if (btn.dataset.nbBound) return;
-      btn.dataset.nbBound = "1";
       btn.addEventListener("click", cycleAppearance);
     });
     applyAppearance(hashMode() || getAppearance());
     var menu = document.querySelector(".nb-menu");
-    if (menu && !menu.dataset.nbBound) {
-      menu.dataset.nbBound = "1";
+    if (menu) {
       document.addEventListener("click", function (e) {
         if (menu.open && !(e.target.closest && e.target.closest(".nb-menu"))) {
           menu.open = false;
@@ -795,7 +717,6 @@
 
     var meta = articleMeta();
     if (meta) {
-      injectChrome().then(bindChrome);
       buildToc();
       normalizeByline();
       linkEyebrow(meta);
