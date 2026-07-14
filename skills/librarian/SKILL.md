@@ -96,6 +96,15 @@ Then write:
 - Tag fragments under `press/series/_tags/` if shared angles apply.
 - Sources for `required_docs` under `press/series/<id>/sources/`.
 
+**A prompt carries only what the engine cannot know.** Config is not prose. If a
+fact lives in `series.yaml` (the roster, the source floor, the word band, the
+template, the cadence), or in PROTOCOL.md, or in `spec/`, the prompt relies on it
+and never restates it. A restated rule drifts from the rule it copies, and the
+copy has no owner. What belongs in a prompt is the editorial judgment no schema
+holds: the beat, the angle, the reader, the standard a source must clear, what
+this desk refuses to do. Test every line before it goes in. Could the engine
+already know this? Then it does not go here.
+
 Validate: `python3 engine/validate_config.py`. Fix anything it flags before
 proceeding. Commit the configuration to `main` via the user's normal review
 flow. Configuration is code-review territory, not an agent PR to `library`.
