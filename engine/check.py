@@ -393,6 +393,27 @@ def classify_link(status, error) -> Literal["dead", "ok", "unverified"]:
     403, a 5xx, a rate limit, a timeout, or no network at all — is 'unverified'
     and never blocks, so a real-but-restricted source can never fail a
     legitimate article.
+
+    A 403 does NOT gate publication, and it is tempting to think it should. The
+    floor says cite only what you have read, so a page the proof cannot read
+    looks like a citation nobody opened. It is not, and this was measured on
+    2026-07-14 against the whole published library: 37 of 244 cited URLs refused
+    this probe, which would have blocked 14 of 30 articles — every SEC EDGAR
+    filing, a JAMA randomized trial, an EU Council release. All were readable.
+    A real browser and the agent's own fetcher both opened them; one of the
+    "gated" pages was read start to finish while the fix was being written.
+
+    The reason is that Cloudflare and Akamai do not fingerprint the User-Agent.
+    They fingerprint the TLS handshake, the HTTP/2 profile, and header order,
+    and urllib is unmistakably a script no matter what string it sends. So a 403
+    here means "you are a script", never "this page is unreadable", and an HTTP
+    status cannot be a readability oracle. Gating on it would blame articles for
+    the probe's own bad manners, and would fall hardest on the best-sourced work
+    in the paper, which is the work that cites primaries behind bot walls.
+
+    "Cite only what you have read" is real, and it is enforced where the evidence
+    actually lives: the researcher logs a verbatim passage per source, the writer
+    may cite only what that log supports, and the editor attacks the pairing.
     """
     if status in DEAD_STATUSES:
         return "dead"
@@ -1326,16 +1347,41 @@ def pr_changed_files(repo, *, base, head):
     return changes
 
 
-RECORD_SECTIONS = ("Process", "Voice brief", "Also consulted")
+RECORD_SECTIONS = ("Task", "Process", "Voice brief", "Research", "Also consulted")
+VOICE_EXEMPLARS_MIN = 3
+SOURCE_LINE_RE = re.compile(r"^\s*Source:\s*\S+", re.I | re.M)
+
+
+def section_text(body, name):
+    """One record section's text, ending only at the next record heading.
+
+    The artifacts carry their own markdown inside the collapsed block, and the
+    voice brief's exemplars are themselves `##` headings, so cutting at any
+    heading would slice the artifact in half and hide most of it.
+    """
+    others = "|".join(re.escape(s) for s in RECORD_SECTIONS if s != name)
+    m = re.search(
+        rf"^#{{2,3}}\s*{re.escape(name)}\b(.*?)(?=^#{{2,3}}\s*(?:{others})\b|\Z)",
+        body,
+        re.I | re.M | re.S,
+    )
+    return m.group(1) if m else ""
 
 
 def check_pr_body_record(pr_body_path, rep):
-    """WARN when the PR body lacks a production-record section.
+    """WARN when the PR body's production record is missing or hollow.
 
-    PROTOCOL step 8 makes the body the article's production record: the edit
-    rounds, the voice brief (gitignored, so the body is where it survives),
-    and the read-but-uncited sources. Presence is the quality bar, never the
-    publishing bar, so a gap is a WARN.
+    PROTOCOL step 8 makes the body the article's production record, and the
+    artifacts are gitignored, so the body is the only place they survive.
+    Presence is the quality bar, never the publishing bar, so a gap is a WARN.
+
+    The voice section gets one structural check on top of presence. The coach
+    must study at least three real writers and cite each piece it read, so a
+    real brief carries `Source:` lines. On 2026-07-14 an orchestrator skipped
+    the coach and wrote the brief itself: six lines naming two mastheads, no
+    writers, no sources. It passed every gate. Counting the `Source:` lines is
+    the cheapest thing that can tell a studied brief from an invented one. It
+    reads structure, never quality: judging the prose is the editor's job.
     """
     with open(pr_body_path, encoding="utf-8") as fh:
         body = fh.read()
@@ -1350,6 +1396,17 @@ def check_pr_body_record(pr_body_path, rep):
             f"PR body record missing section(s): {', '.join(missing)}",
             suggestion="the body is the article's production record; "
             "PROTOCOL step 8 lists the sections",
+        )
+    if "Voice brief" in missing:
+        return
+    exemplars = len(SOURCE_LINE_RE.findall(section_text(body, "Voice brief")))
+    if exemplars < VOICE_EXEMPLARS_MIN:
+        rep.warn(
+            "W-VOICE-THIN",
+            f"the voice brief cites {exemplars} exemplar(s); the coach studies "
+            f"at least {VOICE_EXEMPLARS_MIN} real writers and cites each piece",
+            suggestion="a brief naming outlets instead of writers, with no "
+            "Source: lines, was not written by the coach. Run the coach",
         )
 
 
