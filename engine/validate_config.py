@@ -61,6 +61,7 @@ SERIES_KEYS = {
     "min_sources",
     "sources_by_kind",
     "per_item_sources",
+    "max_sources_per_host",
     "words",
     "items",
     "tags",
@@ -331,10 +332,6 @@ def check_required_docs(docs, root, sid, where, errors):
             )
 
 
-def is_count(value) -> bool:
-    return isinstance(value, int) and not isinstance(value, bool) and value >= 0
-
-
 def check_kind_bands(bands, *, key, where, errors):
     """Validate a source-composition mapping: kind -> [low, high|null]."""
     if bands is None:
@@ -357,9 +354,9 @@ def check_kind_bands(bands, *, key, where, errors):
             errors.append(f"{where}: {key}.{kind} must be [low, high]")
             continue
         low, high = band
-        if not is_count(low):
+        if not check.is_count(low):
             errors.append(f"{where}: {key}.{kind} low must be an integer >= 0")
-        elif high is not None and (not is_count(high) or high < low):
+        elif high is not None and (not check.is_count(high) or high < low):
             errors.append(
                 f"{where}: {key}.{kind} high must be null (no upper "
                 f"bound) or an integer >= the low"
@@ -418,6 +415,9 @@ def check_series(repo, registry, *, errors):
             not isinstance(min_sources, int) or isinstance(min_sources, bool)
         ):
             errors.append(f"{where}: 'min_sources' must be an integer")
+        per_host = cfg.get("max_sources_per_host")
+        if per_host is not None and not (check.is_count(per_host) and per_host >= 1):
+            errors.append(f"{where}: 'max_sources_per_host' must be an integer >= 1")
         section = cfg.get("section")
         if section is not None and (
             not isinstance(section, str) or not section.strip()
@@ -472,16 +472,18 @@ def check_series(repo, registry, *, errors):
             per_item_sources, key="per_item_sources", where=where, errors=errors
         )
         # per_item_sources constrains what each data-nb-item cites, which only a
-        # per-item template has. Say so here, in daylight, rather than let the
-        # key sit silently inert in a series that can never honor it.
-        if (
-            per_item_sources is not None
-            and tregs
-            and not any(t.get("cite_rule") == "per-item" for t in tregs)
-        ):
+        # per-item template has. EVERY template the series may use must cite per
+        # item: a rule the night's template choice can dodge is not a rule.
+        per_section = [
+            t
+            for t in allowed
+            if isinstance(t, str)
+            and (registry.get(t) or {}).get("cite_rule") != "per-item"
+        ]
+        if per_item_sources is not None and tregs and per_section:
             errors.append(
-                f"{where}: 'per_item_sources' needs a template whose cite_rule "
-                f"is per-item; {allowed} cite(s) per section"
+                f"{where}: 'per_item_sources' needs every template the series may "
+                f"use to cite per item; {', '.join(per_section)} cite(s) per section"
             )
         prompt = cfg.get("prompt")
         if prompt and not os.path.isfile(os.path.join(root, sid, prompt)):

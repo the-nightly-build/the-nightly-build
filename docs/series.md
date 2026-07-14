@@ -68,8 +68,8 @@ demonstrated across `examples/series/`.
 
 `min_sources` counts. It cannot see where the sources came from, so ten
 citations from one advocacy shop clear a floor of ten, and six items lifted
-from a single day's arXiv listing clear it too. Two keys constrain the mix
-instead. Both read the kind each source declares in the markup
+from a single day's arXiv listing clear it too. Three keys constrain the mix
+instead. They read the kind each source declares in the markup
 (`data-nb-kind`), which PROTOCOL step 4 defines: a **primary** owns the claim
 (the filing, the ruling, the paper), and a **secondary** reports on a primary
 from outside it. The distinction is independence, not document type, so a lab's
@@ -83,15 +83,25 @@ sources_by_kind: # the article's composition, any series
 per_item_sources: # only on a per-item template (the brief's cite_rule)
   primary: [1, 1] # every item: exactly one document that owns its claim
   secondary: [1, 2] # and one or two independent reads of it
+
+max_sources_per_host: 3 # no host supplies more than three of the sources
 ```
 
 `per_item_sources` applies uniformly to every item, so it holds however many
 items the night's writer chose. On top of the bands, a secondary may not share
-a domain with its item's primary or with another secondary on the same item:
-the arXiv paper plus the lab's own announcement is one voice, and the check
-says so. Both are BLOCKs regardless of `strict`, and a `per_item_sources` on a
-series whose template cites per section is a configuration error, caught by
-`engine/validate_config.py` rather than at 2am.
+a domain with its item's primary: the arXiv paper plus the lab's own
+announcement is one voice, and the check says so. Both bands are BLOCKs
+regardless of `strict`, and a `per_item_sources` on a series that may cite per
+section is a configuration error, caught by `engine/validate_config.py` rather
+than at 2am. A source that declares no kind at all is a WARN in a plain series
+and a BLOCK once either band is set: a source that will not say what it is
+escapes every rule written about the mix.
+
+`max_sources_per_host` is the softer instrument, and deliberately so. Citing one
+outlet several times is sometimes exactly right, so passing the limit is a WARN
+(`W-SOURCE-CONCENTRATION`) — a revision note the writer answers or the editor
+justifies. In a `strict: true` series it blocks, like every other WARN. Set the
+number where you want the argument to start.
 
 ## Commissioning extras by hand
 

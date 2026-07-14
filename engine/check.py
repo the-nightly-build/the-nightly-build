@@ -969,6 +969,36 @@ def band_text(band) -> str:
     return f"{lo} to {hi}"
 
 
+def is_count(value) -> bool:
+    return isinstance(value, int) and not isinstance(value, bool) and value >= 0
+
+
+def kind_bands(bands, *, key, rep) -> dict[str, tuple[int, int | None]]:
+    """The series' [low, high] bands per kind, blocking on a malformed config.
+
+    validate_config says all of this in daylight; a press that skipped it gets a
+    finding here rather than a traceback.
+    """
+    if not isinstance(bands, dict):
+        rep.block("B-SERIES", f"series '{key}' must be a mapping of kind to band")
+        return {}
+    resolved = {}
+    for kind, band in bands.items():
+        if not isinstance(band, list) or len(band) != 2:
+            rep.block("B-SERIES", f"series {key}.{kind} must be [low, high]")
+            continue
+        lo, hi = band
+        if not is_count(lo) or (hi is not None and (not is_count(hi) or hi < lo)):
+            rep.block(
+                "B-SERIES",
+                f"series {key}.{kind} must be [low, high]: a count, then null "
+                f"or a count no lower than it",
+            )
+            continue
+        resolved[kind] = (lo, hi)
+    return resolved
+
+
 def check_item_kinds(cited, *, number, per_item, rep):
     for kind, band in per_item.items():
         count = sum(1 for s in cited if s["kind"] == kind)
@@ -981,14 +1011,13 @@ def check_item_kinds(cited, *, number, per_item, rep):
             )
     # Independence, structurally: a secondary is reporting by someone with no
     # stake in the primary, so sharing the primary's host makes it an extension
-    # of that primary — one voice wearing two hats — not a second one.
+    # of that primary — one voice wearing two hats — not a second one. This is a
+    # misclassification check, not a diversity rule: how many outlets an item
+    # draws on is the writer's call, and max_sources_per_host nudges it.
     primary_hosts = {source_host(s["href"]) for s in cited if s["kind"] == "primary"}
-    seen = set()
     for s in cited:
         host = source_host(s["href"])
-        if s["kind"] != "secondary" or host is None:
-            continue
-        if host in primary_hosts:
+        if s["kind"] == "secondary" and host in primary_hosts:
             rep.block(
                 "B-SOURCE-KIND",
                 f"item #{number}: secondary {s['href']} shares the domain "
@@ -996,13 +1025,6 @@ def check_item_kinds(cited, *, number, per_item, rep):
                 suggestion="a secondary reports on a primary from outside it; "
                 "cite someone with no stake in the document",
             )
-        elif host in seen:
-            rep.block(
-                "B-SOURCE-KIND",
-                f"item #{number}: two secondaries share the domain '{host}'",
-                suggestion="one outlet twice is one voice; find a second one",
-            )
-        seen.add(host)
 
 
 def check_source_kinds(ed, *, series, treg, rep):
@@ -1013,15 +1035,33 @@ def check_source_kinds(ed, *, series, treg, rep):
     constrains the mix instead, and the mix blocks regardless of `strict`,
     because sourcing is not a matter of calibration.
     """
+    by_kind = series.get("sources_by_kind")
+    per_item = series.get("per_item_sources")
+    constrained = by_kind is not None or per_item is not None
     for s in ed.sources:
-        if s["kind"] is not None and s["kind"] not in SOURCE_KINDS:
+        if s["kind"] in SOURCE_KINDS:
+            continue
+        if s["kind"] is not None:
             rep.block(
                 "B-SOURCE-KIND",
                 f'source {s["href"]} declares data-nb-kind="{s["kind"]}"; '
                 f"the kinds are {' and '.join(SOURCE_KINDS)}",
             )
+        elif constrained:
+            rep.block(
+                "B-SOURCE-KIND",
+                f"source {s['href']} declares no data-nb-kind; this series "
+                f"constrains the source mix, which a source that will not say "
+                f"what it is escapes",
+            )
+        else:
+            rep.warn(
+                "W-SOURCE-KIND-MISSING",
+                f"source {s['href']} declares no data-nb-kind",
+                suggestion="declare primary or secondary on the source entry",
+            )
 
-    for kind, band in (series.get("sources_by_kind") or {}).items():
+    for kind, band in kind_bands(by_kind or {}, key="sources_by_kind", rep=rep).items():
         count = sum(1 for s in ed.sources if s["kind"] == kind)
         lo, hi = band
         if count < lo or (hi is not None and count > hi):
@@ -1030,13 +1070,44 @@ def check_source_kinds(ed, *, series, treg, rep):
                 f"{count} {kind} source(s); this series asks for {band_text(band)}",
             )
 
-    per_item = series.get("per_item_sources") or {}
-    if not per_item or treg.get("cite_rule") != "per-item":
-        return  # validate_config rejects the pairing; nothing to enforce here
+    if per_item is None:
+        return
+    bands = kind_bands(per_item, key="per_item_sources", rep=rep)
+    if not bands or treg.get("cite_rule") != "per-item":
+        return  # validate_config rejects a series that may cite per section
     by_id = {s["id"]: s for s in ed.sources if s["id"]}
     for number, it in enumerate(ed.items, 1):
         cited = [by_id[ref] for ref in dict.fromkeys(it["cites"]) if ref in by_id]
-        check_item_kinds(cited, number=number, per_item=per_item, rep=rep)
+        check_item_kinds(cited, number=number, per_item=bands, rep=rep)
+
+
+def check_source_concentration(ed, *, series, rep):
+    """W-SOURCE-CONCENTRATION: how much of the article one host supplies.
+
+    Citing an outlet several times is sometimes exactly right, so a hard block is
+    the wrong instrument: this is a revision note the writer answers or the editor
+    justifies — and a BLOCK where a series has already set `strict`.
+    """
+    limit = series.get("max_sources_per_host")
+    if limit is None:
+        return
+    if not is_count(limit) or limit < 1:
+        rep.block("B-SERIES", "series 'max_sources_per_host' must be an integer >= 1")
+        return
+    tally = {}
+    for s in ed.sources:
+        host = source_host(s["href"])
+        if host:
+            tally[host] = tally.get(host, 0) + 1
+    for host, count in sorted(tally.items()):
+        if count > limit:
+            rep.warn(
+                "W-SOURCE-CONCENTRATION",
+                f"{count} of {len(ed.sources)} sources are on '{host}'; this "
+                f"series asks for at most {limit} per host",
+                suggestion="one house's account of a story is one account; "
+                "reach for a source outside it",
+            )
 
 
 PLACEHOLDER_RUN_WORDS = 4  # a caps run this long warns even off-skeleton
@@ -1376,6 +1447,7 @@ def check_article(
     check_sources(ed, rep, check_links=check_links)
     check_cites(ed, rep)
     check_source_kinds(ed, series=series, treg=treg, rep=rep)
+    check_source_concentration(ed, series=series, rep=rep)
     check_warns(
         ed,
         meta,

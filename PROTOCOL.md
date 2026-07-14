@@ -81,8 +81,11 @@ available, `uv run engine/<script>.py` manages the dependency itself.
 
    You declare the kind on the source entry, `data-nb-kind="primary"` or
    `data-nb-kind="secondary"`. The research log makes the call and records why.
+   A source with no kind is a WARN (`W-SOURCE-KIND-MISSING`) — and a BLOCK in a
+   series that constrains the mix, because a source that will not say what it is
+   escapes every rule written about the mix.
 
-   Five controls, per series and per item:
+   Six controls, per series and per item:
    - `required_docs`: committed files you read and represent, each by a source
      entry carrying `data-nb-required="<id>"`. Missing coverage is a WARN, a BLOCK
      under the series' `strict`. Cite a committed file by its repo-relative path
@@ -104,10 +107,14 @@ available, `uv run engine/<script>.py` manages the dependency itself.
      write on a per-item template. `primary: [1, 1]` with `secondary: [2, 3]`
      means each item carries exactly one primary and two or three secondaries,
      whatever number of items you write.
+   - `max_sources_per_host: <int>`: how much of the article one host may supply.
+     Past it, a WARN (`W-SOURCE-CONCENTRATION`) — a revision note, a BLOCK under
+     the series' `strict`. Citing an outlet several times is sometimes right.
 
-   Within one item, a secondary may not share a domain with that item's primary,
-   nor with another secondary on the same item. Both composition rules are
-   BLOCKs (`B-SOURCE-KIND`), `strict` or not. Sourcing is not calibration.
+   Within one item, a secondary may not share a domain with that item's primary:
+   that is not a diversity rule but the definition above, enforced. The
+   composition rules are BLOCKs (`B-SOURCE-KIND`), `strict` or not. Sourcing is
+   not calibration.
 
 5. **Research properly.** Use web access. Verify claims against primary sources, and
    cite them by the rules of `spec/editorial.md` § Citations. Meet the source floor

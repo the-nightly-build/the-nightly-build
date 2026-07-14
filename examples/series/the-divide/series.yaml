@@ -17,4 +17,7 @@ min_sources: 10 # both sides sourced to primaries. Aim well past this
 sources_by_kind:
   primary: [4, null]
   secondary: [3, null]
+# Nor can it tell ten sources from three houses from ten from one. Past three on
+# a single host the proof WARNs, and `strict` above makes that a BLOCK here.
+max_sources_per_host: 3
 cadence: [mon, wed, fri]

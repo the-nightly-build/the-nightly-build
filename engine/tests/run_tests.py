@@ -1417,7 +1417,7 @@ expect(
     must_have=["B-SOURCE-KIND"],
 )
 expect(
-    "two secondaries from one outlet are one secondary",
+    "two secondaries from one outlet are the writer's call, not a block",
     run_local(
         brief_with(
             [
@@ -1430,7 +1430,17 @@ expect(
         slug=TODAY,
         repo=PER_ITEM_BRIEFS,
     ),
-    must_have=["B-SOURCE-KIND"],
+    blocks=0,
+)
+expect(
+    "an item citing its one primary twice still cites one primary",
+    run_local(
+        brief_with([(ARXIV, "primary"), (ARXIV, "primary"), *CONFORMING_ITEM[1:]]),
+        "ai-briefs",
+        slug=TODAY,
+        repo=PER_ITEM_BRIEFS,
+    ),
+    blocks=0,
 )
 expect(
     "a kind the protocol does not define blocks, composition declared or not",
@@ -1443,16 +1453,40 @@ expect(
     ),
     must_have=["B-SOURCE-KIND"],
 )
+expect(
+    "a source that declares no kind blocks where the series constrains the mix",
+    run_local(
+        brief_with(CONFORMING_ITEM).replace(' data-nb-kind="primary"', "", 1),
+        "ai-briefs",
+        slug=TODAY,
+        repo=PER_ITEM_BRIEFS,
+    ),
+    must_have=["B-SOURCE-KIND"],
+)
 
+# The fixture's sources all live on example.org, which is the very shape a
+# composition rule exists to catch; spread them across real hosts so a passing
+# mix is a mix.
+SPREAD = {
+    1: "https://arxiv.org/abs/2601.00002",
+    3: "https://www.federalregister.gov/d/1",
+    4: "https://curia.europa.eu/r/1",
+    5: "https://eur-lex.europa.eu/l/1",
+    6: "https://uspto.gov/p/1",
+    7: "https://reuters.com/a",
+    8: "https://ft.com/b",
+}
 ALL_PRIMARY = VALID.replace(
     "<a data-nb-source", '<a data-nb-source data-nb-kind="primary"'
 )
+for i, host in SPREAD.items():
+    ALL_PRIMARY = ALL_PRIMARY.replace(f"https://example.org/src{i}", host)
 MIXED = ALL_PRIMARY.replace(
-    'data-nb-kind="primary" href="https://example.org/src7"',
-    'data-nb-kind="secondary" href="https://example.org/src7"',
+    f'data-nb-kind="primary" href="{SPREAD[7]}"',
+    f'data-nb-kind="secondary" href="{SPREAD[7]}"',
 ).replace(
-    'data-nb-kind="primary" href="https://example.org/src8"',
-    'data-nb-kind="secondary" href="https://example.org/src8"',
+    f'data-nb-kind="primary" href="{SPREAD[8]}"',
+    f'data-nb-kind="secondary" href="{SPREAD[8]}"',
 )
 expect(
     "sources_by_kind: an article sourced only to the documents it reports on blocks",
@@ -1474,11 +1508,71 @@ expect(
     must_have=["B-SOURCE-KIND"],
 )
 expect(
-    "an unkinded article is untouched by a series that declares no composition",
+    "sources_by_kind: a source with no kind escapes the mix, so it blocks",
+    run_local(
+        MIXED.replace(
+            f'data-nb-kind="primary" href="{SPREAD[4]}"', f'href="{SPREAD[4]}"'
+        ),
+        "semiconductors",
+        repo=BY_KIND_SEMIS,
+    ),
+    must_have=["B-SOURCE-KIND"],
+)
+expect(
+    "a series that constrains nothing nudges an unkinded source, and no more",
     run_local(VALID, "semiconductors"),
+    must_have=["W-SOURCE-KIND-MISSING"],
     blocks=0,
 )
 
+# Five of an article's sources on one advocacy shop's host: legitimate often
+# enough that the engine argues rather than refuses — unless the series is strict.
+CONCENTRATED = MIXED
+for i in (3, 4, 5, 6, 7):
+    CONCENTRATED = CONCENTRATED.replace(SPREAD[i], f"https://policyshop.example/p{i}")
+CONC_REPO = patched_repo("max_sources_per_host: 3\n")
+CONC_STRICT = patched_repo("max_sources_per_host: 3\n")
+csy = pathlib.Path(CONC_STRICT) / "press" / "series" / "semiconductors" / "series.yaml"
+csy.write_text(csy.read_text().replace("strict: false", "strict: true"))
+expect(
+    "max_sources_per_host: one host past the cap is a revision note, not a refusal",
+    run_local(CONCENTRATED, "semiconductors", repo=CONC_REPO),
+    must_have=["W-SOURCE-CONCENTRATION"],
+    blocks=0,
+)
+expect(
+    "max_sources_per_host: the same concentration blocks in a strict series",
+    run_local(CONCENTRATED, "semiconductors", repo=CONC_STRICT),
+    must_have=["W-SOURCE-CONCENTRATION"],
+    blocks=True,
+)
+expect(
+    "max_sources_per_host: a spread of hosts under the cap passes",
+    run_local(MIXED, "semiconductors", repo=CONC_REPO),
+    must_not=["W-SOURCE-CONCENTRATION"],
+    blocks=0,
+)
+expect(
+    "a band the config botched is a finding, not a traceback",
+    run_local(
+        MIXED, "semiconductors", repo=patched_repo("sources_by_kind:\n  primary: 4\n")
+    ),
+    must_have=["B-SERIES"],
+)
+
+
+def open_briefs_repo(templates, patch=""):
+    """The rolling brief series reopened as an open section with a template choice."""
+    tmp = clone_testrepo("press", "templates", "engine")
+    y = pathlib.Path(tmp) / "press" / "series" / "ai-briefs" / "series.yaml"
+    y.write_text(
+        f"name: AI & Semiconductors\nmode: open\ntemplates: [{', '.join(templates)}]\n"
+        f"prompt: prompt.md\nautopublish: true\nstrict: false\nmin_sources: 5\n{patch}"
+    )
+    return tmp
+
+
+PER_ITEM_PATCH = "per_item_sources:\n  primary: [1, 1]\n  secondary: [1, 2]\n"
 for name, cond in [
     (
         "per_item_sources validates on a per-item template",
@@ -1487,6 +1581,15 @@ for name, cond in [
     (
         "per_item_sources on a per-section template is a config error",
         vc_rc(patched_repo("per_item_sources:\n  primary: [1, 1]\n")) == 1,
+    ),
+    (
+        "per_item_sources on an open section whose every template cites per item "
+        "validates",
+        vc_rc(open_briefs_repo(["brief"], PER_ITEM_PATCH)) == 0,
+    ),
+    (
+        "per_item_sources a template choice could dodge is a config error",
+        vc_rc(open_briefs_repo(["brief", "article"], PER_ITEM_PATCH)) == 1,
     ),
     ("sources_by_kind with a null ceiling validates", vc_rc(BY_KIND_SEMIS) == 0),
     (
@@ -1500,6 +1603,11 @@ for name, cond in [
     (
         "a scalar where a band belongs is rejected",
         vc_rc(patched_repo("sources_by_kind:\n  primary: 4\n")) == 1,
+    ),
+    ("max_sources_per_host validates", vc_rc(CONC_REPO) == 0),
+    (
+        "max_sources_per_host below one is rejected",
+        vc_rc(patched_repo("max_sources_per_host: 0\n")) == 1,
     ),
 ]:
     check(name, cond)

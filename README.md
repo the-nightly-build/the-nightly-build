@@ -88,7 +88,8 @@ consulted source is optional).
 
 A count says nothing about where sources came from, so a series can also
 constrain the mix: `sources_by_kind` and `per_item_sources` set `[low, high]`
-bands over primary and secondary sources, and both BLOCK. See
+bands over primary and secondary sources, and both BLOCK; `max_sources_per_host`
+caps how much of an article one host supplies, and WARNs. See
 [docs/series.md](docs/series.md).
 
 The proof also verifies that every cited source link resolves. It probes each
