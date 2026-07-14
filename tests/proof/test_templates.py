@@ -213,3 +213,30 @@ def test_undeclared_extra_section_blocks_on_a_fixed_outline(
     )
     result = run_local(rogue, "crypto", slug="hashes", repo=user_repo)
     assert "B-HTML" in result.blocks
+
+
+def test_validate_config_accepts_the_overlay_registry(
+    vc_rc: Callable[[str], int], user_repo: str
+) -> None:
+    assert vc_rc(user_repo) == 0
+
+
+def test_the_merged_registry_keeps_shipped_and_adds_press_templates(
+    user_repo: str,
+) -> None:
+    registry = check.load_registry(user_repo)
+
+    assert "memo" in registry
+    assert "article" in registry
+
+
+def test_a_press_template_shadows_a_shipped_one_of_the_same_name(
+    user_repo: str,
+) -> None:
+    memo = check.find_template(user_repo, "memo") or ""
+    shipped = check.find_template(user_repo, "article") or ""
+
+    assert memo.endswith("memo/skeleton.html")
+    assert "press" in memo
+    assert shipped.endswith("article/skeleton.html")
+    assert "press" not in shipped
