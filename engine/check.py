@@ -393,6 +393,27 @@ def classify_link(status, error) -> Literal["dead", "ok", "unverified"]:
     403, a 5xx, a rate limit, a timeout, or no network at all — is 'unverified'
     and never blocks, so a real-but-restricted source can never fail a
     legitimate article.
+
+    A 403 does NOT gate publication, and it is tempting to think it should. The
+    floor says cite only what you have read, so a page the proof cannot read
+    looks like a citation nobody opened. It is not, and this was measured on
+    2026-07-14 against the whole published library: 37 of 244 cited URLs refused
+    this probe, which would have blocked 14 of 30 articles — every SEC EDGAR
+    filing, a JAMA randomized trial, an EU Council release. All were readable.
+    A real browser and the agent's own fetcher both opened them; one of the
+    "gated" pages was read start to finish while the fix was being written.
+
+    The reason is that Cloudflare and Akamai do not fingerprint the User-Agent.
+    They fingerprint the TLS handshake, the HTTP/2 profile, and header order,
+    and urllib is unmistakably a script no matter what string it sends. So a 403
+    here means "you are a script", never "this page is unreadable", and an HTTP
+    status cannot be a readability oracle. Gating on it would blame articles for
+    the probe's own bad manners, and would fall hardest on the best-sourced work
+    in the paper, which is the work that cites primaries behind bot walls.
+
+    "Cite only what you have read" is real, and it is enforced where the evidence
+    actually lives: the researcher logs a verbatim passage per source, the writer
+    may cite only what that log supports, and the editor attacks the pairing.
     """
     if status in DEAD_STATUSES:
         return "dead"
