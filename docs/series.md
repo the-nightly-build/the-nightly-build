@@ -64,6 +64,35 @@ policy: `required_docs`, `consult`, and
 `sources_exclusive`, described in the [README](../README.md) and
 demonstrated across `examples/series/`.
 
+## Source composition
+
+`min_sources` counts. It cannot see where the sources came from, so ten
+citations from one advocacy shop clear a floor of ten, and six items lifted
+from a single day's arXiv listing clear it too. Two keys constrain the mix
+instead. Both read the kind each source declares in the markup
+(`data-nb-kind`), which PROTOCOL step 4 defines: a **primary** owns the claim
+(the filing, the ruling, the paper), and a **secondary** reports on a primary
+from outside it. The distinction is independence, not document type, so a lab's
+post about its own paper is an extension of that paper, never a second source.
+
+```yaml
+sources_by_kind: # the article's composition, any series
+  primary: [4, null] # at least four primaries; null means no ceiling
+  secondary: [2, null]
+
+per_item_sources: # only on a per-item template (the brief's cite_rule)
+  primary: [1, 1] # every item: exactly one document that owns its claim
+  secondary: [1, 2] # and one or two independent reads of it
+```
+
+`per_item_sources` applies uniformly to every item, so it holds however many
+items the night's writer chose. On top of the bands, a secondary may not share
+a domain with its item's primary or with another secondary on the same item:
+the arXiv paper plus the lab's own announcement is one voice, and the check
+says so. Both are BLOCKs regardless of `strict`, and a `per_item_sources` on a
+series whose template cites per section is a configuration error, caught by
+`engine/validate_config.py` rather than at 2am.
+
 ## Commissioning extras by hand
 
 "One article per series per night" disciplines the night shift, not you.

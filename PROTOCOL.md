@@ -70,7 +70,19 @@ available, `uv run engine/<script>.py` manages the dependency itself.
      **Serve only the series duty.py lists as due. If nothing is due, stop. Do
      not open a PR. Exiting silently is correct behavior.**
 
-4. **Honor the source policy.** Three controls, per series and per item:
+4. **Honor the source policy.** Every source has a kind, and the kinds are about
+   independence, not document type:
+   - **primary**: the document that OWNS the claim. The paper, the filing, the
+     ruling, the dataset, a company's release about its own deal.
+   - **secondary**: reporting or analysis ABOUT a primary, published by someone
+     with no stake in it. A lab's blog post about its own paper is not a
+     secondary. It is an extension of the primary, and counting it as a second
+     source is one voice wearing two hats.
+
+   You declare the kind on the source entry, `data-nb-kind="primary"` or
+   `data-nb-kind="secondary"`. The research log makes the call and records why.
+
+   Five controls, per series and per item:
    - `required_docs`: committed files you read and represent, each by a source
      entry carrying `data-nb-required="<id>"`. Missing coverage is a WARN, a BLOCK
      under the series' `strict`. Cite a committed file by its repo-relative path
@@ -86,6 +98,16 @@ available, `uv run engine/<script>.py` manages the dependency itself.
    - `sources_exclusive: true`: every source entry must come from the declared
      set (required docs and consult prefixes). Cite nothing else. An outside
      source is a BLOCK.
+   - `sources_by_kind`: the article's own composition, a `[low, high]` band per
+     kind (`primary: [4, null]` sets a floor and no ceiling).
+   - `per_item_sources`: the same bands, applied uniformly to EVERY item you
+     write on a per-item template. `primary: [1, 1]` with `secondary: [2, 3]`
+     means each item carries exactly one primary and two or three secondaries,
+     whatever number of items you write.
+
+   Within one item, a secondary may not share a domain with that item's primary,
+   nor with another secondary on the same item. Both composition rules are
+   BLOCKs (`B-SOURCE-KIND`), `strict` or not. Sourcing is not calibration.
 
 5. **Research properly.** Use web access. Verify claims against primary sources, and
    cite them by the rules of `spec/editorial.md` § Citations. Meet the source floor
@@ -151,6 +173,7 @@ available, `uv run engine/<script>.py` manages the dependency itself.
        they survive. If the assembled body would exceed GitHub's body limit
        (~60k characters), elide the research log's verbatim passages in place
        with a note and post the full log as a comment after opening.
+
    - Preflight BEFORE opening the PR, with the same invocation the desk's CI
      will run. Commit your one file on the work branch, write the intended
      body to a file, then from the library checkout:

@@ -47,7 +47,14 @@ discipline, every template:
   `flex_sections`, add that many more between the anchors, each named for the
   topic (lowercase-hyphen `data-nb-section`), each cited per the template's
   cite rule.
-- Number source entries in the order the prose first cites them.
+- Number source entries in the order the prose first cites them, and carry each
+  one's kind from the log into its markup: `data-nb-kind="primary"` or
+  `data-nb-kind="secondary"`. The engine cannot read `research.md`, so the
+  attribute is the declaration, and it must say what the log says. A series may
+  hold you to a composition (`sources_by_kind`, `per_item_sources`); those are
+  BLOCKs, and no amount of relabeling fixes a mix that is not there. If the log
+  cannot supply the primaries an item needs, that is a gap, not a labeling
+  problem: send it back.
 - Furniture composes three scopes: `templates/FURNITURE.md`,
   `press/furniture/catalog.md` if present, the template's own. A piece
   earns its place by carrying information better than prose. Charts only as

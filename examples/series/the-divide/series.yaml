@@ -12,4 +12,9 @@ prompt: prompt.md
 autopublish: true
 strict: true # the integrity section runs strict on purpose
 min_sources: 10 # both sides sourced to primaries. Aim well past this
+# A count cannot tell ten sources from one advocacy shop from ten independent
+# ones. The floor is the number; this is the mix. `null` is no upper bound.
+sources_by_kind:
+  primary: [4, null]
+  secondary: [3, null]
 cadence: [mon, wed, fri]

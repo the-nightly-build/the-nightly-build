@@ -36,11 +36,20 @@ The prose floor belongs to the writer and editor.
    retellings of one origin count as one. Never record a URL you have not
    confirmed resolves. Log a page that refuses fetchers (a 403, a
    paywall) as gated, never as dead. Try a browser user agent first.
-4. Read for what breaks the piece as well as what feeds it. A source that
+4. Classify every source you log as primary or secondary, and write the reason
+   in the same line. PROTOCOL step 4 defines the two: a primary owns the claim,
+   a secondary reports on a primary from outside it. The test is independence,
+   never document type. A lab's post about its own paper is an extension of that
+   paper. A trade group's white paper on the rule it is fighting is a party's
+   filing, not a read of one. Nothing carries a kind by its URL, which is why
+   the reason is the entry. Your call becomes `data-nb-kind` in the markup and a
+   series may hold the piece to a composition (`sources_by_kind`,
+   `per_item_sources`), so a wrong call is a wrong article, not a mislabel.
+5. Read for what breaks the piece as well as what feeds it. A source that
    undercuts the commission's angle — a discontinued metric, a retracted
    figure, a quote whose context points elsewhere — is the log's most valuable
    line. Record it under Contradictions, especially when it is inconvenient.
-5. Meet or exceed the series' source floor.
+6. Meet or exceed the series' source floor, and its composition if it sets one.
 
 ## The log
 
@@ -55,7 +64,8 @@ stable headings:
 One paragraph: what the evidence supports, and where it is thin.
 
 ## Sources
-One entry per source read: URL, what it establishes firsthand or merely
+One entry per source read: URL, its kind (primary or secondary) and the
+sentence that earns the kind, what it establishes firsthand or merely
 repeats for THIS piece, and the verbatim passages with locations (section,
 page, or an honest locator like "closing paragraph"). A repetition supports
 "the claim was made", never "it is so".

@@ -1293,6 +1293,217 @@ for name, cond in [
 ]:
     check(name, cond)
 
+print("== source kinds (B-SOURCE-KIND: composition, not count) ==")
+# The 2026-07-14 failures min_sources cannot see: a brief whose items all came
+# off one arXiv listing, and a piece where five of twelve sources belonged to
+# one side's own institution. A series constrains the mix instead.
+
+ARXIV = "https://arxiv.org/abs/2601.00001"
+PER_ITEM_BRIEFS = patched_repo(
+    "per_item_sources:\n  primary: [1, 1]\n  secondary: [1, 2]\n", series="ai-briefs"
+)
+BY_KIND_SEMIS = patched_repo(
+    "sources_by_kind:\n  primary: [4, null]\n  secondary: [2, null]\n"
+)
+
+
+def kinded_brief(items):
+    """A brief whose items cite the (href, kind) sources named, in first-cite order."""
+    numbered = {}
+    for item in items:
+        for href, kind in item:
+            numbered.setdefault(href, (len(numbered) + 1, kind))
+    body = "".join(
+        f'<div data-nb-item><span class="tag">topic{i}</span>'
+        f"<h4>Development number {i} happened today"
+        + "".join(
+            f'<sup class="nb-cite"><a href="#s{numbered[href][0]}">'
+            f"{numbered[href][0]}</a></sup>"
+            for href, _ in item
+        )
+        + "</h4><p>What happened, and the immediate context around it.</p></div>"
+        for i, item in enumerate(items, 1)
+    )
+    src = "".join(
+        f'<li id="s{n}"><a data-nb-source data-nb-kind="{kind}" href="{href}">src</a></li>'
+        for href, (n, kind) in sorted(numbered.items(), key=lambda kv: kv[1][0])
+    )
+    meta = f"""{{
+  "protocol": "1.0", "series": "ai-briefs", "slug": "{TODAY}",
+  "template": "brief", "title": "Daily brief for {TODAY}",
+  "mode": "rolling", "order": null, "date": "{TODAY}", "tags": [],
+  "sources": {len(numbered)}, "words": 300, "reading_minutes": 5,
+  "dek": "Five items, each cited to the document that owns it.",
+  "harness": "test-fixture", "model": "claude-fable-5"
+}}"""
+    return f"""<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><title>Brief {TODAY}</title>
+<script type="application/json" id="nb-meta">
+{meta}
+</script>
+</head><body class="nb-article">
+<section data-nb-section="items">{body}</section>
+<section data-nb-section="sources"><h2>Sources</h2><ol>{src}</ol></section>
+</body></html>"""
+
+
+def brief_with(first_item):
+    """The conforming brief, with its first item's sources swapped out."""
+    return kinded_brief(
+        [
+            first_item,
+            [
+                ("https://www.sec.gov/filings/x", "primary"),
+                ("https://ft.com/b", "secondary"),
+            ],
+            [
+                ("https://curia.europa.eu/r", "primary"),
+                ("https://apnews.com/c", "secondary"),
+            ],
+            [
+                ("https://www.federalregister.gov/d", "primary"),
+                ("https://wsj.com/e", "secondary"),
+            ],
+        ]
+    )
+
+
+CONFORMING_ITEM = [(ARXIV, "primary"), ("https://reuters.com/a", "secondary")]
+expect(
+    "a brief whose every item pairs its primary with an independent read passes",
+    run_local(
+        brief_with(CONFORMING_ITEM), "ai-briefs", slug=TODAY, repo=PER_ITEM_BRIEFS
+    ),
+    blocks=0,
+)
+expect(
+    "an item with no primary blocks: nothing cited owns the claim",
+    run_local(
+        brief_with(
+            [("https://reuters.com/a", "secondary"), ("https://ft.com/z", "secondary")]
+        ),
+        "ai-briefs",
+        slug=TODAY,
+        repo=PER_ITEM_BRIEFS,
+    ),
+    must_have=["B-SOURCE-KIND"],
+)
+expect(
+    "an item over the secondary ceiling blocks",
+    run_local(
+        brief_with(
+            [
+                *CONFORMING_ITEM,
+                ("https://theverge.com/a", "secondary"),
+                ("https://wired.com/a", "secondary"),
+            ]
+        ),
+        "ai-briefs",
+        slug=TODAY,
+        repo=PER_ITEM_BRIEFS,
+    ),
+    must_have=["B-SOURCE-KIND"],
+)
+expect(
+    "the paper plus the lab's own post about it is one voice, not two",
+    run_local(
+        brief_with(
+            [(ARXIV, "primary"), ("https://www.arxiv.org/announce", "secondary")]
+        ),
+        "ai-briefs",
+        slug=TODAY,
+        repo=PER_ITEM_BRIEFS,
+    ),
+    must_have=["B-SOURCE-KIND"],
+)
+expect(
+    "two secondaries from one outlet are one secondary",
+    run_local(
+        brief_with(
+            [
+                (ARXIV, "primary"),
+                ("https://reuters.com/a", "secondary"),
+                ("https://reuters.com/b", "secondary"),
+            ]
+        ),
+        "ai-briefs",
+        slug=TODAY,
+        repo=PER_ITEM_BRIEFS,
+    ),
+    must_have=["B-SOURCE-KIND"],
+)
+expect(
+    "a kind the protocol does not define blocks, composition declared or not",
+    run_local(
+        brief_with(CONFORMING_ITEM).replace(
+            'data-nb-kind="secondary"', 'data-nb-kind="tertiary"', 1
+        ),
+        "ai-briefs",
+        slug=TODAY,
+    ),
+    must_have=["B-SOURCE-KIND"],
+)
+
+ALL_PRIMARY = VALID.replace(
+    "<a data-nb-source", '<a data-nb-source data-nb-kind="primary"'
+)
+MIXED = ALL_PRIMARY.replace(
+    'data-nb-kind="primary" href="https://example.org/src7"',
+    'data-nb-kind="secondary" href="https://example.org/src7"',
+).replace(
+    'data-nb-kind="primary" href="https://example.org/src8"',
+    'data-nb-kind="secondary" href="https://example.org/src8"',
+)
+expect(
+    "sources_by_kind: an article sourced only to the documents it reports on blocks",
+    run_local(ALL_PRIMARY, "semiconductors", repo=BY_KIND_SEMIS),
+    must_have=["B-SOURCE-KIND"],
+)
+expect(
+    "sources_by_kind: a conforming mix passes, and a null ceiling means no ceiling",
+    run_local(MIXED, "semiconductors", repo=BY_KIND_SEMIS),
+    blocks=0,
+)
+expect(
+    "sources_by_kind: a ceiling is enforced too",
+    run_local(
+        MIXED,
+        "semiconductors",
+        repo=patched_repo("sources_by_kind:\n  secondary: [0, 1]\n"),
+    ),
+    must_have=["B-SOURCE-KIND"],
+)
+expect(
+    "an unkinded article is untouched by a series that declares no composition",
+    run_local(VALID, "semiconductors"),
+    blocks=0,
+)
+
+for name, cond in [
+    (
+        "per_item_sources validates on a per-item template",
+        vc_rc(PER_ITEM_BRIEFS) == 0,
+    ),
+    (
+        "per_item_sources on a per-section template is a config error",
+        vc_rc(patched_repo("per_item_sources:\n  primary: [1, 1]\n")) == 1,
+    ),
+    ("sources_by_kind with a null ceiling validates", vc_rc(BY_KIND_SEMIS) == 0),
+    (
+        "a kind outside primary/secondary is rejected",
+        vc_rc(patched_repo("sources_by_kind:\n  tertiary: [1, 2]\n")) == 1,
+    ),
+    (
+        "a band whose high is below its low is rejected",
+        vc_rc(patched_repo("sources_by_kind:\n  primary: [4, 2]\n")) == 1,
+    ),
+    (
+        "a scalar where a band belongs is rejected",
+        vc_rc(patched_repo("sources_by_kind:\n  primary: 4\n")) == 1,
+    ),
+]:
+    check(name, cond)
+
 print("== banned terms (spec list, press overrides) ==")
 
 

@@ -21,6 +21,7 @@ import re
 import sys
 
 import build_site
+import check
 import duty
 import nb_meta
 
@@ -48,6 +49,7 @@ TEMPLATE_KEYS = {
     "about",
 }
 CITE_RULES = {"per-section", "per-item"}
+SOURCE_KINDS = frozenset(check.SOURCE_KINDS)
 SERIES_KEYS = {
     "name",
     "mode",
@@ -57,6 +59,8 @@ SERIES_KEYS = {
     "autopublish",
     "strict",
     "min_sources",
+    "sources_by_kind",
+    "per_item_sources",
     "words",
     "items",
     "tags",
@@ -327,6 +331,41 @@ def check_required_docs(docs, root, sid, where, errors):
             )
 
 
+def is_count(value) -> bool:
+    return isinstance(value, int) and not isinstance(value, bool) and value >= 0
+
+
+def check_kind_bands(bands, *, key, where, errors):
+    """Validate a source-composition mapping: kind -> [low, high|null]."""
+    if bands is None:
+        return
+    if not isinstance(bands, dict) or not bands:
+        errors.append(
+            f"{where}: '{key}' must be a mapping of source kind to [low, high], "
+            f"e.g. primary: [1, 1]"
+        )
+        return
+    unknown = sorted(set(bands) - SOURCE_KINDS)
+    if unknown:
+        errors.append(
+            f"{where}: {key}: unknown source kind(s) {unknown} "
+            f"(the kinds are {sorted(SOURCE_KINDS)})"
+        )
+    for kind in sorted(set(bands) & SOURCE_KINDS):
+        band = bands[kind]
+        if not isinstance(band, list) or len(band) != 2:
+            errors.append(f"{where}: {key}.{kind} must be [low, high]")
+            continue
+        low, high = band
+        if not is_count(low):
+            errors.append(f"{where}: {key}.{kind} low must be an integer >= 0")
+        elif high is not None and (not is_count(high) or high < low):
+            errors.append(
+                f"{where}: {key}.{kind} high must be null (no upper "
+                f"bound) or an integer >= the low"
+            )
+
+
 def check_series(repo, registry, *, errors):
     label = "press"
     root = os.path.join(repo, "press", "series")
@@ -422,6 +461,28 @@ def check_series(repo, registry, *, errors):
                         f"template '{template}' "
                         f"(allowed: {treg.get('modes')})"
                     )
+        check_kind_bands(
+            cfg.get("sources_by_kind"),
+            key="sources_by_kind",
+            where=where,
+            errors=errors,
+        )
+        per_item_sources = cfg.get("per_item_sources")
+        check_kind_bands(
+            per_item_sources, key="per_item_sources", where=where, errors=errors
+        )
+        # per_item_sources constrains what each data-nb-item cites, which only a
+        # per-item template has. Say so here, in daylight, rather than let the
+        # key sit silently inert in a series that can never honor it.
+        if (
+            per_item_sources is not None
+            and tregs
+            and not any(t.get("cite_rule") == "per-item" for t in tregs)
+        ):
+            errors.append(
+                f"{where}: 'per_item_sources' needs a template whose cite_rule "
+                f"is per-item; {allowed} cite(s) per section"
+            )
         prompt = cfg.get("prompt")
         if prompt and not os.path.isfile(os.path.join(root, sid, prompt)):
             errors.append(f"{where}: prompt file '{prompt}' not found")

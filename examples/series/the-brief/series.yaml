@@ -8,4 +8,10 @@ prompt: prompt.md
 autopublish: true
 strict: false
 min_sources: 6
+# Composition, not just count: a brief assembled from one day's arXiv listing
+# meets any floor. Every item carries the document that owns its claim, plus
+# someone with no stake in it reading the same thing.
+per_item_sources:
+  primary: [1, 1]
+  secondary: [1, 2]
 cadence: daily

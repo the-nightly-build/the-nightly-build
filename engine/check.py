@@ -62,6 +62,7 @@ ALLOWED_EXTERNAL_HOSTS = frozenset({"fonts.googleapis.com", "fonts.gstatic.com"}
 # (§7.4 — contextual nav + chart renderer), by relative or root-absolute path.
 ENGINE_SCRIPT_RE = re.compile(r"^(?:(?:\.\./)+|/)assets/nb\.js$")
 DEFAULT_MIN_SOURCES = {"longread": 8, "shortread": 5}
+SOURCE_KINDS = ("primary", "secondary")
 DEFAULT_CITE_EXEMPT = ("sources",)  # a template extends this via registry cite_exempt
 SELF_COUNT_TOLERANCE = 0.20
 
@@ -147,11 +148,11 @@ class Article(HTMLParser):
         self.script_tags = []  # (attrs_dict) for every <script>
         self.sections = []  # data-nb-section values in order
         self.section_cites = {}  # section -> inline cite count
-        self.items = []  # per data-nb-item: {"cites": int}
+        self.items = []  # per data-nb-item: {"cites": [source entry id, ...]}
         self.ids = set()
         self.source_container_ids = set()
         self.source_ids = []  # source entry ids in declaration order
-        self.sources = []  # {"href":, "required":}
+        self.sources = []  # {"href":, "required":, "kind":, "id":}
         self.cite_hrefs = []  # hrefs of anchors inside sup.nb-cite
         self.bad_event_attrs = []
         self.bad_js_urls = []
@@ -216,7 +217,7 @@ class Article(HTMLParser):
             self.section_cites.setdefault(name, 0)
             el["section"] = name
         if "data-nb-item" in a:
-            self.items.append({"cites": 0})
+            self.items.append({"cites": []})
             el["item"] = len(self.items) - 1
 
         if tag == "sup" and "nb-cite" in a.get("class", "").split():
@@ -234,19 +235,21 @@ class Article(HTMLParser):
                     )
                 it = self._current("item")
                 if it is not None:
-                    self.items[it["item"]]["cites"] += 1
+                    self.items[it["item"]]["cites"].append(href[1:])
             if "data-nb-source" in a:
-                self.sources.append(
-                    {
-                        "href": href,
-                        "required": a.get("data-nb-required") or None,
-                    }
-                )
                 nearest = None
                 for e in reversed(self.stack):
                     if e.get("id"):
                         self.source_container_ids.add(e["id"])
                         nearest = nearest or e["id"]
+                self.sources.append(
+                    {
+                        "href": href,
+                        "required": a.get("data-nb-required") or None,
+                        "kind": a.get("data-nb-kind") or None,
+                        "id": nearest,
+                    }
+                )
                 if nearest and nearest not in self.source_ids:
                     self.source_ids.append(nearest)
 
@@ -942,6 +945,100 @@ def check_cites(ed, rep):
             )
 
 
+def source_host(href) -> str | None:
+    """The host a source lives on, lowercased and stripped of a leading www.
+
+    An honest hostname comparison, not a public-suffix parse: it reads
+    arxiv.org and www.arxiv.org as one host, and reads blog.example.com and
+    example.com as two. Enough to catch the case the rule exists for — a paper
+    and its own lab's announcement of it, offered as two sources.
+    """
+    m = re.match(r"https://([^/?#]+)", href or "", re.IGNORECASE)
+    if not m:
+        return None
+    host = m.group(1).rsplit("@", 1)[-1].split(":", 1)[0].lower()
+    return host.removeprefix("www.")
+
+
+def band_text(band) -> str:
+    lo, hi = band
+    if hi is None:
+        return f"at least {lo}"
+    if lo == hi:
+        return f"exactly {lo}"
+    return f"{lo} to {hi}"
+
+
+def check_item_kinds(cited, *, number, per_item, rep):
+    for kind, band in per_item.items():
+        count = sum(1 for s in cited if s["kind"] == kind)
+        lo, hi = band
+        if count < lo or (hi is not None and count > hi):
+            rep.block(
+                "B-SOURCE-KIND",
+                f"item #{number} cites {count} {kind} source(s); this series "
+                f"asks every item for {band_text(band)}",
+            )
+    # Independence, structurally: a secondary is reporting by someone with no
+    # stake in the primary, so sharing the primary's host makes it an extension
+    # of that primary — one voice wearing two hats — not a second one.
+    primary_hosts = {source_host(s["href"]) for s in cited if s["kind"] == "primary"}
+    seen = set()
+    for s in cited:
+        host = source_host(s["href"])
+        if s["kind"] != "secondary" or host is None:
+            continue
+        if host in primary_hosts:
+            rep.block(
+                "B-SOURCE-KIND",
+                f"item #{number}: secondary {s['href']} shares the domain "
+                f"'{host}' with the item's own primary",
+                suggestion="a secondary reports on a primary from outside it; "
+                "cite someone with no stake in the document",
+            )
+        elif host in seen:
+            rep.block(
+                "B-SOURCE-KIND",
+                f"item #{number}: two secondaries share the domain '{host}'",
+                suggestion="one outlet twice is one voice; find a second one",
+            )
+        seen.add(host)
+
+
+def check_source_kinds(ed, *, series, treg, rep):
+    """B-SOURCE-KIND: source composition, per article and per item.
+
+    A count cannot see composition: min_sources is satisfied by ten sources
+    from one advocacy shop, or by an arXiv listing read end to end. A series
+    constrains the mix instead, and the mix blocks regardless of `strict`,
+    because sourcing is not a matter of calibration.
+    """
+    for s in ed.sources:
+        if s["kind"] is not None and s["kind"] not in SOURCE_KINDS:
+            rep.block(
+                "B-SOURCE-KIND",
+                f'source {s["href"]} declares data-nb-kind="{s["kind"]}"; '
+                f"the kinds are {' and '.join(SOURCE_KINDS)}",
+            )
+
+    for kind, band in (series.get("sources_by_kind") or {}).items():
+        count = sum(1 for s in ed.sources if s["kind"] == kind)
+        lo, hi = band
+        if count < lo or (hi is not None and count > hi):
+            rep.block(
+                "B-SOURCE-KIND",
+                f"{count} {kind} source(s); this series asks for {band_text(band)}",
+            )
+
+    per_item = series.get("per_item_sources") or {}
+    if not per_item or treg.get("cite_rule") != "per-item":
+        return  # validate_config rejects the pairing; nothing to enforce here
+    by_id = {s["id"]: s for s in ed.sources if s["id"]}
+    for number, it in enumerate(ed.items, 1):
+        cited = [by_id[ref] for ref in dict.fromkeys(it["cites"]) if ref in by_id]
+        check_item_kinds(cited, number=number, per_item=per_item, rep=rep)
+
+
 PLACEHOLDER_RUN_WORDS = 4  # a caps run this long warns even off-skeleton
 
 
@@ -1052,7 +1149,7 @@ def check_warns(
                 rep.warn("W-CITE-DENSITY", f"section '{s}' has no inline citations")
     elif rule == "per-item":
         for i, it in enumerate(ed.items, 1):
-            if it["cites"] == 0:
+            if not it["cites"]:
                 rep.warn("W-CITE-DENSITY", f"item #{i} has no inline citations")
 
     # citation order: sources should be numbered in order of first appearance
@@ -1278,6 +1375,7 @@ def check_article(
     check_sandbox(ed, rep)
     check_sources(ed, rep, check_links=check_links)
     check_cites(ed, rep)
+    check_source_kinds(ed, series=series, treg=treg, rep=rep)
     check_warns(
         ed,
         meta,

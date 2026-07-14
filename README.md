@@ -86,6 +86,11 @@ BLOCK (a citation outside the declared set fails the PR); a missing
 `consult` is a read-first instruction the proof does not verify (citing a
 consulted source is optional).
 
+A count says nothing about where sources came from, so a series can also
+constrain the mix: `sources_by_kind` and `per_item_sources` set `[low, high]`
+bands over primary and secondary sources, and both BLOCK. See
+[docs/series.md](docs/series.md).
+
 The proof also verifies that every cited source link resolves. It probes each
 URL by default and BLOCKs only on a definitive dead link: a 404/410
 response or a domain that does not resolve. A restricted, slow, rate-limited,
