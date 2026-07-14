@@ -1025,68 +1025,6 @@ def atom_feed(base_url, feed_path, *, title, eds, generated, author=None):
 
 
 # --------------------------------------------------------------------------- #
-# Morning email digest (procedural — assembled from nb-meta, no model)
-# --------------------------------------------------------------------------- #
-
-
-def render_email(site_title, date, *, eds, series_cfgs, base_url):
-    """Render the morning digest as a self-contained email document.
-
-    Email clients ignore stylesheets, so every style is inline and the
-    palette is hardcoded to the light theme. Links must be absolute
-    because the mail has no base URL to resolve against.
-    """
-
-    def absolute(path):
-        return absolutize_url(base_url, path)
-
-    eds = sorted(eds, key=lambda e: -e["reading_minutes"])
-    total_minutes = sum(e["reading_minutes"] for e in eds)
-    rows = []
-    for ed in eds:
-        meta = ed["meta"]
-        cfg = series_cfgs.get(ed["series"], {})
-        url = absolute(f"/library/{ed['series']}/{ed['slug']}.html")
-        label = source_label(meta)
-        sources_line = f" · {esc(label)}" if label else ""
-        rows.append(f"""
-  <div style="border-top:1px solid #D9E2EE;padding:18px 0 14px">
-    <div style="font-family:monospace;font-size:11px;letter-spacing:1px;
-                text-transform:uppercase;color:#8A5C08">
-      {esc(cfg.get("name", ed["series"]))}</div>
-    <div style="font-family:Georgia,serif;font-size:20px;line-height:1.3;
-                margin:6px 0 4px">
-      <a href="{esc(url)}" style="color:#161D28;text-decoration:none">
-        {esc(str(meta.get("title", ed["slug"])))}</a></div>
-    <div style="font-family:Georgia,serif;font-style:italic;font-size:14px;
-                color:#4E5866;margin:0 0 6px">{esc(str(meta.get("dek", "")))}</div>
-    <div style="font-family:monospace;font-size:11px;color:#8794A4">
-      {ed["reading_minutes"]} min read{sources_line}</div>
-  </div>""")
-    return f"""<!DOCTYPE html>
-<html><body style="margin:0;padding:0;background:#F4F7FB">
-<div style="max-width:600px;margin:0 auto;padding:28px 20px;color:#161D28">
-  <div style="font-family:Georgia,serif;font-size:26px;font-weight:bold;
-              letter-spacing:-0.5px">{esc(site_title)}<span
-              style="color:#8A5C08">.</span></div>
-  <div style="font-family:monospace;font-size:12px;color:#4E5866;
-              text-transform:uppercase;letter-spacing:1px;margin:4px 0 10px">
-    Tonight's build · {esc(date)}</div>
-  <div style="font-family:Georgia,serif;font-size:15px;margin:0 0 12px">
-    {len(eds)} article{"s" if len(eds) != 1 else ""} ·
-    {total_minutes} minutes of reading, built while you slept.</div>
-  {"".join(rows)}
-  <div style="border-top:2px solid #161D28;margin-top:16px;padding-top:12px;
-              font-family:monospace;font-size:11px;color:#8794A4">
-    <a href="{esc(absolute("/") or "/")}" style="color:#935F00">the newsstand</a> ·
-    <a href="{esc(absolute("/feed.xml"))}" style="color:#935F00">feed</a> ·
-    The Nightly Build</div>
-</div>
-</body></html>
-"""
-
-
-# --------------------------------------------------------------------------- #
 # Build
 # --------------------------------------------------------------------------- #
 
@@ -1316,27 +1254,6 @@ def build(
                 author=site_cfg["title"],
             ),
         )
-
-    # email digests: one per build (permanent) + the latest at a stable path
-    # for the morning-mail workflow, reusing the latest night's render
-    latest = max(catalog["builds"], key=date_sort_key, default=None)
-    for date in catalog["builds"]:
-        eds = by_night.get(date, [])
-        rendered = render_email(
-            site_cfg["title"],
-            date,
-            eds=eds,
-            series_cfgs=series_cfgs,
-            base_url=base_url,
-        )
-        write(os.path.join(out, "builds", date, "email.html"), rendered)
-        if date == latest:
-            write(os.path.join(out, "email-latest.html"), rendered)
-            write(
-                os.path.join(out, "email-latest-subject.txt"),
-                f"{site_cfg['title']} · {latest}: {len(eds)} "
-                f"article{'s' if len(eds) != 1 else ''}\n",
-            )
 
     copy_assets(repo, site_cfg, out=out)
     copy_articles(articles, out, stamp=site["stamp"], assets_html=site["assets_html"])

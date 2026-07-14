@@ -44,11 +44,6 @@ title: "The Nightly Build"
 theme: engine/assets/themes/newspaper.css   # or press/themes/<yours>.css
 appearance: auto   # auto | light | dark
 front: compact     # compact | comfortable (deks on front-page story cells)
-
-# Morning email delivery (also requires the MAIL_* repo secrets; see
-# docs/delivery.md). Without this block, the Atom feed is the push channel.
-# email:
-#   send_utc_hour: 12
 YAML
 	cat >press/editorial.md <<'MD'
 # Voice

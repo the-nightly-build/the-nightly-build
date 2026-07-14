@@ -25,11 +25,6 @@ assets:
     - url: https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js
       integrity: sha384-WJdEkJKrbsqw0evQ4GB6mlsKe5cGTxBOw4KAEIa52ZLB7DDpliGkwdme/HMa5n1m
 
-# Morning email delivery. It also needs the MAIL_* repo secrets (see
-# docs/delivery.md). Without this block, the Atom feed is the push channel.
-# email:
-#   send_utc_hour: 12
-
 # The Nightly Build directory. You are listed automatically at
 # the-nightly-build.github.io. The public URL comes from your GitHub Pages URL,
 # never from this file. The description is one line on your card, and optional.

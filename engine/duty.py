@@ -5,11 +5,9 @@
 # ///
 """Compute tonight's work list deterministically from config and library state.
 
-The correspondent runs this before researching anything, and the
-morning-mail gate runs it to tell an expected quiet night from a missed
-one. It is the single source of truth for cadence, pauses, completion,
-commission queues, and rerun safety, so no agent ever does calendar math
-on its own.
+The correspondent runs this before researching anything. It is the single
+source of truth for cadence, pauses, completion, commission queues, and
+rerun safety, so no agent ever does calendar math on its own.
 
 Run: python3 engine/duty.py --repo . --library <library-checkout> [--date YYYY-MM-DD]
 Prints JSON: {"date", "weekday", "due": [...], "idle": [...]}. Always exits 0.

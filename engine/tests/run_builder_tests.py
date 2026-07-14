@@ -302,27 +302,6 @@ check(
     "of None" not in read(out, "series", "index.html"),
 )
 
-print("== email digest ==")
-email = read(out, "email-latest.html")
-check(
-    "email digest exists with article titles",
-    "Micron Technology" in email and "Daily brief for 2026-07-06" in email,
-)
-check("email digest is latest build only", "2026-07-05" not in email)
-check(
-    "email digest is inline-only (no scripts, no engine assets)",
-    "<script" not in email and "assets/" not in email,
-)
-check(
-    "email subject line",
-    read(out, "email-latest-subject.txt").strip()
-    == "The Nightly Build · 2026-07-06: 2 articles",
-)
-check(
-    "per-build digests are permanent",
-    "Daily brief for 2026-07-05" in read(out, "builds", "2026-07-05", "email.html"),
-)
-
 print("== sequence series ==")
 seq_repo = str(pathlib.Path(tempfile.mkdtemp()) / "repo")
 shutil.copytree(TESTREPO, seq_repo)
@@ -760,9 +739,8 @@ check(
     "../../../assets/nb.css" in nested_page,
 )
 
-print("== email digest routes sources through source_label ==")
-em = read(dl_out, "email-latest.html")
-check("email shows a well-formed source count", "8 sources" in em)
+print("== source counts route through source_label ==")
+check("the front page shows a well-formed source count", "8 sources" in dl_index)
 bad_lib = tempfile.mkdtemp()
 write_article(
     bad_lib,
@@ -774,7 +752,7 @@ bad_out = tempfile.mkdtemp()
 B.build(TESTREPO, bad_lib, out=bad_out, now=NOW)
 check(
     "a non-int sources value never reaches the reader raw",
-    "<b>x</b>" not in read(bad_out, "email-latest.html"),
+    "<b>x</b>" not in read(bad_out, "index.html"),
 )
 
 sys.exit(summary())
