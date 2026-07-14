@@ -48,7 +48,7 @@ import re
 import shutil
 import sys
 
-import nb_meta
+from nb import meta as nb_meta
 
 try:
     import yaml

@@ -37,7 +37,7 @@ import os
 import subprocess
 import sys
 
-import nb_meta
+from nb import meta as nb_meta
 
 try:
     import yaml
