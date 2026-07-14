@@ -306,6 +306,30 @@ expect(
     run_local(mut('"template": "article"', '"template": "brief"'), "semiconductors"),
     must_have=["B-META-MATCH"],
 )
+RENDERED_DEK = """<p class="nb-dekline">
+  How a cyclical commodity maker became the AI era&#39;s<br>
+  bottleneck.
+</p>"""
+expect(
+    "wrapped, escaped, tag-broken dekline agreeing with nb-meta is clean",
+    run_local(VALID, "semiconductors"),
+    must_not=["B-META-MATCH"],
+    blocks=0,
+)
+expect(
+    "meta dek disagrees with the rendered dekline",
+    run_local(
+        mut(RENDERED_DEK, '<p class="nb-dekline">A better sentence, body only.</p>'),
+        "semiconductors",
+    ),
+    must_have=["B-META-MATCH"],
+)
+expect(
+    "an article with no dekline element is not held to nb-meta's dek",
+    run_local(mut(RENDERED_DEK, ""), "semiconductors"),
+    must_not=["B-META-MATCH"],
+    blocks=0,
+)
 expect(
     "slug-style tag is accepted",
     run_local(
