@@ -1234,14 +1234,6 @@ figure.nb-chart noscript {
   margin: 0 0 8px;
 }
 
-.nb-brief-item p[data-nb-why] {
-  color: var(--ink);
-}
-
-.nb-brief-item p[data-nb-why] b {
-  color: var(--accent);
-}
-
 @media (width >=640px) {
   .nb-brief-item {
     display: grid;

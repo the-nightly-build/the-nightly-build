@@ -44,7 +44,6 @@ TEMPLATE_KEYS = {
     "flex_sections",
     "cite_rule",
     "cite_exempt",
-    "require_why",
     "modes",
     "about",
 }
@@ -275,8 +274,6 @@ def check_registry(repo, errors):
             and all(isinstance(x, str) for x in cite_exempt)
         ):
             errors.append(f"{where}: 'cite_exempt' must be a list of section names")
-        if not isinstance(entry.get("require_why", False), bool):
-            errors.append(f"{where}: 'require_why' must be true or false")
         for band_key in ("words", "items", "flex_sections"):
             band = entry.get(band_key)
             if band is not None and not (

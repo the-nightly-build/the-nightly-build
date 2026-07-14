@@ -175,7 +175,6 @@ def brief(date="2026-07-06"):
             f'<sup class="nb-cite"><a href="#s{i}">{i}</a></sup></h4>'
             f"<p>Two sentences of what happened and the immediate context around it. "
             f"The specifics are grounded in the cited source.</p>"
-            f"<p data-nb-why><b>Why it matters</b>: it moves the larger story we track.</p>"
             f"</div>"
         )
     src = "".join(
@@ -187,7 +186,7 @@ def brief(date="2026-07-06"):
   "template": "brief", "title": "Daily brief for {date}",
   "mode": "rolling", "order": null, "date": "{date}", "tags": [],
   "sources": 5, "words": 300, "reading_minutes": 5,
-  "dek": "Five items, each with why it matters.",
+  "dek": "Five items, each cited to its primary source.",
   "harness": "test-fixture", "model": "claude-fable-5"
 }}"""
     return f"""<!DOCTYPE html>

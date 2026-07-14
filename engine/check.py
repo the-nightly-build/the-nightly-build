@@ -147,7 +147,7 @@ class Article(HTMLParser):
         self.script_tags = []  # (attrs_dict) for every <script>
         self.sections = []  # data-nb-section values in order
         self.section_cites = {}  # section -> inline cite count
-        self.items = []  # per data-nb-item: {"cites": int, "why": bool}
+        self.items = []  # per data-nb-item: {"cites": int}
         self.ids = set()
         self.source_container_ids = set()
         self.source_ids = []  # source entry ids in declaration order
@@ -216,12 +216,8 @@ class Article(HTMLParser):
             self.section_cites.setdefault(name, 0)
             el["section"] = name
         if "data-nb-item" in a:
-            self.items.append({"cites": 0, "why": False})
+            self.items.append({"cites": 0})
             el["item"] = len(self.items) - 1
-        if "data-nb-why" in a:
-            cur = self._current("item")
-            if cur is not None:
-                self.items[cur["item"]]["why"] = True
 
         if tag == "sup" and "nb-cite" in a.get("class", "").split():
             el["cite_sup"] = True
@@ -1077,15 +1073,6 @@ def check_warns(
                 )
                 break
             frontier += 1
-
-    # per-item "why it matters", when the template's registry entry requires it
-    if treg.get("require_why"):
-        for i, it in enumerate(ed.items, 1):
-            if not it["why"]:
-                rep.warn(
-                    "W-WHY-MISSING",
-                    f"item #{i} lacks a 'why it matters' line (data-nb-why)",
-                )
 
     # source policy: required docs must be read AND cited; consult prefixes
     # must be read first but citing them is optional (no check here); with
