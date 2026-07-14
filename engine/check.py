@@ -299,7 +299,7 @@ class Article(HTMLParser):
             sec = self._current("section")
             if sec is None or sec.get("section") != "sources":
                 self._prose_text_parts.append(data)
-            if self._current("dekline") is not None:
+            if self._dek_parts is not None and self._current("dekline") is not None:
                 self._dek_parts.append(data)
 
     @property
