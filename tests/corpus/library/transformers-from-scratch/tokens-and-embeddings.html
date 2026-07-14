@@ -1,0 +1,540 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Tokens and Embeddings: Turning Text into Vectors — Transformers from Scratch</title>
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400..700;1,6..72,400..700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="../../assets/theme.css" />
+    <link rel="stylesheet" href="../../assets/nb.css" />
+    <script defer src="../../assets/nb.js"></script>
+    <script type="application/json" id="nb-meta">
+      {
+        "protocol": "1.1",
+        "series": "transformers-from-scratch",
+        "slug": "tokens-and-embeddings",
+        "template": "article",
+        "title": "Tokens and Embeddings: Turning Text into Vectors",
+        "mode": "sequence",
+        "order": 1,
+        "date": "2026-07-09",
+        "tags": ["course", "transformers", "embeddings"],
+        "sources": 9,
+        "words": 2760,
+        "reading_minutes": 13,
+        "dek": "Lesson one of building a GPT from scratch: how a string of text becomes the grid of numbers a transformer can actually read.",
+        "harness": "claude-code-routine",
+        "model": "claude-opus-4-8"
+      }
+    </script>
+  </head>
+  <body class="nb-article">
+    <article class="nb-reading">
+      <header>
+        <div class="nb-eyebrow">Transformers from Scratch · Foundations</div>
+        <h1 class="nb-title">Tokens and Embeddings: Turning Text into Vectors</h1>
+        <p class="nb-dekline">
+          Lesson one of building a GPT from scratch: how a string of text
+          becomes the grid of numbers a transformer can actually read.
+        </p>
+        <div class="nb-byline"><span>13 min read</span><span>2026-07-09</span></div>
+      </header>
+
+      <section data-nb-section="orientation" id="orientation">
+        <h2>Where the course begins</h2>
+        <p>
+          This is the first lesson of a course that builds a decoder-only
+          transformer — a small GPT — one mechanism at a time, in PyTorch, until
+          the final lesson trains a model that generates text. There is no
+          previous lesson to recap; there is only the running example we will
+          extend from here to the end: a character-level GPT trained on a small
+          text corpus, the same setup as Andrej Karpathy's nanoGPT.<sup
+            class="nb-cite"
+            ><a href="#s6">6</a></sup
+          >
+          Everything else in the course — attention, multiple heads, positional
+          encoding, the transformer block, the training loop — assumes the
+          machinery this lesson builds. A transformer never sees text. It sees a
+          tensor of floating-point numbers of a fixed width the original paper
+          calls <code>d_model</code>, and the first job of any language model is
+          to turn one into the other faithfully.<sup class="nb-cite"
+            ><a href="#s1">1</a></sup
+          >
+        </p>
+        <div class="nb-objectives">
+          <div class="nb-objectives-label">In this article</div>
+          <ul>
+            <li>
+              Tokenize text into integer ids with a character-level vocabulary,
+              and explain when a subword scheme like byte-pair encoding is worth
+              the added machinery.
+            </li>
+            <li>
+              Build an embedding table with <code>nn.Embedding</code> and explain
+              why a lookup is exactly a one-hot matrix multiply, done cheaply.
+            </li>
+            <li>
+              Track the shape of the data as it moves from a string to a
+              <code>(batch, sequence, d_model)</code> tensor — the object every
+              later layer consumes.
+            </li>
+            <li>
+              Say precisely what the embedding vectors are (learned parameters)
+              and what they are not (fixed features).
+            </li>
+          </ul>
+        </div>
+        <p>
+          Two terms to fix at the outset. A <em>token</em> is the atomic unit of
+          text the model reads — a character, a subword, or a whole word,
+          depending on the scheme. The <em>vocabulary</em> is the finite set of
+          distinct tokens the model knows; every token is identified by an
+          integer index into it. The entire pipeline below exists to carry a
+          string into that integer space and then into a continuous vector space
+          the network can optimize over.
+        </p>
+      </section>
+
+      <section data-nb-section="from-characters-to-integers" id="from-characters-to-integers">
+        <h2>From characters to integers</h2>
+        <p>
+          Start with the simplest tokenizer that works: one token per character.
+          Given a corpus, the vocabulary is just the sorted set of distinct
+          characters that appear in it, and each character maps to its position
+          in that set. This is the scheme Andrej Karpathy's nanoGPT uses for its
+          tiny-Shakespeare demo, where the corpus resolves to a vocabulary of 65
+          characters — the letters, digits, punctuation, and whitespace present
+          in the text.<sup class="nb-cite"><a href="#s6">6</a></sup> Two lookup
+          tables, string-to-integer and integer-to-string, are the whole
+          tokenizer.
+        </p>
+        <div class="rs-code">
+          <div class="rs-code-head">
+            <span class="rs-code-file">tokenizer.py</span><span>PyTorch</span>
+          </div>
+          <pre><code class="language-python">text = open("input.txt").read()            # the tiny-shakespeare corpus
+chars = sorted(set(text))                  # every distinct character, in order
+vocab_size = len(chars)                     # 65 for tiny shakespeare
+stoi = {c: i for i, c in enumerate(chars)}  # string -> integer id
+itos = {i: c for i, c in enumerate(chars)}  # integer id -> string
+
+encode = lambda s: [stoi[c] for c in s]     # "Hi" -> [20, 47]
+decode = lambda ids: "".join(itos[i] for i in ids)
+
+encode("Hello")   # -> [20, 43, 50, 50, 53]</code></pre>
+          <span class="rs-code-cap">
+            Fig. 1 · A character-level tokenizer is two dictionaries, following
+            nanoGPT's <code>stoi</code>/<code>itos</code> construction.<sup
+              class="nb-cite"
+              ><a href="#s6">6</a></sup
+            >
+          </span>
+        </div>
+        <p>
+          Character tokenization is honest and trivial to invert, but it pays for
+          that simplicity in sequence length: every character is a step the model
+          must attend over, so a paragraph becomes hundreds of tokens. Production
+          language models make the opposite trade. GPT-2 uses a byte-level
+          <em>byte-pair encoding</em> (BPE) tokenizer with a vocabulary of 50,257
+          tokens and a context window of 1,024 tokens.<sup class="nb-cite"
+            ><a href="#s3">3</a></sup
+          >
+          BPE, introduced for neural machine translation by Sennrich, Haddow, and
+          Birch, adapts a data-compression algorithm to segmentation: it encodes
+          rare and unknown words as sequences of frequent subword units, so the
+          model gets an open vocabulary without a token for every word it might
+          ever meet.<sup class="nb-cite"><a href="#s2">2</a></sup>
+        </p>
+        <div class="nb-callout">
+          <span class="nb-callout-term">Byte-pair encoding (BPE)</span>
+          A tokenizer that starts from a base alphabet and repeatedly merges the
+          most frequent adjacent pair into a new symbol. GPT-2's variant runs at
+          the byte level: the base is the 256 possible byte values, and learned
+          merges build up common multi-byte sequences on top of them, so any
+          string of any language encodes without an out-of-vocabulary
+          token.<sup class="nb-cite"><a href="#s5">5</a></sup>
+        </div>
+        <p>
+          The mechanics are visible in GPT-2's released tokenizer. A
+          <code>bytes_to_unicode</code> map assigns each of the 256 byte values a
+          printable character, and a ranked table of merges is applied greedily,
+          highest-priority pair first, until no ranked pair remains; the base of
+          256 bytes plus the learned merges is what produces the final
+          vocabulary.<sup class="nb-cite"><a href="#s5">5</a></sup> The lineage
+          predates GPT-2: the original GPT already tokenized with BPE, over a
+          vocabulary of 40,000 merges, on top of a Transformer decoder.<sup
+            class="nb-cite"
+            ><a href="#s4">4</a></sup
+          >
+          For this course we keep the character tokenizer — it makes every tensor
+          small enough to print — but the embedding machinery below is identical
+          whichever tokenizer feeds it. Only <code>vocab_size</code> changes.
+        </p>
+        <figure class="nb-chart">
+          <figcaption>
+            Fig. 2 · Vocabulary size is a design axis, not a constant (log scale).
+            Character-level tiny-Shakespeare, the original GPT's BPE merges, and
+            GPT-2's byte-level BPE. Sources: nanoGPT; "Improving Language
+            Understanding by Generative Pre-Training"; "Language Models are
+            Unsupervised Multitask Learners".
+          </figcaption>
+          <canvas></canvas>
+          <noscript>
+            Vocabulary sizes: character-level (tiny shakespeare) 65; GPT-1 BPE
+            40,000; GPT-2 byte-level BPE 50,257.
+          </noscript>
+          <script type="application/json" data-nb-chart>
+            {
+              "type": "bar",
+              "labels": ["char-level (65)", "GPT-1 BPE (40k)", "GPT-2 BPE (50,257)"],
+              "series": [
+                {
+                  "name": "Vocabulary size (tokens)",
+                  "values": [65, 40000, 50257]
+                }
+              ],
+              "y": { "scale": "log", "label": "Vocabulary size (log)" }
+            }
+          </script>
+        </figure>
+      </section>
+
+      <section data-nb-section="the-embedding-table" id="the-embedding-table">
+        <h2>The embedding table is a lookup</h2>
+        <p>
+          An integer id carries no useful geometry: token 43 is not "more" than
+          token 20 in any sense the model should trust. The embedding layer fixes
+          this by mapping each id to its own learned vector. In PyTorch,
+          <code>torch.nn.Embedding</code> is documented as "a simple lookup table
+          that stores embeddings of a fixed dictionary and size"; its two
+          arguments are <code>num_embeddings</code>, the size of the vocabulary,
+          and <code>embedding_dim</code>, the length of each vector. The input is
+          a tensor of indices and the output is the corresponding
+          vectors.<sup class="nb-cite"><a href="#s8">8</a></sup>
+        </p>
+        <p>
+          Internally the module holds one weight matrix of shape
+          <code>(num_embeddings, embedding_dim)</code>. We will call the vector
+          length <code>d_model</code> throughout the course, following the
+          transformer paper's notation; it is the width every layer of the model
+          works in.<sup class="nb-cite"><a href="#s1">1</a></sup> Looking up a
+          token is selecting its row.
+        </p>
+        <div class="rs-code">
+          <div class="rs-code-head">
+            <span class="rs-code-file">embedding.py</span><span>PyTorch</span>
+          </div>
+          <pre><code class="language-python">import torch
+import torch.nn as nn
+
+vocab_size, d_model = 65, 384
+token_embedding = nn.Embedding(vocab_size, d_model)
+token_embedding.weight.shape        # (65, 384): one row per token
+
+ids = torch.tensor([[20, 43, 50, 50, 53]])   # (B=1, T=5): one "Hello"
+x = token_embedding(ids)                       # (B=1, T=5, d_model=384)
+x.shape                                          # torch.Size([1, 5, 384])</code></pre>
+          <span class="rs-code-cap">
+            Fig. 3 · One id per position in, one vector per position out. The
+            batch and sequence axes pass through untouched.
+          </span>
+        </div>
+        <p>
+          Three axis names recur for the rest of the course, so fix them now:
+          <code>B</code> is the batch (how many independent sequences we process
+          at once), <code>T</code> is time or sequence length (how many tokens in
+          each), and <code>C</code> is channels, our <code>d_model</code> (the
+          width of each token's vector). The embedding step is the only place the
+          last axis is created; from here to the output every layer maps
+          <code>(B, T, C)</code> to <code>(B, T, C)</code>.
+        </p>
+        <p>
+          It is worth seeing why a "lookup" is a real linear operation and not a
+          special case. Selecting row <code>i</code> of a matrix is identical to
+          multiplying that matrix by a one-hot vector with its 1 in position
+          <code>i</code>. The embedding is that multiply, with the wasteful part
+          skipped.
+        </p>
+        <div class="rs-code">
+          <div class="rs-code-head">
+            <span class="rs-code-file">lookup_is_matmul.py</span><span>PyTorch</span>
+          </div>
+          <pre><code class="language-python">import torch.nn.functional as F
+
+onehot = F.one_hot(ids, vocab_size).float()   # (B, T, vocab_size)
+x_via_matmul = onehot @ token_embedding.weight # (B, T, d_model)
+
+torch.allclose(x_via_matmul, token_embedding(ids))   # True</code></pre>
+          <span class="rs-code-cap">
+            Fig. 4 · <code>nn.Embedding(ids)</code> equals
+            <code>one_hot(ids) @ W</code>. The lookup avoids materializing a
+            <code>(B, T, vocab_size)</code> tensor and the full matmul, which is
+            why models never one-hot in practice.
+          </span>
+        </div>
+      </section>
+
+      <section data-nb-section="what-the-vectors-learn" id="what-the-vectors-learn">
+        <h2>What the vectors learn</h2>
+        <p>
+          The rows of the embedding matrix are not features you compute; they are
+          parameters you train. PyTorch initializes the weight from a unit normal
+          distribution, and from there the vectors move under the same gradient
+          descent that trains the rest of the network — there is no separate
+          embedding objective.<sup class="nb-cite"><a href="#s8">8</a></sup> The
+          geometry that results is a byproduct of the language-modeling loss:
+          tokens that the model benefits from treating similarly drift toward
+          similar vectors, because that is what lowers the loss.
+        </p>
+        <div class="nb-pull">
+          <p>
+            The embedding is not a dictionary the model reads. It is a set of
+            coordinates the model is free to move.
+          </p>
+        </div>
+        <p>
+          The width <code>d_model</code> is a design choice, and it has grown with
+          scale. The original transformer's base model used
+          <code>d_model = 512</code>.<sup class="nb-cite"><a href="#s1">1</a></sup>
+          nanoGPT's default configuration reproduces GPT-2 small at
+          <code>n_embd = 768</code>, with a vocabulary of 50,304 (GPT-2's 50,257
+          padded to a multiple of 64) and a block size of 1,024.<sup
+            class="nb-cite"
+            ><a href="#s7">7</a></sup
+          >
+          A wider <code>d_model</code> gives each token more room to encode
+          distinctions, at a quadratic-ish cost downstream; for our
+          character-level model, 384 is comfortable.
+        </p>
+        <p>
+          Two refinements from the transformer paper are worth naming now,
+          because they act directly on this table and you will meet them again in
+          the code. First, the paper multiplies the embedding weights by the
+          square root of <code>d_model</code>: "In the embedding layers, we
+          multiply those weights by √d_model."<sup class="nb-cite"
+            ><a href="#s1">1</a></sup
+          >
+          It is a scaling convention that keeps the embeddings on a comparable
+          magnitude to the positional signal added next. Second, the same paper
+          shares one weight matrix between the input embedding and the final
+          layer that produces next-token scores: "we share the same weight matrix
+          between the two embedding layers and the pre-softmax linear
+          transformation."<sup class="nb-cite"><a href="#s1">1</a></sup> This
+          <em>weight tying</em>, studied by Press and Wolf, roughly halves the
+          embedding parameters and tends to lower perplexity, on the intuition
+          that the space you read tokens from and the space you predict them into
+          should be the same space.<sup class="nb-cite"><a href="#s9">9</a></sup>
+        </p>
+        <div class="nb-callout">
+          <span class="nb-callout-term">d_model (embedding dimension)</span>
+          The width of the vector that represents each token, and the width every
+          layer of the transformer preserves. Denoted <code>d_model</code> in the
+          transformer paper and <code>n_embd</code> in GPT-style code; it is a
+          hyperparameter, not something the data fixes.<sup class="nb-cite"
+            ><a href="#s1">1</a></sup
+          >
+        </div>
+      </section>
+
+      <section data-nb-section="the-shape-of-the-input" id="the-shape-of-the-input">
+        <h2>The shape of the input</h2>
+        <p>
+          Put the pieces in order. A batch of strings is encoded to a
+          <code>(B, T)</code> integer tensor, the embedding table turns it into
+          <code>(B, T, C)</code>, and that tensor is what the first transformer
+          block will read. The walk below is the forward pass up to the point the
+          next lessons take over.
+        </p>
+        <ol class="nb-steps">
+          <li>
+            <h3>Encode</h3>
+            <p>
+              Each string becomes a list of integer ids via <code>stoi</code>;
+              stacked and padded to a common length, a batch is a
+              <code>(B, T)</code> <code>LongTensor</code> of ids.<sup
+                class="nb-cite"
+                ><a href="#s6">6</a></sup
+              >
+            </p>
+          </li>
+          <li>
+            <h3>Embed the tokens</h3>
+            <p>
+              The token embedding maps <code>(B, T)</code> ids to
+              <code>(B, T, C)</code> vectors — the operation of Fig. 3, a row
+              lookup per position.<sup class="nb-cite"><a href="#s8">8</a></sup>
+            </p>
+          </li>
+          <li>
+            <h3>Add positions (a preview)</h3>
+            <p>
+              Token embeddings alone are order-blind: permute the sequence and
+              the set of vectors is unchanged. GPT-style models add a second,
+              position-indexed embedding of the same width, so
+              <code>x = wte(idx) + wpe(pos)</code>; the two tables have shapes
+              <code>(vocab_size, C)</code> and <code>(block_size, C)</code>.<sup
+                class="nb-cite"
+                ><a href="#s7">7</a></sup
+              >
+              Lesson four builds positional encoding properly; here it is enough
+              to know where it enters.
+            </p>
+          </li>
+        </ol>
+        <div class="rs-code">
+          <div class="rs-code-head">
+            <span class="rs-code-file">forward_so_far.py</span><span>PyTorch</span>
+          </div>
+          <pre><code class="language-python">B, T, C = 4, 8, 384                          # batch, sequence, d_model
+token_embedding = nn.Embedding(vocab_size, C)
+position_embedding = nn.Embedding(block_size, C)  # block_size = max T
+
+idx = torch.randint(0, vocab_size, (B, T))   # (B, T) ids
+pos = torch.arange(T)                          # (T,) positions 0..T-1
+
+tok = token_embedding(idx)                     # (B, T, C)
+pos_emb = position_embedding(pos)              # (T, C), broadcast over B
+x = tok + pos_emb                               # (B, T, C): ready for a block</code></pre>
+          <span class="rs-code-cap">
+            Fig. 5 · The input to the first transformer block, assembled exactly
+            as nanoGPT does it: a token table plus a position table, summed.<sup
+              class="nb-cite"
+              ><a href="#s7">7</a></sup
+            >
+          </span>
+        </div>
+        <div class="nb-check-box">
+          <ol>
+            <li>
+              For tiny-Shakespeare's 65-character vocabulary and
+              <code>d_model = 384</code>, how many parameters are in the token
+              embedding table? Give the shape and the count.
+            </li>
+            <li>
+              Encode the string <code>"Hi"</code> by hand given
+              <code>stoi = {..., 'H': 20, 'i': 47, ...}</code>, then state the
+              shape of the tensor after the embedding lookup for a batch of one.
+            </li>
+            <li>
+              Explain why <code>one_hot(ids) @ W</code> and
+              <code>nn.Embedding(ids)</code> return the same tensor, and why
+              production models still prefer the lookup.
+            </li>
+            <li>
+              A model doubles <code>d_model</code> from 384 to 768 and leaves the
+              vocabulary fixed. By what factor does the token embedding table's
+              parameter count change, and why?
+            </li>
+          </ol>
+        </div>
+      </section>
+
+      <section data-nb-section="go-deeper" id="go-deeper">
+        <h2>Go deeper</h2>
+        <p>
+          Read Section 3.4, "Embeddings and Softmax", of "Attention Is All You
+          Need" — it is four sentences and it states the embedding, the
+          √d_model scaling, and the weight tying you now recognize.<sup
+            class="nb-cite"
+            ><a href="#s1">1</a></sup
+          >
+          Then open nanoGPT's <code>model.py</code> and find
+          <code>wte</code> and <code>wpe</code>: the entire token-and-position
+          construction of Fig. 5 is a handful of lines you can now
+          read.<sup class="nb-cite"><a href="#s7">7</a></sup> To feel the
+          tokenization trade-off in your hands, encode a paragraph of English
+          with the character tokenizer above and with GPT-2's BPE, and compare
+          the two sequence lengths against the 50,257-token vocabulary GPT-2
+          pays for that compression.<sup class="nb-cite"><a href="#s3">3</a></sup>
+          If you want the algorithm itself, the merge loop in GPT-2's
+          <code>encoder.py</code> is short enough to reimplement from
+          scratch.<sup class="nb-cite"><a href="#s5">5</a></sup> And for the
+          origin of subword segmentation, Sennrich et al. is the primary
+          source.<sup class="nb-cite"><a href="#s2">2</a></sup>
+        </p>
+        <div class="nb-bridge">
+          <span class="nb-bridge-label">Next lesson</span>
+          We now have a <code>(B, T, C)</code> tensor of token vectors that know
+          nothing about each other. Self-Attention by Hand builds the mechanism
+          that lets each position mix in information from the others — the query,
+          key, and value construction — and it consumes exactly the tensor this
+          lesson produced.
+        </div>
+      </section>
+
+      <section class="nb-sources" data-nb-section="sources" id="sources">
+        <h2>Sources</h2>
+        <ol>
+          <li id="s1">
+            <a data-nb-source href="https://arxiv.org/abs/1706.03762"
+              >Vaswani et al. — "Attention Is All You Need" (§3.4 learned
+              embeddings of dimension d_model, ×√d_model scaling, weight tying;
+              base model d_model = 512)</a
+            >
+          </li>
+          <li id="s2">
+            <a data-nb-source href="https://arxiv.org/abs/1508.07909"
+              >Sennrich, Haddow &amp; Birch — "Neural Machine Translation of Rare
+              Words with Subword Units" (introduces BPE for open-vocabulary
+              segmentation)</a
+            >
+          </li>
+          <li id="s3">
+            <a data-nb-source href="https://cdn.openai.com/better-language-models/language_models_are_unsupervised_multitask_learners.pdf"
+              >Radford et al. — "Language Models are Unsupervised Multitask
+              Learners" (GPT-2: byte-level BPE, vocabulary 50,257, context
+              1,024)</a
+            >
+          </li>
+          <li id="s4">
+            <a data-nb-source href="https://cdn.openai.com/research-covers/language-unsupervised/language_understanding_paper.pdf"
+              >Radford et al. — "Improving Language Understanding by Generative
+              Pre-Training" (original GPT: multi-layer Transformer decoder, BPE
+              with 40,000 merges, token and position embeddings)</a
+            >
+          </li>
+          <li id="s5">
+            <a data-nb-source href="https://github.com/openai/gpt-2/blob/master/src/encoder.py"
+              >OpenAI — GPT-2 <code>encoder.py</code> (byte-level BPE
+              implementation: <code>bytes_to_unicode</code> over 256 bytes plus
+              ranked merges)</a
+            >
+          </li>
+          <li id="s6">
+            <a data-nb-source href="https://github.com/karpathy/nanoGPT/blob/master/data/shakespeare_char/prepare.py"
+              >Karpathy — nanoGPT <code>shakespeare_char/prepare.py</code>
+              (character-level vocabulary of 65, <code>stoi</code>/<code>itos</code>
+              encode/decode)</a
+            >
+          </li>
+          <li id="s7">
+            <a data-nb-source href="https://github.com/karpathy/nanoGPT/blob/master/model.py"
+              >Karpathy — nanoGPT <code>model.py</code> (<code>wte</code> and
+              <code>wpe</code> as <code>nn.Embedding</code>; defaults
+              <code>n_embd = 768</code>, <code>vocab_size = 50304</code>,
+              <code>block_size = 1024</code>)</a
+            >
+          </li>
+          <li id="s8">
+            <a data-nb-source href="https://docs.pytorch.org/docs/stable/generated/torch.nn.Embedding.html"
+              >PyTorch — <code>torch.nn.Embedding</code> documentation ("a simple
+              lookup table"; <code>num_embeddings</code> and
+              <code>embedding_dim</code>; weight initialized from N(0, 1))</a
+            >
+          </li>
+          <li id="s9">
+            <a data-nb-source href="https://arxiv.org/abs/1608.05859"
+              >Press &amp; Wolf — "Using the Output Embedding to Tie Word
+              Embeddings" (weight tying reduces parameters and lowers
+              perplexity)</a
+            >
+          </li>
+        </ol>
+      </section>
+    </article>
+  </body>
+</html>

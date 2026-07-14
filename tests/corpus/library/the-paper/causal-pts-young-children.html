@@ -1,0 +1,574 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>A causal algorithm inferred the causes of child PTSD · The Paper</title>
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400..700;1,6..72,400..700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="../../assets/theme.css" />
+    <link rel="stylesheet" href="../../assets/nb.css" />
+    <script defer src="../../assets/nb.js"></script>
+    <script type="application/json" id="nb-meta">
+      {
+        "protocol": "1.1",
+        "series": "the-paper",
+        "slug": "causal-pts-young-children",
+        "template": "paper",
+        "title": "A causal algorithm inferred the causes of child PTSD from data no one could randomize",
+        "mode": "open",
+        "order": null,
+        "date": "2026-07-13",
+        "tags": ["health", "causality"],
+        "sources": 8,
+        "words": 2830,
+        "reading_minutes": 13,
+        "dek": "Run over 1,354 maltreated children in a decades-old cohort, causal discovery named four direct causes of posttraumatic stress at age 8, and the same run shows which of them a second study should expect to lose.",
+        "harness": "claude-code-routine",
+        "model": "claude-opus-4-8"
+      }
+    </script>
+  </head>
+  <body class="nb-article">
+    <article class="nb-reading">
+      <header>
+        <div class="nb-eyebrow">The Paper</div>
+        <h1 class="nb-title">
+          A causal algorithm inferred the causes of child PTSD from data no one
+          could randomize
+        </h1>
+        <p class="nb-dekline">
+          Run over 1,354 maltreated children in a decades-old cohort, causal
+          discovery named four direct causes of posttraumatic stress at age 8,
+          and the same run shows which of them a second study should expect to
+          lose.
+        </p>
+        <div class="nb-byline">
+          <span>13 min read</span><span>2026-07-13</span>
+        </div>
+      </header>
+
+      <section data-nb-section="abstract" id="abstract">
+        <div class="nb-paper-card">
+          <p class="nb-paper-title">
+            Posttraumatic stress in young children at risk for maltreatment: a
+            causal data science analysis
+          </p>
+          <p class="nb-paper-meta">
+            Saxe, Morales, Ma, Urgurbil, Aliferis · Frontiers in Health Services
+            6:1784459 · 2026
+          </p>
+          <a
+            class="nb-paper-link"
+            href="https://doi.org/10.3389/frhs.2026.1784459"
+            >Read the paper</a
+          >
+          <blockquote class="nb-paper-abstract">
+            This article features the application of Causal Data Science (CDS)
+            methods to determine the mechanism for Posttraumatic Stress (PTS) in
+            young, maltreated children, in order to advance knowledge for
+            prevention. Advances in prevention require research that identifies
+            causal factors, but the scientific literature that would inform the
+            identification of causes are almost exclusively based on the
+            application of correlational methods to observational data. Causal
+            inferences from such research will frequently be in error. We
+            conducted the present study to explore the application of CDS methods
+            as an alternative—or a supplement—to experimental methods, which can
+            rarely be applied in human research on causal factors for PTS. A data
+            processing pipeline that integrates state-of-the-art CDS algorithms
+            was applied to an existing observational, longitudinal data set
+            collected by the Consortium for Longitudinal Studies in Child Abuse
+            and Neglect (LONGSCAN). This data set contains a sample of 1,354
+            children who were identified in infancy to early childhood as being
+            maltreated or at risk. A causal network model of 251 variables
+            (nodes) and 818 bivariate relations (edges) was discovered, revealing
+            four direct causes (Emotional Maltreatment at age 0–4, Physical
+            Assault at age 8, Feeling of Safety at age 8, and Witnessing Violence
+            at age 8) and two direct effects (Negative Self-Image and Severe
+            Assault from a Non-Caregiver at age 8) of PTS at age 8, within a
+            network containing a broad diversity of causal pathways. These
+            results indicate that CDS methods show promise for research on the
+            complex etiology of PTS in young, maltreated children.<sup
+              class="nb-cite"
+              ><a href="#s1">1</a></sup
+            >
+          </blockquote>
+        </div>
+      </section>
+
+      <section data-nb-section="before-you-read" id="before-you-read">
+        <h2>Before you read</h2>
+        <p>
+          The paper stands on two bodies of knowledge and assumes you hold
+          neither. From machine learning it takes constraint-based causal
+          discovery: the family of algorithms that reads a causal graph off the
+          pattern of conditional independences in data, the PC algorithm and its
+          relatives, colliders, d-separation, the Markov blanket. Those you may
+          already carry, and the piece leans on them. From clinical psychology it
+          takes something you almost certainly do not carry: what posttraumatic
+          stress is in a child too young to describe it, how it gets measured at
+          that age, and what a cohort of children "at risk for maltreatment"
+          actually is. Everything clinical is built here before it is spent.
+        </p>
+      </section>
+
+      <section data-nb-section="orientation" id="orientation">
+        <h2>The cause you are not allowed to test</h2>
+        <p>
+          To prove a cause, randomize it. Split a population in two, change one
+          thing for one half, and any difference that follows is the thing you
+          changed. This is the engine under every clinical trial, and it is
+          unavailable for almost every question that matters about child
+          maltreatment. You cannot assign children to be abused. So the field
+          that most needs to know what causes lasting harm is confined to
+          watching harm happen and measuring what travels with it, which is a way
+          of learning correlations and calling them causes when the paper's
+          discussion turns to prevention. The authors name this predicament
+          plainly: the literature meant to identify causes is "almost exclusively
+          based on the application of correlational methods to observational
+          data," and "causal inferences from such research will frequently be in
+          error."<sup class="nb-cite"><a href="#s1">1</a></sup>
+        </p>
+        <p>
+          Across trauma-exposed children, the pooled
+          rate of PTSD is about 16%, rising to roughly a third of girls after
+          interpersonal trauma of the kind maltreatment inflicts.<sup
+            class="nb-cite"
+            ><a href="#s2">2</a></sup
+          >
+          The paper cites a still higher band, 30 to 40%, for maltreated children
+          specifically.<sup class="nb-cite"><a href="#s1">1</a></sup> A
+          prevention program has to know which levers, pulled early, actually
+          bend that number, and correlation cannot tell it apart from the many
+          things that merely ride along. The paper's wager is that a class of
+          algorithms built for exactly this gap, causal discovery, can extract
+          defensible causal structure from data that was only ever observed. It
+          is a wager worth watching precisely because it is so hard to win.
+        </p>
+      </section>
+
+      <section data-nb-section="cohort" id="cohort">
+        <h2>Who the 1,354 children are, and what "PTS" means at age 8</h2>
+        <p>
+          The data was not collected for this study. It comes from LONGSCAN, a
+          consortium begun in 1991 that followed children who were maltreated or
+          at elevated risk of it, across five United States sites, from age 4
+          toward adulthood, interviewing child and caregiver separately at ages
+          4, 6, 8, and beyond, and pulling child-protective-services records
+          every two years.<sup class="nb-cite"><a href="#s3">3</a></sup> Two
+          features of that design shape everything downstream. First, "at risk
+          for maltreatment" is an enrollment criterion, not a per-child verdict:
+          the sites ranged from low-income community samples to children already
+          in foster care, so risk is a property of how the cohort was recruited,
+          not a diagnosis each child carries.<sup class="nb-cite"
+            ><a href="#s3">3</a></sup
+          >
+          Second, the wave structure at 4, 6, and 8 gives the analysis its one
+          firm handhold on time, which will matter greatly when the algorithm has
+          to decide which way a causal arrow points.
+        </p>
+        <div class="nb-stat-strip">
+          <div class="nb-stat">
+            <span class="nb-stat-n">1,354</span
+            ><span class="nb-stat-l">children in the sample</span>
+          </div>
+          <div class="nb-stat">
+            <span class="nb-stat-n">251</span
+            ><span class="nb-stat-l">variables in the final network</span>
+          </div>
+          <div class="nb-stat">
+            <span class="nb-stat-n">138</span
+            ><span class="nb-stat-l">causal paths ending at PTS</span>
+          </div>
+        </div>
+        <p>
+          Of the 1,354 children, 1,053 had the outcome the study is about, so the
+          analysis runs on them.<sup class="nb-cite"><a href="#s1">1</a></sup>
+          That outcome needs care, because "PTSD in an eight-year-old" is not the
+          adult disorder shrunk down. A young child cannot narrate flashbacks or
+          report a foreshortened sense of the future, and DSM-5 acknowledged this
+          by adding a developmental subtype, posttraumatic stress disorder in
+          children six and younger, the first developmental subtype of any DSM
+          disorder. It lowers the threshold for the avoidance-and-numbing cluster
+          from three symptoms to one and drops the criteria that require a child
+          to verbalize internal states, such as persistent negative beliefs about
+          oneself.<sup class="nb-cite"><a href="#s4">4</a></sup> The practical
+          consequence is that trauma stress at this age is read from behavior a
+          caregiver can see, not from what a child can say.
+        </p>
+        <p>
+          So the study does not measure a diagnosis at all. Its target is a
+          posttraumatic-stress T-score from the Trauma Symptom Checklist for
+          Young Children, a 90-item instrument on which a caregiver rates how
+          often each symptom has appeared over the past month.<sup
+            class="nb-cite"
+            ><a href="#s5">5</a></sup
+          >
+          A T-score is normed to a mean of 50 and a standard deviation of 10; the
+          sample averages 52.92, a shade above the norm.<sup class="nb-cite"
+            ><a href="#s1">1</a></sup
+          >
+          The outcome, then, is a caregiver's rating of a child's
+          observable symptoms, not a clinician's diagnosis and not the child's
+          own account. Every causal claim the paper makes terminates here, and
+          the claim is only ever as good as the measurement it lands on.
+        </p>
+      </section>
+
+      <section data-nb-section="machine" id="machine">
+        <h2>How an algorithm points a causal arrow</h2>
+        <p>
+          Causal discovery starts from a fact any statistician knows and inverts
+          it. Correlation does not imply causation, but causation leaves a
+          specific fingerprint in the correlations. If A causes B causes C, then
+          A and C are dependent, yet once you condition on B they come apart: B
+          screens them off. Read enough of these conditional independences and
+          you can reconstruct much of the graph that produced them. The
+          canonical method is the PC algorithm, which first deletes an edge
+          between any two variables that turn out conditionally independent given
+          some set of others, leaving a skeleton, then orients edges by hunting
+          for colliders, the pattern where two arrows collide into one variable
+          without the parents being adjacent.<sup class="nb-cite"
+            ><a href="#s6">6</a></sup
+          >
+        </p>
+        <div class="nb-callout">
+          <span class="nb-callout-term">Markov boundary</span>
+          The smallest set of variables that makes the target independent of
+          everything else. Under the method's assumptions it is exactly the
+          target's direct causes, its direct effects, and the other direct causes
+          of those effects. It is the local causal neighborhood, and it is what
+          the paper reports for PTS.
+        </div>
+        <p>
+          This buys power at the price of assumptions, and the assumptions are
+          where a reader's scrutiny belongs. The method needs faithfulness: every
+          conditional independence in the data must reflect the true graph's
+          structure rather than two effects happening to cancel. The authors
+          reassure that unfaithful distributions are vanishingly rare, "Lebesque
+          measure 0" in their phrase, which is true in theory and says nothing
+          about whether a finite, noisy sample of 1,053 children behaves.<sup
+            class="nb-cite"
+            ><a href="#s1">1</a></sup
+          >
+          It also needs the graph to be complete enough that no unmeasured
+          variable is secretly a common cause of two it does see. And even with
+          both, observation alone cannot fully orient a graph: it can only pin it
+          down to a Markov equivalence class, the set of graphs that share the
+          same skeleton and colliders and are otherwise indistinguishable from the
+          data.<sup class="nb-cite"><a href="#s1">1</a></sup>
+        </p>
+        <figure class="nb-excerpt">
+          <blockquote>
+            Observational data can only resolve causal directions up to the
+            Markov Equivalence class (i.e., the set of causal graphs that share
+            the same edge orientations consistent with the data), leaving the
+            rest as unknown.<sup class="nb-cite"><a href="#s1">1</a></sup>
+          </blockquote>
+          <figcaption>
+            <span class="nb-excerpt-loc">Discussion</span>
+            The paper states the ceiling on what observation can recover, then
+            uses time to break past it, not more data.
+          </figcaption>
+        </figure>
+        <p>
+          Time is how the study escapes the tie. Because a cause cannot follow its
+          effect, the eight developmental époques from constitutional and
+          perinatal factors through the age-8 wave supply orientations no
+          statistics could. In the final network, 35.5% of the 818 edges were
+          pointed by time ordering alone and 59.3% by the algorithm's collider
+          rules, leaving 43 edges the method could not orient.<sup
+            class="nb-cite"
+            ><a href="#s1">1</a></sup
+          >
+          The pipeline itself, GLL-PC, extends this constraint-based logic into a
+          framework for learning the local structure around one target variable
+          in high dimensions from modest samples, work co-authored by the paper's
+          senior author.<sup class="nb-cite"><a href="#s7">7</a></sup> Applied to
+          the PTS T-score, it returns that target's Markov boundary: 19 variables,
+          28 edges.<sup class="nb-cite"><a href="#s1">1</a></sup>
+        </p>
+      </section>
+
+      <section data-nb-section="finding" id="finding">
+        <h2>Four things that make it, two things it makes</h2>
+        <p>
+          Inside that boundary sit four direct causes of posttraumatic stress at
+          age 8: emotional maltreatment recorded between ages 0 and 4, physical
+          assault at 8, witnessing violence at 8, and the child's feeling of
+          safety at 8.<sup class="nb-cite"><a href="#s1">1</a></sup> Three of the
+          four are unsurprising in direction and valuable in status. That
+          witnessing violence and being assaulted raise trauma symptoms is not
+          news; that an algorithm designed to strip out confounding still finds
+          the edge, after conditioning on a broad field of alternatives, is what
+          the correlational literature could never establish. The fourth cause is
+          the interesting one. Feeling safe is not an exposure done to the child
+          but a state inside it, and the model places it as a direct cause rather
+          than a byproduct, which is what makes it a candidate prevention lever
+          rather than a symptom to wait out.
+        </p>
+        <p>
+          The two direct effects run the other way, out of PTS. The first,
+          negative self-image, is the expected downstream cost, and it is worth
+          pausing on: the developmental criteria deliberately de-emphasize
+          self-referential beliefs at younger ages because children cannot yet
+          articulate them,<sup class="nb-cite"><a href="#s4">4</a></sup> so seeing
+          the construct emerge as a consequence by age 8 tracks a real
+          developmental window opening. The second effect is the one that stops a
+          reader, because it seems to run backward.
+        </p>
+        <figure class="nb-excerpt">
+          <blockquote>
+            A child with distress from PTS would naturally try to elicit help and
+            protection from their parents/caregivers: but this observed pathway is
+            also related to severe emotional maltreatment and maltreatment related
+            to substance abuse.<sup class="nb-cite"><a href="#s1">1</a></sup>
+          </blockquote>
+          <figcaption>
+            <span class="nb-excerpt-loc">Discussion</span>
+            The model's most counterintuitive edge, and the authors' proposed
+            mechanism for it, offered as interpretation rather than established
+            fact.
+          </figcaption>
+        </figure>
+      </section>
+
+      <section data-nb-section="backwards-arrow" id="backwards-arrow">
+        <h2>The arrow that points from stress to more harm</h2>
+        <p>
+          The model says PTS at age 8 is a direct cause of severe assault by a
+          non-caregiver at age 8. A trauma symptom causing a later assault
+          inverts the usual reading, in which assault causes trauma. The authors
+          do not dodge it; they propose a mechanism. A child in distress reaches
+          for protection, and when the caregivers who should provide it are
+          absent, incapacitated, or themselves the source of harm, the child's
+          reaching turns toward adults outside any caregiving role, where the risk
+          of exploitation is highest.<sup class="nb-cite"><a href="#s1">1</a></sup>
+          On that reading the arrow is not backward at all. Distress produces a
+          behavior, help-seeking under conditions of caregiver failure, and the
+          behavior raises exposure to a specific danger. The direction is not
+          invented for this dataset: a systematic review of childhood
+          maltreatment and revictimization finds prospective evidence that PTSD
+          symptom severity mediates the path from earlier victimization to later
+          victimization, though it rates that evidence as preliminary.<sup
+            class="nb-cite"
+            ><a href="#s8">8</a></sup
+          >
+        </p>
+        <p>
+          This is the single best thing in the paper for a reader learning how
+          causal discovery earns its keep, and also the single most fragile
+          claim, and the two facts are the same fact. An edge this surprising is
+          exactly what a correlational study would either miss or dismiss as
+          reverse causation. It is also exactly the kind of edge that a
+          time-ordering assumption within a single wave cannot firmly orient, and
+          that the authors flag as sensitive to sampling variation, calling for
+          replication before anyone builds on it.<sup class="nb-cite"
+            ><a href="#s1">1</a></sup
+          >
+          The right response is neither to discard it nor to believe it, but to
+          treat it as the model's most testable prediction: a hypothesis sharp
+          enough to design the next study around.
+        </p>
+      </section>
+
+      <section data-nb-section="what-it-licenses" id="what-it-licenses">
+        <h2>What the run licenses, and what it does not</h2>
+        <p>
+          The paper's own honesty is its best feature, and reading it well means
+          reproducing that honesty rather than the abstract's cleaner headline.
+          Take the confident sentence, "four direct causes," against the buried
+          concession that "edges between several variables were observed in less
+          than 30% of bootstrapped samples."<sup class="nb-cite"
+            ><a href="#s1">1</a></sup
+          >
+          Bootstrapping refits the model on 100 resamples of the children and asks
+          how often each edge survives. An edge that appears in under a third of
+          them is not thereby false, and the authors are right that low power at
+          this sample size can hide a true edge. But it is a signal that the edge
+          may be an artifact of these particular 1,053 children, and the reader
+          should carry the four causes with the stability written next to each,
+          not the flat confidence of the summary.
+        </p>
+        <div class="nb-holdsup">
+          <div class="good">
+            <span class="nb-holdsup-label">What holds up</span>
+            <ul>
+              <li>
+                Edges that echo the trauma literature (witnessing violence,
+                physical assault, feeling of safety) now carry a causal reading
+                the correlational work could not supply, unconfounded by the 251
+                other measured variables.
+              </li>
+              <li>
+                A multiplicity test confirmed a single Markov boundary for PTS,
+                which is the internal consistency check the method demands.
+              </li>
+              <li>
+                The design converts an untestable question into a set of concrete,
+                falsifiable pathways a prevention study can target.
+              </li>
+            </ul>
+          </div>
+          <div class="careful">
+            <span class="nb-holdsup-label">What to be careful about</span>
+            <ul>
+              <li>
+                The outcome is a caregiver-reported symptom T-score, not a
+                diagnosis; a shared reporter can couple causes and effect in ways
+                the graph reads as structure.
+              </li>
+              <li>
+                Faithfulness and, above all, no unmeasured confounding are
+                assumptions, not results. The authors concede the method "cannot
+                rule out the possibility of confounding from unmeasured
+                variables."<sup class="nb-cite"><a href="#s1">1</a></sup>
+              </li>
+              <li>
+                Several edges, including the counterintuitive one, are unstable
+                under resampling and await replication in a second cohort.
+              </li>
+            </ul>
+          </div>
+        </div>
+        <p>
+          One smaller thing the reader can check without the data: the paper
+          reports 43 of 818 edges left unoriented and calls that 6.3%, but 43 of
+          818 is 5.3%. The slip is harmless to the argument and useful as a
+          reminder that a network with 818 edges is still assembled by hand and
+          eye at the edges, and deserves the arithmetic double-check any result
+          does.<sup class="nb-cite"><a href="#s1">1</a></sup>
+        </p>
+        <p>
+          The honest verdict is that this is a promising method used carefully on
+          a hard problem, and that its value is a menu of prevention hypotheses
+          rather than a settled etiology. The authors say as much when they list
+          the levers with the broadest reach across the 138 pathways, helping a
+          child feel safer, treating a caregiver's partner's lack of empathy, and
+          supporting a four-year-old's motor development, each an intervention
+          someone could actually run and test.<sup class="nb-cite"
+            ><a href="#s1">1</a></sup
+          >
+          What causal discovery adds here is not certainty about the causes of
+          child PTSD. It is a principled way to decide which of the many things
+          that travel with it are worth the expense of trying to change, on data
+          where the experiment can never be run. That is a real contribution, and
+          it is a smaller one than "the causes were found," which is the reading
+          the paper takes pains to refuse.
+        </p>
+      </section>
+
+      <section data-nb-section="read-it-yourself" id="read-it-yourself">
+        <h2>Read it yourself</h2>
+        <p>
+          A full read pays where this reconstruction summarized: the exact
+          machinery, and the pathway diagram that carries the prevention argument.
+        </p>
+        <ul class="nb-paper-map">
+          <li>
+            <span class="nb-map-verdict nb-read">read</span>
+            <strong class="nb-map-target">Methods, the PCDSP pipeline</strong>:
+            the conditioning-set size, the p-value threshold, and the multiplicity
+            and bootstrap safeguards are where you judge whether the graph is
+            trustworthy, and they are stated precisely.
+          </li>
+          <li>
+            <span class="nb-map-verdict nb-read">read</span>
+            <strong class="nb-map-target"
+              >Figure 2, the local causal network</strong
+            >: the Markov boundary drawn out, with the edge stabilities that the
+            abstract's clean list omits.
+          </li>
+          <li>
+            <span class="nb-map-verdict nb-skim">skim</span>
+            <strong class="nb-map-target">Discussion, prevention targets</strong>:
+            pull the three highest-influence levers and the pathway logic; the
+            surrounding interpretation is more suggestive than settled.
+          </li>
+          <li>
+            <span class="nb-map-verdict nb-skip">skip</span>
+            <strong class="nb-map-target"
+              >the general defense of causal data science</strong
+            >: useful if the paradigm is new to you, skippable if you already know
+            the PC algorithm and want this study's result.
+          </li>
+        </ul>
+      </section>
+
+      <section class="nb-sources" data-nb-section="sources" id="sources">
+        <h2>Sources</h2>
+        <ol>
+          <li id="s1">
+            <a
+              data-nb-source
+              href="https://pmc.ncbi.nlm.nih.gov/articles/PMC13143975/"
+              >PMC / Frontiers in Health Services · Saxe et al., "Posttraumatic
+              stress in young children at risk for maltreatment: a causal data
+              science analysis" (2026)</a
+            >
+          </li>
+          <li id="s2">
+            <a data-nb-source href="https://pubmed.ncbi.nlm.nih.gov/24785767/"
+              >British Journal of Psychiatry · Alisic et al., "Rates of
+              post-traumatic stress disorder in trauma-exposed children and
+              adolescents: meta-analysis" (2014)</a
+            >
+          </li>
+          <li id="s3">
+            <a
+              data-nb-source
+              href="https://www.ndacan.acf.hhs.gov/datasets/dataset-details.cfm?ID=170"
+              >NDACAN · Longitudinal Studies on Child Abuse and Neglect
+              (LONGSCAN), dataset and consortium overview</a
+            >
+          </li>
+          <li id="s4">
+            <a
+              data-nb-source
+              href="https://www.ptsd.va.gov/professional/treat/specific/ptsd_child_under6.asp"
+              >U.S. Department of Veterans Affairs, National Center for PTSD ·
+              PTSD in children 6 years and younger (DSM-5 developmental
+              subtype)</a
+            >
+          </li>
+          <li id="s5">
+            <a
+              data-nb-source
+              href="https://www.nctsn.org/measures/trauma-symptom-checklist-young-children"
+              >National Child Traumatic Stress Network · Trauma Symptom Checklist
+              for Young Children (TSCYC), instrument description</a
+            >
+          </li>
+          <li id="s6">
+            <a
+              data-nb-source
+              href="https://direct.mit.edu/books/monograph/2057/Causation-Prediction-and-Search"
+              >MIT Press · Spirtes, Glymour & Scheines, "Causation, Prediction,
+              and Search" (the PC algorithm, faithfulness, Markov equivalence)</a
+            >
+          </li>
+          <li id="s7">
+            <a
+              data-nb-source
+              href="https://www.jmlr.org/papers/v11/aliferis10a.html"
+              >Journal of Machine Learning Research · Aliferis et al., "Local
+              Causal and Markov Blanket Induction for Causal Discovery and Feature
+              Selection for Classification, Part I" (2010)</a
+            >
+          </li>
+          <li id="s8">
+            <a
+              data-nb-source
+              href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10666465/"
+              >Trauma, Violence, & Abuse · "Childhood Maltreatment and
+              Revictimization: A Systematic Literature Review" (2023)</a
+            >
+          </li>
+        </ol>
+      </section>
+    </article>
+  </body>
+</html>

@@ -1,0 +1,383 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Bartz v. Anthropic: The Line Between Learning and Piracy — Docket</title>
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400..700;1,6..72,400..700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="../../assets/theme.css" />
+    <link rel="stylesheet" href="../../assets/nb.css" />
+    <script defer src="../../assets/nb.js"></script>
+    <script type="application/json" id="nb-meta">
+      {
+        "protocol": "1.1",
+        "series": "docket",
+        "slug": "bartz-v-anthropic",
+        "template": "article",
+        "title": "Bartz v. Anthropic: The Line Between Learning and Piracy",
+        "mode": "open",
+        "order": null,
+        "date": "2026-07-07",
+        "tags": ["copyright", "training-data", "fair-use"],
+        "sources": 9,
+        "words": 1590,
+        "reading_minutes": 7,
+        "dek": "A landmark ruling made training on books fair use; a $1.5 billion settlement made pirating them the expensive part — and the difference is provenance.",
+        "harness": "claude-code-routine",
+        "model": "claude-opus-4-8"
+      }
+    </script>
+  </head>
+  <body class="nb-article">
+    <article class="nb-reading">
+      <header>
+        <div class="nb-eyebrow">Docket · AI &amp; the Law</div>
+        <h1 class="nb-title">Bartz v. Anthropic: The Line Between Learning and Piracy</h1>
+        <p class="nb-dekline">
+          A landmark ruling made training on books fair use; a $1.5 billion
+          settlement made pirating them the expensive part — and the difference
+          is provenance.
+        </p>
+        <div class="nb-byline"><span>7 min read</span><span>2026-07-07</span></div>
+      </header>
+
+      <section data-nb-section="orientation" id="orientation">
+        <div class="rs-docket">
+          <span class="rs-docket-case">Bartz v. Anthropic PBC</span>
+          <span class="rs-docket-court">N.D. Cal. · No. 3:24-cv-05417</span>
+          <dl class="rs-docket-grid">
+            <dt>Stage</dt>
+            <dd>
+              Settlement awaiting final approval; fairness hearing held 14 May
+              2026 and taken under submission
+            </dd>
+            <dt>Question</dt>
+            <dd>
+              Is copying books to train an LLM fair use — and does buying versus
+              pirating the copies change the answer?
+            </dd>
+            <dt>Stakes</dt>
+            <dd>
+              The legal line between lawful and unlawful training data, and the
+              statutory price of crossing it
+            </dd>
+          </dl>
+        </div>
+        <p>
+          Three authors — Andrea Bartz, Charles Graeber and Kirk Wallace Johnson
+          — sued Anthropic in 2024, alleging their books had been copied to build
+          and train its Claude models.<sup class="nb-cite"><a href="#s4">4</a></sup>
+          The case matters to anyone who assembles a training corpus because it
+          produced the first substantive US ruling on whether that copying is
+          fair use, and then the largest copyright settlement in the country's
+          history — and the two point in opposite directions. Training on books
+          was held lawful; the way Anthropic obtained many of them was not.
+        </p>
+        <p>
+          What you should be able to judge after reading this: why the same
+          conduct can be both "exceedingly transformative" and a nine-figure
+          liability, why the settlement leaves the most important question for
+          builders unanswered, and what actually changes about how a lawful
+          corpus is sourced.
+        </p>
+      </section>
+
+      <section data-nb-section="the-ruling" id="the-ruling">
+        <h2>What Judge Alsup actually held</h2>
+        <p>
+          Fair use is a statutory defence. Section 107 of the Copyright Act tells
+          a court to weigh four factors: the purpose and character of the use,
+          the nature of the work, the amount used, and — the factor that decides
+          most modern cases — "the effect of the use upon the potential market
+          for or value of the copyrighted work."<sup class="nb-cite"><a href="#s1">1</a></sup>
+          No factor is dispositive; the court weighs them together.
+        </p>
+        <p>
+          On 23 June 2025, Judge William Alsup split the conduct into three parts
+          and decided each separately.<sup class="nb-cite"><a href="#s2">2</a></sup>
+          First, using the books to train the models was fair use: the court
+          called the purpose "exceedingly transformative," reasoning that a model
+          learning statistical structure from text to generate new text is closer
+          to how a writer learns from what they read than to republishing the
+          book. Second, digitising books Anthropic had lawfully purchased in print
+          — destroying each physical copy as it was scanned — was also fair use,
+          a format shift that added no new copies to the world. Third, and
+          decisively, downloading pirated copies from shadow libraries to build a
+          permanent central library was <em>not</em> protected, and that question
+          was headed for trial.<sup class="nb-cite"><a href="#s2">2</a></sup>
+        </p>
+        <div class="nb-callout">
+          <span class="nb-callout-term">The purchase-versus-pirate line</span>
+          The ruling does not turn on what the model learned. Two corpora that
+          train an identical model can land on opposite sides of the law purely
+          by how the underlying copies were acquired: bought and scanned is
+          defensible; downloaded from LibGen is not.
+        </div>
+        <p>
+          That distinction is the holding's centre of gravity. The transformative
+          nature of training did the work of clearing the first hurdle; the
+          <em>source</em> of the copies did the work of creating the liability.
+        </p>
+      </section>
+
+      <section data-nb-section="the-settlement" id="the-settlement">
+        <h2>Why the number is $1.5 billion</h2>
+        <p>
+          The settlement's size is not a measure of the authors' lost sales. It
+          is a function of statutory damages. US copyright law lets a plaintiff
+          elect a fixed penalty per infringed work — $750 to $30,000 for ordinary
+          infringement, and up to $150,000 where the infringement is wilful —
+          regardless of proven harm.<sup class="nb-cite"><a href="#s7">7</a></sup>
+          Court filings indicated Anthropic had downloaded more than seven million
+          books from pirate sites; after certification, roughly 482,460 works
+          qualified for the class.<sup class="nb-cite"><a href="#s7">7</a></sup>
+          Multiply that class by the wilful maximum and the theoretical exposure
+          runs past $70 billion — a bet-the-company number even after a fair-use
+          win on training.
+        </p>
+        <div class="nb-stat-strip">
+          <div class="nb-stat">
+            <span class="nb-stat-n">$1.5B</span
+            ><span class="nb-stat-l">SETTLEMENT FUND</span>
+          </div>
+          <div class="nb-stat">
+            <span class="nb-stat-n">482,460</span
+            ><span class="nb-stat-l">WORKS IN CLASS</span>
+          </div>
+          <div class="nb-stat">
+            <span class="nb-stat-n">~$3,100</span
+            ><span class="nb-stat-l">PER WORK CLAIMED</span>
+          </div>
+          <div class="nb-stat">
+            <span class="nb-stat-n">$150K</span
+            ><span class="nb-stat-l">MAX STATUTORY / WORK</span>
+          </div>
+        </div>
+        <p>
+          After Judge Alsup certified a class of rightsholders whose works came
+          from shadow libraries, the parties settled the piracy claim rather than
+          try it.<sup class="nb-cite"><a href="#s4">4</a></sup> The $1.5 billion
+          fund, net of fees and costs, works out to roughly $3,100 per claimed
+          work — a small fraction of the statutory ceiling, but spread across
+          hundreds of thousands of titles.<sup class="nb-cite"><a href="#s7">7</a></sup>
+          By the May 2026 fairness hearing the claims rate had reached about 92.8
+          per cent of eligible works, with only a few hundred opt-outs.<sup class="nb-cite"><a href="#s5">5</a></sup>
+        </p>
+        <ol class="nb-timeline">
+          <li class="nb-tl-event major">
+            <span class="nb-tl-date">2024</span>
+            <h3>
+              Complaint filed<sup class="nb-cite"><a href="#s4">4</a></sup>
+            </h3>
+            <p>Three authors sue over books used to build and train Claude.</p>
+          </li>
+          <li class="nb-tl-event">
+            <span class="nb-tl-date">Jun 2025</span>
+            <h3>
+              Summary judgment<sup class="nb-cite"><a href="#s2">2</a></sup>
+            </h3>
+            <p>Training and lawful digitisation are fair use; pirated copies are not.</p>
+          </li>
+          <li class="nb-tl-event">
+            <span class="nb-tl-date">Jul 2025</span>
+            <h3>
+              Class certified<sup class="nb-cite"><a href="#s4">4</a></sup>
+            </h3>
+            <p>A class of rightsholders whose works came from shadow libraries.</p>
+          </li>
+          <li class="nb-tl-event">
+            <span class="nb-tl-date">Sep 2025</span>
+            <h3>
+              $1.5B settlement<sup class="nb-cite"><a href="#s7">7</a></sup>
+            </h3>
+            <p>The piracy claim is settled rather than tried, and preliminarily approved.</p>
+          </li>
+          <li class="nb-tl-event major">
+            <span class="nb-tl-date">May 2026</span>
+            <h3>
+              Fairness hearing<sup class="nb-cite"><a href="#s5">5</a></sup>
+            </h3>
+            <p>Final approval taken under submission, with fee questions outstanding.</p>
+          </li>
+        </ol>
+        <p>
+          The matter is not closed. The case passed to Judge Araceli
+          Martínez-Olguín for final approval, and at the 14 May 2026 hearing she
+          took it under submission — pressing mainly on attorneys' fees (an
+          objection put the multiplier near 6.9 times lodestar) and on the cost
+          reserve — rather than approving from the bench.<sup class="nb-cite"><a href="#s5">5</a></sup>
+          As of this writing the court had ordered supplemental briefing on a
+          handful of late opt-outs and had not yet entered a final approval
+          order.<sup class="nb-cite"><a href="#s6">6</a></sup>
+        </p>
+      </section>
+
+      <section data-nb-section="what-it-doesnt-settle" id="what-it-doesnt-settle">
+        <h2>What the settlement does not settle</h2>
+        <p>
+          A settlement resolves liability; it does not make law. The piracy
+          question that was headed for trial will now go unadjudicated, so the
+          only binding doctrine to come out of Bartz is the summary-judgment
+          holding: training can be fair use, acquisition can still infringe.<sup class="nb-cite"><a href="#s7">7</a></sup>
+          Two live uncertainties sit on either side of it.
+        </p>
+        <div class="nb-position">
+          <span class="nb-position-who">Judge Alsup, in Bartz</span>
+          <span class="nb-position-stance"
+            >Transformative purpose is what makes LLM training fair use.</span
+          >
+          <p>
+            The court found training "exceedingly transformative" and concluded
+            it would not displace demand for the books, since no infringing copies
+            reached the public.<sup class="nb-cite"><a href="#s2">2</a></sup>
+          </p>
+        </div>
+        <div class="nb-position">
+          <span class="nb-position-who">Judge Chhabria, in Kadrey v. Meta</span>
+          <span class="nb-position-stance"
+            >Market dilution is the factor that should decide these cases.</span
+          >
+          <p>
+            Ruling the same month, he warned that no use has "anything near the
+            potential to flood the market with competing works the way that LLM
+            training does," and criticised a transformative-first analysis — yet
+            still ruled for Meta because the authors failed to build an
+            evidentiary record of that harm.<sup class="nb-cite"><a href="#s3">3</a></sup>
+          </p>
+        </div>
+        <p>
+          The gap between two judges in the same courthouse is the warning: the
+          fair-use win rests on a market-harm theory a better-argued plaintiff may
+          yet dislodge. On the other side, Anthropic's own certification narrows
+          the win further. The company states the settlement releases only legacy
+          training claims, not any claim based on model <em>outputs</em>, and
+          certifies that it did not use the LibGen or PiLiMi material in
+          commercial models.<sup class="nb-cite"><a href="#s8">8</a></sup>
+          Output liability and web-scraped data remain untested.
+        </p>
+      </section>
+
+      <section data-nb-section="for-builders" id="for-builders">
+        <h2>What an engineer should take from it</h2>
+        <p>
+          The practical lesson inverts the headline. "AI training is fair use" is
+          the quotable line, but the enforceable rule that emerged is narrower and
+          more operational: <em>provenance is the liability.</em> The same model,
+          trained on the same text, is defensible or ruinous depending on whether
+          the copies were lawfully acquired.<sup class="nb-cite"><a href="#s2">2</a></sup>
+          For anyone assembling a corpus, three things follow.
+        </p>
+        <ol class="nb-steps">
+          <li>
+            <h3>Treat acquisition as the control point</h3>
+            <p>
+              Keep records of where each part of a corpus came from and on what
+              licence. A shadow-library shortcut converts a fair-use defence into
+              a statutory-damages exposure measured per work.<sup class="nb-cite"><a href="#s7">7</a></sup>
+            </p>
+          </li>
+          <li>
+            <h3>Do not read the win as covering outputs</h3>
+            <p>
+              The settlement expressly leaves output-based claims alive; a model
+              that reproduces protected text is a separate risk the training
+              holding does not touch.<sup class="nb-cite"><a href="#s8">8</a></sup>
+            </p>
+          </li>
+          <li>
+            <h3>Assume the market-harm theory is unsettled</h3>
+            <p>
+              A future plaintiff who documents market dilution, as Judge Chhabria
+              invited, could reach a different result on the same training
+              conduct.<sup class="nb-cite"><a href="#s3">3</a></sup>
+            </p>
+          </li>
+        </ol>
+      </section>
+
+      <section data-nb-section="go-deeper" id="go-deeper">
+        <h2>Go deeper</h2>
+        <p>
+          Read the statute first: 17 U.S.C. § 107 is one paragraph, and the four
+          factors are the frame every one of these cases argues within.<sup class="nb-cite"><a href="#s1">1</a></sup>
+          Then follow the primary record on the docket — the summary-judgment
+          order, the class-certification order, and the settlement papers are all
+          filed under No. 3:24-cv-05417 in the Northern District of California.<sup class="nb-cite"><a href="#s9">9</a></sup>
+          To see how contested the reasoning is, read the Bartz and Kadrey orders
+          side by side: same court, same month, opposite emphasis on market
+          harm.<sup class="nb-cite"><a href="#s3">3</a></sup> Watch next for the
+          final-approval order in this case, and for the first plaintiff to bring
+          the market-dilution record Chhabria said was missing.<sup class="nb-cite"><a href="#s6">6</a></sup>
+        </p>
+      </section>
+
+      <section class="nb-sources" data-nb-section="sources" id="sources">
+        <h2>Sources</h2>
+        <ol>
+          <li id="s1">
+            <a data-nb-source href="https://www.law.cornell.edu/uscode/text/17/107"
+              >Legal Information Institute (Cornell Law) — 17 U.S.C. § 107, fair
+              use and its four statutory factors</a
+            >
+          </li>
+          <li id="s2">
+            <a data-nb-source href="https://www.goodwinlaw.com/en/insights/publications/2025/06/alerts-practices-aiml-district-court-issues-ai-fair-use-decision"
+              >Goodwin — analysis of Judge Alsup's 23 June 2025 summary-judgment
+              order in Bartz v. Anthropic (three holdings; training as fair use;
+              pirated library copies not)</a
+            >
+          </li>
+          <li id="s3">
+            <a data-nb-source href="https://www.whitecase.com/insight-alert/two-california-district-judges-rule-using-books-train-ai-fair-use"
+              >White &amp; Case — comparison of Bartz (Alsup) and Kadrey v. Meta
+              (Chhabria) on transformativeness and market dilution</a
+            >
+          </li>
+          <li id="s4">
+            <a data-nb-source href="https://www.insidetechlaw.com/blog/2025/09/bartz-v-anthropic-settlement-reached-after-landmark-summary-judgment-and-class-certification"
+              >Norton Rose Fulbright, Inside Tech Law — class certification of the
+              shadow-library class and the September 2025 settlement</a
+            >
+          </li>
+          <li id="s5">
+            <a data-nb-source href="https://www.authorsalliance.org/2026/05/14/bartz-v-anthropic-fairness-hearing-observations-and-takeaways/"
+              >Authors Alliance — observations from the 14 May 2026 final-approval
+              hearing before Judge Martínez-Olguín (claims rate, opt-outs, fee
+              objections, matter taken under submission)</a
+            >
+          </li>
+          <li id="s6">
+            <a data-nb-source href="https://www.publishersweekly.com/pw/by-topic/digital/copyright/article/100438-little-drama-at-anthropic-s-settlement-hearing.html"
+              >Publishers Weekly — coverage of the May 2026 fairness hearing and
+              the supplemental briefing ordered on late opt-outs</a
+            >
+          </li>
+          <li id="s7">
+            <a data-nb-source href="https://legalblogs.wolterskluwer.com/copyright-blog/the-bartz-v-anthropic-settlement-understanding-americas-largest-copyright-settlement/"
+              >Kluwer Copyright Blog — statutory-damages exposure (17 U.S.C. §
+              504), the ~7 million pirated works, and why the settlement leaves
+              the piracy question unadjudicated</a
+            >
+          </li>
+          <li id="s8">
+            <a data-nb-source href="https://www.npr.org/2025/09/05/g-s1-87367/anthropic-authors-settlement-pirated-chatbot-training-material"
+              >NPR — Anthropic's statement on the settlement (legacy claims only;
+              no release of output-based claims; certification on LibGen/PiLiMi
+              material)</a
+            >
+          </li>
+          <li id="s9">
+            <a data-nb-source href="https://www.courtlistener.com/docket/69058235/bartz-v-anthropic-pbc/"
+              >CourtListener — the Bartz v. Anthropic docket, No. 3:24-cv-05417
+              (N.D. Cal.), primary filings and orders</a
+            >
+          </li>
+        </ol>
+      </section>
+    </article>
+  </body>
+</html>

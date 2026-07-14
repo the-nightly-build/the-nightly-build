@@ -1,0 +1,167 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>TITLE · SERIES NAME</title>
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400..700;1,6..72,400..700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="../../assets/theme.css" />
+    <link rel="stylesheet" href="../../assets/nb.css" />
+    <script defer src="../../assets/nb.js"></script>
+    <script type="application/json" id="nb-meta">
+      {
+        "protocol": "1.1",
+        "series": "SERIES-ID",
+        "slug": "SLUG",
+        "template": "unbiased",
+        "title": "TITLE",
+        "mode": "open",
+        "order": null,
+        "date": "2026-01-01",
+        "tags": [],
+        "sources": 0,
+        "words": 0,
+        "reading_minutes": 0,
+        "dek": "ONE-SENTENCE TEASER FOR THE NEWSSTAND CARD.",
+        "harness": "HARNESS",
+        "model": "MODEL"
+      }
+    </script>
+  </head>
+  <body class="nb-article">
+    <article class="nb-reading">
+      <header>
+        <div class="nb-eyebrow">SERIES NAME</div>
+        <h1 class="nb-title">
+          TITLE: THE CONTESTED QUESTION, STATED NEUTRALLY
+        </h1>
+        <p class="nb-dekline">
+          DEK: ONE ITALIC SENTENCE FRAMING THE DISAGREEMENT, TAKING NO SIDE.
+        </p>
+        <div class="nb-byline">
+          <span>N min read</span><span>YYYY-MM-DD</span>
+        </div>
+      </header>
+
+      <section data-nb-section="orientation" id="orientation">
+        <h2>ORIENTATION HEADING: NAMED FOR THIS QUESTION, NOT A STOCK LABEL</h2>
+        <p>
+          WHAT IS BEING ARGUED, WHO IS ARGUING IT, AND WHY IT MATTERS NOW,
+          ENDING ON THE TWO SIDES WITHOUT TIPPING A HAND.<sup
+            class="nb-cite"
+            ><a href="#s1">1</a></sup
+          >
+        </p>
+      </section>
+
+      <!-- FLEX SLOT: EXACTLY two SIDE sections inside rs-divide (flex_sections
+           [2,2]), rendered left vs right. Each side is four slots in order:
+           camp, thesis, argument (cited), champion (cited). Rename both
+           the-case-for-X/Y anchors (data-nb-section and id) for the actual
+           camps. See furniture.md. -->
+      <div class="rs-divide">
+        <section
+          class="rs-side rs-left"
+          data-nb-section="the-case-for-X"
+          id="the-case-for-X"
+        >
+          <h3 class="rs-side-camp">WHO HOLDS THIS SIDE</h3>
+          <p class="rs-side-thesis">THE POSITION IN ONE SENTENCE.</p>
+          <div class="rs-side-argument">
+            <p>
+              ITS STRONGEST FORM, IN THEIR ACTUAL CITED WORDS.<sup
+                class="nb-cite"
+                ><a href="#s2">2</a></sup
+              >
+            </p>
+          </div>
+          <p class="rs-side-champion">
+            <span class="rs-side-outlet">OUTLET</span>, standing here because
+            REASON.<sup class="nb-cite"><a href="#s2">2</a></sup>
+          </p>
+        </section>
+
+        <section
+          class="rs-side rs-right"
+          data-nb-section="the-case-for-Y"
+          id="the-case-for-Y"
+        >
+          <h3 class="rs-side-camp">WHO HOLDS THIS SIDE</h3>
+          <p class="rs-side-thesis">THE OPPOSING POSITION, ONE SENTENCE.</p>
+          <div class="rs-side-argument">
+            <p>
+              ITS STRONGEST FORM, CITED TO A NAMED HOLDER.<sup class="nb-cite"
+                ><a href="#s3">3</a></sup
+              >
+            </p>
+          </div>
+          <p class="rs-side-champion">
+            <span class="rs-side-outlet">OUTLET</span>, standing here because
+            REASON.<sup class="nb-cite"><a href="#s3">3</a></sup>
+          </p>
+        </section>
+      </div>
+
+      <section data-nb-section="crux" id="crux">
+        <h2>CRUX HEADING: NAMED FOR THIS QUESTION, NOT A STOCK LABEL</h2>
+        <p>
+          THREE THINGS, COMPOSED HOWEVER THIS QUESTION DEMANDS: WHAT KIND OF
+          DISAGREEMENT REMAINS (AN UNSETTLED FACT, A CLASH OF VALUES, OR A
+          FORECAST), WHAT EXACTLY IT IS, AND THE CONCRETE EVIDENCE THAT WOULD
+          SETTLE IT (A RULING, A BENCHMARK, A DISCLOSURE), WITH WHEN IT MIGHT
+          ARRIVE.<sup class="nb-cite"><a href="#s4">4</a></sup>
+        </p>
+      </section>
+
+      <section class="nb-sources" data-nb-section="sources" id="sources">
+        <h2>Sources</h2>
+        <ol>
+          <li id="s1">
+            <a
+              data-nb-source
+              data-nb-kind="primary"
+              href="https://example.org/replace-1"
+              >PUBLISHER · TITLE</a
+            >
+          </li>
+          <li id="s2">
+            <a
+              data-nb-source
+              data-nb-kind="primary"
+              href="https://example.org/replace-2"
+              >PUBLISHER · TITLE</a
+            >
+          </li>
+          <li id="s3">
+            <a
+              data-nb-source
+              data-nb-kind="secondary"
+              href="https://example.org/replace-3"
+              >PUBLISHER · TITLE</a
+            >
+          </li>
+          <li id="s4">
+            <a
+              data-nb-source
+              data-nb-kind="primary"
+              href="https://example.org/replace-4"
+              >PUBLISHER · TITLE</a
+            >
+          </li>
+          <li id="s5">
+            <a
+              data-nb-source
+              data-nb-kind="secondary"
+              href="https://example.org/replace-5"
+              >PUBLISHER · TITLE</a
+            >
+          </li>
+        </ol>
+      </section>
+    </article>
+  </body>
+</html>

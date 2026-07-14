@@ -32,7 +32,7 @@ jobs:
       - run: uv run ruff check .
       - run: uv run ruff format --check .
       - run: uv run ty check
-      - run: uv run python engine/tests/run_tests.py
+      - run: uv run pytest
 
   web:
     runs-on: ubuntu-latest

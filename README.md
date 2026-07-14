@@ -137,7 +137,7 @@ never touch the 3.10 toolchain; the 3.10 floor is for contributing to the
 engine.
 
 ```sh
-python3 engine/tests/run_tests.py    # proof, builder, and end-to-end suites
+uv run pytest                        # proof, builder, and end-to-end suites
 python3 engine/validate_config.py    # validate press/ configuration
 ```
 

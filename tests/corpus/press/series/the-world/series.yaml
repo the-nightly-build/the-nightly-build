@@ -1,0 +1,34 @@
+# The general-news brief: five minutes, slugged by UTC date.
+name: The World
+mode: rolling
+section: "The Daily"
+template: brief
+prompt: prompt.md
+autopublish: true
+strict: true
+words: [600, 1200]
+cadence: daily
+# General news lives or dies on corroboration: every item rests on a document
+# that owns the claim, read by two outlets with no stake in it. Floors, both of
+# them: one read is not corroboration, and a third outlet that saw something the
+# first two missed is a better item, not a violation. The floors carry the night
+# well past any min_sources worth writing down.
+per_item_sources:
+  primary: [1, null]
+  secondary: [2, null]
+# The roster: consult entries are swept before researching elsewhere
+# (PROTOCOL step 4). Paywalled fronts may be gated to fetchers; the
+# researcher logs them as gated, never dead.
+consult:
+  - https://www.reuters.com/
+  - https://apnews.com/
+  - https://www.economist.com/
+  - https://www.ft.com/
+  - https://www.bloomberg.com/
+  - https://www.wsj.com/
+  - https://www.nytimes.com/
+  - https://www.readtangle.com/
+  - https://www.lawfaremedia.org/
+  - https://www.propublica.org/
+  - https://www.statnews.com/
+  - https://www.theatlantic.com/

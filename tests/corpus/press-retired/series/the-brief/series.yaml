@@ -1,0 +1,11 @@
+# A rolling series: one edition per night, slugged by UTC date. Missed nights
+# are skipped, never backfilled. No item list; the date is the item.
+name: The Brief
+mode: rolling
+section: "The Daily"
+template: brief
+prompt: prompt.md
+autopublish: true
+strict: false
+min_sources: 6
+cadence: daily

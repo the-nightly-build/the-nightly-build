@@ -1,0 +1,41 @@
+# The AI and technology brief. Rolling, slugged by UTC date, five minutes.
+name: The Wire
+mode: rolling
+section: "The Daily"
+template: brief
+prompt: prompt.md
+autopublish: true
+strict: true
+min_sources: 6
+words: [600, 1200]
+cadence: daily
+# A brief that is all abstracts is a reading list, not a brief. Any one item
+# may rest on its document alone; the night as a whole may not.
+sources_by_kind:
+  secondary: [3, null]
+# In AI the primary often IS the news, and the reporting lands weeks later, so
+# every item owns a document. A floor, not a quota: an item that rests on the
+# paper and the lab's own technical report is better read, not overcited.
+per_item_sources:
+  primary: [1, null]
+# The roster: consult entries are swept before researching elsewhere
+# (PROTOCOL step 4). Archive prefixes scope a search; they are not pages
+# to read whole.
+consult:
+  - https://arxiv.org/list/cs.LG/recent
+  - https://arxiv.org/list/cs.CL/recent
+  - https://arxiv.org/list/cs.AI/recent
+  - https://www.anthropic.com/news
+  - https://openai.com/news/
+  - https://deepmind.google/discover/blog/
+  - https://ai.meta.com/blog/
+  - https://simonwillison.net/
+  - https://www.interconnects.ai/
+  - https://jack-clark.net/
+  - https://lilianweng.github.io/
+  - https://epoch.ai/
+  - https://www.theinformation.com/
+  - https://stratechery.com/
+  - https://www.understandingai.org/
+  - https://arstechnica.com/
+  - https://www.chinatalk.media/

@@ -3,5 +3,10 @@
   "rules": {
     "no-descending-specificity": null
   },
-  "ignoreFiles": ["press/**/*.css", "press-check/**/*.css", "node_modules/**"]
+  "ignoreFiles": [
+    "press/**/*.css",
+    "press-check/**/*.css",
+    "tests/corpus/**/*.css",
+    "node_modules/**"
+  ]
 }

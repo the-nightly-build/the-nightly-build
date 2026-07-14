@@ -1,0 +1,288 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>The Wire · 2026-07-14</title>
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400..700;1,6..72,400..700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="../../assets/theme.css" />
+    <link rel="stylesheet" href="../../assets/nb.css" />
+    <script defer src="../../assets/nb.js"></script>
+    <script type="application/json" id="nb-meta">
+      {
+        "protocol": "1.1",
+        "series": "the-wire",
+        "slug": "2026-07-14",
+        "template": "brief",
+        "title": "A side network restores the safety fine-tuning strips",
+        "mode": "rolling",
+        "order": null,
+        "date": "2026-07-14",
+        "tags": ["engineering", "research", "compute"],
+        "sources": 7,
+        "words": 930,
+        "reading_minutes": 4,
+        "dek": "What helps someone shipping a model tonight sits in a handful of day-old arxiv papers rather than the launch feed, and in a $5.34 billion deal that reads the compute bottleneck as electricity instead of silicon.",
+        "harness": "claude-code-routine",
+        "model": "claude-opus-4-8"
+      }
+    </script>
+  </head>
+  <body class="nb-article">
+    <article class="nb-reading">
+      <header>
+        <div class="nb-eyebrow">The Wire</div>
+        <h1 class="nb-title">A side network restores the safety fine-tuning strips</h1>
+        <p class="nb-dekline">
+          What helps someone shipping a model tonight sits in a handful of
+          day-old arxiv papers rather than the launch feed, and in a $5.34
+          billion deal that reads the compute bottleneck as electricity instead
+          of silicon.
+        </p>
+        <div class="nb-byline">
+          <span>4 min read</span><span>2026-07-14</span>
+        </div>
+      </header>
+
+      <section data-nb-section="items" id="items">
+        <div class="nb-brief-item" data-nb-item>
+          <span class="nb-brief-tag">engineering</span>
+          <h3>
+            <a href="https://arxiv.org/abs/2607.11475"
+              >HyperSafe restores the safety alignment fine-tuning strips,
+              without touching the weights</a
+            ><sup class="nb-cite"><a href="#s1">1</a></sup>
+          </h3>
+          <p>
+            Fine-tune an open model for a downstream task and its safety
+            alignment degrades. HyperSafe reads the fine-tuned model's
+            layer-wise activation fingerprints and, in a single forward pass,
+            generates a per-checkpoint Safe Side Network that runs alongside the
+            frozen base, with no gradient updates and no safety data at
+            deployment. On Qwen2-7B and LLaMA-3-8B it drops the harmful-response
+            rate from 19&ndash;31% to below 1% on every held-out checkpoint,
+            with downstream task accuracy within 1% of the fine-tuned
+            baseline.<sup class="nb-cite"><a href="#s1">1</a></sup>
+          </p>
+          <p data-nb-why>
+            <b>Why it matters</b>: anyone shipping a fine-tuned open-weights
+            model inherits a safety regression they rarely measure. This is a
+            per-checkpoint guard generated from the model's own activations, not
+            a generic filter, so it is worth wiring into a release pipeline
+            before the model ships. Read the sub-1% as a ceiling under the
+            paper's threat model on two 7-to-8B models, not a guarantee against
+            an adversarial red team.
+          </p>
+        </div>
+
+        <div class="nb-brief-item" data-nb-item>
+          <span class="nb-brief-tag">research</span>
+          <h3>
+            <a href="https://arxiv.org/abs/2607.11506"
+              >SCOPE-RL raises reasoning accuracy and cuts tokens at the same
+              time</a
+            ><sup class="nb-cite"><a href="#s2">2</a></sup>
+          </h3>
+          <p>
+            Reinforcement learning with verifiable rewards (RLVR) scores only
+            the final answer, so the model gets no signal on its intermediate
+            steps. SCOPE-RL adds verifiable rewards on sub-question chains before
+            a trajectory succeeds and refines the correct trajectories
+            afterward. On Qwen3-8B-Instruct that is worth up to 11.2 percentage
+            points of accuracy and up to a 27.1% reduction in tokens, held across
+            model sizes and RLVR variants.<sup class="nb-cite"
+              ><a href="#s2">2</a></sup
+            >
+          </p>
+          <p data-nb-why>
+            <b>Why it matters</b>: the usual RLVR result trades accuracy for
+            tokens in one direction or the other, and getting both at once is the
+            part to verify. If you already run RLVR on a reasoning model, the
+            lever here is a process reward on the steps, not a larger
+            final-answer bonus. The "up to" figures come from a single 8B model
+            and assume you can decompose the task into sub-questions to score,
+            which many domains cannot.
+          </p>
+        </div>
+
+        <div class="nb-brief-item" data-nb-item>
+          <span class="nb-brief-tag">compute</span>
+          <h3>
+            <a
+              href="https://www.williams.com/2026/07/13/williams-announces-5-34-billion-investment-in-power-innovation-joint-venture-from-blackstone/"
+              >Williams takes $5.34 billion from Blackstone to wire power
+              straight to data centers</a
+            ><sup class="nb-cite"><a href="#s3">3</a></sup>
+          </h3>
+          <p>
+            On July 13 Williams Companies sold a 49% stake in five
+            behind-the-meter Power Innovation projects to funds led by Blackstone
+            Credit &amp; Insurance, with Apollo- and KKR-managed vehicles
+            alongside, for $5.34 billion of committed capital.<sup
+              class="nb-cite"
+              ><a href="#s3">3</a></sup
+            >
+            Williams keeps 51% and operational and commercial control; the total
+            breaks down as about $4.4 billion for 49% of expected growth capex
+            plus roughly $0.9 billion of additional consideration.<sup
+              class="nb-cite"
+              ><a href="#s4">4</a></sup
+            >
+            Behind-the-meter means the generation feeds large users, data centers
+            among them, directly rather than through the grid.
+          </p>
+          <p data-nb-why>
+            <b>Why it matters</b>: the GPU allocation a builder waits on is,
+            upstream, a power-interconnection problem, and the binding constraint
+            on new compute has moved from chips to the electricity feeding them.
+            Behind-the-meter generation is how operators route around the
+            grid-interconnection queue that gates when capacity comes online.
+            This is committed capital on pre-completion projects, not delivered
+            megawatts, so read it as where the money is pointing, not supply you
+            can book this year.
+          </p>
+        </div>
+
+        <div class="nb-brief-item" data-nb-item>
+          <span class="nb-brief-tag">compute</span>
+          <h3>
+            <a href="https://arxiv.org/abs/2607.11211"
+              >FastTPS speeds up on-device decoding 6x, once you read the
+              baseline</a
+            ><sup class="nb-cite"><a href="#s5">5</a></sup>
+          </h3>
+          <p>
+            FastTPS accelerates the sequential token (decode) phase of inference
+            on an AI accelerator through KV-cache concatenation, RoPE-attention
+            changes, and fused MLP operations, at low precision loss. On an AMD
+            Ryzen AI 300-series NPU at BF16 it reaches 93% of peak memory
+            bandwidth and a 6x speedup over a non-fused baseline, benchmarked on
+            Phi-3-mini-4k-instruct.<sup class="nb-cite"><a href="#s5">5</a></sup>
+          </p>
+          <p data-nb-why>
+            <b>Why it matters</b>: decode on a laptop-class NPU is
+            memory-bandwidth bound, so the 93% of peak is the real result and the
+            6x follows from it. If you ship small models to NPUs, that bandwidth
+            ceiling is the number to design against. The 6x is measured against
+            an unoptimized floor, not a production runtime, so it is not a
+            speedup over whatever you run today.
+          </p>
+        </div>
+
+        <div class="nb-brief-item" data-nb-item>
+          <span class="nb-brief-tag">engineering</span>
+          <h3>
+            <a href="https://arxiv.org/abs/2607.11423"
+              >ToFu ships a coding-agent harness you can open up, under MIT</a
+            ><sup class="nb-cite"><a href="#s6">6</a></sup>
+          </h3>
+          <p>
+            ToFu is a coding-agent harness that reads a codebase, edits files,
+            runs commands, and integrates with dev tools, released so researchers
+            can inspect and modify its orchestration and tool-use logic and
+            self-host it for privacy-sensitive work, under an MIT license. Its
+            authors claim better token efficiency, lower cost, and multilingual
+            capability than existing agentic harnesses, but the abstract carries
+            no benchmark numbers, so those comparisons stay unquantified.<sup
+              class="nb-cite"
+              ><a href="#s6">6</a></sup
+            >
+          </p>
+          <p data-nb-why>
+            <b>Why it matters</b>: most agent harnesses are closed boxes. An MIT
+            one a team can read, modify, and run in-house is the news, not a
+            measured win over the incumbents. If you are building agents and need
+            to see how the loop calls tools, this is worth a look before you
+            commit to a vendor's black box; wait for numbers before you credit
+            the efficiency claims.
+          </p>
+        </div>
+
+        <div class="nb-brief-item" data-nb-item>
+          <span class="nb-brief-tag">research</span>
+          <h3>
+            <a href="https://arxiv.org/abs/2607.11505"
+              >PUST moves post-training gains from a cheap proxy model to a
+              bigger one</a
+            ><sup class="nb-cite"><a href="#s7">7</a></sup>
+          </h3>
+          <p>
+            PUST (Proxy-guided Update Signal Transfer) splits post-training in
+            two: a lightweight proxy model explores which behaviors help, and the
+            relative-improvement signal it finds transfers to the larger primary
+            model, so the expensive online run becomes modular and reusable
+            rather than one monolithic pass. The authors report this across
+            Qwen3-family models on math and code, but the abstract exposes no
+            numeric deltas, so weak-to-strong transfer here is a demonstrated
+            direction, not a benchmarked gain.<sup class="nb-cite"
+              ><a href="#s7">7</a></sup
+            >
+          </p>
+          <p data-nb-why>
+            <b>Why it matters</b>: if update signals are reusable across model
+            sizes, you can run costly exploration once on a cheap proxy and
+            amortize it over larger models, a different cost structure for
+            post-training than one online run per model. There is nothing to
+            budget against yet, so watch for the follow-up that quantifies the
+            transfer before you re-plan a pipeline around it.
+          </p>
+        </div>
+      </section>
+
+      <section class="nb-sources" data-nb-section="sources" id="sources">
+        <h2>Sources</h2>
+        <ol>
+          <li id="s1">
+            <a data-nb-source href="https://arxiv.org/abs/2607.11475"
+              >arXiv · HyperSafe: inference-time restoration of safety alignment
+              in fine-tuned models</a
+            >
+          </li>
+          <li id="s2">
+            <a data-nb-source href="https://arxiv.org/abs/2607.11506"
+              >arXiv · SCOPE-RL: process rewards for reasoning accuracy and token
+              efficiency</a
+            >
+          </li>
+          <li id="s3">
+            <a
+              data-nb-source
+              href="https://www.williams.com/2026/07/13/williams-announces-5-34-billion-investment-in-power-innovation-joint-venture-from-blackstone/"
+              >Williams · Williams announces $5.34 billion investment in Power
+              Innovation joint venture from Blackstone</a
+            >
+          </li>
+          <li id="s4">
+            <a
+              data-nb-source
+              href="https://www.sec.gov/Archives/edgar/data/0000107263/000119312526301533/d152507dex991.htm"
+              >U.S. SEC · Williams Companies Form 8-K, Exhibit 99.1 (Power
+              Innovation joint venture)</a
+            >
+          </li>
+          <li id="s5">
+            <a data-nb-source href="https://arxiv.org/abs/2607.11211"
+              >arXiv · FastTPS: accelerating the token phase of on-device LLM
+              inference</a
+            >
+          </li>
+          <li id="s6">
+            <a data-nb-source href="https://arxiv.org/abs/2607.11423"
+              >arXiv · ToFu: an MIT-licensed white-box coding-agent harness</a
+            >
+          </li>
+          <li id="s7">
+            <a data-nb-source href="https://arxiv.org/abs/2607.11505"
+              >arXiv · PUST: Proxy-guided Update Signal Transfer for
+              post-training</a
+            >
+          </li>
+        </ol>
+      </section>
+    </article>
+  </body>
+</html>

@@ -11,7 +11,24 @@ dev = [
     "ty>=0.0.1a1",
     "pre-commit>=4.0",
     "websocket-client>=1.9.0",
+    "pytest>=9.1.1",
 ]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+# The engine ships as loose modules, not a package: `import check` is how
+# every caller reaches it. Putting engine/ on the path here is what keeps
+# sys.path hacks out of the test files.
+pythonpath = ["engine"]
+addopts = "-q --strict-markers"
+markers = [
+    "slow: runs a real git press end to end (deselect with -m 'not slow')",
+]
+
+[tool.ty.environment]
+# The same two roots pytest puts on the path, so the type checker resolves
+# `import check` exactly as the suite does.
+extra-paths = ["engine", "tests"]
 
 [tool.ruff]
 target-version = "py310"

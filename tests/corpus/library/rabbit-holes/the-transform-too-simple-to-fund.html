@@ -1,0 +1,356 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>The transform too simple to fund · Rabbit Holes</title>
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400..700;1,6..72,400..700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="../../assets/theme.css" />
+    <link rel="stylesheet" href="../../assets/nb.css" />
+    <script defer src="../../assets/nb.js"></script>
+    <script type="application/json" id="nb-meta">
+      {
+        "protocol": "1.1",
+        "series": "rabbit-holes",
+        "slug": "the-transform-too-simple-to-fund",
+        "template": "article",
+        "title": "The Transform That Was Too Simple to Fund",
+        "mode": "open",
+        "order": null,
+        "date": "2026-07-11",
+        "tags": [],
+        "sources": 9,
+        "words": 1850,
+        "reading_minutes": 8,
+        "dek": "A grant reviewer dismissed the discrete cosine transform as too simple in 1972; it now rebuilds nearly every image and video frame on Earth, and it works because it cheaply imitates a transform we could not afford to compute.",
+        "harness": "claude-code-routine",
+        "model": "claude-opus-4-8"
+      }
+    </script>
+  </head>
+  <body class="nb-article">
+    <article class="nb-reading">
+      <header>
+        <div class="nb-eyebrow">Rabbit Holes</div>
+        <h1 class="nb-title">The Transform That Was Too Simple to Fund</h1>
+        <p class="nb-dekline">
+          A grant reviewer dismissed the discrete cosine transform as too simple
+          in 1972; it now rebuilds nearly every image and video frame on Earth,
+          and it works because it cheaply imitates a transform we could not
+          afford to compute.
+        </p>
+        <div class="nb-byline">
+          <span>8 min read</span><span>2026-07-11</span>
+        </div>
+      </header>
+
+      <section data-nb-section="orientation" id="orientation">
+        <h2>A rejection letter, and two trillion pictures</h2>
+        <p>
+          In 1972 Nasir Ahmed, an electrical engineer at Kansas State
+          University, asked the National Science Foundation to fund a summer of
+          work on a new way to compress digital signals. The reviewers turned
+          him down. As Ahmed later told it, they said the idea was too simple,
+          so they rejected the proposal.<sup class="nb-cite"><a href="#s1">1</a></sup>
+          He paid for the summer himself, and in January 1974 he and two
+          collaborators published a four-page paper introducing the discrete
+          cosine transform.<sup class="nb-cite"><a href="#s1">1</a></sup>
+        </p>
+        <p>
+          Consider what that too-simple idea now carries. In 2025 people took
+          roughly 2.1 trillion photographs, about 94 percent of them on
+          smartphones.<sup class="nb-cite"><a href="#s2">2</a></sup> Almost every
+          one is stored and sent as a JPEG or a close relative, and the step
+          that makes a JPEG small is a discrete cosine transform. The same
+          transform sits inside the video in a call, the frames of a streamed
+          film, and the audio of nearly every compressed song. It is, by a wide
+          margin, the most widely used linear transform in data
+          compression.<sup class="nb-cite"><a href="#s3">3</a></sup>
+        </p>
+        <div class="nb-stat-strip">
+          <div class="nb-stat">
+            <span class="nb-stat-n">2.1T</span
+            ><span class="nb-stat-l">PHOTOS TAKEN IN 2025</span>
+          </div>
+          <div class="nb-stat">
+            <span class="nb-stat-n">94%</span
+            ><span class="nb-stat-l">SHOT ON SMARTPHONES</span>
+          </div>
+          <div class="nb-stat">
+            <span class="nb-stat-n">1974</span
+            ><span class="nb-stat-l">YEAR THE DCT WAS PUBLISHED</span>
+          </div>
+        </div>
+        <p>
+          Ahmed's own verdict, decades on, was mild: it is gratifying, he said,
+          to see the transform become a standard, adding that little did they
+          realize it would be used the way it is.<sup class="nb-cite"><a href="#s4">4</a></sup>
+          The interesting question is not why a good idea took hold. It is why
+          this particular idea, which really is close to trivial to describe,
+          turned out to be almost the best possible thing to do. That is not
+          luck. It is a fact about the mathematics, and it explains both why the
+          reviewer was wrong and, in a sense, why he was right.
+        </p>
+      </section>
+
+      <section data-nb-section="rebuilding-a-block-from-cosines">
+        <h2>What the transform actually does</h2>
+        <p>
+          Start with the concrete case the transform was built for. The JPEG
+          baseline process cuts an image into blocks of eight pixels by eight,
+          and runs a forward DCT on each block on its own.<sup class="nb-cite"><a href="#s5">5</a></sup>
+          A block is 64 brightness values. The DCT rewrites those 64 numbers as
+          64 different numbers, the amounts of 64 fixed cosine patterns that,
+          added together, reconstruct the block exactly. The first pattern is a
+          flat gray, the block's average. The next few are broad light-to-dark
+          gradients. The later ones are fine checkerboards, the rapid ripples
+          that capture edges and texture.
+        </p>
+        <p>
+          No information is lost in that rewrite; it is a change of coordinates,
+          fully reversible. The compression happens next. For a typical
+          photographic block, the energy piles up in the first few coefficients
+          and the fine-ripple coefficients come out near zero. That property has
+          a name.
+        </p>
+        <div class="nb-callout">
+          <span class="nb-callout-term">Energy compaction</span>
+          A transform has good energy compaction when it packs most of a signal's
+          variance into a few coefficients, leaving the rest small enough to
+          quantize coarsely or throw away with little visible cost.
+        </div>
+        <p>
+          JPEG cashes that in by dividing the coefficients by a quantization
+          table and rounding, which sends most of the small high-frequency terms
+          to zero, and then storing the survivors compactly. Undo the steps and
+          you get a block that looks almost like the original from far fewer
+          bits. The whole scheme leans on one assumption: that when you express a
+          natural image in cosines, the important part collapses into a handful
+          of numbers. Fabian Giesen, who has spent a career building codecs,
+          puts the engineering verdict plainly: after decades of DCT-based
+          coders, the transform is known to sit quite close to the optimal choice
+          of basis for certain classes of signals.<sup class="nb-cite"><a href="#s6">6</a></sup>
+          That word optimal is doing real work, and it is worth taking
+          literally.
+        </p>
+      </section>
+
+      <section data-nb-section="the-optimal-basis-it-imitates">
+        <h2>The exact answer it stands in for</h2>
+        <p>
+          There is a provably best linear transform for this job, and it is not
+          the DCT. Machine-learning readers already know it under another name.
+          Take a large collection of image blocks, compute the covariance matrix
+          of the pixels, and find its eigenvectors. Those eigenvectors are the
+          basis that decorrelates the data perfectly and, among all linear
+          transforms, concentrates the most energy into the fewest coefficients.
+          Statisticians call it the Karhunen&ndash;Lo&egrave;ve transform;
+          practitioners call the same construction principal component analysis.
+        </p>
+        <div class="nb-callout">
+          <span class="nb-callout-term">Karhunen&ndash;Lo&egrave;ve transform (KLT)</span>
+          The optimal linear transform for decorrelation and energy compaction.
+          It is the eigenbasis of the signal's covariance matrix, so it is
+          data-dependent: the best basis for one class of signals is not the best
+          for another, and you must estimate it from the data.
+        </div>
+        <p>
+          The DCT is not that basis. It is a fixed set of cosines, chosen before
+          any image is seen, identical for every block in every picture ever
+          coded. So how can a fixed basis come close to the data-optimal one?
+          Ahmed's 1974 paper already reported the answer empirically: the DCT's
+          performance compares closely to that of the Karhunen&ndash;Lo&egrave;ve
+          transform, which is known to be optimal, including on the
+          rate-distortion measure that governs compression.<sup class="nb-cite"><a href="#s7">7</a></sup>
+        </p>
+        <p>
+          Five years later Anil Jain gave the reason. Model a row of pixels as a
+          first-order Markov process, where each pixel is a noisy copy of its
+          neighbor with correlation close to one. That is a crude but decent
+          model of a natural image, whose neighboring pixels are nearly always
+          alike. Jain showed that the discrete Fourier, cosine, and sine
+          transforms and the Karhunen&ndash;Lo&egrave;ve transform of such a
+          process are all members of one family of sinusoidal transforms, and
+          that they are asymptotically equivalent.<sup class="nb-cite"><a href="#s8">8</a></sup>
+          As the correlation between neighbors approaches one, the KLT of the
+          Markov model converges to the DCT. The cosine basis is not an
+          approximation someone tuned to look like the optimum. It is the exact
+          limit the optimum runs toward for the signal statistics that real
+          images happen to have.
+        </p>
+        <p>
+          This inverts the reviewer's complaint. The DCT is simple because the
+          right answer, for this signal, is simple. A blunt objection that the
+          idea was too plain to matter missed that the plainness was the whole
+          result: a basis you can write down with no data at all lands a hair
+          away from the basis you would need a mountain of data to compute.
+        </p>
+      </section>
+
+      <section data-nb-section="why-a-fixed-basis-won">
+        <h2>Why the imitation beat the original</h2>
+        <p>
+          If the KLT is optimal, why did the world standardize on the
+          approximation instead? Because optimal on paper and usable in a chip
+          are different tests, and the DCT wins the second decisively. The KLT is
+          data-dependent, which is fatal in a codec. You would have to estimate a
+          covariance matrix, compute its eigenvectors, and then ship those
+          eigenvectors alongside the image so the decoder could invert them; the
+          basis itself becomes part of the payload. The DCT carries none of that
+          cost. It is fixed, so both ends already know it. It is separable, so a
+          two-dimensional block is just the one-dimensional transform applied to
+          rows and then columns. And Ahmed's original paper gave an algorithm to
+          compute it through the fast Fourier transform, which put it within
+          reach of the hardware of the day.<sup class="nb-cite"><a href="#s7">7</a></sup>
+          The one real friction, as Giesen notes, is that the cosine coefficients
+          are irrational, so bit-exact implementations across devices need
+          careful integer approximations.<sup class="nb-cite"><a href="#s6">6</a></sup>
+          That is a solvable engineering problem, not a barrier.
+        </p>
+        <p>
+          A fixed basis that is nearly optimal and nearly free to compute is the
+          kind of thing that spreads. It did.
+        </p>
+        <ol class="nb-timeline">
+          <li class="nb-tl-event major">
+            <span class="nb-tl-date">1974</span>
+            <h3>
+              The DCT is defined<sup class="nb-cite"><a href="#s7">7</a></sup>
+            </h3>
+            <p>
+              Ahmed, Natarajan, and Rao publish the transform and show it tracks
+              the optimal KLT for correlated signals.
+            </p>
+          </li>
+          <li class="nb-tl-event">
+            <span class="nb-tl-date">1979</span>
+            <h3>
+              The reason is proved<sup class="nb-cite"><a href="#s8">8</a></sup>
+            </h3>
+            <p>Jain places the DCT and the KLT in one asymptotically equivalent family.</p>
+          </li>
+          <li class="nb-tl-event major">
+            <span class="nb-tl-date">1992</span>
+            <h3>
+              JPEG ships<sup class="nb-cite"><a href="#s5">5</a></sup>
+            </h3>
+            <p>The still-image standard builds its baseline on the 8&times;8 DCT.</p>
+          </li>
+          <li class="nb-tl-event">
+            <span class="nb-tl-date">1990s&ndash;2010s</span>
+            <h3>
+              Everything moving<sup class="nb-cite"><a href="#s3">3</a></sup>
+            </h3>
+            <p>
+              MPEG video, H.264 and H.265, and, through the modified DCT, MP3,
+              AAC, Dolby Digital, Vorbis, and Opus.
+            </p>
+          </li>
+        </ol>
+        <p>
+          The audio branch is the clearest sign of reach. A modified DCT, applied
+          to overlapping windows of sound rather than square blocks of pixels,
+          became the compression core of MP3, AAC, Dolby Digital, Vorbis, and
+          Opus.<sup class="nb-cite"><a href="#s3">3</a></sup> A transform designed
+          for still pictures turned out to be the right tool for music it was
+          never built for, because sound, like an image row, is a signal whose
+          samples are strongly correlated with their neighbors. Touradj
+          Ebrahimi, who chaired the JPEG committee, has said flatly that only a
+          few image-compression standards not using the DCT exist
+          today.<sup class="nb-cite"><a href="#s1">1</a></sup>
+        </p>
+      </section>
+
+      <section data-nb-section="the-loop-back-to-the-optimum">
+        <h2>The loop closes</h2>
+        <p>
+          There is a final turn, and it is the one that makes the whole story
+          more than a piece of trivia about compression. The DCT won because,
+          fifty years ago, computing the true optimum for each signal was out of
+          the question. That constraint is lifting. The newest generation of
+          codecs is beginning to abandon the fixed cosine basis for the very
+          thing the cosines were imitating all along.
+        </p>
+        <p>
+          AV2, the successor codec now under development at the Alliance for Open
+          Media, still keeps the DCT and its sine-based cousins as core kernels.
+          But it introduces data-driven transforms for certain block sizes,
+          trained on prediction residuals using the Karhunen&ndash;Lo&egrave;ve
+          transformation itself.<sup class="nb-cite"><a href="#s9">9</a></sup>
+          The optimal, data-dependent basis that was too expensive to ship in
+          1974 is now cheap enough to learn from data and embed in a standard.
+          The field spent five decades using a closed-form stand-in for the KLT,
+          and is now circling back to compute the KLT directly, because the
+          arithmetic finally fits.
+        </p>
+        <p>
+          That is the shape worth carrying away. The discrete cosine transform
+          was never really the answer; it was a near-perfect placeholder for an
+          answer nobody could afford, and the placeholder was so good that it
+          quietly defined how digital images and sound look and feel for two
+          generations. The grant reviewer who called it too simple was reading
+          the wrong signal. The idea was simple because it had found, in closed
+          form and with no data, a result that the optimum only reaches in the
+          limit. Simplicity that close to the exact answer is not a weakness to
+          be funded around. It is the rarest thing in engineering, and this time
+          it happened to be sitting in a rejected summer proposal.
+        </p>
+      </section>
+
+      <section class="nb-sources" data-nb-section="sources" id="sources">
+        <h2>Sources</h2>
+        <ol>
+          <li id="s1">
+            <a data-nb-source href="https://spectrum.ieee.org/compression-algorithms"
+              >IEEE Spectrum · Nasir Ahmed Pioneered Digital Compression Algorithms</a
+            >
+          </li>
+          <li id="s2">
+            <a data-nb-source href="https://petapixel.com/2025/06/18/the-number-of-photos-taken-in-2025-is-expected-to-exceed-two-trillion/"
+              >PetaPixel · The Number of Photos Taken in 2025 Is Expected to Exceed Two Trillion</a
+            >
+          </li>
+          <li id="s3">
+            <a data-nb-source href="https://en.wikipedia.org/wiki/Discrete_cosine_transform"
+              >Wikipedia · Discrete cosine transform</a
+            >
+          </li>
+          <li id="s4">
+            <a data-nb-source href="https://ece.unm.edu/news/2021/02/hollywood-salutes-nasir-ahmed.html"
+              >University of New Mexico ECE · Hollywood Salutes Nasir Ahmed</a
+            >
+          </li>
+          <li id="s5">
+            <a data-nb-source href="https://web.stanford.edu/class/ee398a/handouts/papers/Wallace%20-%20JPEG%20-%201992.pdf"
+              >G. K. Wallace · The JPEG Still Picture Compression Standard (1991)</a
+            >
+          </li>
+          <li id="s6">
+            <a data-nb-source href="https://fgiesen.wordpress.com/2013/11/04/bink-2-2-integer-dct-design-part-1/"
+              >Fabian Giesen · Bink 2.2 integer DCT design, part 1</a
+            >
+          </li>
+          <li id="s7">
+            <a data-nb-source href="https://www.scirp.org/reference/referencespapers?referenceid=776982"
+              >Ahmed, Natarajan &amp; Rao · Discrete Cosine Transform, IEEE Trans. Computers (1974)</a
+            >
+          </li>
+          <li id="s8">
+            <a data-nb-source href="https://pubmed.ncbi.nlm.nih.gov/21868870/"
+              >A. K. Jain · A Sinusoidal Family of Unitary Transforms, IEEE Trans. PAMI (1979)</a
+            >
+          </li>
+          <li id="s9">
+            <a data-nb-source href="https://arxiv.org/html/2601.02712"
+              >Transform and Entropy Coding in AV2 (arXiv 2601.02712)</a
+            >
+          </li>
+        </ol>
+      </section>
+    </article>
+  </body>
+</html>
