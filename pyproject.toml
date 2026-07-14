@@ -21,6 +21,9 @@ testpaths = ["tests"]
 # sys.path hacks out of the test files.
 pythonpath = ["engine"]
 addopts = "-q --strict-markers"
+markers = [
+    "slow: runs a real git press end to end (deselect with -m 'not slow')",
+]
 
 [tool.ty.environment]
 # The same two roots pytest puts on the path, so the type checker resolves
