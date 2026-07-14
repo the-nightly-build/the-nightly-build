@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # /// script
-# requires-python = ">=3.9"
+# requires-python = ">=3.10"
 # dependencies = ["pyyaml"]
 # ///
 """Compute tonight's work list deterministically from config and library state.
@@ -32,6 +32,21 @@ except ImportError:
     sys.exit(2)
 
 DAY_NAMES = ("mon", "tue", "wed", "thu", "fri", "sat", "sun")
+CADENCE_WORDS = ("daily", "weekdays", "weekends")
+
+
+def cadence_is_valid(cadence) -> bool:
+    """The strict author-time twin of cadence_includes: validate_config asks
+    this, while the fail-open evaluation below never skips work over a value
+    validation would have flagged. Keeping both here means the vocabulary
+    cannot drift between the validator and the scheduler."""
+    if isinstance(cadence, str):
+        return cadence in CADENCE_WORDS
+    return (
+        isinstance(cadence, list)
+        and len(cadence) > 0
+        and all(d in DAY_NAMES for d in cadence)
+    )
 
 
 def cadence_includes(cadence, day: str) -> bool:
@@ -128,7 +143,7 @@ def series_duty(
     if mode == "sequence":
         if not unpublished:
             return False, {**entry, "reason": "complete"}
-        nxt = next(it["slug"] for it in items if it.get("slug") not in pub)
+        nxt = unpublished[0]
         order = next(i for i, it in enumerate(items, 1) if it.get("slug") == nxt)
         return True, {
             **entry,
@@ -183,17 +198,7 @@ def main(argv=None) -> int:
 
     due, idle = [], []
     root = os.path.join(args.repo, "press", "series")
-    sids = (
-        sorted(
-            d
-            for d in os.listdir(root)
-            if not d.startswith("_")
-            and os.path.isfile(os.path.join(root, d, "series.yaml"))
-        )
-        if os.path.isdir(root)
-        else []
-    )
-    for sid in sids:
+    for sid in nb_meta.series_ids(args.repo):
         try:
             with open(os.path.join(root, sid, "series.yaml"), encoding="utf-8") as fh:
                 cfg = yaml.safe_load(fh)

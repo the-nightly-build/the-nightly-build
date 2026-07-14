@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # /// script
-# requires-python = ">=3.9"
+# requires-python = ">=3.10"
 # dependencies = ["pyyaml"]
 # ///
 """Validate the press configuration before anything schedules or publishes.
@@ -20,15 +20,21 @@ import os
 import re
 import sys
 
+import build_site
+import duty
+import nb_meta
+
 try:
     import yaml
 except ImportError:
     sys.stderr.write("validate_config.py requires PyYAML (pip install pyyaml)\n")
     sys.exit(2)
 
-SERIES_ID_RE = re.compile(r"^[a-z0-9-]{1,32}$")
-SLUG_RE = re.compile(r"^[a-z0-9-]{1,64}$")
-MODES = {"collection", "sequence", "rolling", "open"}
+# The grammar the proof enforces at 2am is the grammar authors validate
+# against by daylight — shared definitions, or the two drift apart.
+SERIES_ID_RE = nb_meta.SERIES_RE
+SLUG_RE = nb_meta.SLUG_RE
+MODES = frozenset(nb_meta.MODES)
 TEMPLATE_KEYS = {
     "chrome",
     "class",
@@ -64,19 +70,7 @@ SERIES_KEYS = {
     "section",
 }
 BANNED_TERM_KEYS = {"id", "terms", "max", "suggestion", "enabled"}
-DAY_NAMES = ("mon", "tue", "wed", "thu", "fri", "sat", "sun")
-CADENCE_WORDS = {"daily", "weekdays", "weekends"}
 SELECTIONS = {"in-order", "random"}
-
-
-def cadence_is_valid(cadence):
-    if isinstance(cadence, str):
-        return cadence in CADENCE_WORDS
-    return (
-        isinstance(cadence, list)
-        and len(cadence) > 0
-        and all(d in DAY_NAMES for d in cadence)
-    )
 
 
 def load(path):
@@ -248,24 +242,12 @@ def check_banned_terms(repo, errors):
 
 def check_registry(repo, errors):
     registry, folders = {}, {}
-    for base in (
-        os.path.join(repo, "templates"),
-        os.path.join(repo, "press", "templates"),  # press shadows shipped
-    ):
-        if not os.path.isdir(base):
-            continue
-        for name in sorted(os.listdir(base)):
-            folder = os.path.join(base, name)
-            manifest = os.path.join(folder, "manifest.yaml")
-            if not os.path.isfile(manifest):
-                continue
-            try:
-                registry[name] = load(manifest) or {}
-                folders[name] = folder
-            except yaml.YAMLError as e:
-                errors.append(
-                    f"registry '{name}': manifest.yaml is not valid YAML: {e}"
-                )
+    for name, folder in build_site.template_dirs(repo).items():
+        try:
+            registry[name] = load(os.path.join(folder, "manifest.yaml")) or {}
+            folders[name] = folder
+        except yaml.YAMLError as e:
+            errors.append(f"registry '{name}': manifest.yaml is not valid YAML: {e}")
     if not registry:
         errors.append("no template packages found (templates/<id>/manifest.yaml)")
         return {}
@@ -385,10 +367,10 @@ def check_series(repo, registry, *, errors):
         if mode not in MODES:
             errors.append(f"{where}: mode must be one of {sorted(MODES)}")
         cadence = cfg.get("cadence")
-        if cadence is not None and not cadence_is_valid(cadence):
+        if cadence is not None and not duty.cadence_is_valid(cadence):
             errors.append(
                 f"{where}: cadence must be daily | weekdays | "
-                f"weekends | a list of day names {list(DAY_NAMES)}"
+                f"weekends | a list of day names {list(duty.DAY_NAMES)}"
             )
         if not isinstance(cfg.get("paused", False), bool):
             errors.append(f"{where}: 'paused' must be true or false")

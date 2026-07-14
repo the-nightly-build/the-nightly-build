@@ -23,16 +23,24 @@ import types
 import _bootstrap
 import check as C
 import make_fixtures
+import morning_gate as MG
 import validate_config as V
 import yaml
+from _harness import TALLY, check, git, summary
 
 HERE = _bootstrap.HERE
 REPO = _bootstrap.REPO
 
 TODAY = "2026-07-06"
-PASS, FAIL = 0, []
 # tests never read the shipped series configs — forks clear those on setup
 TESTREPO = make_fixtures.test_repo()
+
+
+def clone_testrepo(*subs):
+    tmp = tempfile.mkdtemp()
+    for sub in subs:
+        shutil.copytree(pathlib.Path(TESTREPO) / sub, pathlib.Path(tmp) / sub)
+    return tmp
 
 
 def run_local(
@@ -72,7 +80,6 @@ def codes(rep):
 
 
 def expect(name, rep, *, must_have=(), must_not=(), blocks=None):
-    global PASS
     got = codes(rep)
     ok = all(c in got for c in must_have) and all(c not in got for c in must_not)
     if blocks is not None:
@@ -80,15 +87,13 @@ def expect(name, rep, *, must_have=(), must_not=(), blocks=None):
             ok = ok and ((len(rep.blocks) > 0) == blocks)
         else:
             ok = ok and (len(rep.blocks) == blocks)
-    if ok:
-        PASS += 1
-        print(f"  ok   {name}")
-    else:
-        FAIL.append(name)
-        print(
-            f"  FAIL {name}: codes={got} blocks={len(rep.blocks)} "
-            f"(wanted +{list(must_have)} -{list(must_not)} blocks={blocks})"
-        )
+    check(
+        name,
+        ok,
+        detail=f"codes={got} blocks={len(rep.blocks)} "
+        f"(wanted +{list(must_have)} -{list(must_not)} blocks={blocks})",
+    )
+    if not ok:
         for f in rep.findings:
             print(f"        {f.level} {f.code}: {f.message}")
 
@@ -104,9 +109,7 @@ def make_library(published):
 
 
 def seq_repo():
-    tmp = tempfile.mkdtemp()
-    for sub in ("press", "templates"):
-        shutil.copytree(pathlib.Path(TESTREPO) / sub, pathlib.Path(tmp) / sub)
+    tmp = clone_testrepo("press", "templates")
     y = pathlib.Path(tmp) / "press" / "series" / "semiconductors" / "series.yaml"
     y.write_text(y.read_text().replace("mode: collection", "mode: sequence"))
     return tmp
@@ -658,9 +661,7 @@ expect(
     must_have=["W-LENGTH-LOW"],
     blocks=0,
 )
-reqdoc_repo = tempfile.mkdtemp()
-for sub in ("press", "templates"):
-    shutil.copytree(pathlib.Path(TESTREPO) / sub, pathlib.Path(reqdoc_repo) / sub)
+reqdoc_repo = clone_testrepo("press", "templates")
 ry = pathlib.Path(reqdoc_repo) / "press" / "series" / "semiconductors" / "series.yaml"
 ry.write_text(
     ry.read_text().replace(
@@ -699,9 +700,7 @@ expect(
 )
 
 print("== sources_exclusive ==")
-excl_repo = tempfile.mkdtemp()
-for sub in ("press", "templates"):
-    shutil.copytree(pathlib.Path(TESTREPO) / sub, pathlib.Path(excl_repo) / sub)
+excl_repo = clone_testrepo("press", "templates")
 ey = pathlib.Path(excl_repo) / "press" / "series" / "semiconductors" / "series.yaml"
 ey.write_text(
     ey.read_text().replace(
@@ -744,9 +743,7 @@ expect(
 )
 
 print("== strict promotion ==")
-strict_repo = tempfile.mkdtemp()
-for sub in ("press", "templates"):
-    shutil.copytree(pathlib.Path(TESTREPO) / sub, pathlib.Path(strict_repo) / sub)
+strict_repo = clone_testrepo("press", "templates")
 sy = pathlib.Path(strict_repo) / "press" / "series" / "semiconductors" / "series.yaml"
 sy.write_text(sy.read_text().replace("strict: false", "strict: true"))
 expect(
@@ -791,10 +788,10 @@ registry = C.load_registry(str(REPO))
 for template_id, treg in registry.items():
     tpl_path = C.find_template(str(REPO), template_id)
     if tpl_path is None:
-        FAIL.append(f"template {template_id}/skeleton.html")
-        print(
-            f"  FAIL template {template_id}: no skeleton.html in "
-            "templates/ or press/templates/"
+        check(
+            f"template {template_id}/skeleton.html structure",
+            False,
+            detail="no skeleton.html in templates/ or press/templates/",
         )
         continue
     src = pathlib.Path(tpl_path).read_text()
@@ -818,21 +815,15 @@ for template_id, treg in registry.items():
         and not tpl.bad_js_urls
         and tpl.sources
     )
-    ok = ok_sections and ok_meta and ok_scripts and ok_sandbox
-    if ok:
-        PASS += 1
-        print(f"  ok   template {template_id}/skeleton.html structure")
-    else:
-        FAIL.append(f"template {template_id}/skeleton.html")
-        print(
-            f"  FAIL template {template_id}/skeleton.html: sections={ok_sections} "
-            f"meta={ok_meta} scripts={ok_scripts} sandbox={ok_sandbox}"
-        )
+    check(
+        f"template {template_id}/skeleton.html structure",
+        ok_sections and ok_meta and ok_scripts and ok_sandbox,
+        detail=f"sections={ok_sections} meta={ok_meta} "
+        f"scripts={ok_scripts} sandbox={ok_sandbox}",
+    )
 
 print("== user templates (press/templates overlay) ==")
-ut_repo = tempfile.mkdtemp()
-for sub in ("press", "templates", "engine"):
-    shutil.copytree(pathlib.Path(TESTREPO) / sub, pathlib.Path(ut_repo) / sub)
+ut_repo = clone_testrepo("press", "templates", "engine")
 ut_tpl = pathlib.Path(ut_repo) / "press" / "templates"
 
 
@@ -1156,40 +1147,32 @@ ut_rc = subprocess.run(
     [sys.executable, str(REPO / "engine" / "validate_config.py"), "--repo", ut_repo],
     capture_output=True,
 )
-if ut_rc.returncode == 0:
-    PASS += 1
-    print("  ok   validate_config accepts the overlay registry")
-else:
-    FAIL.append("validate_config overlay")
-    print(f"  FAIL validate_config overlay: {ut_rc.stdout.decode()[-300:]}")
+check(
+    "validate_config accepts the overlay registry",
+    ut_rc.returncode == 0,
+    detail=ut_rc.stdout.decode()[-300:],
+)
 reg = C.load_registry(ut_repo)
-if "memo" in reg and "article" in reg:
-    PASS += 1
-    print("  ok   merged registry keeps shipped + adds press templates")
-else:
-    FAIL.append("registry merge")
-    print(f"  FAIL registry merge: keys={sorted(reg)}")
+check(
+    "merged registry keeps shipped + adds press templates",
+    "memo" in reg and "article" in reg,
+    detail=f"keys={sorted(reg)}",
+)
 memo_tpl = C.find_template(ut_repo, "memo") or ""
 article_tpl = C.find_template(ut_repo, "article") or ""
-if (
+check(
+    "template lookup: press shadows shipped",
     memo_tpl.endswith("memo/skeleton.html")
     and "press" in memo_tpl
     and article_tpl.endswith("article/skeleton.html")
-    and "press" not in article_tpl
-):
-    PASS += 1
-    print("  ok   template lookup: press shadows shipped")
-else:
-    FAIL.append("template lookup precedence")
-    print("  FAIL template lookup precedence")
+    and "press" not in article_tpl,
+)
 
 print("== rhythm & governance (cadence, paused, selection) ==")
 
 
 def patched_repo(patch, series="semiconductors"):
-    tmp = tempfile.mkdtemp()
-    for sub in ("press", "templates", "engine"):
-        shutil.copytree(pathlib.Path(TESTREPO) / sub, pathlib.Path(tmp) / sub)
+    tmp = clone_testrepo("press", "templates", "engine")
     y = pathlib.Path(tmp) / "press" / "series" / series / "series.yaml"
     y.write_text(y.read_text() + patch)
     return tmp
@@ -1229,20 +1212,13 @@ for name, cond in [
         vc_rc(patched_repo("cadance: daily\n")) == 1,
     ),
 ]:
-    if cond:
-        PASS += 1
-        print(f"  ok   {name}")
-    else:
-        FAIL.append(name)
-        print(f"  FAIL {name}")
+    check(name, cond)
 
 print("== banned terms (spec list, press overrides) ==")
 
 
 def banned_repo(press_yaml=None):
-    tmp = tempfile.mkdtemp()
-    for sub in ("press", "templates", "spec", "engine"):
-        shutil.copytree(pathlib.Path(TESTREPO) / sub, pathlib.Path(tmp) / sub)
+    tmp = clone_testrepo("press", "templates", "spec", "engine")
     if press_yaml is not None:
         (pathlib.Path(tmp) / "press" / "banned-terms.yaml").write_text(press_yaml)
     return tmp
@@ -1327,12 +1303,7 @@ for name, cond in [
         vc_rc(banned_repo("- id: em-dash\n  max: 8\n- id: em-dash\n  max: 9\n")) == 1,
     ),
 ]:
-    if cond:
-        PASS += 1
-        print(f"  ok   {name}")
-    else:
-        FAIL.append(name)
-        print(f"  FAIL {name}")
+    check(name, cond)
 
 print("== placeholder leftovers (caps runs) ==")
 
@@ -1398,9 +1369,7 @@ min_sources: 8
 
 
 def open_repo(series_yaml=OPEN_YAML):
-    tmp = tempfile.mkdtemp()
-    for sub in ("press", "templates", "engine"):
-        shutil.copytree(pathlib.Path(TESTREPO) / sub, pathlib.Path(tmp) / sub)
+    tmp = clone_testrepo("press", "templates", "engine")
     d = pathlib.Path(tmp) / "press" / "series" / "wildcard"
     d.mkdir()
     (d / "series.yaml").write_text(series_yaml)
@@ -1478,12 +1447,7 @@ for name, cond in [
         vc_rc(open_repo(OPEN_YAML.replace("templates: [article, brief]\n", ""))) == 1,
     ),
 ]:
-    if cond:
-        PASS += 1
-        print(f"  ok   {name}")
-    else:
-        FAIL.append(name)
-        print(f"  FAIL {name}")
+    check(name, cond)
 
 print("== duty.py (tonight's work list) ==")
 
@@ -1575,12 +1539,7 @@ for name, cond in [
         == "complete",
     ),
 ]:
-    if cond:
-        PASS += 1
-        print(f"  ok   {name}")
-    else:
-        FAIL.append(name)
-        print(f"  FAIL {name}")
+    check(name, cond)
 
 print("== duty.py degrades gracefully on malformed input ==")
 
@@ -1653,28 +1612,49 @@ for name, cond in [
         duty_of(d_seq_extra, "semiconductors")["reason"].startswith("1 of 5 published"),
     ),
 ]:
-    if cond:
-        PASS += 1
-        print(f"  ok   {name}")
-    else:
-        FAIL.append(name)
-        print(f"  FAIL {name}")
+    check(name, cond)
+
+print("== morning gate (the mail's decision, out of the workflow) ==")
+
+
+def gate_out(**kwargs):
+    buf = io.StringIO()
+    with contextlib.redirect_stdout(buf), contextlib.suppress(SystemExit):
+        MG.out(**kwargs)
+    return buf.getvalue()
+
+
+notice = MG.quiet_notice(
+    "The Test Build", missed="the-wire, the-world", latest="2026-07-10", age=3
+)
+for name, cond in [
+    (
+        "latest build is the newest date, never the dateless bucket",
+        MG.latest_build(["unknown", "2026-07-10", "2026-07-12"]) == "2026-07-12",
+    ),
+    (
+        "a library of only dateless articles has no latest build",
+        MG.latest_build(["unknown"]) is None and MG.latest_build([]) is None,
+    ),
+    (
+        "quiet notice names the missed series and the staleness",
+        "the-wire, the-world" in notice and "2026-07-10 (3 nights ago)" in notice,
+    ),
+    (
+        "out() speaks the workflow's four-output contract",
+        gate_out(send=True, why="w", body="b.html", subject="s")
+        == "send=true\nwhy=w\nbody=b.html\nsubject=s\n",
+    ),
+]:
+    check(name, cond)
 
 print("== PR mode (real git repo) ==")
 
-
-def git(*args, cwd):
-    cmd = ["git", *args]
-    subprocess.run(cmd, cwd=cwd, check=True, capture_output=True)
-
-
-prdir = tempfile.mkdtemp()
-for sub in ("press", "templates"):
-    shutil.copytree(pathlib.Path(TESTREPO) / sub, pathlib.Path(prdir) / sub)
+prdir = clone_testrepo("press", "templates")
 shutil.copytree(
     REPO / "engine",
     pathlib.Path(prdir) / "engine",
-    ignore=shutil.ignore_patterns("__pycache__", "fixtures"),
+    ignore=shutil.ignore_patterns("__pycache__"),
 )
 git("init", "-q", "-b", "main", cwd=prdir)
 git("config", "user.email", "t@t", cwd=prdir)
@@ -1875,12 +1855,7 @@ for name, cond in [
     ("shipped examples validate as a press", rc_good == 0),
     ("illegal mode/template pairing fails", rc_bad == 1),
 ]:
-    if cond:
-        PASS += 1
-        print(f"  ok   {name}")
-    else:
-        FAIL.append(name)
-        print(f"  FAIL {name}")
+    check(name, cond)
 
 
 def vc_site_errors(yaml_text):
@@ -1933,12 +1908,7 @@ for name, cond in [
         vc_directory_errors({"publish": True, "description": "a" * 281}) != [],
     ),
 ]:
-    if cond:
-        PASS += 1
-        print(f"  ok   {name}")
-    else:
-        FAIL.append(name)
-        print(f"  FAIL {name}")
+    check(name, cond)
 
 print()
 print("== validate_config catches malformed series before an unattended run ==")
@@ -1969,9 +1939,7 @@ DUP_SLUG = (
 
 
 def manifest_patched_repo(patch, template="article"):
-    tmp = tempfile.mkdtemp()
-    for sub in ("press", "templates", "engine"):
-        shutil.copytree(pathlib.Path(TESTREPO) / sub, pathlib.Path(tmp) / sub)
+    tmp = clone_testrepo("press", "templates", "engine")
     m = pathlib.Path(tmp) / "templates" / template / "manifest.yaml"
     # A repeated key is fine here: yaml keeps the last one, the patch.
     m.write_text(m.read_text() + patch)
@@ -2046,12 +2014,7 @@ for name, cond in [
         vc_rc(manifest_patched_repo('chrome: "<h2>Sources</h2>"\n')) == 1,
     ),
 ]:
-    if cond:
-        PASS += 1
-        print(f"  ok   {name}")
-    else:
-        FAIL.append(name)
-        print(f"  FAIL {name}")
+    check(name, cond)
 
 print()
 print("== ci_helpers (the workflow's facts) ==")
@@ -2121,12 +2084,7 @@ for name, cond in [
         ci_helper("article-path", "autopublish: true\n") == "library/foo/story.html",
     ),
 ]:
-    if cond:
-        PASS += 1
-        print(f"  ok   {name}")
-    else:
-        FAIL.append(name)
-        print(f"  FAIL {name}")
+    check(name, cond)
 
 print()
 print("== source link resolution classifier ==")
@@ -2143,12 +2101,7 @@ link_cases = [
     ("no links to probe returns empty", C.dead_source_links([]) == []),
 ]
 for name, ok in link_cases:
-    if ok:
-        PASS += 1
-        print(f"  ok   {name}")
-    else:
-        FAIL.append(name)
-        print(f"  FAIL {name}")
+    check(name, ok)
 
 print()
 print("== rehearsal honors --check-links (parity with CI) ==")
@@ -2194,12 +2147,7 @@ link_flag_cases = [
     ("--no-check-links suppresses probing locally", "B-SOURCE-DEAD" not in off_codes),
 ]
 for name, ok in link_flag_cases:
-    if ok:
-        PASS += 1
-        print(f"  ok   {name}")
-    else:
-        FAIL.append(name)
-        print(f"  FAIL {name}")
+    check(name, ok)
 
 print()
 print("== workflow trigger safety (fork-token guarantee) ==")
@@ -2225,16 +2173,10 @@ wf_cases = [
     ),
 ]
 for name, ok in wf_cases:
-    if ok:
-        PASS += 1
-        print(f"  ok   {name}")
-    else:
-        FAIL.append(name)
-        print(f"  FAIL {name}")
+    check(name, ok)
 
 
 def run_suite(script, label):
-    global PASS
     print(f"== {label} ({script}) ==")
     proc = subprocess.run(
         [sys.executable, str(HERE / script)], capture_output=True, text=True
@@ -2247,9 +2189,9 @@ def run_suite(script, label):
     # e2e assertions.
     m = _re.search(r"(\d+) passed, (\d+) failed", proc.stdout)
     if m:
-        PASS += int(m.group(1))
+        TALLY.passed += int(m.group(1))
     if proc.returncode != 0:
-        FAIL.append(f"{label} ({m.group(2) if m else '?'} failed)")
+        TALLY.failed.append(f"{label} ({m.group(2) if m else '?'} failed)")
 
 
 print()
@@ -2257,8 +2199,4 @@ run_suite("run_builder_tests.py", "builder suite")
 print()
 run_suite("run_e2e_test.py", "end-to-end dress rehearsal")
 
-print()
-print(f"{PASS} passed, {len(FAIL)} failed")
-if FAIL:
-    print("FAILED:", FAIL)
-    sys.exit(1)
+sys.exit(summary())

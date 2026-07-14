@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # /// script
-# requires-python = ">=3.9"
+# requires-python = ">=3.10"
 # dependencies = ["pyyaml"]
 # ///
 """Validate an article against the protocol and series config: the proof.
@@ -49,8 +49,8 @@ except ImportError:
 
 PROTOCOL_MAJOR = "1"
 MAX_BYTES = 2 * 1024 * 1024
-SLUG_RE = re.compile(r"^[a-z0-9-]{1,64}$")
-SERIES_RE = re.compile(r"^[a-z0-9-]{1,32}$")
+SLUG_RE = nb_meta.SLUG_RE
+SERIES_RE = nb_meta.SERIES_RE
 TAG_RE = re.compile(r"^[a-z0-9-]{1,32}$")
 DATE_RE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
 # Off-origin references (link/img) may load only from Google Fonts over https.
@@ -246,14 +246,13 @@ class Article(HTMLParser):
                         "required": a.get("data-nb-required") or None,
                     }
                 )
-                for e in self.stack:
-                    if e.get("id"):
-                        self.source_container_ids.add(e["id"])
+                nearest = None
                 for e in reversed(self.stack):
                     if e.get("id"):
-                        if e["id"] not in self.source_ids:
-                            self.source_ids.append(e["id"])
-                        break
+                        self.source_container_ids.add(e["id"])
+                        nearest = nearest or e["id"]
+                if nearest and nearest not in self.source_ids:
+                    self.source_ids.append(nearest)
 
         if tag in ("script", "style"):
             self._suppress_text_depth += 1
@@ -309,25 +308,14 @@ def load_yaml(path):
 def load_registry(repo):
     """Load every template's manifest, press packages shadowing shipped.
 
-    A template is a folder holding a manifest.yaml (the folder name is the
-    id); the manifest carries the geometry the proof enforces. A
-    press/templates/<id> package replaces a shipped one of the same id
-    wholesale, which is both how a press adds templates and how it
-    redefines a shipped template's band press-wide. A folder without a
-    manifest.yaml is not a template and is skipped.
+    build_site.template_dirs owns what counts as a template package and how
+    press/ shadows shipped; the manifests it finds carry the geometry the
+    proof enforces.
     """
-    registry = {}
-    for base in (
-        os.path.join(repo, "templates"),
-        os.path.join(repo, "press", "templates"),  # press shadows shipped
-    ):
-        if not os.path.isdir(base):
-            continue
-        for name in sorted(os.listdir(base)):
-            manifest = os.path.join(base, name, "manifest.yaml")
-            if os.path.isfile(manifest):
-                registry[name] = load_yaml(manifest) or {}
-    return registry
+    return {
+        tid: load_yaml(os.path.join(folder, "manifest.yaml")) or {}
+        for tid, folder in build_site.template_dirs(repo).items()
+    }
 
 
 def find_template(repo, template_id):
@@ -539,7 +527,7 @@ def validate_meta_fields(meta, rep):
     # B-META-MATCH) — user templates in press/templates/ are first-class
     need("template", str)
     need("title", str)
-    need("mode", str, enum=["collection", "sequence", "rolling", "open"])
+    need("mode", str, enum=list(nb_meta.MODES))
     need("date", str, pattern=DATE_RE.pattern)
     need("dek", str)
     need("sources", int)
@@ -1128,7 +1116,8 @@ def check_warns(
     # banned terms (soft): the lexical tells spec/banned-terms.yaml rules out,
     # extended by press/banned-terms.yaml. Counting covers the rendered text
     # minus the sources section, so a heading counts and a cited title does not.
-    prose = " ".join(" ".join(ed._prose_text_parts).split()).casefold()
+    raw_prose = " ".join(" ".join(ed._prose_text_parts).split())
+    prose = raw_prose.casefold()
     for entry in banned_terms:
         count = sum(prose.count(str(term).casefold()) for term in entry["terms"])
         limit = int(entry.get("max", 0))
@@ -1143,7 +1132,6 @@ def check_warns(
     # caps so it cannot pass as copy. A caps run surviving into the prose is
     # an unfilled slot or a lifted instruction; long runs warn even when the
     # skeleton does not carry them, catching lifts from the furniture docs.
-    raw_prose = " ".join(" ".join(ed._prose_text_parts).split())
     leftovers = set()
     for run in caps_runs(raw_prose):
         joined = " ".join(run)
@@ -1292,7 +1280,7 @@ def check_article(
 # PR mode
 # --------------------------------------------------------------------------- #
 
-PR_PATH_RE = re.compile(r"^library/([a-z0-9-]{1,32})/([a-z0-9-]{1,64})\.html$")
+PR_PATH_RE = nb_meta.PR_PATH_RE
 
 
 def parse_pr_body(path) -> dict | None:
@@ -1463,16 +1451,12 @@ def emit(rep, as_json):
             )
         )
     else:
-        print(f"BLOCK: {len(blocks)}")
-        for f in blocks:
-            print(f"  {f.code:<18} {f.message}")
-            if f.suggestion:
-                print(f"  {'':<18} → {f.suggestion}")
-        print(f"WARN:  {len(warns)}")
-        for f in warns:
-            print(f"  {f.code:<18} {f.message}")
-            if f.suggestion:
-                print(f"  {'':<18} → {f.suggestion}")
+        for label, findings in (("BLOCK:", blocks), ("WARN: ", warns)):
+            print(f"{label} {len(findings)}")
+            for f in findings:
+                print(f"  {f.code:<18} {f.message}")
+                if f.suggestion:
+                    print(f"  {'':<18} → {f.suggestion}")
         for n in rep.notes:
             print(f"note: {n}")
         print("verdict:", "PUBLISHABLE" if not blocks else "BLOCKED")

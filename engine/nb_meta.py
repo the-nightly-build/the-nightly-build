@@ -1,15 +1,25 @@
-"""Shared readers for the published library.
+"""Shared readers and grammar for the published library.
 
-check.py, build_site.py, and duty.py all read the same published state: each
-article's nb-meta block and the series directories under a library checkout.
-Keeping the recognition contract and the directory layout here is the single
-source of truth, so the proof validates exactly the block the builder renders
-and duty schedules against, and all three agree on where a series lives.
+check.py, build_site.py, duty.py, and the CI helpers all read the same
+published state: each article's nb-meta block, the series directories under
+a library checkout, and the press's configured series. Keeping the
+recognition contract, the directory layout, and the identifier grammar here
+is the single source of truth, so the proof validates exactly the block the
+builder renders and duty schedules against, the validator approves only ids
+the 2am proof will accept, and every module agrees on where a series lives.
 """
 
 import json
 import os
 import re
+
+# The identifier grammar and the one PR shape built from it. validate_config
+# approves against these, the proof enforces them, and ci_helpers derives the
+# render probe's target with them — one definition or they drift apart.
+SERIES_RE = re.compile(r"^[a-z0-9-]{1,32}$")
+SLUG_RE = re.compile(r"^[a-z0-9-]{1,64}$")
+PR_PATH_RE = re.compile(r"^library/([a-z0-9-]{1,32})/([a-z0-9-]{1,64})\.html$")
+MODES = ("collection", "sequence", "rolling", "open")
 
 # The one nb-meta block every consumer honors: a typed
 # <script type="application/json" id="nb-meta">. Requiring the type (in any
@@ -48,3 +58,19 @@ def series_dir(library: str, series_id: str) -> str | None:
         if os.path.isdir(base):
             return base
     return None
+
+
+def series_ids(repo: str) -> list[str]:
+    """Every configured series id, sorted. A `_`-prefixed folder is a shared
+    fragment home (press/series/_tags), never a series; a folder without a
+    series.yaml is ignored here, and validate_config is where authors hear
+    about it."""
+    root = os.path.join(repo, "press", "series")
+    if not os.path.isdir(root):
+        return []
+    return sorted(
+        sid
+        for sid in os.listdir(root)
+        if not sid.startswith("_")
+        and os.path.isfile(os.path.join(root, sid, "series.yaml"))
+    )
