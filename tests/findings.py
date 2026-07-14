@@ -36,6 +36,15 @@ class Tier:
     def codes(self) -> list[str]:
         return sorted({f.code for f in self._findings})
 
+    def saying(self, fragment: str) -> bool:
+        """Whether a finding at this tier carries `fragment` in its message.
+
+        Several rules share a code (B-SANDBOX covers scripts, tags, handlers and
+        external refs), so a code alone cannot tell which one fired. Where the
+        rule matters on its own, name it.
+        """
+        return any(fragment in f.message for f in self._findings)
+
     def __repr__(self) -> str:
         if not self._findings:
             return "<none>"
