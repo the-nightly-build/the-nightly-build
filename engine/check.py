@@ -127,6 +127,36 @@ VOID = {
     "wbr",
 }
 
+# a start tag that HTML5 lets close an open <p>; the dek capture ends at one
+BLOCK_LEVEL = {
+    "address",
+    "article",
+    "aside",
+    "blockquote",
+    "div",
+    "dl",
+    "fieldset",
+    "figure",
+    "footer",
+    "form",
+    "h1",
+    "h2",
+    "h3",
+    "h4",
+    "h5",
+    "h6",
+    "header",
+    "hr",
+    "main",
+    "nav",
+    "ol",
+    "p",
+    "pre",
+    "section",
+    "table",
+    "ul",
+}
+
 
 def collapse_space(text: str) -> str:
     return " ".join(text.split())
@@ -162,8 +192,9 @@ class Article(HTMLParser):
         self.forbidden_tags = []
         self.external_refs = []  # (tag, url) for script src / link href / img src
         self._capture = None  # ("meta"|"chart", buffer) while inside a JSON script
-        self._dek_seen = False  # an article need not render a dek at all
-        self._dek_parts = []  # text of the first p.nb-dekline
+        self.dekline_count = 0  # .nb-dekline elements; an article need not render one
+        self._dek_open = False  # inside the first dekline, before any block ends it
+        self._dek_parts = []  # text of the first .nb-dekline
         self._text_parts = []
         self._prose_text_parts = []  # body prose only, excludes the sources section
         self._suppress_text_depth = 0  # inside script/style
@@ -232,13 +263,17 @@ class Article(HTMLParser):
         if tag == "sup" and "nb-cite" in a.get("class", "").split():
             el["cite_sup"] = True
 
-        if (
-            tag == "p"
-            and "nb-dekline" in a.get("class", "").split()
-            and not self._dek_seen
-        ):
-            self._dek_seen = True
-            el["dekline"] = True
+        # the class is the whole contract: a press writes its own template and may
+        # render the dek in any element, so the tag is not ours to require
+        if "nb-dekline" in a.get("class", "").split():
+            self.dekline_count += 1
+            if self.dekline_count == 1:
+                self._dek_open = True
+                el["dekline"] = True
+        elif self._dek_open and tag in BLOCK_LEVEL:
+            # a <p> dekline may be left unclosed; the next block ends it, so the
+            # capture stops here rather than running on into the body
+            self._dek_open = False
 
         if tag == "a":
             in_sup = any(e.get("cite_sup") for e in self.stack)
@@ -302,7 +337,7 @@ class Article(HTMLParser):
             sec = self._current("section")
             if sec is None or sec.get("section") != "sources":
                 self._prose_text_parts.append(data)
-            if self._current("dekline") is not None:
+            if self._dek_open and self._current("dekline") is not None:
                 self._dek_parts.append(data)
 
     @property
@@ -312,7 +347,7 @@ class Article(HTMLParser):
 
     @property
     def dekline(self) -> str | None:
-        if not self._dek_seen:
+        if not self.dekline_count:
             return None
         return collapse_space("".join(self._dek_parts))
 
@@ -721,6 +756,7 @@ def check_meta_agreement(
     slug_from_path,
     parent,
     dekline,
+    dekline_count,
     pr_body_meta,
     rep,
 ):
@@ -760,6 +796,14 @@ def check_meta_agreement(
             f"nb-meta dek {dek!r} != the rendered dekline {dekline!r}",
             suggestion="the front page and the feed render nb-meta's dek, not "
             "the body's; carry every dek edit back into nb-meta",
+        )
+    if dekline_count > 1:
+        # only the first dekline is the reader's; a second is a dek nobody edits,
+        # and holding it to nb-meta would only bless whichever one happens to agree
+        rep.block(
+            "B-META-MATCH",
+            f"exactly one .nb-dekline element allowed, found {dekline_count}",
+            suggestion="delete the stale dekline; the reader reads the first one",
         )
     if pr_body_meta is not None:
         for field in ("series", "slug", "mode", "template", "date", "title"):
@@ -1314,6 +1358,7 @@ def check_article(
         slug_from_path=slug_from_path,
         parent=parent,
         dekline=ed.dekline,
+        dekline_count=ed.dekline_count,
         pr_body_meta=pr_body_meta,
         rep=rep,
     )

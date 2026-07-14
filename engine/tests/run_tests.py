@@ -330,6 +330,43 @@ expect(
     must_not=["B-META-MATCH"],
     blocks=0,
 )
+DEK_TEXT = "How a cyclical commodity maker became the AI era&#39;s bottleneck."
+expect(
+    "a dekline in a non-p element is held to nb-meta's dek",
+    run_local(
+        mut(RENDERED_DEK, '<div class="nb-dekline">A better sentence, body only.</div>'),
+        "semiconductors",
+    ),
+    must_have=["B-META-MATCH"],
+)
+expect(
+    "a dekline in a non-p element that agrees is clean",
+    run_local(
+        mut(RENDERED_DEK, f'<h2 class="nb-dekline">{DEK_TEXT}</h2>'), "semiconductors"
+    ),
+    must_not=["B-META-MATCH"],
+    blocks=0,
+)
+expect(
+    "an unclosed dekline <p> does not swallow the block that follows it",
+    run_local(
+        mut(
+            RENDERED_DEK,
+            f'<p class="nb-dekline">{DEK_TEXT}<p>A sentence the dek must not eat.</p>',
+        ),
+        "semiconductors",
+    ),
+    must_not=["B-META-MATCH"],
+    blocks=0,
+)
+expect(
+    "a second dekline left in the body blocks",
+    run_local(
+        mut(RENDERED_DEK, f'{RENDERED_DEK}<p class="nb-dekline">The stale dek.</p>'),
+        "semiconductors",
+    ),
+    must_have=["B-META-MATCH"],
+)
 expect(
     "slug-style tag is accepted",
     run_local(
