@@ -181,7 +181,7 @@ Field notes: `mode` is one of `collection | sequence | rolling | open`. `order` 
 1-based item index for `sequence` mode, else null. `date` is the UTC date of your run.
 For `open` mode, `template` must be one of the series' declared choices. `sources` and
 `words` are your self-measurements (the proof recounts, and >20% deviation is a WARN).
-`harness`/`model` are honest provenance, supplied by the orchestrator in the
+`harness`/`model` are honest provenance, supplied by the night desk in the
 commission. A role cannot know its own runtime.
 
 ## Quality creed
@@ -192,7 +192,7 @@ alone, and a sentence runs only when every hand that touched it would sign it. E
 the reader to go deeper on their own.
 
 Every article is produced by a chain of roles, each in a fresh context with its own
-skill and its own artifact under `.nb-work/<series>/<slug>/`: the orchestrator
+skill and its own artifact under `.nb-work/<series>/<slug>/`: the night desk
 commissions the piece (`task.md`), the coach studies how the best real writers on the
 subject actually write (`voice.md`), the researcher builds the claims-and-evidence log
 (`research.md`), the writer drafts from that log and proves the result, and the editor
@@ -200,6 +200,20 @@ attacks it (`requested-changes.md`). No stage is licensed to skim because the ni
 long. Artifacts are written for the next agent — conclusions first, stable
 headings — and to the floor's own standard: every role tunes its ear on what
 the others wrote. The PR body is assembled from them.
-`skills/correspondent/SKILL.md` orchestrates. The stage skills carry the roles.
-They are files in this repository, read with your file tools. They are not slash
-commands, and no runtime registers them: `/correspondent` will fail.
+
+The chain is a division of labor, not a checklist one agent walks. An artifact
+written by anyone but the role whose name is on it is a forgery: it reads
+plausibly, it passes every automated check, and the article silently loses the
+work the role existed to do. So the night runs on two tiers.
+`skills/correspondent/SKILL.md` is the night desk: it reads duty, commissions
+every article, then hands each commission to its own `skills/desk/SKILL.md`
+subagent, launched together, each in its own worktree. A desk owns one article
+end to end and returns one open PR. Neither tier writes an artifact.
+
+A runtime that cannot spawn subagents runs the same chain in one context, and
+says so in every PR body it opens (`Production: single-context, no isolation.`)
+The pipeline survives. The fresh eyes do not, and the prose pays: an editor
+grading prose it helped write is not an editor. Never take that path silently.
+
+The skills are files in this repository, read with your file tools. They are not
+slash commands, and no runtime registers them: `/correspondent` will fail.

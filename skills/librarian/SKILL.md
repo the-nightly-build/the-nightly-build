@@ -116,7 +116,7 @@ Before any scheduling, offer a rehearsal: _"want to see what the first article
 would look like tonight?"_ It costs the same usage as a real run and only
 skips publishing.
 
-A press check runs the correspondent skill's article chain exactly as a real
+A press check runs a desk's article chain exactly as a real
 night, with one difference: the commission you write names the article path
 as `press-check/library/<series>/<slug>.html` (gitignored), so every role
 writes where `task.md` says. Run the chain (coach, researcher, writer,
