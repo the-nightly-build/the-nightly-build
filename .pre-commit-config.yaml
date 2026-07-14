@@ -75,7 +75,7 @@ repos:
         types: [shell]
       - id: tests
         name: engine test suite
-        entry: python3 engine/tests/run_tests.py
+        entry: uv run pytest
         language: system
         pass_filenames: false
         always_run: true
