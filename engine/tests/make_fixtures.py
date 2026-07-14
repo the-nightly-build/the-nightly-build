@@ -127,12 +127,12 @@ def article():
             f'<a data-nb-source{req} href="{href}">link</a></li>'
         )
 
-    # the dekline renders wrapped and entity-escaped; nb-meta's dek is one JSON
-    # string, and the proof must still see the two as the same sentence
+    # the dekline renders wrapped, entity-escaped and broken by a tag; nb-meta's
+    # dek is one JSON string, and the proof must still see the two as one sentence
     header = """<header>
 <h1 class="nb-title">Micron Technology: The Scarcest Commodity in AI</h1>
 <p class="nb-dekline">
-  How a cyclical commodity maker became the AI era&#39;s
+  How a cyclical commodity maker became the AI era&#39;s<br>
   bottleneck.
 </p>
 </header>"""
