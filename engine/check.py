@@ -162,7 +162,8 @@ class Article(HTMLParser):
         self.forbidden_tags = []
         self.external_refs = []  # (tag, url) for script src / link href / img src
         self._capture = None  # ("meta"|"chart", buffer) while inside a JSON script
-        self._dek_parts = None  # text of the first p.nb-dekline; None when absent
+        self._dek_seen = False  # an article need not render a dek at all
+        self._dek_parts = []  # text of the first p.nb-dekline
         self._text_parts = []
         self._prose_text_parts = []  # body prose only, excludes the sources section
         self._suppress_text_depth = 0  # inside script/style
@@ -234,9 +235,9 @@ class Article(HTMLParser):
         if (
             tag == "p"
             and "nb-dekline" in a.get("class", "").split()
-            and self._dek_parts is None
+            and not self._dek_seen
         ):
-            self._dek_parts = []
+            self._dek_seen = True
             el["dekline"] = True
 
         if tag == "a":
@@ -311,7 +312,7 @@ class Article(HTMLParser):
 
     @property
     def dekline(self) -> str | None:
-        if self._dek_parts is None:
+        if not self._dek_seen:
             return None
         return collapse_space("".join(self._dek_parts))
 
