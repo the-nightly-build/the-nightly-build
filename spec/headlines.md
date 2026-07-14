@@ -61,9 +61,12 @@ a topic, and no detail that competes with the thesis for the reader's first
 impression.
 
 `spec/editorial.md` bans the hedged-contrast reflex in body prose, and the
-dek gets no exemption. Two dek molds carry it: the semicolon reversal ("X
-did A; Y refuses B") and the suspended question ("...and the real question
-is whether"). Cut them on sight. Even an earned shape reads stamped once it recurs, so check
+dek gets no exemption. Three dek molds carry it: the semicolon reversal ("X
+did A; Y refuses B"), the suspended question ("...and the real question
+is whether"), and the comma triad, three clauses joined by commas and closed
+with "and" ("The trial cut the rate from 14 in 100 to 2, the
+general-population evidence is thinner, and the benefit depends on sustained
+feeding"). Cut them on sight. Even an earned shape reads stamped once it recurs, so check
 the recent library's deks before settling on one.
 
 ## Section headings
