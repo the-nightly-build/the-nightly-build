@@ -1613,6 +1613,118 @@ for name, cond in [
 ]:
     check(name, cond)
 
+print("== duty refuses a wrong tree ==")
+# The 2026-07-14 failure: pointed at a tree with no press, duty printed an empty
+# work list and exited 0. The night shift read that as "nothing due", went
+# looking for a configuration, and adopted the engine's examples/ folder. An
+# empty answer is an invitation. A missing press must refuse, and it must not be
+# confusable with a paper whose desks are simply all idle tonight.
+
+DUTY = [sys.executable, str(REPO / "engine" / "duty.py")]
+
+no_press = tempfile.mkdtemp()
+pathlib.Path(no_press, "engine").mkdir()
+no_press_run = subprocess.run(
+    [*DUTY, "--repo", no_press, "--library", empty_lib], capture_output=True, text=True
+)
+# the trap itself: the engine's own examples/ is a complete, working paper
+examples_as_press = tempfile.mkdtemp()
+shutil.copytree(REPO / "examples", pathlib.Path(examples_as_press) / "press")
+examples_run = subprocess.run(
+    [*DUTY, "--repo", examples_as_press, "--library", empty_lib],
+    capture_output=True,
+    text=True,
+)
+# a real press whose every series is paused: a quiet night, and a valid answer
+quiet = clone_testrepo("press", "templates")
+for sy in pathlib.Path(quiet, "press", "series").glob("*/series.yaml"):
+    sy.write_text(sy.read_text() + "paused: true\n")
+quiet_run = subprocess.run(
+    [*DUTY, "--repo", quiet, "--library", empty_lib], capture_output=True, text=True
+)
+
+check(
+    "a tree with no press refuses instead of reporting a quiet night",
+    no_press_run.returncode == 2 and not no_press_run.stdout.strip(),
+    detail=f"rc={no_press_run.returncode} stdout={no_press_run.stdout[:60]!r}",
+)
+check(
+    "the refusal says which tree, and that examples/ is not a press",
+    "no press at" in no_press_run.stderr
+    and "examples/ is documentation" in no_press_run.stderr,
+    detail=no_press_run.stderr[:160],
+)
+check(
+    "a press whose desks are all idle is a quiet night, not a refusal",
+    quiet_run.returncode == 0 and json.loads(quiet_run.stdout)["due"] == [],
+    detail=f"rc={quiet_run.returncode}",
+)
+check(
+    "examples/ copied into press/ is a real press (the trap is the path, not the folder)",
+    examples_run.returncode == 0,
+)
+
+origin_dir = tempfile.mkdtemp()
+git("init", "--bare", "-q", "-b", "main", cwd=origin_dir)
+night = clone_testrepo("press", "templates")
+git("init", "-q", "-b", "main", cwd=night)
+git("config", "user.email", "t@t", cwd=night)
+git("config", "user.name", "t", cwd=night)
+git("remote", "add", "origin", origin_dir, cwd=night)
+git("add", "-A", cwd=night)
+git("commit", "-qm", "the press as the night shift sees it", cwd=night)
+git("push", "-q", "origin", "main", cwd=night)
+
+fresh = subprocess.run(
+    [*DUTY, "--repo", night, "--library", empty_lib], capture_output=True, text=True
+)
+
+# the owner retires a series on main; the night shift's clone never hears about it
+owner = tempfile.mkdtemp()
+git("clone", "-q", origin_dir, owner, cwd=tempfile.gettempdir())
+git("config", "user.email", "t@t", cwd=owner)
+git("config", "user.name", "t", cwd=owner)
+shutil.rmtree(pathlib.Path(owner) / "press" / "series" / "ai-briefs")
+git("add", "-A", cwd=owner)
+git("commit", "-qm", "retire the old press", cwd=owner)
+git("push", "-q", "origin", "main", cwd=owner)
+
+stale = subprocess.run(
+    [*DUTY, "--repo", night, "--library", empty_lib], capture_output=True, text=True
+)
+overridden = subprocess.run(
+    [*DUTY, "--repo", night, "--library", empty_lib, "--allow-stale"],
+    capture_output=True,
+    text=True,
+)
+
+check("a checkout level with origin/main computes the work list", fresh.returncode == 0)
+check(
+    "a checkout behind origin/main refuses to compute a work list",
+    stale.returncode == 2 and not stale.stdout.strip(),
+    detail=f"rc={stale.returncode} stdout={stale.stdout[:80]!r}",
+)
+check(
+    "the refusal names the drift and the command that fixes it",
+    "stale checkout" in stale.stderr
+    and "1 commits behind" in stale.stderr
+    and "reset --hard origin/main" in stale.stderr,
+    detail=stale.stderr[:200],
+)
+check(
+    "--allow-stale is the offline escape hatch",
+    overridden.returncode == 0 and json.loads(overridden.stdout)["due"],
+)
+check(
+    "a tree with no git (press check, temp fixture) is never called stale",
+    subprocess.run(
+        [*DUTY, "--repo", TESTREPO, "--library", empty_lib],
+        capture_output=True,
+        text=True,
+    ).returncode
+    == 0,
+)
+
 print("== PR mode (real git repo) ==")
 
 prdir = clone_testrepo("press", "templates")

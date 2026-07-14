@@ -9,8 +9,23 @@ The correspondent runs this before researching anything. It is the single
 source of truth for cadence, pauses, completion, commission queues, and
 rerun safety, so no agent ever does calendar math on its own.
 
+Because it runs first, it is also where a wrong tree is caught. It refuses,
+rather than answering, in two cases:
+
+  No press. An empty work list used to mean the same thing whether the paper
+  was resting or the tree had no press/ at all. On 2026-07-14 a night shift
+  read an empty list, went looking for a configuration, and adopted the
+  engine's own examples/ folder: three articles for series this paper retired
+  months ago, every local proof passing, CI blocking all of it. A missing
+  press is not a quiet night. It means you are in the wrong tree.
+
+  A stale checkout. A cached workspace serves a press, prompts, and an engine
+  the paper has moved past, and nothing downstream can tell.
+
 Run: python3 engine/duty.py --repo . --library <library-checkout> [--date YYYY-MM-DD]
-Prints JSON: {"date", "weekday", "due": [...], "idle": [...]}. Always exits 0.
+Prints JSON: {"date", "weekday", "due": [...], "idle": [...]}. Exits 0, except
+2 when the tree is refused (--allow-stale skips the staleness check, for
+offline work; nothing skips the missing-press check).
 """
 
 from __future__ import annotations
@@ -19,6 +34,7 @@ import argparse
 import datetime as _dt
 import json
 import os
+import subprocess
 import sys
 
 import nb_meta
@@ -178,6 +194,65 @@ def series_duty(
     return False, {**entry, "reason": f"unknown mode {mode!r}"}
 
 
+def git(repo, *args) -> str | None:
+    try:
+        done = subprocess.run(
+            ["git", "-C", repo, *args], capture_output=True, text=True, timeout=60
+        )
+    except (OSError, subprocess.SubprocessError):
+        return None
+    return done.stdout.strip() if done.returncode == 0 else None
+
+
+def stale_checkout(repo) -> str | None:
+    """Say how the tree is behind origin/main, or None when it is not.
+
+    Only a strict ancestor of origin/main is stale: a branch with local work
+    is ahead or diverged, and a press check on a feature branch must keep
+    working. A tree with no git, no origin, or no reachable remote cannot be
+    judged, so it passes rather than blocking an offline run.
+    """
+    if git(repo, "rev-parse", "--git-dir") is None:
+        return None
+    if git(repo, "remote", "get-url", "origin") is None:
+        return None
+    git(repo, "fetch", "--quiet", "origin", "main")
+    head = git(repo, "rev-parse", "HEAD")
+    remote = git(repo, "rev-parse", "origin/main")
+    if head is None or remote is None or head == remote:
+        return None
+    if git(repo, "merge-base", "HEAD", "origin/main") != head:
+        return None  # ahead or diverged: local work, not a stale clone
+    behind = git(repo, "rev-list", "--count", f"{head}..origin/main") or "?"
+    return (
+        f"stale checkout: HEAD is {head[:8]}, {behind} commits behind "
+        f"origin/main ({remote[:8]}). The press, the prompts, and the engine "
+        f"in this tree are not the ones this paper runs. Sync first:\n"
+        f"    git -C {repo} fetch origin && git -C {repo} reset --hard origin/main\n"
+        f"then run duty again. (--allow-stale overrides, for offline work only.)"
+    )
+
+
+def missing_press(repo) -> str | None:
+    """Say why this tree holds no press, or None when it holds one.
+
+    A paper whose series are all idle tonight is a quiet night, and duty
+    answers it with an empty due list. A tree with no press/series at all is
+    not a quiet night: it is the wrong directory, and an empty answer invites
+    the night shift to go find a configuration somewhere else.
+    """
+    root = os.path.join(repo, "press", "series")
+    if os.path.isdir(root) and nb_meta.series_ids(repo):
+        return None
+    return (
+        f"no press at {repo!r}: {root} holds no configured series. This is not a "
+        f"quiet night, it is the wrong tree. The press is press/ and nothing "
+        f"else: examples/ is documentation, never configuration, and an article "
+        f"written from it names a series the proof will refuse. Check out the "
+        f"paper's main branch and run duty from its root."
+    )
+
+
 def main(argv=None) -> int:
     p = argparse.ArgumentParser(description="Tonight's deterministic work list")
     p.add_argument("--repo", default=".", help="repo root (main checkout)")
@@ -185,7 +260,19 @@ def main(argv=None) -> int:
         "--library", required=True, help="library-branch checkout (published state)"
     )
     p.add_argument("--date", default=None, help="UTC date, default today")
+    p.add_argument(
+        "--allow-stale",
+        action="store_true",
+        help="compute a work list even from a tree behind origin/main",
+    )
     args = p.parse_args(argv)
+
+    refusal = missing_press(args.repo)
+    if refusal is None and not args.allow_stale:
+        refusal = stale_checkout(args.repo)
+    if refusal:
+        sys.stderr.write(f"duty.py: {refusal}\n")
+        return 2
 
     date = (
         _dt.date.fromisoformat(args.date)

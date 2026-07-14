@@ -26,7 +26,11 @@ the file paths, not summaries.
    `python3 engine/duty.py --repo . --library <checkout>`
    If your schedule prompt names one series, serve only that one, and only if
    duty lists it. **Duty says nothing is due → stop. No PR. Exiting silently
-   here is correct behavior.**
+   here is correct behavior.** **Duty refuses the tree (exit 2) → do what it
+   says, then rerun it.** Your runtime may hand you a cached workspace or drop
+   you in the wrong directory. Tonight's work list comes from duty or it does
+   not exist: never rebuild one from the library, and never from `examples/`,
+   which is documentation for people and names series this paper does not run.
 2. Orient. Skim the recent nights in the library checkout (titles, deks,
    openers) and learn, per assignment, what moved on the beat and what the
    catalog already covered. For an open series with an empty commission
@@ -47,9 +51,10 @@ the file paths, not summaries.
 
 ## Phase 2: the article chain
 
-Serve each due series independently: a subagent in its own git worktree where
-your runtime allows, one series at a time in a fresh pass where it does not.
-The chain, each stage a fresh context loading the named skill:
+Serve the due series concurrently: one subagent per series, each in its own git
+worktree, all launched together where your runtime allows. No article waits on
+another's chain. Where it does not allow that, run them one at a time in fresh
+passes. The chain, each stage a fresh context loading the named skill:
 
 1. `writing-coach` → `voice.md`
 2. `researcher` → `research.md`
