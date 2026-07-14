@@ -363,6 +363,28 @@ def check_kind_bands(bands, *, key, where, errors):
             )
 
 
+def check_kinded_skeletons(repo, templates, *, where, errors):
+    """A composition rule needs source entries that declare a kind.
+
+    A skeleton whose sources carry no `data-nb-kind` renders an article the
+    writer fills faithfully and the proof then blocks for "0 primary source(s)".
+    Say it at the author's desk instead.
+    """
+    for tid, folder in build_site.template_dirs(repo).items():
+        skeleton = os.path.join(folder, "skeleton.html")
+        if tid not in templates or not os.path.isfile(skeleton):
+            continue
+        ed = check.Article()
+        with open(skeleton, encoding="utf-8") as fh:
+            ed.feed(fh.read())
+        ed.close()
+        if any(s["kind"] is None for s in ed.sources):
+            errors.append(
+                f"{where}: a source composition needs a template whose skeleton "
+                f"declares data-nb-kind on its source entries; '{tid}' does not"
+            )
+
+
 def check_series(repo, registry, *, errors):
     label = "press"
     root = os.path.join(repo, "press", "series")
@@ -485,6 +507,8 @@ def check_series(repo, registry, *, errors):
                 f"{where}: 'per_item_sources' needs every template the series may "
                 f"use to cite per item; {', '.join(per_section)} cite(s) per section"
             )
+        if per_item_sources is not None or cfg.get("sources_by_kind") is not None:
+            check_kinded_skeletons(repo, allowed, where=where, errors=errors)
         prompt = cfg.get("prompt")
         if prompt and not os.path.isfile(os.path.join(root, sid, prompt)):
             errors.append(f"{where}: prompt file '{prompt}' not found")

@@ -248,7 +248,13 @@ ordered course, rebuilt as your own template.
    box, check box, and bridge components in `templates/FURNITURE.md` carry
    the lesson. The sandbox applies unchanged: no scripts beyond the JSON blocks
    and the engine runtime, citations as `sup.nb-cite` anchors into numbered
-   source entries. Optionally add `identity.md` (the template's voice) and
+   source entries. Give each placeholder source entry a
+   `data-nb-kind="primary"` or `"secondary"` next to its `data-nb-source`, as
+   the shipped skeletons do: it is how a series constrains its source mix
+   (`sources_by_kind`, `per_item_sources` in [series.md](series.md)), and
+   `validate_config.py` rejects a series that sets one of those bands on a
+   template whose skeleton omits the attribute. Optionally add `identity.md`
+   (the template's voice) and
    `furniture.md` + `furniture.css` for bespoke components only this template
    renders.
 
