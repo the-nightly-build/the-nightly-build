@@ -40,7 +40,9 @@ available, `uv run engine/<script>.py` manages the dependency itself.
 
 3. **Select your work.** Fetch the `library` branch and check it out to its own
    path (a `git worktree add`, or a second clone) so the engine can read tonight's
-   published state, then run the duty oracle:
+   published state. The branch root holds `library/<series>/<slug>.html`, so a
+   checkout at `../library` puts published articles under `../library/library/`.
+   Then run the duty oracle:
    `python3 engine/duty.py --repo . --library <path-to-library-checkout>`
    Duty exits 2 and prints nothing when your checkout is behind `origin/main`.
    A cached workspace serves a press, prompts, and an engine this paper has
@@ -195,3 +197,5 @@ long. Artifacts are written for the next agent — conclusions first, stable
 headings — and to the floor's own standard: every role tunes its ear on what
 the others wrote. The PR body is assembled from them.
 `skills/correspondent/SKILL.md` orchestrates. The stage skills carry the roles.
+They are files in this repository, read with your file tools. They are not slash
+commands, and no runtime registers them: `/correspondent` will fail.

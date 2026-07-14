@@ -49,9 +49,10 @@ the file paths, not summaries.
 
 ## Phase 2: the article chain
 
-Serve each due series independently: a subagent in its own git worktree where
-your runtime allows, one series at a time in a fresh pass where it does not.
-The chain, each stage a fresh context loading the named skill:
+Serve the due series concurrently: one subagent per series, each in its own git
+worktree, all launched together where your runtime allows. No article waits on
+another's chain. Where it does not allow that, run them one at a time in fresh
+passes. The chain, each stage a fresh context loading the named skill:
 
 1. `writing-coach` → `voice.md`
 2. `researcher` → `research.md`
