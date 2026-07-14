@@ -65,7 +65,7 @@ turn, together**. Each owns its article end to end and returns an open PR. No
 desk waits on another. Give each desk an isolated tree so their proof runs and
 work branches cannot collide:
 
-```
+```sh
 git worktree add ../desk-<series> -b nb/<series>-<slug> origin/library
 ```
 
