@@ -99,6 +99,20 @@ def test_a_brief_citing_three_studied_writers_passes(
     assert "W-VOICE-THIN" not in result.codes
 
 
+def test_a_fenced_task_heading_does_not_hide_the_real_voice_brief(
+    run_local: Callable[..., Findings],
+) -> None:
+    body = GOOD_BODY.replace(
+        "Commission: what Micron's cycle costs, for a public-market reader.",
+        "````text\n## Voice brief\n````\n\n"
+        "Commission: what Micron's cycle costs, for a public-market reader.",
+    )
+
+    result = run_local(article(), "semiconductors", pr_body=body)
+
+    assert "W-VOICE-THIN" not in result.codes
+
+
 def test_the_commission_and_the_research_log_are_part_of_the_record(
     run_local: Callable[..., Findings],
 ) -> None:

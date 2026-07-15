@@ -22,7 +22,9 @@ order.
 
 State in your own words, from the draft alone, the thesis and the two to four
 claims the piece stands on. If you cannot, that is your first finding. The
-headline and the dek are claims too. Put them on the list.
+headline and the dek are claims too. Put them on the list. A dek that grades or
+describes the article's own selection or method ("each of tonight's...", "this
+piece...") instead of making a claim about the world is a required change.
 
 Then try to break each one, hardest whichever delights you. Delight is
 scrutiny about to relax. Open `research.md` as your map and re-open the
@@ -38,9 +40,13 @@ the half the piece did not quote is the first place a broken thesis hides.
 Recompute what the numbers imply. Do the arithmetic the draft asserted rather
 than showed, and check each figure against whatever it is a part of and against
 the figures the piece sets beside it. Check a figure against the document that
-owns it and not a convenient summary of it. An interval absent from an abstract
-is not an interval absent from the paper, and a figure you recompute yourself is
-a second estimate, not a verdict on the first. A verbatim quote aimed at
+owns it and not a convenient summary of it. When primary and secondary figures
+conflict, the primary governs and the discrepancy is a required change. An
+interval absent from an abstract is not an interval absent from the paper, and a
+figure you recompute yourself is a second estimate, not a verdict on the first.
+For every directional claim (higher/lower, under/over, increases/decreases,
+more/less), reread the source's exact verb: a reversed direction is a broken
+claim, not a wording nit. A verbatim quote aimed at
 a different object than the source's fails however clean it reads. Scale the
 check to the cost of being wrong. Any claim that could damage or credit a
 named person gets the deepest check. When the body names a primary ("per a

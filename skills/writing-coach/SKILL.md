@@ -27,7 +27,10 @@ The voice you produce must fit the paper. Read first:
   redefine the genre you are calibrating.
 - The recent library: skim the latest published articles' titles, deks, and
   openers in the library checkout, reading deeper where a piece neighbors
-  yours. A move or an angle the paper just used is off tonight's menu.
+  yours. Use it only to find moves or angles that are off tonight's menu. The
+  named exemplars, never a pre-change edition of this series, calibrate voice,
+  dek, and structure: publication history records what the format was, not what
+  it should remain.
 
 Adapt the domain's best voice to fit all of these. The brief arrives already
 reconciled to the paper, so the writer never fights the register.

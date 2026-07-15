@@ -17,6 +17,37 @@ VOICE_EXEMPLARS_MIN = 3
 SOURCE_LINE_RE = re.compile(r"^\s*Source:\s*\S+", re.I | re.M)
 
 
+def record_headings(body):
+    """Return production-record headings that are outside Markdown code fences.
+
+    The record embeds verbatim artifacts in four-backtick fences, and those
+    artifacts can legitimately contain headings named like production-record
+    sections. Only the outer headings delimit the record.
+    """
+    headings = []
+    fence = None
+    offset = 0
+    names = {name.casefold(): name for name in RECORD_SECTIONS}
+    for line in body.splitlines(keepends=True):
+        marker = re.match(r"^\s*([`~]{3,})", line)
+        if marker:
+            token = marker.group(1)
+            if fence is None:
+                fence = token
+            elif token[0] == fence[0] and len(token) >= len(fence):
+                fence = None
+            offset += len(line)
+            continue
+        if fence is None:
+            heading = re.match(r"^#{2,3}\s+(.+?)\s*$", line)
+            if heading:
+                name = names.get(heading.group(1).casefold())
+                if name is not None:
+                    headings.append((name, offset, offset + len(line)))
+        offset += len(line)
+    return headings
+
+
 def parse_pr_body(path) -> dict | None:
     with open(path, encoding="utf-8") as fh:
         body = fh.read()
@@ -67,13 +98,13 @@ def section_text(body, name):
     voice brief's exemplars are themselves `##` headings, so cutting at any
     heading would slice the artifact in half and hide most of it.
     """
-    others = "|".join(re.escape(s) for s in RECORD_SECTIONS if s != name)
-    m = re.search(
-        rf"^#{{2,3}}\s*{re.escape(name)}\b(.*?)(?=^#{{2,3}}\s*(?:{others})\b|\Z)",
-        body,
-        re.I | re.M | re.S,
-    )
-    return m.group(1) if m else ""
+    headings = record_headings(body)
+    for index, (heading, _start, end) in enumerate(headings):
+        if heading != name:
+            continue
+        next_start = headings[index + 1][1] if index + 1 < len(headings) else len(body)
+        return body[end:next_start]
+    return ""
 
 
 def check_pr_body_record(pr_body_path, rep):
@@ -93,11 +124,8 @@ def check_pr_body_record(pr_body_path, rep):
     """
     with open(pr_body_path, encoding="utf-8") as fh:
         body = fh.read()
-    missing = [
-        name
-        for name in RECORD_SECTIONS
-        if not re.search(rf"^#{{2,3}}\s*{re.escape(name)}\b", body, re.I | re.M)
-    ]
+    present = {name for name, _start, _end in record_headings(body)}
+    missing = [name for name in RECORD_SECTIONS if name not in present]
     if missing:
         rep.warn(
             "W-BODY-RECORD",
