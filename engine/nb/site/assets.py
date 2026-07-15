@@ -144,3 +144,10 @@ def copy_articles(articles, out, *, site):
         if site["stamp"]:
             raw = ARTICLE_ASSET_RE.sub(rf"\1?v={site['stamp']}\2", raw)
         write(dst, dress_article(raw, site))
+        source_assets = os.path.join(os.path.dirname(ed["file"]), ed["slug"])
+        if os.path.isdir(source_assets):
+            shutil.copytree(
+                source_assets,
+                os.path.join(os.path.dirname(dst), ed["slug"]),
+                dirs_exist_ok=True,
+            )

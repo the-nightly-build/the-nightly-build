@@ -261,7 +261,7 @@ ordered course, rebuilt as your own template.
    `furniture.md` + `furniture.css` for bespoke components only this template
    renders.
 
-3. Validate and rehearse: `python3 engine/validate_config.py`, then point a
+3. Validate and rehearse: `uv run engine/validate_config.py --repo .`, then point a
    series at the template and run a press check before scheduling it.
 
 ## What stays with the engine

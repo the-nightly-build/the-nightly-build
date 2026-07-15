@@ -145,12 +145,11 @@ def run_pr_mode(args, rep):
         and changes
         and all(status == "D" for status, _ in changes)
     ):
-        stray = [p for _, p in changes if not PR_PATH_RE.match(p)]
-        if stray:
+        if nb_meta.article_bundle_path(changes, status="D") is None:
             rep.block(
                 "B-DIFF-SHAPE",
-                "an owner curation PR deletes published articles only "
-                f"(library/<series>/<slug>.html); this one also removes {stray}",
+                "an owner curation PR deletes one article and only its matching "
+                f"local figure assets; found {changes}",
             )
         else:
             rep.notes.append(
@@ -158,26 +157,16 @@ def run_pr_mode(args, rep):
                 "nothing to proof"
             )
         return
-    if len(changes) != 1:
+    path = nb_meta.article_bundle_path(changes)
+    if path is None:
         rep.block(
             "B-DIFF-SHAPE",
-            f"PR must change exactly one file; found {len(changes)}: "
-            f"{[p for _, p in changes]}",
-        )
-        return
-    status, path = changes[0]
-    if status != "A":
-        rep.block(
-            "B-DIFF-SHAPE", f"the one change must be an addition; got status '{status}'"
+            "PR must add one article and only matching local figure assets; found "
+            f"{[(status, path) for status, path in changes]}",
         )
         return
     m = PR_PATH_RE.match(path)
-    if not m:
-        rep.block(
-            "B-DIFF-SHAPE",
-            f"added file must be library/<series>/<slug>.html; got '{path}'",
-        )
-        return
+    assert m is not None
     series_id = m.group(1)
     cfg_repo = getattr(args, "main", None) or args.repo
     series_cfg, _ = load_series(cfg_repo, series_id)

@@ -143,12 +143,13 @@ dependencies. Do not substitute `pip install` in a harness or schedule.
    - File path: `library/<series>/<slug>.html`.
 
 7. **Run the proof and iterate:**
-   `python3 engine/check.py library/<series>/<slug>.html --series <id> --repo . --library <path-to-library-checkout>`
+   `uv run engine/check.py library/<series>/<slug>.html --series <id> --repo . --library <path-to-library-checkout>`
    Revise until `BLOCK: 0`. Treat every WARN as a revision note and address what you
    reasonably can. WARNs are the quality bar. BLOCKs are the publishing bar.
 
 8. **Open one pull request per article, targeting the `library` branch.** Branch
-   from `library` and add exactly one file, so the PR's diff is that file alone.
+   from `library` and add one article bundle: its HTML file and, only when used,
+   image assets directly under its matching slug directory.
    - Title: `nb: <series>/<slug> - <Title>`
    - Body: the article's production record, assembled from the run's artifacts
      under `.nb-work/<series>/<slug>/`, harness-agnostic and readable years
@@ -183,18 +184,20 @@ dependencies. Do not substitute `pip install` in a harness or schedule.
        with a note and post the full log as a comment after opening.
 
    - Preflight BEFORE opening the PR, with the same invocation the desk's CI
-     will run. Commit your one file on the work branch, write the intended
+     will run. Commit the article bundle on the work branch, write the intended
      body to a file, then from the library checkout:
      `uv run engine/check.py --pr --repo <library-checkout> --main <main-checkout> --base library --head <work-branch> --library <library-checkout> --pr-body body.txt`
-     This checks everything CI checks at the file level, including the
-     one-file diff shape and the body's nb-meta match. A failure here is
+     This checks everything CI checks at the bundle level, including matching
+     local figure assets and the body's nb-meta match. A failure here is
      yours to fix before any PR exists. CI also render-probes the built page
      in a browser, which no file check can; stay until its validate check
      reports on each PR you opened, and fix a failure on the same branch.
 
-9. **Boundaries.** Never merge. Never push to `library` directly. Never modify any other
-   file. Never open a second PR for the same series. If your PR is labeled
-   `nb-invalid`, a future run supersedes you. Do not fight the desk.
+9. **Boundaries.** Never merge. Never push to `library` directly. Modify only the
+   article and, when a cited source figure earns its place, its matching local
+   asset directory (`library/<series>/<slug>/`). Never open a second PR for the
+   same series. If your PR is labeled `nb-invalid`, a future run supersedes you.
+   Do not fight the desk.
 
 ## nb-meta
 

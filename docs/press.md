@@ -40,7 +40,7 @@ press/
    [scheduling.md](scheduling.md) (a native scheduler, often included in your
    plan, or the universal GitHub Actions cron). Optionally trigger it once now
    so today's first article publishes instead of waiting for tonight.
-4. Publish forever. The night shift adds articles to `library` via one-file
+4. Publish forever. The night shift adds article bundles to `library` via isolated
    PRs. `main` only changes when you change configuration or pull an engine
    update.
 

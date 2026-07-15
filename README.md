@@ -135,8 +135,8 @@ separate environment. Local development and CI use `pyproject.toml` and target
 Python 3.10+.
 
 ```sh
-uv run pytest                        # proof, builder, and end-to-end suites
-python3 engine/validate_config.py    # validate press/ configuration
+uv run pytest                                  # proof, builder, and end-to-end suites
+uv run engine/validate_config.py --repo .      # validate press/ configuration
 ```
 
 Engine changes go through a lint, type-check, format, and test gate that CI
@@ -174,6 +174,7 @@ contains a complete working configuration as documentation.
 - [Scheduling: native schedulers, the universal Actions cron](docs/scheduling.md)
 - [Harnesses: which agents can run the night shift, and the cost](docs/harnesses.md)
 - [Customization: themes, voice, your own templates](docs/customization.md)
+- [Source figures: capture and article bundles](docs/figures.md)
 - [Delivery: feeds, the directory, the catalog API](docs/delivery.md)
 
 Published sites are listed automatically on

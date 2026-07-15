@@ -159,6 +159,24 @@ def test_pr_touching_two_files(pr_repo: PressRepo) -> None:
     assert "B-DIFF-SHAPE" in result.blocks
 
 
+def test_pr_accepts_matching_figure_assets(pr_repo: PressRepo) -> None:
+    pr_repo.write("library/semiconductors/micron/figure-1.png", "image")
+    pr_repo.commit("figure asset")
+
+    result = pr_repo.run_pr(pr_body=pr_repo.body)
+
+    assert "B-DIFF-SHAPE" not in result.codes
+
+
+def test_pr_rejects_another_articles_figure_asset(pr_repo: PressRepo) -> None:
+    pr_repo.write("library/semiconductors/tsmc/figure-1.png", "image")
+    pr_repo.commit("wrong figure asset")
+
+    result = pr_repo.run_pr(pr_body=pr_repo.body)
+
+    assert "B-DIFF-SHAPE" in result.blocks
+
+
 def test_pr_modifying_engine_code(pr_repo: PressRepo) -> None:
     check_py = pathlib.Path(pr_repo.path, "engine", "check.py")
     pr_repo.write("engine/check.py", check_py.read_text() + "\n# sneak\n")

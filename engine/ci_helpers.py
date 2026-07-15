@@ -30,12 +30,12 @@ def added_article(diff_base):
         .stdout.strip()
         .splitlines()
     )
-    if len(out) != 1:
-        return None
-    status, _, path = out[0].partition("\t")
-    if status != "A" or not nb_meta.PR_PATH_RE.match(path):
-        return None
-    return path
+    changes = []
+    for line in out:
+        status, _, path = line.partition("\t")
+        if path:
+            changes.append((status, path))
+    return nb_meta.article_bundle_path(changes)
 
 
 def autopublish(repo, diff_base):

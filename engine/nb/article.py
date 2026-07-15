@@ -56,6 +56,7 @@ class Article(HTMLParser):
         self.bad_js_urls = []
         self.forbidden_tags = []
         self.external_refs = []  # (tag, url) for script src / link href / img src
+        self.images = []  # {src, alt, figure}; local article-figure candidates
         self._capture = None  # ("meta"|"chart", buffer) while inside a JSON script
         self._dek_parts = None  # text of the first .nb-dekline; None until one opens
         self._text_parts = []
@@ -94,6 +95,9 @@ class Article(HTMLParser):
             # a meta-refresh redirects the reader off-site the instant the page loads
             self.forbidden_tags.append("meta[http-equiv=refresh]")
 
+        if tag == "figure" and "nb-figure" in a.get("class", "").split():
+            el["figure"] = {"cites": []}
+
         if tag == "script":
             self.script_tags.append(a)
             src = a.get("src")
@@ -109,6 +113,14 @@ class Article(HTMLParser):
             self.external_refs.append(("link", a["href"]))
         if tag == "img" and a.get("src"):
             self.external_refs.append(("img", a["src"]))
+            figure = self._current("figure")
+            self.images.append(
+                {
+                    "src": a["src"],
+                    "alt": a.get("alt", ""),
+                    "figure": figure["figure"] if figure is not None else None,
+                }
+            )
 
         if "data-nb-section" in a:
             name = a["data-nb-section"]
@@ -133,6 +145,9 @@ class Article(HTMLParser):
             href = a.get("href", "")
             if in_sup and href.startswith("#"):
                 self.cite_hrefs.append(href[1:])
+                figure = self._current("figure")
+                if figure is not None:
+                    figure["figure"]["cites"].append(href[1:])
                 sec = self._current("section")
                 if sec is not None:
                     self.section_cites[sec["section"]] = (

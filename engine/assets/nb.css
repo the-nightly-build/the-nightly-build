@@ -1049,6 +1049,27 @@ a.nb-backref:hover {
 }
 
 /* charts */
+figure.nb-figure {
+  margin: 24px 0;
+  padding: 12px;
+  background: var(--wash);
+  border: 1px solid var(--hair);
+  border-radius: var(--radius);
+}
+
+figure.nb-figure img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+figure.nb-figure figcaption {
+  margin-top: 8px;
+  color: var(--ink-soft);
+  font-family: var(--sans);
+  font-size: 11.5px;
+}
+
 figure.nb-chart {
   margin: 22px 0;
   padding: 14px;

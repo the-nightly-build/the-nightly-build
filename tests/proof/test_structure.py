@@ -14,6 +14,59 @@ from findings import Findings
 from press import LOREM, article, mut
 
 FONT_LINK = "https://fonts.googleapis.com/css2?family=Newsreader&amp;display=swap"
+PNG = (
+    b"\x89PNG\r\n\x1a\n"
+    + b"\0\0\0\rIHDR"
+    + (640).to_bytes(4, "big")
+    + (480).to_bytes(4, "big")
+)
+
+
+def source_figure(
+    *, src: str = "micron/figure-1.png", alt: str = "Memory demand by year"
+) -> str:
+    return f'''<figure class="nb-figure">
+  <img src="{src}" alt="{alt}" />
+  <figcaption>Fig. 1 · Demand.<sup class="nb-cite"><a href="#s1">1</a></sup></figcaption>
+</figure>'''
+
+
+def test_a_cited_local_figure_passes(
+    run_local: Callable[..., Findings],
+) -> None:
+    result = run_local(
+        mut("</article>", f"{source_figure()}</article>"),
+        "semiconductors",
+        assets={"micron/figure-1.png": PNG},
+    )
+
+    assert "B-FIGURE" not in result.codes
+    assert "B-SANDBOX" not in result.codes
+
+
+@pytest.mark.parametrize(
+    ("figure", "assets"),
+    [
+        pytest.param(
+            source_figure(alt=""), {"micron/figure-1.png": PNG}, id="missing-alt"
+        ),
+        pytest.param(source_figure(src="other/figure-1.png"), {}, id="wrong-directory"),
+        pytest.param(
+            source_figure(src="https://example.org/figure.png"),
+            {},
+            id="external-source",
+        ),
+        pytest.param(source_figure(), {}, id="missing-file"),
+    ],
+)
+def test_invalid_figures_block(
+    run_local: Callable[..., Findings], *, figure: str, assets: dict[str, bytes]
+) -> None:
+    result = run_local(
+        mut("</article>", f"{figure}</article>"), "semiconductors", assets=assets
+    )
+
+    assert "B-FIGURE" in result.blocks
 
 
 def test_missing_required_section_blocks(run_local: Callable[..., Findings]) -> None:

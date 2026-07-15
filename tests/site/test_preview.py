@@ -48,6 +48,20 @@ def test_the_draft_file_is_copied_modulo_stamp_and_chrome(preview_site: Site) ->
     assert re.sub(r"\?v=[0-9a-f]+", "", undress(copied)) == DRAFT
 
 
+def test_a_preview_copies_the_drafts_figure_assets(
+    testrepo: str, full_site: Site, *, tmp_path: pathlib.Path
+) -> None:
+    draft_root = tmp_path / "draft"
+    write_article(str(draft_root), "semiconductors", slug="tsmc", html=DRAFT)
+    asset = draft_root / "library" / "semiconductors" / "tsmc" / "figure-1.png"
+    asset.parent.mkdir()
+    asset.write_bytes(b"figure")
+
+    site = build_press(testrepo, full_site.library, preview_root=str(draft_root))
+
+    assert site.exists("library", "semiconductors", "tsmc", "figure-1.png")
+
+
 def test_the_published_article_file_is_untouched(preview_site: Site) -> None:
     published = preview_site.read("library", "semiconductors", "micron.html")
 

@@ -3,11 +3,12 @@
 import json
 import os
 import re
+import struct
 
 from nb.site.assets import css_owners
 from nb.site.library import load_site_config
 
-# Off-origin references (link/img) may load only from Google Fonts over https.
+# Off-origin stylesheet references may load only from Google Fonts over https.
 # Matched by exact host after browser-style normalization, never by string
 # prefix — "fonts.googleapis.com.evil.example" and userinfo tricks defeat prefix
 # matching but not a real host comparison.
@@ -127,6 +128,109 @@ def check_sandbox(ed, rep):
         err = chart_spec_error(raw_chart)
         if err is not None:
             rep.block("B-SANDBOX", f"data-nb-chart block #{i} invalid: {err}")
+
+
+MAX_FIGURE_BYTES = 2 * 1024 * 1024
+MAX_FIGURE_EDGE = 2400
+
+
+def image_dimensions(path):
+    with open(path, "rb") as fh:
+        raw = fh.read(32)
+        if raw.startswith(b"\x89PNG\r\n\x1a\n") and len(raw) >= 24:
+            return struct.unpack(">II", raw[16:24])
+        if raw.startswith(b"RIFF") and raw[8:12] == b"WEBP" and len(raw) >= 30:
+            kind = raw[12:16]
+            if kind == b"VP8X":
+                return (
+                    1 + int.from_bytes(raw[24:27], "little"),
+                    1 + int.from_bytes(raw[27:30], "little"),
+                )
+            if kind == b"VP8 " and len(raw) >= 30:
+                return struct.unpack("<HH", raw[26:30])
+            if kind == b"VP8L" and len(raw) >= 25 and raw[20] == 0x2F:
+                return (
+                    1 + (raw[21] | ((raw[22] & 0x3F) << 8)),
+                    1
+                    + (
+                        (raw[23] << 2)
+                        | ((raw[22] & 0xC0) >> 6)
+                        | ((raw[24] & 0x0F) << 10)
+                    ),
+                )
+        if raw.startswith(b"\xff\xd8"):
+            fh.seek(2)
+            while marker := fh.read(2):
+                if len(marker) != 2 or marker[0] != 0xFF:
+                    return None
+                while marker[1] == 0xFF:
+                    next_byte = fh.read(1)
+                    if not next_byte:
+                        return None
+                    marker = marker[:1] + next_byte
+                if (
+                    marker[1] in range(0xC0, 0xC4)
+                    or marker[1] in range(0xC5, 0xC8)
+                    or marker[1] in range(0xC9, 0xCC)
+                    or marker[1] in range(0xCD, 0xD0)
+                ):
+                    length = fh.read(3)
+                    if len(length) != 3:
+                        return None
+                    height, width = struct.unpack(">HH", fh.read(4))
+                    return width, height
+                length = fh.read(2)
+                if len(length) != 2:
+                    return None
+                fh.seek(struct.unpack(">H", length)[0] - 2, 1)
+    return None
+
+
+def check_figures(ed, *, html_path, rep):
+    slug = os.path.splitext(os.path.basename(html_path))[0]
+    parent = os.path.dirname(html_path)
+    expected = re.compile(
+        rf"^{re.escape(slug)}/[a-z0-9][a-z0-9._-]*\.(?:png|jpe?g|webp)$"
+    )
+    seen = set()
+    for image in ed.images:
+        figure = image["figure"]
+        if figure is None:
+            rep.block("B-FIGURE", "images must sit inside figure.nb-figure")
+            continue
+        key = id(figure)
+        if key not in seen:
+            seen.add(key)
+            if not any(cite in ed.source_container_ids for cite in figure["cites"]):
+                rep.block(
+                    "B-FIGURE", "each figure needs a caption citation to a source entry"
+                )
+        src = image["src"]
+        if not expected.fullmatch(src):
+            rep.block("B-FIGURE", f"figure image must be local to '{slug}/': {src!r}")
+            continue
+        if not image["alt"].strip():
+            rep.block("B-FIGURE", f"figure image needs nonempty alt text: {src!r}")
+        path = os.path.join(parent, src)
+        if not os.path.isfile(path):
+            rep.block("B-FIGURE", f"figure asset is missing: {src!r}")
+            continue
+        if os.path.getsize(path) > MAX_FIGURE_BYTES:
+            rep.block(
+                "B-FIGURE",
+                f"figure asset exceeds {MAX_FIGURE_BYTES // 1024 // 1024} MiB: {src!r}",
+            )
+            continue
+        dimensions = image_dimensions(path)
+        if dimensions is None:
+            rep.block(
+                "B-FIGURE", f"figure asset has an unreadable image header: {src!r}"
+            )
+        elif max(dimensions) > MAX_FIGURE_EDGE:
+            rep.block(
+                "B-FIGURE",
+                f"figure asset exceeds {MAX_FIGURE_EDGE}px on one edge: {src!r}",
+            )
 
 
 def check_cites(ed, rep):

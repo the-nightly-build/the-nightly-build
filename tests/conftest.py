@@ -84,6 +84,7 @@ def run_local(testrepo: str) -> Callable[..., Findings]:
         repo: str | None = None,
         today: str = TODAY,
         pr_body: str | None = None,
+        assets: dict[str, bytes] | None = None,
     ) -> Findings:
         repo = repo or testrepo
         tmp = tempfile.mkdtemp()
@@ -92,6 +93,10 @@ def run_local(testrepo: str) -> Callable[..., Findings]:
         d.mkdir(parents=True)
         article_path = d / f"{slug}.html"
         article_path.write_text(html_text)
+        for relpath, content in (assets or {}).items():
+            asset_path = d / relpath
+            asset_path.parent.mkdir(parents=True, exist_ok=True)
+            asset_path.write_bytes(content)
         rep = check.Report()
         cfg, _ = check.load_series(repo, series)
         rep.strict = bool(cfg and cfg.get("strict"))

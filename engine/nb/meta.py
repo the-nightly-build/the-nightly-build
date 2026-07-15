@@ -13,12 +13,17 @@ import json
 import os
 import re
 
-# The identifier grammar and the one PR shape built from it. validate_config
-# approves against these, the proof enforces them, and ci_helpers derives the
-# render probe's target with them — one definition or they drift apart.
+# The identifier grammar and the article-bundle PR shape built from it.
+# validate_config approves against these, the proof enforces them, and
+# ci_helpers derives the render probe's target with them — one definition or
+# they drift apart.
 SERIES_RE = re.compile(r"^[a-z0-9-]{1,32}$")
 SLUG_RE = re.compile(r"^[a-z0-9-]{1,64}$")
 PR_PATH_RE = re.compile(r"^library/([a-z0-9-]{1,32})/([a-z0-9-]{1,64})\.html$")
+ARTICLE_ASSET_RE = re.compile(
+    r"^library/([a-z0-9-]{1,32})/([a-z0-9-]{1,64})/"
+    r"[a-z0-9][a-z0-9._-]*\.(?:png|jpe?g|webp)$"
+)
 MODES = ("collection", "sequence", "rolling", "open")
 
 # The one nb-meta block every consumer honors: a typed
@@ -58,6 +63,36 @@ def series_dir(library: str, series_id: str) -> str | None:
         if os.path.isdir(base):
             return base
     return None
+
+
+def article_bundle_path(
+    changes: list[tuple[str, str]], *, status: str = "A"
+) -> str | None:
+    """Return the one article a content diff adds or retracts, if isolated.
+
+    An article bundle keeps the canonical article at ``<slug>.html`` and any
+    captured figures directly under the matching ``<slug>/`` directory. No
+    other path or status belongs in a nightly content PR.
+    """
+    articles = [
+        path for state, path in changes if state == status and PR_PATH_RE.match(path)
+    ]
+    if len(articles) != 1 or len(changes) < 1:
+        return None
+    article = articles[0]
+    match = PR_PATH_RE.match(article)
+    if match is None:
+        return None
+    series_id, slug = match.groups()
+    for state, path in changes:
+        if state != status:
+            return None
+        if path == article:
+            continue
+        asset = ARTICLE_ASSET_RE.match(path)
+        if asset is None or asset.groups() != (series_id, slug):
+            return None
+    return article
 
 
 def series_ids(repo: str) -> list[str]:

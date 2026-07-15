@@ -57,6 +57,25 @@ Restate the data in caption and prose. The noscript line is fixed chrome.
 </figure>
 ```
 
+## Source figure
+
+An exact figure from a cited primary or public document. Store the image beside
+the article at `library/<series>/<slug>/figure-N.png` (or `.jpg`/`.webp`), give
+it useful alternative text, and cite the source in the caption. Capture a
+direct source image when possible; use a precise PDF crop or a web screenshot
+only when the source cannot export the figure.
+
+```html
+<figure class="nb-figure">
+  <img src="ARTICLE-SLUG/figure-1.png" alt="WHAT THE FIGURE SHOWS" />
+  <figcaption>
+    Fig. 1 · THE SOURCE'S CAPTION, CONCISELY.<sup class="nb-cite"
+      ><a href="#s1">1</a></sup
+    >
+  </figcaption>
+</figure>
+```
+
 ## Callout
 
 A term or concept the reader must carry forward.
