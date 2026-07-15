@@ -70,7 +70,13 @@ only when the source cannot export the figure.
   <img src="ARTICLE-SLUG/figure-1.png" alt="WHAT THE FIGURE SHOWS" />
   <figcaption>
     Fig. 1 · THE SOURCE'S CAPTION, CONCISELY.<sup class="nb-cite"
-      ><a href="#s1">1</a></sup
+      ><a
+        href="#s1"
+        data-nb-locator="Fig. 1 · p. 4"
+        data-nb-url="https://example.org/source.pdf#page=4"
+        data-nb-note="WHAT THIS FIGURE SUPPORTS IN THIS ARTICLE."
+        >1</a
+      ></sup
     >
   </figcaption>
 </figure>

@@ -992,6 +992,22 @@ sup.nb-cite a:hover {
   color: var(--accent-2);
 }
 
+.nb-sheet-context {
+  border-top: 1px solid var(--line);
+  margin-top: 10px;
+  padding-top: 9px;
+}
+
+.nb-sheet-context p {
+  margin: 5px 0;
+}
+
+.nb-sheet-locator {
+  color: var(--ink-soft);
+  font-family: var(--mono);
+  font-size: 11px;
+}
+
 /* sources list: the title is the link; ↩ returns to the citing sentence */
 .nb-sources ol {
   padding-left: 22px;

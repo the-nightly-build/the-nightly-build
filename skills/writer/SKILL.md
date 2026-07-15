@@ -55,6 +55,11 @@ discipline, every template:
   BLOCKs, and no amount of relabeling fixes a mix that is not there. If the log
   cannot supply the primaries an item needs, that is a gap, not a labeling
   problem: send it back.
+- Keep the normal numbered citation marker. When the research log supplies a
+  locator for a quote, exact number, table, figure, or method/result claim, add
+  optional `data-nb-locator`, `data-nb-url`, and `data-nb-note` attributes to
+  that citation anchor. They enrich its source sheet without duplicating the
+  root source in the final list. Never invent a locator or destination.
 - Furniture composes three scopes: `templates/FURNITURE.md`,
   `press/furniture/catalog.md` if present, the template's own. A piece
   earns its place by carrying information better than prose. Charts only as

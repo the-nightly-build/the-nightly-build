@@ -342,3 +342,37 @@ test("charts map a declarative spec into Chart config and skip a malformed spec"
     JSON.stringify([1, 2]),
   );
 });
+
+test("citation sheet adds the clicked marker's locator, note, and direct target", async () => {
+  const html = articlePage(
+    '<article><p>One<sup class="nb-cite"><a href="#s1" data-nb-locator="Fig. 3 · p. 6" data-nb-url="https://example.org/paper.pdf#page=6" data-nb-note="The IsoFLOP minima behind the frontier.">1</a></sup></p>' +
+      '<p>Two<sup class="nb-cite"><a href="#s1" data-nb-locator="Appendix G · p. 29" data-nb-note="The optimizer control.">1</a></sup></p></article>' +
+      '<section class="nb-sources"><ol><li id="s1"><a data-nb-source href="https://example.org/paper">The paper</a></li></ol></section>',
+  );
+  const w = await loadNb(html);
+  const citations = w.document.querySelectorAll("sup.nb-cite a");
+
+  citations[0].dispatchEvent(new w.MouseEvent("click", { bubbles: true }));
+  assert.match(
+    w.document.querySelector(".nb-sheet").textContent,
+    /Fig. 3 · p. 6/,
+  );
+  assert.match(
+    w.document.querySelector(".nb-sheet").textContent,
+    /IsoFLOP minima/,
+  );
+  assert.equal(
+    w.document.querySelector(".nb-sheet-context a").href,
+    "https://example.org/paper.pdf#page=6",
+  );
+
+  citations[1].dispatchEvent(new w.MouseEvent("click", { bubbles: true }));
+  assert.match(
+    w.document.querySelector(".nb-sheet").textContent,
+    /Appendix G · p. 29/,
+  );
+  assert.doesNotMatch(
+    w.document.querySelector(".nb-sheet").textContent,
+    /IsoFLOP minima/,
+  );
+});

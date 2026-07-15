@@ -75,6 +75,11 @@ repeats for THIS piece, and the verbatim passages with locations (section,
 page, or an honest locator like "closing paragraph"). A repetition supports
 "the claim was made", never "it is so".
 
+For a direct quote, exact number, table, figure, or method/result claim, retain
+the most useful reader locator and direct destination when one exists: a PDF
+page and figure, a section heading, or a timestamp. The writer uses these to
+enrich the citation sheet; a broad synthesis need not pretend it has one.
+
 ## Contradictions
 Where sources disagree with each other or with the commission. Leave it
 empty only when you looked and found nothing.

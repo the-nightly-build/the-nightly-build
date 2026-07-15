@@ -349,7 +349,36 @@
     if (s) s.remove();
   }
 
-  function openSheet(num, li) {
+  function citationContext(citation) {
+    var locator = citation.getAttribute("data-nb-locator");
+    var note = citation.getAttribute("data-nb-note");
+    var url = citation.getAttribute("data-nb-url");
+    if (!locator && !note && !url) return null;
+    var context = document.createElement("div");
+    context.className = "nb-sheet-context";
+    if (locator) {
+      var location = document.createElement("div");
+      location.className = "nb-sheet-locator";
+      location.textContent = locator;
+      context.appendChild(location);
+    }
+    if (note) {
+      var explanation = document.createElement("p");
+      explanation.textContent = note;
+      context.appendChild(explanation);
+    }
+    if (url) {
+      var direct = document.createElement("a");
+      direct.href = url;
+      direct.target = "_blank";
+      direct.rel = "noopener";
+      direct.textContent = "Open cited passage";
+      context.appendChild(direct);
+    }
+    return context;
+  }
+
+  function openSheet(num, li, citation) {
     closeSheet();
     veil = document.createElement("div");
     veil.className = "nb-veil";
@@ -373,6 +402,8 @@
       "</div>";
     document.body.appendChild(veil);
     document.body.appendChild(sheet);
+    var context = citationContext(citation);
+    if (context) sheet.querySelector(".nb-sheet-body").appendChild(context);
   }
 
   function normalizeSources() {
@@ -406,7 +437,7 @@
         var li = document.getElementById(target);
         if (!li) return;
         e.preventDefault();
-        openSheet(a.textContent.trim(), li);
+        openSheet(a.textContent.trim(), li, a);
       });
     });
     Object.keys(firstCiter).forEach(function (target) {
