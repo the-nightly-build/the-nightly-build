@@ -5,11 +5,12 @@ minimum must still commission research for eight sources rather than discovering
 the requirement only when proof runs, and declared kind composition must survive.
 """
 
-from nb.source_policy import resolve
+from nb.source_policy import minimum, resolve
 
 
 def test_template_default_is_visible_to_the_desk() -> None:
     assert resolve({}, {"class": "longread"}) == {"min_sources": 8}
+    assert minimum({}, {"class": "longread"}) == 8
 
 
 def test_series_policy_overrides_the_default_and_keeps_composition() -> None:

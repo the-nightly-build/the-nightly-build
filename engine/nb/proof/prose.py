@@ -8,10 +8,10 @@ the other proof modules. Template defaults live here because they shape quality.
 import re
 
 from nb.article import Article
+from nb.source_policy import minimum
 
 __all__ = ("caps_runs", "check_warns", "placeholder_entries")
 
-DEFAULT_MIN_SOURCES = {"longread": 8, "shortread": 5}
 DEFAULT_CITE_EXEMPT = ("sources",)  # a template extends this via registry cite_exempt
 SELF_COUNT_TOLERANCE = 0.20
 PLACEHOLDER_RUN_WORDS = 4  # a caps run this long warns even off-skeleton
@@ -107,9 +107,7 @@ def check_warns(
             )
 
     # source floor
-    floor = series.get("min_sources") or DEFAULT_MIN_SOURCES.get(
-        treg.get("class", "longread"), 5
-    )
+    floor = minimum(series, treg)
     if len(ed.sources) < floor:
         rep.warn("W-SOURCES-MIN", f"{len(ed.sources)} sources; series floor is {floor}")
 
