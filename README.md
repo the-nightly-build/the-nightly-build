@@ -129,7 +129,8 @@ script-free, so the sandbox above is unchanged. See
 
 uv is required for every local, CI, and harness Python invocation. Install it
 from [the official installer](https://docs.astral.sh/uv/getting-started/installation/),
-then run `uv sync`. The engine has one runtime dependency, PyYAML; its scripts
+then run `uv sync --group figure-capture`. The engine has one runtime dependency,
+PyYAML; its scripts
 carry PEP 723 metadata, so `uv run engine/check.py` resolves it without a
 separate environment. Local development and CI use `pyproject.toml` and target
 Python 3.10+.
@@ -143,7 +144,7 @@ Engine changes go through a lint, type-check, format, and test gate that CI
 enforces on `main`. Set it up once:
 
 ```sh
-uv sync                     # Python tools: ruff, ty
+uv sync --group figure-capture # Python tools and capture dependencies
 npm install                 # web tools: prettier, eslint, stylelint, markdownlint
 uv run pre-commit install   # run the same checks on every commit
 ```

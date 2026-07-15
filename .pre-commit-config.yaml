@@ -1,5 +1,5 @@
 # Local hooks run the same tools as the CI gate, so local == CI.
-# Setup: uv sync (Python), npm install (web), and shellcheck + shfmt on PATH
+# Setup: uv sync --group figure-capture (Python), npm install (web), and shellcheck + shfmt on PATH
 # (brew install shellcheck shfmt). Install with: uv run pre-commit install
 default_install_hook_types: [pre-commit, pre-push]
 
@@ -33,7 +33,7 @@ repos:
         types: [python]
       - id: ty
         name: ty type check
-        entry: uv run ty check
+        entry: uv run --group figure-capture ty check
         language: system
         types: [python]
         pass_filenames: false
