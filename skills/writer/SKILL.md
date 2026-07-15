@@ -61,7 +61,8 @@ discipline, every template:
   `data-nb-chart` JSON blocks. No other scripts, styles, iframes, or handlers.
 - A source figure is earned only when `research.md § Figures` identifies an
   exact visual from a cited primary document that lets the reader inspect an
-  argument the prose uses. Capture it into
+  argument the prose uses. Use one or more when each earns its space. Capture
+  each into
   `library/<series>/<slug>/figure-N.<format>` with
   `uv run --group figure-capture engine/capture_figure.py`; use the log's
   direct-image, PDF-crop, or web-selector route. Add the documented
