@@ -16,7 +16,7 @@ import { readFileSync } from "node:fs";
 import { JSDOM } from "jsdom";
 
 const NB_SOURCE = readFileSync(
-  new URL("../../assets/nb.js", import.meta.url),
+  new URL("../../engine/assets/nb.js", import.meta.url),
   "utf8",
 );
 

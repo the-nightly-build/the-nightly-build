@@ -22,7 +22,7 @@ export default [
   },
   {
     // Node ESM behavior tests for the browser runtime.
-    files: ["engine/tests/**/*.js"],
+    files: ["tests/js/**/*.js"],
     languageOptions: {
       ecmaVersion: 2022,
       sourceType: "module",

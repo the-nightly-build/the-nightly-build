@@ -11,7 +11,7 @@
     "lint:css": "stylelint \"engine/assets/**/*.css\"",
     "lint:md": "markdownlint-cli2",
     "lint": "npm run lint:format && npm run lint:js && npm run lint:css && npm run lint:md",
-    "test:js": "node --test \"engine/tests/js/**/*.test.js\"",
+    "test:js": "node --test \"tests/js/**/*.test.js\"",
     "lint:sg": "ast-grep scan --rule .byor/rules/project/nbjs-innerhtml-escape.yml"
   },
   "devDependencies": {
