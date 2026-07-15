@@ -176,7 +176,9 @@ dependencies. Do not substitute `pip install` in a harness or schedule.
      - `## Research`: the researcher's `research.md`.
      - `## Also consulted`: the research log's Discarded section, one line per
        source with the reason, plain (never collapsed).
-       Each artifact section is a one-line summary, then the artifact verbatim in
+       Build this record with `uv run engine/build_record.py`, never by manually
+       summarizing or copying artifacts. Each artifact section is a one-line summary,
+       then the artifact verbatim in
        a collapsed `<details>` block inside a four-backtick fence (its own code
        fences nest safely). The artifacts are gitignored, so the PR body is where
        they survive. If the assembled body would exceed GitHub's body limit
