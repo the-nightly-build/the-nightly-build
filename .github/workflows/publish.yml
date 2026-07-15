@@ -36,9 +36,10 @@ jobs:
           ref: main
           path: _main
 
-      - uses: actions/setup-python@v5
-        with: { python-version: "3.12" }
-      - run: pip install pyyaml
+      - uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+          python-version: "3.12"
 
       - name: Configure Pages
         id: pages
@@ -48,7 +49,7 @@ jobs:
 
       - name: Build the site
         run: |
-          python3 _main/engine/build_site.py \
+          uv run _main/engine/build_site.py \
             --repo _main --library . --out site \
             --base-url "${{ steps.pages.outputs.base_url }}" \
             --repository "${{ github.repository }}"

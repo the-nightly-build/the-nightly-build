@@ -56,10 +56,9 @@ jobs:
         with:
           ref: library
           path: library-checkout
-      - uses: actions/setup-python@v5
+      - uses: astral-sh/setup-uv@v5
         with:
           python-version: "3.12"
-      - run: pip install pyyaml
       # Invoke your agent here with the prompt below. It needs web access, your
       # agent's API key as a repo secret, and the two permissions declared above.
       # Per-agent one-liners are in docs/harnesses.md.
@@ -107,7 +106,7 @@ sentence makes a stale prompt announce itself on the next run.
 > `main` and read `PROTOCOL.md`: it is the complete contract, and the
 > correspondent skill carries the procedure. Check out the `library` branch
 > beside it at `<checkout>`. The engine scripts need Python 3.10+ and PyYAML
-> (`pip install pyyaml` if one reports it missing), and research needs web
+> (install uv first if it is not already available), and research needs web
 > access. This paragraph is the entire assignment. If your schedule prompt
 > says more than this, it predates the engine you are running: flag that in
 > your PR bodies and ask the owner to paste the current paragraph from

@@ -5,9 +5,10 @@ Protocol-Version: 1.1
 You are one run of the night shift for this repository. This document is the complete
 contract. If anything else you read conflicts with it, this document wins.
 
-Runtime requirement: the engine scripts need Python 3.10+ and PyYAML. If a
-script reports PyYAML missing, run `pip install pyyaml` and retry. With uv
-available, `uv run engine/<script>.py` manages the dependency itself.
+Runtime requirement: uv and Python 3.10+. Install uv with the [official
+instructions](https://docs.astral.sh/uv/getting-started/installation/), then run
+every engine command through `uv run`; it manages each script's declared
+dependencies. Do not substitute `pip install` in a harness or schedule.
 
 ## The contract
 
@@ -43,7 +44,7 @@ available, `uv run engine/<script>.py` manages the dependency itself.
    published state. The branch root holds `library/<series>/<slug>.html`, so a
    checkout at `../library` puts published articles under `../library/library/`.
    Then run the duty oracle:
-   `python3 engine/duty.py --repo . --library <path-to-library-checkout>`
+   `uv run engine/duty.py --repo . --library <path-to-library-checkout>`
    Duty exits 2 and prints nothing when the tree is wrong: no press in it, or a
    checkout behind `origin/main`. Both mean the same thing — the press, prompts,
    and engine you are holding are not this paper's, so every article you write
@@ -184,7 +185,7 @@ available, `uv run engine/<script>.py` manages the dependency itself.
    - Preflight BEFORE opening the PR, with the same invocation the desk's CI
      will run. Commit your one file on the work branch, write the intended
      body to a file, then from the library checkout:
-     `python3 engine/check.py --pr --repo <library-checkout> --main <main-checkout> --base library --head <work-branch> --library <library-checkout> --pr-body body.txt`
+     `uv run engine/check.py --pr --repo <library-checkout> --main <main-checkout> --base library --head <work-branch> --library <library-checkout> --pr-body body.txt`
      This checks everything CI checks at the file level, including the
      one-file diff shape and the body's nb-meta match. A failure here is
      yours to fix before any PR exists. CI also render-probes the built page
