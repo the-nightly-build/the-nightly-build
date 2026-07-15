@@ -113,6 +113,12 @@ established.
 
 Line: `Reader: this gives me …` (or `nothing beyond the sources; redraft`).
 
+If an exact source visual in `research.md § Figures` would let the reader test
+a load-bearing part of the argument better than prose alone, request it in
+`requested-changes.md`. If the log missed the needed visual, send the researcher
+back for a candidate from the cited primary document. Name the figure and the
+argument it must carry; never request decoration or a publisher image.
+
 ## Surgical, never a rewrite
 
 Make the cuts and fixes yourself, in place. Cutting has no size limit: a

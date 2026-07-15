@@ -59,6 +59,15 @@ discipline, every template:
   `press/furniture/catalog.md` if present, the template's own. A piece
   earns its place by carrying information better than prose. Charts only as
   `data-nb-chart` JSON blocks. No other scripts, styles, iframes, or handlers.
+- A source figure is earned only when `research.md § Figures` identifies an
+  exact visual from a cited primary document that lets the reader inspect an
+  argument the prose uses. Use one or more when each earns its space. Capture
+  each into
+  `library/<series>/<slug>/figure-N.<format>` with
+  `uv run --group figure-capture engine/capture_figure.py`; use the log's
+  direct-image, PDF-crop, or web-selector route. Add the documented
+  `nb-figure` markup with useful alt text and a caption citation. Skip it when
+  the visual decorates rather than explains. Never use an external image URL.
 - Fill `nb-meta` with the piece's actual values: real dates, real counts,
   `harness` and `model` from `task.md`, nothing inflated. Write to the path
   the commission names: on a real night, `library/<series>/<slug>.html`.
