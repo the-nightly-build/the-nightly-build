@@ -127,14 +127,12 @@ script-free, so the sandbox above is unchanged. See
 
 ## Development
 
-The engine is pure Python with one runtime dependency, PyYAML. Two Python
-floors apply, by context. The night-shift scripts each carry PEP 723 metadata
-and run standalone (`uv run engine/check.py` works with no setup), so they
-target Python 3.9+ to run on whatever a headless harness provides. Local
-development and CI run the lint, type-check, and test gate through
-`pyproject.toml`, which pins 3.10+. If you only schedule a night shift you
-never touch the 3.10 toolchain; the 3.10 floor is for contributing to the
-engine.
+uv is required for every local, CI, and harness Python invocation. Install it
+from [the official installer](https://docs.astral.sh/uv/getting-started/installation/),
+then run `uv sync`. The engine has one runtime dependency, PyYAML; its scripts
+carry PEP 723 metadata, so `uv run engine/check.py` resolves it without a
+separate environment. Local development and CI use `pyproject.toml` and target
+Python 3.10+.
 
 ```sh
 uv run pytest                        # proof, builder, and end-to-end suites
@@ -149,6 +147,17 @@ uv sync                     # Python tools: ruff, ty
 npm install                 # web tools: prettier, eslint, stylelint, markdownlint
 uv run pre-commit install   # run the same checks on every commit
 ```
+
+Figure capture is an optional authoring toolchain. Its bootstrap installs the
+repo-pinned Python packages and Playwright's Chromium browser in one step:
+
+```sh
+./scripts/install-figure-capture.sh
+```
+
+Chromium is not committed and never runs in site CI or in a reader's browser.
+Re-run the command after updating the lockfile or when Playwright reports that
+its browser revision is missing.
 
 `pre-commit` runs exactly what CI runs (the Rust drop-in `prek` reads the same
 config). The shell hooks also need `shellcheck` and `shfmt` on your PATH;
