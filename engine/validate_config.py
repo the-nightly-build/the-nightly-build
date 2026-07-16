@@ -61,6 +61,7 @@ SERIES_KEYS = {
     "min_sources",
     "sources_by_kind",
     "per_item_sources",
+    "rubric",
     "words",
     "items",
     "tags",
@@ -332,7 +333,6 @@ def check_required_docs(docs, root, sid, where, errors):
 
 
 def check_kind_bands(bands, *, key, where, errors):
-    """Validate a source-composition mapping: kind -> [low, high|null]."""
     if bands is None:
         return
     if not isinstance(bands, dict) or not bands:
@@ -381,6 +381,70 @@ def check_kinded_skeletons(repo, templates, *, where, errors):
             errors.append(
                 f"{where}: a source composition needs a template whose skeleton "
                 f"declares data-nb-kind on its source entries; '{tid}' does not"
+            )
+
+
+RUBRIC_KEYS = {"id", "name", "note"}
+
+
+def check_rubric_config(rubric, *, where, errors):
+    """A pinned rubric the proof can hold every review to.
+
+    Each criterion is {id, name, note?}: the id is the slug rows carry in
+    data-nb-criterion, the name is what the reader sees, and the optional
+    note briefs the writer. Ids must be unique — the proof matches rows to
+    pinned criteria by id, and a duplicate makes that match ambiguous.
+    """
+    if rubric is None:
+        return
+    if not isinstance(rubric, list) or not rubric:
+        errors.append(f"{where}: 'rubric' must be a non-empty list of criteria")
+        return
+    seen = set()
+    for i, criterion in enumerate(rubric):
+        spot = f"{where}: rubric criterion #{i + 1}"
+        if not isinstance(criterion, dict):
+            errors.append(f"{spot} must be a mapping with id and name")
+            continue
+        unknown = set(criterion) - RUBRIC_KEYS
+        if unknown:
+            errors.append(
+                f"{spot}: unknown keys {sorted(unknown)} (known: {sorted(RUBRIC_KEYS)})"
+            )
+        cid = criterion.get("id")
+        if not isinstance(cid, str) or not SLUG_RE.match(cid):
+            errors.append(f"{spot}: 'id' must match {SLUG_RE.pattern}")
+        elif cid in seen:
+            errors.append(f"{spot}: duplicate id '{cid}'")
+        else:
+            seen.add(cid)
+        name = criterion.get("name")
+        if not isinstance(name, str) or not name.strip():
+            errors.append(f"{spot}: 'name' must be a non-empty string")
+        note = criterion.get("note")
+        if note is not None and (not isinstance(note, str) or not note.strip()):
+            errors.append(f"{spot}: 'note' must be a non-empty string when present")
+
+
+def check_criterion_skeletons(repo, templates, *, where, errors):
+    """A pinned rubric needs templates whose skeletons render rubric rows.
+
+    Mirrors check_kinded_skeletons: EVERY template the series may use must
+    carry data-nb-criterion in its skeleton, or the night's template choice
+    could dodge the rubric the series pins.
+    """
+    for tid, folder in build_site.template_dirs(repo).items():
+        skeleton = os.path.join(folder, "skeleton.html")
+        if tid not in templates or not os.path.isfile(skeleton):
+            continue
+        ed = check.Article()
+        with open(skeleton, encoding="utf-8") as fh:
+            ed.feed(fh.read())
+        ed.close()
+        if not ed.rubric_rows:
+            errors.append(
+                f"{where}: a pinned rubric needs a template whose skeleton "
+                f"renders data-nb-criterion rows; '{tid}' does not"
             )
 
 
@@ -505,6 +569,10 @@ def check_series(repo, registry, *, errors):
             )
         if per_item_sources is not None or cfg.get("sources_by_kind") is not None:
             check_kinded_skeletons(repo, allowed, where=where, errors=errors)
+        rubric = cfg.get("rubric")
+        check_rubric_config(rubric, where=where, errors=errors)
+        if rubric is not None:
+            check_criterion_skeletons(repo, allowed, where=where, errors=errors)
         prompt = cfg.get("prompt")
         if prompt and not os.path.isfile(os.path.join(root, sid, prompt)):
             errors.append(f"{where}: prompt file '{prompt}' not found")
