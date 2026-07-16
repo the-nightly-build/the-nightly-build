@@ -18,6 +18,11 @@ figure-capture = [
     "playwright>=1.61.0",
     "pymupdf>=1.28.0",
 ]
+charts = [
+    "kaleido>=1.1.0",
+    "pandas>=2.0.0",
+    "plotly>=6.3.0",
+]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
