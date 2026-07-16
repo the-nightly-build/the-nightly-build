@@ -5,11 +5,20 @@ updates never touch it. Working examples live in `examples/`.
 
 ## Look: themes
 
-The entire visual system reads about 14 CSS variables from one token file.
-The theme contract: define the color tokens in all four blocks (light, dark,
-and the two manual-override blocks); the font and radius tokens live in the
-base block and are inherited. The test suite enforces parity across the
+The entire visual system reads about two dozen CSS variables from one token
+file. The theme contract: define the color tokens in all four blocks (light,
+dark, and the two manual-override blocks); the font and radius tokens live in
+the base block and are inherited. The test suite enforces parity across the
 blocks.
+
+Beyond the page tokens, a theme carries two data-color groups. `--chart-1`
+through `--chart-6` are the categorical series colors for charts, in a fixed,
+colorblind-validated order — assign them in sequence, never re-sorted.
+`--ok`, `--warn`, and `--bad` are semantic status inks (grade verdicts,
+holds-up labels, score meters). The suite checks their contrast in every
+block: chart tokens hold at least 3:1 against `--bg` and `--panel`, status
+tokens at least 4.5:1, so a custom theme cannot ship unreadable legends or
+status text.
 
 The shipped theme pairs a pale day-sky paper with bronze accents in light
 mode and a deep navy night with amber in dark mode. Keep day accents deep
