@@ -88,7 +88,11 @@
     if (m) applyAppearance(m);
   });
 
-  /* ---------------------------------------------------------------- charts */
+  /* ------------------------------------------------- legacy charts
+   * data-nb-chart blocks are retired for new articles (charts are PNGs
+   * rendered by engine/render_chart.py); this renderer stays so the
+   * published shelf keeps drawing. Chart.js loads only when a legacy
+   * block exists on the page. */
 
   var chartInstances = [];
 

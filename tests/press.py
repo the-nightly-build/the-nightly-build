@@ -163,11 +163,6 @@ def article() -> str:
   "dek": "How a cyclical commodity maker became the AI era's bottleneck.",
   "harness": "test-fixture", "model": "claude-fable-5"
 }"""
-    chart = (
-        '{"type":"bar","labels":["FY23","FY24","FY25"],'
-        '"series":[{"name":"Revenue $B","values":[15.5,25.1,37.4]}]}'
-    )
-
     return f"""<!DOCTYPE html>
 <html lang="en"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -184,11 +179,6 @@ def article() -> str:
 <article>
 {header}
 {"".join(body)}
-<figure>
-<script type="application/json" data-nb-chart>
-{chart}
-</script>
-</figure>
 <section data-nb-section="sources"><h2>Sources</h2><ol>{"".join(src)}</ol></section>
 </article>
 </body></html>"""

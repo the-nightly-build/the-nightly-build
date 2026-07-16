@@ -135,7 +135,9 @@ dependencies. Do not substitute `pip install` in a harness or schedule.
      furniture (`<t>/furniture.md`) if it ships any. Use a component from any of
      them when it carries information better than prose.
    - Embed the `nb-meta` JSON block (schema below).
-   - Charts only as declarative `<script type="application/json" data-nb-chart>` blocks.
+   - Charts only as engine-rendered PNG figures: `figure.nb-chart` wrapping
+     `<slug>/chart-N.png`, its committed `chart-N.py` in the bundle, the data
+     source cited in the caption (docs/charts.md).
    - No scripts other than those JSON blocks and the template's own
      `<script src="../../assets/nb.js">`, the engine runtime. Keep it. Never add
      others. No iframes/objects/embeds. No inline event handlers. No `javascript:`

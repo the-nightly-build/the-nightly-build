@@ -295,7 +295,7 @@ test("ROOT is derived from the script URL so article links resolve under a subpa
   );
 });
 
-test("charts map a declarative spec into Chart config and skip a malformed spec", async () => {
+test("legacy shelf charts still map a declarative spec into Chart config and skip a malformed spec", async () => {
   const html =
     "<!doctype html><html><body>" +
     '<figure><script type="application/json" data-nb-chart>' +
