@@ -1345,11 +1345,11 @@ figure.nb-chart noscript {
 }
 
 .nb-holdsup > div.good .nb-holdsup-label {
-  color: #2e7d4f;
+  color: var(--ok);
 }
 
 .nb-holdsup > div.careful .nb-holdsup-label {
-  color: #b07c1f;
+  color: var(--warn);
 }
 
 .nb-holdsup ul {
@@ -1669,15 +1669,15 @@ figure.nb-chart noscript {
 }
 
 .nb-grade.hit .nb-grade-verdict {
-  color: #2e7d4f;
+  color: var(--ok);
 }
 
 .nb-grade.miss .nb-grade-verdict {
-  color: #b3403a;
+  color: var(--bad);
 }
 
 .nb-grade.open .nb-grade-verdict {
-  color: #b07c1f;
+  color: var(--warn);
 }
 
 .nb-grade p {
