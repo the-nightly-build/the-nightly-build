@@ -213,16 +213,11 @@ def test_validate_config_rejects_a_malformed_rubric(
     assert vc_rc(rubric_repo) == 1
 
 
-def test_validate_config_rejects_a_rowless_skeleton_under_a_pinning_series(
+def test_a_pinned_rubric_on_the_article_template_validates(
     vc_rc: Callable[[str], int], rubric_repo: str
 ) -> None:
-    skeleton = pathlib.Path(
-        rubric_repo, "press", "templates", "scored", "skeleton.html"
+    series_yaml = pathlib.Path(rubric_repo, "press", "series", "bench", "series.yaml")
+    series_yaml.write_text(
+        series_yaml.read_text().replace("template: scored", "template: article")
     )
-    skeleton.write_text(
-        "<!DOCTYPE html><html><body>"
-        '<section data-nb-section="rubric"></section>'
-        '<section data-nb-section="sources"></section>'
-        "</body></html>"
-    )
-    assert vc_rc(rubric_repo) == 1
+    assert vc_rc(rubric_repo) == 0

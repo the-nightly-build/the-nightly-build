@@ -426,28 +426,6 @@ def check_rubric_config(rubric, *, where, errors):
             errors.append(f"{spot}: 'note' must be a non-empty string when present")
 
 
-def check_criterion_skeletons(repo, templates, *, where, errors):
-    """A pinned rubric needs templates whose skeletons render rubric rows.
-
-    Mirrors check_kinded_skeletons: EVERY template the series may use must
-    carry data-nb-criterion in its skeleton, or the night's template choice
-    could dodge the rubric the series pins.
-    """
-    for tid, folder in build_site.template_dirs(repo).items():
-        skeleton = os.path.join(folder, "skeleton.html")
-        if tid not in templates or not os.path.isfile(skeleton):
-            continue
-        ed = check.Article()
-        with open(skeleton, encoding="utf-8") as fh:
-            ed.feed(fh.read())
-        ed.close()
-        if not ed.rubric_rows:
-            errors.append(
-                f"{where}: a pinned rubric needs a template whose skeleton "
-                f"renders data-nb-criterion rows; '{tid}' does not"
-            )
-
-
 def check_series(repo, registry, *, errors):
     label = "press"
     root = os.path.join(repo, "press", "series")
@@ -569,10 +547,7 @@ def check_series(repo, registry, *, errors):
             )
         if per_item_sources is not None or cfg.get("sources_by_kind") is not None:
             check_kinded_skeletons(repo, allowed, where=where, errors=errors)
-        rubric = cfg.get("rubric")
-        check_rubric_config(rubric, where=where, errors=errors)
-        if rubric is not None:
-            check_criterion_skeletons(repo, allowed, where=where, errors=errors)
+        check_rubric_config(cfg.get("rubric"), where=where, errors=errors)
         prompt = cfg.get("prompt")
         if prompt and not os.path.isfile(os.path.join(root, sid, prompt)):
             errors.append(f"{where}: prompt file '{prompt}' not found")

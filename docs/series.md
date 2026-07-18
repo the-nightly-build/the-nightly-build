@@ -127,13 +127,11 @@ mix, these are contract failures, not calibration. An uncited row is `W-RUBRIC`,
 a BLOCK under `strict`. Whether a score is deserved is judgment: the cited
 justification carries it and the editor audits it; the engine only counts.
 
-The contract is attribute-driven, so it works on any template. A series
-that pins a rubric still needs every template it may use to render rubric
-rows,
-and `engine/validate_config.py` rejects one whose skeleton carries no
-`data-nb-criterion` (the same rule kinded source bands follow). A series
-with no `rubric:` never asks, though any rubric rows an article renders are
-still integrity-checked.
+The contract is attribute-driven, so it works on any template. A review
+desk is a genre, not a template: run the `article` template, pin the
+criteria here, and let the prompt name the rubric furniture
+(templates/FURNITURE.md). A series with no `rubric:` never asks, though any
+rubric rows an article renders are still integrity-checked.
 
 ## Commissioning extras by hand
 
