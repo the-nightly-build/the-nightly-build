@@ -110,6 +110,7 @@ moral. Let the teaching and the citations equip the reader to go further.
 
 ## Charts
 
-Use a chart when a trend or comparison is the point. Charts are declarative
-`data-nb-chart` JSON blocks only. Keep them honest: label axes, note scale, and cite the
-data source in the caption.
+Use a chart when a trend or comparison is the point. Charts are PNGs
+rendered from the committed `chart-N.py` script beside the article
+(docs/charts.md), never hand-drawn images or script blocks. Keep them honest:
+label axes, note a non-linear scale, and cite the data source in the caption.

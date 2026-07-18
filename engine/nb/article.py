@@ -52,7 +52,6 @@ class Article(HTMLParser):
         self.stack = []  # list of dicts per open element
         self.meta_raw = None
         self.meta_count = 0  # number of #nb-meta blocks; >1 is a violation
-        self.chart_raw = []  # raw JSON strings of data-nb-chart blocks
         self.script_tags = []  # (attrs_dict) for every <script>
         self.sections = []  # data-nb-section values in order
         self.section_cites = {}  # section -> inline cite count
@@ -67,7 +66,7 @@ class Article(HTMLParser):
         self.forbidden_tags = []
         self.external_refs = []  # (tag, url) for script src / link href / img src
         self.images = []  # {src, alt, figure}; local article-figure candidates
-        self._capture = None  # ("meta"|"chart", buffer) while inside a JSON script
+        self._capture = None  # ("meta", buffer) while inside the nb-meta script
         self._dek_parts = None  # text of the first .nb-dekline; None until one opens
         self._text_parts = []
         self._prose_text_parts = []  # body prose only, excludes the sources section
@@ -115,10 +114,6 @@ class Article(HTMLParser):
                 self.external_refs.append(("script", src))
             if nb_meta.is_meta_script(a):
                 self._capture = ("meta", [])
-            elif (a.get("type") or "").strip().lower() == "application/json" and (
-                "data-nb-chart" in a
-            ):
-                self._capture = ("chart", [])
         if tag == "link" and a.get("href"):
             self.external_refs.append(("link", a["href"]))
         if tag == "img" and a.get("src"):
@@ -192,16 +187,12 @@ class Article(HTMLParser):
         if tag in ("script", "style"):
             self._suppress_text_depth = max(0, self._suppress_text_depth - 1)
             if tag == "script" and self._capture:
-                kind, buf = self._capture
-                raw = "".join(buf)
-                if kind == "meta":
-                    self.meta_count += 1
-                    if self.meta_raw is None:
-                        # keep the FIRST block — the browser (getElementById) and
-                        # build_site/duty (first regex match) all read the first
-                        self.meta_raw = raw
-                else:
-                    self.chart_raw.append(raw)
+                _, buf = self._capture
+                self.meta_count += 1
+                if self.meta_raw is None:
+                    # keep the FIRST block — the browser (getElementById) and
+                    # build_site/duty (first regex match) all read the first
+                    self.meta_raw = "".join(buf)
                 self._capture = None
         # pop to matching tag (tolerant of minor nesting slips)
         for i in range(len(self.stack) - 1, -1, -1):

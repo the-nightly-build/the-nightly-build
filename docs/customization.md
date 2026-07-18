@@ -120,8 +120,9 @@ This does not weaken the security model, because the trust boundary is
   (no `<script>`, no event handlers) is unchanged, so auto-merge is as safe as
   ever.
 
-Readers with JavaScript off still get the raw content (plain monospace code, an
-unrendered figure), the same graceful fallback the built-in charts use.
+Readers with JavaScript off still get the raw content (plain monospace code,
+an unrendered figure) — and the engine's own charts are plain PNGs, readable
+everywhere.
 
 ## Voice: press/editorial.md
 

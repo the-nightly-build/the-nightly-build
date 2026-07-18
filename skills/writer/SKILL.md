@@ -62,7 +62,10 @@ discipline, every template:
 - Furniture composes three scopes: `templates/FURNITURE.md`,
   `press/furniture/catalog.md` if present, the template's own. A piece
   earns its place by carrying information better than prose. Charts only as
-  `data-nb-chart` JSON blocks. No other scripts, styles, iframes, or handlers.
+  rendered PNGs with their committed `chart-N.py` (docs/charts.md): build the
+  figure from the research log's numbers, run
+  `uv run --group charts engine/render_chart.py`, inspect the PNG and the
+  rendered article. No scripts, styles, iframes, or handlers.
 - A source asset is earned only when `research.md § Source assets` identifies
   an exact visual from a cited primary or public document that lets the reader
   inspect an argument the prose uses. It may be a chart, photograph, document

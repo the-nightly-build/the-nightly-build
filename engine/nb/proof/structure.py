@@ -11,7 +11,6 @@ could smuggle through markup must be ruled out here, not reviewed later.
 """
 
 __all__ = (
-    "chart_spec_error",
     "check_chrome",
     "check_cites",
     "check_classes",
@@ -23,7 +22,6 @@ __all__ = (
     "image_dimensions",
 )
 
-import json
 import os
 import re
 import struct
@@ -42,28 +40,6 @@ ENGINE_SCRIPT_RE = re.compile(r"^(?:(?:\.\./)+|/)assets/nb\.js$")
 # Classes styled by owner-declared external assets (docs/customization.md's
 # syntax-highlighter recipe), so no shipped stylesheet defines them.
 CLASS_ALLOW_PREFIXES = ("language-", "token")
-
-
-def chart_spec_error(raw):
-    try:
-        spec = json.loads(raw)
-    except ValueError as e:
-        return str(e)
-    if not isinstance(spec, dict):
-        return "spec must be a JSON object"
-    if spec.get("type") not in ("line", "bar", "scatter"):
-        return "bad chart type"
-    if not isinstance(spec.get("labels"), list) or not spec["labels"]:
-        return "labels required"
-    series = spec.get("series")
-    if not isinstance(series, list) or not series:
-        return "series required"
-    for s in series:
-        if not isinstance(s, dict) or not isinstance(s.get("name"), str):
-            return "series name required"
-        if not isinstance(s.get("values"), list):
-            return "series values required"
-    return None
 
 
 def external_ref_allowed(normalized_url):
@@ -122,10 +98,15 @@ def check_sandbox(ed, rep):
                 "B-SANDBOX",
                 f"articles may not contain executable <script> (type={stype or 'none'})",
             )
-        elif a.get("id") != "nb-meta" and "data-nb-chart" not in a:
+        elif "data-nb-chart" in a:
             rep.block(
-                "B-SANDBOX", "JSON <script> blocks must be #nb-meta or data-nb-chart"
+                "B-SANDBOX",
+                "declarative data-nb-chart charts are retired; render a PNG "
+                "with engine/render_chart.py and embed it as a figure "
+                "(docs/charts.md)",
             )
+        elif a.get("id") != "nb-meta":
+            rep.block("B-SANDBOX", "JSON <script> blocks must be #nb-meta")
         if src:
             rep.block("B-SANDBOX", "articles may not load external scripts")
     if ed.forbidden_tags:
@@ -147,10 +128,6 @@ def check_sandbox(ed, rep):
         is_external = "://" in u or u.startswith("//")
         if is_external and not external_ref_allowed(u):
             rep.block("B-SANDBOX", f"external {kind} reference not on allowlist: {url}")
-    for i, raw_chart in enumerate(ed.chart_raw, 1):
-        err = chart_spec_error(raw_chart)
-        if err is not None:
-            rep.block("B-SANDBOX", f"data-nb-chart block #{i} invalid: {err}")
 
 
 MAX_FIGURE_BYTES = 2 * 1024 * 1024

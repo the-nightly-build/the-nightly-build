@@ -190,7 +190,15 @@ def test_duplicated_section_blocks(run_local: Callable[..., Findings]) -> None:
             mut(FONT_LINK, "https://fonts.googleapis.commmm/x.css"),
             id="font-host-lookalike-TLD-suffix",
         ),
-        pytest.param(mut('"type":"bar"', '"type":"pie"'), id="malformed-chart-json"),
+        pytest.param(
+            mut(
+                "</article>",
+                '<figure><script type="application/json" data-nb-chart>'
+                '{"type":"bar","labels":["a"],"series":[]}</script></figure>'
+                "</article>",
+            ),
+            id="retired-declarative-chart",
+        ),
         pytest.param(
             mut(
                 "</article>",

@@ -38,22 +38,18 @@ Three or four numbers that carry the thesis. Each must be cited in nearby prose.
 
 ## Chart
 
-Declarative data, rendered by the engine runtime. Types: line, bar, scatter.
-Restate the data in caption and prose. The noscript line is fixed chrome.
+A production-rendered PNG from the chart's committed plotly script. Render
+with `uv run --group charts engine/render_chart.py` (docs/charts.md); the
+script `chart-N.py` ships beside `chart-N.png` as the chart's provenance.
+Label axes, note a non-linear scale, and cite the data source in the caption.
+Restate the data in caption and prose.
 
 ```html
-<figure class="nb-chart">
-  <figcaption>Fig. 1 · CAPTION</figcaption>
-  <canvas></canvas>
-  <noscript>chart requires JS; data in caption and prose</noscript>
-  <script type="application/json" data-nb-chart>
-    {
-      "type": "line",
-      "labels": ["2022", "2023"],
-      "series": [{ "name": "NAME", "values": [1, 2] }],
-      "y": { "scale": "linear", "label": "UNITS" }
-    }
-  </script>
+<figure class="nb-figure">
+  <img src="ARTICLE-SLUG/chart-1.png" alt="WHAT THE CHART SHOWS" />
+  <figcaption>
+    Fig. 1 · CAPTION.<sup class="nb-cite"><a href="#s1">1</a></sup>
+  </figcaption>
 </figure>
 ```
 

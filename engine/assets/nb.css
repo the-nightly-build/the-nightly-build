@@ -1117,6 +1117,7 @@ figure.nb-chart figcaption {
   margin-bottom: 8px;
 }
 
+/* legacy: canvas/noscript serve articles published before PNG charts */
 figure.nb-chart canvas {
   width: 100%;
   max-height: 260px;

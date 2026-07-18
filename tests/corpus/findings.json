@@ -107,8 +107,13 @@
     "notes": []
   },
   "transformers-from-scratch/tokens-and-embeddings": {
-    "exit": 0,
+    "exit": 1,
     "findings": [
+      {
+        "code": "B-SANDBOX",
+        "level": "BLOCK",
+        "message": "declarative data-nb-chart charts are retired; render a PNG with engine/render_chart.py and embed it as a figure (docs/charts.md)"
+      },
       {
         "code": "W-CITE-ORDER",
         "level": "WARN",
