@@ -102,7 +102,7 @@ def check_sandbox(ed, rep):
             rep.block(
                 "B-SANDBOX",
                 "declarative data-nb-chart charts are retired; render a PNG "
-                "with engine/render_chart.py and embed it as figure.nb-chart "
+                "with engine/render_chart.py and embed it as a figure "
                 "(docs/charts.md)",
             )
         elif a.get("id") != "nb-meta":

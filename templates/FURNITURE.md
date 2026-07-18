@@ -45,7 +45,7 @@ Label axes, note a non-linear scale, and cite the data source in the caption.
 Restate the data in caption and prose.
 
 ```html
-<figure class="nb-chart">
+<figure class="nb-figure">
   <img src="ARTICLE-SLUG/chart-1.png" alt="WHAT THE CHART SHOWS" />
   <figcaption>
     Fig. 1 · CAPTION.<sup class="nb-cite"><a href="#s1">1</a></sup>
