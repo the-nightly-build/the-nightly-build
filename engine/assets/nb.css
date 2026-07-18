@@ -1900,12 +1900,57 @@ figure.nb-chart noscript {
   color: var(--ink-soft);
 }
 
+/* the claim card carries its whole lifecycle: open the night it is made,
+   hit or miss when a later article judges it (data-nb-resolution), so no
+   separate grading component exists. */
 .nb-claim {
-  border: 1px solid var(--hair);
-  border-radius: var(--radius);
+  border: 1px solid var(--line);
+  border-left: 3px solid var(--accent);
+  border-radius: 0 var(--radius) var(--radius) 0;
   background: var(--panel);
   padding: 14px 16px;
   margin: 14px 0;
+}
+
+.nb-claim[data-nb-resolution="hit"] {
+  border-left-color: var(--ok);
+}
+
+.nb-claim[data-nb-resolution="miss"] {
+  border-left-color: var(--bad);
+}
+
+.nb-claim-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+}
+
+.nb-claim-state {
+  font-family: var(--mono);
+  font-size: 10.5px;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  padding: 2px 9px;
+  border-radius: 999px;
+  border: 1px solid currentcolor;
+  white-space: nowrap;
+  color: var(--warn);
+}
+
+.nb-claim[data-nb-resolution="hit"] .nb-claim-state {
+  color: var(--ok);
+}
+
+.nb-claim[data-nb-resolution="miss"] .nb-claim-state {
+  color: var(--bad);
+}
+
+.nb-claim-outcome {
+  margin: 8px 0 2px;
+  font-size: 15px;
+  color: var(--ink);
 }
 
 .nb-claim h3 {
@@ -1923,8 +1968,10 @@ figure.nb-chart noscript {
 
 .nb-claim-meta {
   display: flex;
-  gap: 8px;
+  gap: 14px;
   flex-wrap: wrap;
+  border-top: 1px solid var(--hair);
+  padding-top: 8px;
 }
 
 .nb-claim-meta span {
@@ -1936,6 +1983,8 @@ figure.nb-chart noscript {
   padding: 2px 10px;
 }
 
+/* retired from the catalog (the claim card carries its own resolution);
+   kept so the published shelf renders */
 .nb-grade {
   display: flex;
   gap: 12px;

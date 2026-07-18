@@ -15,9 +15,10 @@ docs/customization.md).
 
 The catalogue is small on purpose: a few primitives the writer adapts beat a
 component per idea. Retired components (callout, epigraph, aside, cast,
-objectives box, check box, bridge, plain abstract, verdict) stay styled so
-the published shelf keeps rendering, but new articles express those moves
-through the note below.
+objectives box, check box, bridge, plain abstract, verdict, grade row, the
+paper template's anchored excerpt) stay styled so the published shelf keeps
+rendering; new articles express those moves through the note below, and a
+claim's judgment lives on the claim card itself.
 
 In the samples below, ALL-CAPS runs are placeholders: replace every one in
 the article's own words. The proof warns on a caps run that survives into
@@ -33,7 +34,8 @@ the note; the article's own best sentence, promoted, is a pull quote.
 **Structure** — stages in order are steps, events in time a timeline,
 stances in a disagreement position blocks, strengths against caveats the
 holds-up grid. **Judgment** — scored criteria are a rubric; a prediction is
-a claim card; its judgment later is a grade row.
+a claim card, carried from open to hit or miss when a later article judges
+it.
 
 ## Stat strip
 
@@ -262,7 +264,9 @@ rows the subject demands. The rendered score text must agree with
       >
     </div>
     <p class="nb-rubric-note">
-      THE LINE THE SCORE STANDS ON.<sup class="nb-cite"><a href="#s2">2</a></sup>
+      THE LINE THE SCORE STANDS ON.<sup class="nb-cite"
+        ><a href="#s2">2</a></sup
+      >
     </p>
   </div>
 </div>
@@ -270,33 +274,39 @@ rows the subject demands. The rendered score text must agree with
 
 ## Claim card
 
-A falsifiable prediction: what, how confident, and when it can be judged.
-If a section makes claims, later articles should grade them (see grade row).
+A falsifiable prediction that carries its own lifecycle. The night it is
+made it is open: the claim, the reasoning, confidence, and when it can be
+judged. When a later article judges it, that article renders the same card
+with `data-nb-resolution="hit"` or `"miss"`, the matching state chip text,
+and an outcome line saying what actually happened. If a section makes
+claims, later articles must grade them.
 
 ```html
-<div class="nb-claim">
-  <h3>
-    THE CLAIM<sup class="nb-cite"><a href="#s4">4</a></sup>
-  </h3>
+<div class="nb-claim" data-nb-resolution="open">
+  <div class="nb-claim-top">
+    <h3>
+      THE CLAIM<sup class="nb-cite"><a href="#s4">4</a></sup>
+    </h3>
+    <span class="nb-claim-state">Open</span>
+  </div>
   <p>THE REASONING BEHIND IT.</p>
   <div class="nb-claim-meta">
     <span>confidence 70%</span><span>resolves by 2026-12-31</span>
   </div>
 </div>
-```
 
-## Grade row
-
-A past claim judged against what happened. Verdict class: `hit`, `miss`,
-or `open`.
-
-```html
-<div class="nb-grade hit">
-  <span class="nb-grade-verdict">Hit</span>
-  <p>
-    THE CLAIM, AND WHAT ACTUALLY HAPPENED.<sup class="nb-cite"
-      ><a href="#s5">5</a></sup
-    >
+<div class="nb-claim" data-nb-resolution="hit">
+  <div class="nb-claim-top">
+    <h3>
+      THE ORIGINAL CLAIM<sup class="nb-cite"><a href="#s4">4</a></sup>
+    </h3>
+    <span class="nb-claim-state">Hit</span>
+  </div>
+  <p class="nb-claim-outcome">
+    WHAT ACTUALLY HAPPENED.<sup class="nb-cite"><a href="#s5">5</a></sup>
   </p>
+  <div class="nb-claim-meta">
+    <span>claimed 2026-01-08 at 70%</span><span>judged 2026-12-19</span>
+  </div>
 </div>
 ```
