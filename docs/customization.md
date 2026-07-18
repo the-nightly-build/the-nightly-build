@@ -12,8 +12,9 @@ the base block and are inherited. The test suite enforces parity across the
 blocks.
 
 Beyond the page tokens, a theme carries two data-color groups. `--chart-1`
-through `--chart-6` are the categorical series colors for charts, in a fixed,
-colorblind-validated order — assign them in sequence, never re-sorted.
+through `--chart-6` are the categorical series colors for charts, in a
+fixed, colorblind-validated order: assign them in sequence, never
+re-sorted.
 `--ok`, `--warn`, and `--bad` are semantic status inks (grade verdicts,
 holds-up labels, score meters). The suite checks their contrast in every
 block: chart tokens hold at least 3:1 against `--bg` and `--panel`, status
@@ -121,7 +122,7 @@ This does not weaken the security model, because the trust boundary is
   ever.
 
 Readers with JavaScript off still get the raw content (plain monospace code,
-an unrendered figure) — and the engine's own charts are plain PNGs, readable
+an unrendered figure), and the engine's own charts are plain PNGs, readable
 everywhere.
 
 ## Voice: press/editorial.md

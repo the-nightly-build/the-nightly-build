@@ -26,20 +26,19 @@ prose. Sentence-case labels a component renders ("What holds up", "What to
 be careful about") are fixed chrome: keep them verbatim. Everything else is
 sample data: replace it.
 
-The families, and how to choose within them: **evidence** — a couple of
-heterogeneous headline numbers are a stat strip; rows of one shape, three or
-more deep, are a table; anything the reader must see is a figure, drawn from
-data or captured from a source. **Voice** — a labeled passage of any kind is
-the note; the article's own best sentence, promoted, is a pull quote.
-**Structure** — stages in order are steps, events in time a timeline,
-stances in a disagreement position blocks, strengths against caveats the
-holds-up grid. **Judgment** — scored criteria are a rubric; a prediction is
-a claim card, carried from open to hit or miss when a later article judges
-it.
+The families, and how to choose within them. Evidence: a couple of
+heterogeneous headline numbers are a stat strip, rows of one shape three or
+more deep are a table, and anything the reader must see is a figure, drawn
+from data or captured from a source. Voice: a labeled passage of any kind is
+the note, and the article's own best sentence, promoted, is a pull quote.
+Structure: stages in order are steps, events in time a timeline, a stance
+anyone holds a position card, strengths against caveats the holds-up grid.
+Judgment: scored criteria are a rubric, and a prediction is a claim card,
+carried from open to hit or miss when a later article judges it.
 
 ## Stat strip
 
-The numbers that carry the thesis — any count works, one included. Each must
+The numbers that carry the thesis. Any count works, one included. Each must
 be cited in nearby prose.
 
 ```html
@@ -92,8 +91,8 @@ filename. A **chart** is drawn from data at production time: render with
 `chart-N.py` script beside `chart-N.png` as its provenance (the `chart-`
 name is reserved), label axes, note a non-linear scale, and cite the data
 source in the caption. A **source asset** (`asset-N.png`/`.jpg`/`.webp`) is
-an exact visual captured from a cited primary or public document — a figure,
-photograph, or document detail; crop away page furniture and printed
+an exact visual captured from a cited primary or public document: a figure,
+photograph, or document detail. Crop away page furniture and printed
 captions unless that text is itself evidence, and cite the document. Both
 live beside the article in `library/<series>/<slug>/`, need useful
 alternative text, and restate what matters in caption and prose.
@@ -124,9 +123,9 @@ alternative text, and restate what matters in caption and prose.
 
 ## The note
 
-The one labeled-passage component. You supply the label and the content —
-prose, a list, or a quotation — and the label is not an enum: name the move
-this passage makes. A definition wears its term. A plain-language rendering
+The one labeled-passage component. You supply the label and the content:
+prose, a list, or a quotation. The label is not an enum. Name the move this
+passage makes. A definition wears its term. A plain-language rendering
 of a work's claim wears "In plain language". The weight-of-evidence landing
 wears "Verdict" and the `nb-note-strong` modifier (at most one per article).
 A sequenced series' pointer onward wears "Next article"; a teaching piece's
@@ -170,7 +169,7 @@ One sentence from the article itself, promoted for emphasis. Use at most one.
 ## Numbered steps
 
 A mechanism or process, one stage per step. The connecting rule implies
-order. Do not use it for unordered lists — a ranking is a table.
+order. Do not use it for unordered lists; a ranking is a table.
 
 ```html
 <ol class="nb-steps">

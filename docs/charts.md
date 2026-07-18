@@ -41,7 +41,7 @@ behaves like a photograph on the figure card), series colors from the press
 theme's `--chart-1..6` tokens in order, and a line-dash and marker cycle so
 series never differ by color alone. The full plotly API is available when a
 chart needs more than the default look; keep axes labeled, note a non-linear
-scale, and let the data carry the ink.
+scale, and keep decoration out of the drawing.
 
 The output lands beside the script as `chart-N.png`, sized inside the
 proof's figure limits (2400px maximum edge, 2 MiB). Inspect the PNG and the

@@ -88,9 +88,9 @@ empty only when you looked and found nothing.
 ## Numbers
 Every load-bearing figure: the primary that owns it, the exact reading, what
 one unit counts. When a series of numbers could carry a chart, record the
-full series and the primary that owns each value — the writer's `chart-N.py`
-commits those numbers as the chart's provenance, and it can only be as honest
-as this log.
+full series and the primary that owns each value. The writer's `chart-N.py`
+commits those numbers as the chart's provenance, and it can only be as
+honest as this log.
 
 ## Source assets
 For every cited primary or public document whose visual evidence could carry an

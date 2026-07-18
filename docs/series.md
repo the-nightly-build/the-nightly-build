@@ -120,15 +120,16 @@ An article renders the rubric as rows carrying `data-nb-criterion` (the
 pinned id, or a fit-for-subject slug the writer adds) and `data-score`, an
 integer 0–5; the rendered `nb-rubric-score` text must agree with the
 attribute, and each row's one-line justification carries an inline citation.
-Row integrity — a dropped pinned criterion, no rows at all, a duplicate or
-malformed slug, a score off the scale, a meter text that disagrees with its
-attribute — BLOCKs regardless of `strict` (`B-RUBRIC`), like the source mix:
-these are contract failures, not calibration. An uncited row is `W-RUBRIC`,
+Row integrity BLOCKs regardless of `strict` (`B-RUBRIC`): a dropped pinned
+criterion, no rows at all, a duplicate or malformed slug, a score off the
+scale, or a meter text that disagrees with its attribute. Like the source
+mix, these are contract failures, not calibration. An uncited row is `W-RUBRIC`,
 a BLOCK under `strict`. Whether a score is deserved is judgment: the cited
 justification carries it and the editor audits it; the engine only counts.
 
-The contract is attribute-driven, so it works on any template — but a series
-that pins a rubric needs every template it may use to render rubric rows,
+The contract is attribute-driven, so it works on any template. A series
+that pins a rubric still needs every template it may use to render rubric
+rows,
 and `engine/validate_config.py` rejects one whose skeleton carries no
 `data-nb-criterion` (the same rule kinded source bands follow). A series
 with no `rubric:` never asks, though any rubric rows an article renders are

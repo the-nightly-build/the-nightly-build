@@ -1130,8 +1130,8 @@ figure.nb-chart noscript {
   color: var(--faint);
 }
 
-/* stat strip — ledger rows: hairline rows on phones, columns with vertical
-   dividers on wide screens. No boxes; the numbers carry the ink. Extends to
+/* stat strip, as ledger rows: hairline rows on phones, columns with
+   vertical dividers on wide screens. No boxes. Extends to
    any count, one included. */
 .nb-stat-strip {
   display: grid;
@@ -1191,7 +1191,7 @@ figure.nb-chart noscript {
   }
 }
 
-/* the note — the one labeled-passage component. The writer supplies the
+/* the note: the one labeled-passage component. The writer supplies the
    label (a definition's term, "In plain language", "Verdict", "Next
    article", a coined label) and any content: prose, a list, a quotation.
    `nb-note-strong` is the landing intensity; use it at most once. */
@@ -1248,7 +1248,7 @@ figure.nb-chart noscript {
   border-radius: 0 var(--radius) var(--radius) 0;
 }
 
-/* the rubric — scored criteria for a review (engine contract: an integer
+/* the rubric: scored criteria for a review (engine contract: an integer
    data-score 0-5, the rendered nb-rubric-score agreeing, the note cited).
    Meter width and color follow data-score via the semantic tokens. */
 .nb-rubric {
@@ -1345,7 +1345,7 @@ figure.nb-chart noscript {
   color: var(--ink-soft);
 }
 
-/* the table — compact worked rows (design adopted from the example press's
+/* the table: compact worked rows (design adopted from the example press's
    rs-worked): mono numerals, spaced digits fit a phone, the caption carries
    the citation. A `txt` cell drops to serif, left-aligns, and wraps. */
 .nb-table {

@@ -129,9 +129,9 @@ belongs in the prose. If the asset fails either test, request a recrop or
 caption revision in terms of what to retain or remove, never coordinates. The
 editor requests image work but never edits assets or markup.
 
-For every chart, open its committed `chart-N.py` and check the numbers in it
-against the research log and the cited primary — the script is the chart's
-provenance, and a wrong literal there is a wrong claim in ink. Then read the
+For every chart, open its committed `chart-N.py` and check its numbers
+against the research log and the cited primary. The script is the chart's
+provenance; a wrong literal there is a wrong published claim. Then read the
 PNG as a reader: axes labeled, a non-linear scale noted, the legend legible,
 and nothing in the drawing implying more than the cited data carries. A chart
 that fails gets the same treatment as a failed crop: name what must change,

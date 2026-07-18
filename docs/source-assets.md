@@ -43,5 +43,5 @@ source asset and state what it shows in useful alternative text.
 
 A source asset is always captured evidence, never something the pipeline
 draws. A data visualization the article itself generates is a chart, a
-different concept with its own contract — the reserved `chart-N` name, a committed
-`chart-N.py`, and the data source cited in the caption. See docs/charts.md.
+different concept with its own contract: the reserved `chart-N` name, a
+committed `chart-N.py`, and the data source cited in the caption. See docs/charts.md.
