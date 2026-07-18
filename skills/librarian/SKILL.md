@@ -119,16 +119,20 @@ furniture component's markup is catalogued, not what a tag fragment already
 disciplines. A restated rule drifts from the rule it copies, and the copy has no
 owner.
 
-What belongs here is the editorial judgment no schema holds: the beat, the angle,
-the reader, the genre and the furniture that carries it, the standard a source
-must clear, what this desk refuses to do. Naming a furniture component is
+What belongs here is the editorial judgment no schema holds: the beat, the
+angle, the genre and the furniture that carries it, the standard a source
+must clear, what this desk refuses to do. The audience never appears in a
+series prompt; it lives in `press/editorial.md`, and prompt rules are stated
+about the article, the desk, or the subject. Naming a furniture component is
 editorial; explaining its markup is not. And an open section's beat IS its
 config, so its watchlist, its rotation, and its lanes live in the prompt and
 nowhere else.
 
 Test every line before it goes in. Could the engine already know this? Then it
-does not go here. The prompts in `examples/series/` hold this standard. Keep them
-holding it.
+does not go here. Then test the prose itself against `spec/prompting.md`:
+reread the finished prompt as the writer will, and fix anything the standard
+names before committing. The prompts in `examples/series/` hold both
+standards. Keep them holding both.
 
 Validate: `python3 engine/validate_config.py`. Fix anything it flags before
 proceeding. Commit the configuration to `main` via the user's normal review
@@ -256,6 +260,11 @@ An ordinary fork merge. For users who only write inside `press/` it is clean by
 construction: their commits and upstream's touch disjoint paths. If they HAVE
 edited engine files, the merge may conflict exactly there. That is normal fork
 ownership. Help them resolve it like any merge, never overwriting their work.
+
+After the merge, diff the paper's schedule prompt against the canonical one
+in `docs/scheduling.md` and replace anything that restates what the repo now
+owns. Nothing else guards that seam, and a schedule prompt written fat rots
+with every engine update.
 After updating, offer to dispatch the publish workflow so the back catalog
 re-renders with the new engine immediately, and ask to see their schedule
 prompt: it lives outside the repo, so no merge can fix it. Diff it against the
