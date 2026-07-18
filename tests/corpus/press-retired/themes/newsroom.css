@@ -19,6 +19,15 @@
   --accent-2: #935f00;
   --line: #d9e2ee;
   --hair: #e7edf5;
+  --chart-1: #96640a;
+  --chart-2: #1c5cab;
+  --chart-3: #008a74;
+  --chart-4: #a8332e;
+  --chart-5: #6d28d9;
+  --chart-6: #2e7d4f;
+  --ok: #1e6b3f;
+  --warn: #7d600f;
+  --bad: #b3403a;
   --serif: "Newsreader", georgia, serif;
   --sans: "Inter", system-ui, sans-serif;
   --mono: "IBM Plex Mono", monospace;
@@ -38,6 +47,15 @@
     --accent-2: #ddb262;
     --line: #242f45;
     --hair: #1c2638;
+    --chart-1: #bf7f00;
+    --chart-2: #5b93d9;
+    --chart-3: #0fa08f;
+    --chart-4: #d95555;
+    --chart-5: #8b7ce8;
+    --chart-6: #61a83f;
+    --ok: #5bbd8b;
+    --warn: #e0b25e;
+    --bad: #e8837d;
   }
 }
 
@@ -53,6 +71,15 @@
   --accent-2: #935f00;
   --line: #d9e2ee;
   --hair: #e7edf5;
+  --chart-1: #96640a;
+  --chart-2: #1c5cab;
+  --chart-3: #008a74;
+  --chart-4: #a8332e;
+  --chart-5: #6d28d9;
+  --chart-6: #2e7d4f;
+  --ok: #1e6b3f;
+  --warn: #7d600f;
+  --bad: #b3403a;
 
   color-scheme: light;
 }
@@ -68,6 +95,15 @@
   --accent-2: #ddb262;
   --line: #242f45;
   --hair: #1c2638;
+  --chart-1: #bf7f00;
+  --chart-2: #5b93d9;
+  --chart-3: #0fa08f;
+  --chart-4: #d95555;
+  --chart-5: #8b7ce8;
+  --chart-6: #61a83f;
+  --ok: #5bbd8b;
+  --warn: #e0b25e;
+  --bad: #e8837d;
 
   color-scheme: dark;
 }

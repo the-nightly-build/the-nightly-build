@@ -99,6 +99,13 @@
   }
 
   function chartColors() {
+    var slots = [];
+    for (var i = 1; i <= 6; i++) {
+      var c = cssVar("--chart-" + i);
+      if (c) slots.push(c);
+    }
+    if (slots.length) return slots;
+    /* themes older than the chart tokens keep rendering on the accent trio */
     return [cssVar("--accent"), cssVar("--accent-2"), cssVar("--ink-soft")];
   }
 
