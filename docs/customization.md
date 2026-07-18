@@ -199,7 +199,7 @@ press/templates/<id>/
 A `press/templates/<id>/` package replaces a shipped `templates/<id>/` of the
 same id **wholesale**. User templates are first class: the proof enforces
 whatever the manifest declares, so a template you define gets the same
-validation, CI, and site treatment as the shipped two. Reach for one when a
+validation, CI, and site treatment as the shipped templates. Reach for one when a
 section needs structure enforced rather than described; for most genres,
 describing it in the series prompt on the `article` template is enough (see
 [series.md](series.md)).

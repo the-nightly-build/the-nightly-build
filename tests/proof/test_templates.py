@@ -111,7 +111,6 @@ def skeleton_of(*sections: str) -> str:
 
 @pytest.fixture
 def user_repo(clone_testrepo: Callable[..., str]) -> str:
-    """A press that overlays its own templates on the shipped ones."""
     repo = clone_testrepo("press", "templates", "engine")
     for template_id, (manifest, sections) in USER_TEMPLATES.items():
         folder = pathlib.Path(repo) / "press" / "templates" / template_id
@@ -127,7 +126,6 @@ def user_repo(clone_testrepo: Callable[..., str]) -> str:
 
 @pytest.fixture
 def template_repo() -> str:
-    """A press whose series exist only to proof the shipped sample articles."""
     repo = pathlib.Path(tempfile.mkdtemp())
     shutil.copytree(REPO / "templates", repo / "templates")
     series = repo / "press" / "series" / "histories"
@@ -137,7 +135,46 @@ def template_repo() -> str:
         "autopublish: true\nstrict: false\n"
         "items:\n  - {slug: unix, title: Unix}\n"
     )
+    debates = repo / "press" / "series" / "debates"
+    debates.mkdir(parents=True)
+    (debates / "series.yaml").write_text(
+        "name: Debates\nmode: collection\ntemplate: unbiased\n"
+        "autopublish: true\nstrict: false\n"
+        "items:\n  - {slug: carbon, title: Carbon}\n"
+    )
     return str(repo)
+
+
+UNBIASED_SIDES = "".join(
+    f'<section class="nb-side nb-side-{half}" data-nb-section="the-case-for-{half}" '
+    f'id="the-case-for-{half}">'
+    f'<h3 class="nb-side-camp">Camp {half}</h3>'
+    f'<p class="nb-side-thesis">The {half} position in one sentence.</p>'
+    f'<div class="nb-side-argument"><p>{LOREM * 7}'
+    f'<sup class="nb-cite"><a href="#s{i + 1}">{i + 1}</a></sup></p></div>'
+    f'<p class="nb-side-champion"><span class="nb-side-outlet">Outlet</span>, '
+    f'standing here because reasons.<sup class="nb-cite"><a href="#s{i + 1}">'
+    f"{i + 1}</a></sup></p></section>"
+    for i, half in enumerate(("left", "right"))
+)
+
+UNBIASED = f"""<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><title>Carbon</title>
+<script type="application/json" id="nb-meta">
+{{"protocol": "1.0", "series": "debates", "slug": "carbon",
+  "template": "unbiased", "title": "Carbon", "mode": "collection",
+  "order": null, "date": "2026-07-06", "tags": [], "sources": 5,
+  "words": 1400, "reading_minutes": 6, "dek": "Contested.",
+  "harness": "test-fixture", "model": "claude-fable-5"}}
+</script>
+</head><body class="nb-article">
+<section data-nb-section="orientation"><p>{LOREM * 7}
+<sup class="nb-cite"><a href="#s3">3</a></sup></p></section>
+<div class="nb-divide">{UNBIASED_SIDES}</div>
+<section data-nb-section="crux"><p>{LOREM * 7}
+<sup class="nb-cite"><a href="#s4">4</a></sup></p></section>
+<section data-nb-section="sources"><h2>Sources</h2><ol>{SOURCES}</ol></section>
+</body></html>"""
 
 
 def test_chronicle_shaped_article_is_block_clean_and_warn_free(
@@ -153,6 +190,33 @@ def test_chronicle_shaped_article_is_block_clean_and_warn_free(
         "W-SELF-COUNT",
     ):
         assert code not in result.codes
+
+
+def test_unbiased_two_sides_and_a_crux_pass(
+    run_local: Callable[..., Findings], template_repo: str
+) -> None:
+    result = run_local(UNBIASED, "debates", slug="carbon", repo=template_repo)
+    assert not result.blocks
+
+
+def test_unbiased_blocks_a_third_side(
+    run_local: Callable[..., Findings], template_repo: str
+) -> None:
+    third = UNBIASED.replace(
+        '<section data-nb-section="crux">',
+        '<section data-nb-section="the-case-for-both"><p>extra</p></section>'
+        '<section data-nb-section="crux">',
+    )
+    result = run_local(third, "debates", slug="carbon", repo=template_repo)
+    assert "B-HTML" in result.blocks
+
+
+def test_unbiased_blocks_when_the_divide_chrome_is_reworded(
+    run_local: Callable[..., Findings], template_repo: str
+) -> None:
+    reworded = UNBIASED.replace('<div class="nb-divide">', '<div class="nb-split">')
+    result = run_local(reworded, "debates", slug="carbon", repo=template_repo)
+    assert "B-CHROME" in result.blocks
 
 
 @pytest.mark.parametrize("template_id", sorted(REGISTRY))
