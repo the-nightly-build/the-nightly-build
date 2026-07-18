@@ -11,8 +11,9 @@ are on record before any commentary.
 Rebuild the argument in your own words, your own examples, and the order that
 teaches best; the original's order rarely is. Define each concept at the
 moment the argument first spends it. Anchor the moments the argument turns on
-with `nb-excerpt`: the original's exact sentence, an honest locator, and a
-one-line gloss of what it does and does not claim.
+in the citations themselves — an honest `data-nb-locator` and `data-nb-note`
+on the cite — and quote the original's exact sentence in a note when it
+earns display space.
 
 Weigh the evidence as a reviewer would: what was measured, on what, and what
 would count as the result failing to generalize. Name a weak evaluation

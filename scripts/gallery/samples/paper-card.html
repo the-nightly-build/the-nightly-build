@@ -8,12 +8,18 @@
   <a class="nb-paper-link" href="https://arxiv.org/abs/2506.01847"
     >Read the paper</a
   >
-  <blockquote class="nb-paper-abstract">
-    We show that deferring gradient synchronization to off-peak power windows
-    reduces facility draw 47% on a 4,096-GPU cluster while costing 11%
-    throughput, and characterize when the trade favors the deferral.<sup
-      class="nb-cite"
-      ><a href="#s1">1</a></sup
-    >
+  <blockquote class="nb-paper-abstract nb-clamped">
+    Large-scale language model training is increasingly constrained by facility
+    power rather than accelerator supply. We show that deferring gradient
+    synchronization to off-peak power windows reduces facility draw 47% on a
+    4,096-GPU cluster while costing 11% throughput, and characterize when the
+    trade favors the deferral. Our scheduler treats the interconnect as a power
+    market participant, batching all-reduce operations against a facility-level
+    power budget and releasing them when marginal capacity is cheap. We evaluate
+    across two cluster generations and three model scales, report end-to-end
+    convergence parity with synchronous baselines, and release the scheduler and
+    its traces. On a fully utilized site the recoverable overhead shrinks and
+    the honest saving is closer to a third; we bound the conditions under which
+    the method generalizes.<sup class="nb-cite"><a href="#s1">1</a></sup>
   </blockquote>
 </div>

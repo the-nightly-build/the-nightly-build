@@ -16,11 +16,15 @@ from gallery.build import SAMPLES, build, discover_pieces
 REPO = pathlib.Path(__file__).resolve().parents[1]
 
 
-def test_every_catalog_piece_has_a_sample() -> None:
+def test_every_engine_piece_has_a_sample() -> None:
     pieces = discover_pieces(REPO)
 
     assert pieces, "no catalog pieces discovered"
-    missing = [p.slug for p in pieces if not (SAMPLES / f"{p.slug}.html").is_file()]
+    missing = [
+        p.slug
+        for p in pieces
+        if p.engine_owned and not (SAMPLES / f"{p.slug}.html").is_file()
+    ]
     assert not missing
 
 
@@ -42,3 +46,21 @@ def test_the_build_fails_loudly_on_a_missing_sample(tmp_path: pathlib.Path) -> N
 
     with pytest.raises(SystemExit, match="imaginary-piece"):
         build(repo, tmp_path / "out" / "index.html")
+
+
+def test_press_furniture_without_a_sample_renders_a_placeholder(
+    tmp_path: pathlib.Path,
+) -> None:
+    repo = tmp_path / "repo"
+    (repo / "templates").mkdir(parents=True)
+    (repo / "templates" / "FURNITURE.md").write_text("# Furniture\n")
+    press = repo / "press" / "furniture"
+    press.mkdir(parents=True)
+    (press / "catalog.md").write_text(
+        "# Mine\n\n## House special\n\nA press-only piece.\n"
+    )
+
+    page = build(repo, tmp_path / "out" / "index.html").read_text(encoding="utf-8")
+
+    assert "House special" in page
+    assert "no gallery sample yet" in page

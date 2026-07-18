@@ -257,9 +257,9 @@ ordered course, rebuilt as your own template.
    owns (a heading like "Sources", a component's fixed label) stay sentence
    case. The proof backstops the convention: a caps run surviving into an
    article's prose is a `W-PLACEHOLDER` warning. The same holds for
-   `identity.md`: describe the move, do not perform it. The objectives
-   box, check box, and bridge components in `templates/FURNITURE.md` carry
-   the lesson. The sandbox applies unchanged: no scripts beyond the JSON blocks
+   `identity.md`: describe the move, do not perform it. The note
+   component in `templates/FURNITURE.md` carries the lesson's goals,
+   self-checks, and bridge as labeled moves. The sandbox applies unchanged: no scripts beyond the JSON blocks
    and the engine runtime, citations as `sup.nb-cite` anchors into numbered
    source entries. Give each placeholder source entry a
    `data-nb-kind="primary"` or `"secondary"` next to its `data-nb-source`, as

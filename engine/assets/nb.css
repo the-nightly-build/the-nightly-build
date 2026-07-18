@@ -1130,38 +1130,293 @@ figure.nb-chart noscript {
   color: var(--faint);
 }
 
-/* stat strips (dossier furniture) */
+/* stat strip — ledger rows: hairline rows on phones, columns with vertical
+   dividers on wide screens. No boxes; the numbers carry the ink. Extends to
+   any count, one included. */
 .nb-stat-strip {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-  gap: 1px;
-  background: var(--line);
-  border: 1px solid var(--line);
-  overflow: hidden;
+  grid-template-columns: 1fr;
   margin: 20px 0;
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
 }
 
 .nb-stat {
-  background: var(--panel);
-  padding: 12px;
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 2px;
+}
+
+.nb-stat + .nb-stat {
+  border-top: 1px solid var(--hair);
 }
 
 .nb-stat .nb-stat-n {
-  font-family: var(--mono);
-  font-size: 20px;
-  color: var(--accent);
-  display: block;
+  font-family: var(--serif);
+  font-weight: 600;
+  font-size: 1.5rem;
+  color: var(--accent-2);
 }
 
 .nb-stat .nb-stat-l {
   font-family: var(--sans);
-  font-size: 10.5px;
+  font-size: 11px;
   color: var(--faint);
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.06em;
+  text-align: right;
+}
+
+@media (width >= 641px) {
+  .nb-stat-strip {
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  }
+
+  .nb-stat {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 2px;
+    padding: 12px 16px;
+  }
+
+  .nb-stat + .nb-stat {
+    border-top: none;
+    border-left: 1px solid var(--hair);
+  }
+
+  .nb-stat .nb-stat-l {
+    text-align: left;
+  }
+}
+
+/* the note — the one labeled-passage component. The writer supplies the
+   label (a definition's term, "In plain language", "Verdict", "Next
+   article", a coined label) and any content: prose, a list, a quotation.
+   `nb-note-strong` is the landing intensity; use it at most once. */
+.nb-note {
+  margin: 18px 0;
+  padding: 2px 0 2px 14px;
+  border-left: 2px solid var(--line);
+}
+
+.nb-note .nb-note-label {
+  font-family: var(--sans);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--accent-2);
+  display: block;
+  margin-bottom: 4px;
+}
+
+.nb-note > p,
+.nb-note > ul,
+.nb-note > ol,
+.nb-note > blockquote {
+  margin: 0;
+}
+
+.nb-note > ul,
+.nb-note > ol {
+  padding-left: 20px;
+}
+
+.nb-note li {
+  margin: 3px 0;
+}
+
+.nb-note blockquote {
+  font-style: italic;
+}
+
+.nb-note .nb-note-who {
+  display: block;
+  margin-top: 6px;
+  font-family: var(--sans);
+  font-size: 12.5px;
+  font-style: normal;
+  color: var(--faint);
+}
+
+.nb-note.nb-note-strong {
+  border-left: 3px solid var(--accent-2);
+  background: var(--wash);
+  padding: 14px 16px;
+  border-radius: 0 var(--radius) var(--radius) 0;
+}
+
+/* the rubric — scored criteria for a review (engine contract: an integer
+   data-score 0-5, the rendered nb-rubric-score agreeing, the note cited).
+   Meter width and color follow data-score via the semantic tokens. */
+.nb-rubric {
+  background: var(--wash);
+  border-left: 3px solid var(--accent-2);
+  border-radius: 0 var(--radius) var(--radius) 0;
+  padding: 14px 16px 6px;
+  margin: 14px 0;
+}
+
+.nb-rubric-row {
+  padding: 8px 0 10px;
+  border-top: 1px solid var(--line);
+}
+
+.nb-rubric-row:first-child {
+  border-top: none;
+}
+
+.nb-rubric-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.nb-rubric-name {
+  font-family: var(--sans);
+  font-weight: 600;
+  font-size: 15px;
+}
+
+.nb-rubric-gauge {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  white-space: nowrap;
+}
+
+.nb-rubric-meter {
+  width: 84px;
+  height: 8px;
+  border-radius: 999px;
+  background: var(--line);
+  overflow: hidden;
+  flex: none;
+}
+
+.nb-rubric-meter i {
+  display: block;
+  height: 100%;
+  background: var(--warn);
+}
+
+.nb-rubric-score {
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--ink-soft);
+}
+
+.nb-rubric-row[data-score="0"] .nb-rubric-meter i {
+  width: 0%;
+  background: var(--bad);
+}
+
+.nb-rubric-row[data-score="1"] .nb-rubric-meter i {
+  width: 20%;
+  background: var(--bad);
+}
+
+.nb-rubric-row[data-score="2"] .nb-rubric-meter i {
+  width: 40%;
+  background: var(--warn);
+}
+
+.nb-rubric-row[data-score="3"] .nb-rubric-meter i {
+  width: 60%;
+  background: var(--warn);
+}
+
+.nb-rubric-row[data-score="4"] .nb-rubric-meter i {
+  width: 80%;
+  background: var(--ok);
+}
+
+.nb-rubric-row[data-score="5"] .nb-rubric-meter i {
+  width: 100%;
+  background: var(--ok);
+}
+
+.nb-rubric-note {
+  margin: 3px 0 0;
+  font-size: 15.5px;
+  color: var(--ink-soft);
+}
+
+/* the table — compact worked rows (design adopted from the example press's
+   rs-worked): mono numerals, spaced digits fit a phone, the caption carries
+   the citation. A `txt` cell drops to serif, left-aligns, and wraps. */
+.nb-table {
+  margin: 24px auto;
+  border-collapse: collapse;
+  font-family: var(--mono);
+  font-size: 0.85rem;
+  color: var(--ink);
+}
+
+.nb-table caption {
+  caption-side: bottom;
+  padding-top: 10px;
+  font-family: var(--sans);
+  font-size: 0.82rem;
+  text-align: left;
+  color: var(--ink-soft);
+}
+
+.nb-table th {
+  padding: 6px 12px;
+  border-bottom: 1px solid var(--line);
+  font-family: var(--sans);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  text-align: center;
+  color: var(--faint);
+}
+
+.nb-table th:first-child,
+.nb-table td:first-child {
+  padding-left: 0;
+  text-align: left;
+}
+
+.nb-table td {
+  padding: 7px 12px;
+  border-bottom: 1px solid var(--hair);
+  text-align: center;
+  white-space: nowrap;
+}
+
+.nb-table tr:last-child td {
+  border-bottom: none;
+}
+
+.nb-table .nb-table-token {
+  display: inline-block;
+  padding: 1px 7px;
+  background: var(--faint);
+  border-radius: 4px;
+  color: var(--bg);
+}
+
+.nb-table td.txt {
+  font-family: var(--serif);
+  font-size: 0.95rem;
+}
+
+.nb-table td.txt,
+.nb-table th.txt {
+  text-align: left;
+  white-space: normal;
 }
 
 /* lesson furniture */
+
+/* retired from the catalog (the nb-note primitive carries this move);
+   kept so the published shelf renders */
 .nb-objectives {
   background: var(--wash);
   border: 1px solid var(--hair);
@@ -1191,6 +1446,8 @@ figure.nb-chart noscript {
   margin: 4px 0;
 }
 
+/* retired from the catalog (the nb-note primitive carries this move);
+   kept so the published shelf renders */
 .nb-callout {
   border-left: 3px solid var(--accent);
   background: var(--wash);
@@ -1210,6 +1467,8 @@ figure.nb-chart noscript {
   margin-bottom: 4px;
 }
 
+/* retired from the catalog (the nb-note primitive carries this move);
+   kept so the published shelf renders */
 .nb-check-box {
   border-top: 1px dashed var(--line);
   border-bottom: 1px dashed var(--line);
@@ -1226,6 +1485,8 @@ figure.nb-chart noscript {
   margin: 10px 0;
 }
 
+/* retired from the catalog (the nb-note primitive carries this move);
+   kept so the published shelf renders */
 .nb-bridge {
   border-left: 3px solid var(--accent-2);
   background: var(--wash);
@@ -1313,6 +1574,9 @@ figure.nb-chart noscript {
 }
 
 /* paper furniture */
+
+/* retired from the catalog (the nb-note primitive carries this move);
+   kept so the published shelf renders */
 .nb-abstract {
   background: var(--wash);
   border: 1px solid var(--hair);
@@ -1380,6 +1644,8 @@ figure.nb-chart noscript {
   margin: 6px 0;
 }
 
+/* retired from the catalog (the nb-note primitive carries this move);
+   kept so the published shelf renders */
 .nb-verdict {
   border-left: 3px solid var(--accent-2);
   background: var(--wash);
@@ -1478,6 +1744,8 @@ figure.nb-chart noscript {
   color: var(--ink);
 }
 
+/* retired from the catalog (the nb-note primitive carries this move);
+   kept so the published shelf renders */
 .nb-epigraph {
   margin: 0 0 26px;
   padding: 0 24px;
@@ -1501,6 +1769,8 @@ figure.nb-chart noscript {
   color: var(--faint);
 }
 
+/* retired from the catalog (the nb-note primitive carries this move);
+   kept so the published shelf renders */
 .nb-aside {
   background: var(--wash);
   border: 1px solid var(--hair);
@@ -1567,6 +1837,8 @@ figure.nb-chart noscript {
   color: var(--ink-soft);
 }
 
+/* retired from the catalog (the nb-note primitive carries this move);
+   kept so the published shelf renders */
 .nb-cast {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -1595,45 +1867,112 @@ figure.nb-chart noscript {
 }
 
 .nb-position {
-  border: 1px solid var(--hair);
+  margin: 18px 0;
+  padding: 14px 16px;
+  background: var(--wash);
+  border-left: 3px solid var(--accent-2);
+  border-radius: 0 var(--radius) var(--radius) 0;
+}
+
+.nb-position-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+  margin-bottom: 6px;
+}
+
+.nb-position-who {
+  font-family: var(--sans);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--accent-2);
+}
+
+.nb-position-pill {
+  font-family: var(--mono);
+  font-size: 10.5px;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--faint);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 2px 9px;
+  white-space: nowrap;
+}
+
+.nb-position-statement {
+  font-family: var(--serif);
+  font-weight: 600;
+  font-size: 1.18rem;
+  line-height: 1.4;
+  margin: 0 0 8px;
+  color: var(--ink);
+}
+
+.nb-position-summary {
+  font-family: var(--sans);
+  font-size: 0.85rem;
+  line-height: 1.5;
+  color: var(--ink-soft);
+  border-top: 1px solid var(--line);
+  padding-top: 8px;
+  margin: 0;
+}
+
+/* the claim card carries its whole lifecycle: open the night it is made,
+   hit or miss when a later article judges it (data-nb-resolution), so no
+   separate grading component exists. */
+.nb-claim {
+  border: 1px solid var(--line);
   border-left: 3px solid var(--accent);
   border-radius: 0 var(--radius) var(--radius) 0;
   background: var(--panel);
   padding: 14px 16px;
-  margin: 16px 0;
-}
-
-.nb-position .nb-position-who {
-  font-family: var(--sans);
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--accent);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  display: block;
-  margin-bottom: 2px;
-}
-
-.nb-position .nb-position-stance {
-  font-family: var(--serif);
-  font-size: 16.5px;
-  line-height: 1.4;
-  display: block;
-  margin-bottom: 8px;
-}
-
-.nb-position p {
-  margin: 0;
-  font-size: 14.5px;
-  color: var(--ink-soft);
-}
-
-.nb-claim {
-  border: 1px solid var(--hair);
-  border-radius: var(--radius);
-  background: var(--panel);
-  padding: 14px 16px;
   margin: 14px 0;
+}
+
+.nb-claim[data-nb-resolution="hit"] {
+  border-left-color: var(--ok);
+}
+
+.nb-claim[data-nb-resolution="miss"] {
+  border-left-color: var(--bad);
+}
+
+.nb-claim-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+}
+
+.nb-claim-state {
+  font-family: var(--mono);
+  font-size: 10.5px;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  padding: 2px 9px;
+  border-radius: 999px;
+  border: 1px solid currentcolor;
+  white-space: nowrap;
+  color: var(--warn);
+}
+
+.nb-claim[data-nb-resolution="hit"] .nb-claim-state {
+  color: var(--ok);
+}
+
+.nb-claim[data-nb-resolution="miss"] .nb-claim-state {
+  color: var(--bad);
+}
+
+.nb-claim-outcome {
+  margin: 8px 0 2px;
+  font-size: 15px;
+  color: var(--ink);
 }
 
 .nb-claim h3 {
@@ -1651,8 +1990,10 @@ figure.nb-chart noscript {
 
 .nb-claim-meta {
   display: flex;
-  gap: 8px;
+  gap: 14px;
   flex-wrap: wrap;
+  border-top: 1px solid var(--hair);
+  padding-top: 8px;
 }
 
 .nb-claim-meta span {
@@ -1664,6 +2005,8 @@ figure.nb-chart noscript {
   padding: 2px 10px;
 }
 
+/* retired from the catalog (the claim card carries its own resolution);
+   kept so the published shelf renders */
 .nb-grade {
   display: flex;
   gap: 12px;

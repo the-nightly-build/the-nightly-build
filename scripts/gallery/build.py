@@ -32,6 +32,7 @@ class Piece:
     slug: str
     scope: str
     blurb: str
+    engine_owned: bool
 
 
 def slugify(heading: str) -> str:
@@ -39,34 +40,39 @@ def slugify(heading: str) -> str:
     return re.sub(r"[^a-z0-9]+", "-", bare).strip("-")
 
 
-def parse_catalog(text: str, scope: str) -> list[Piece]:
+def parse_catalog(text: str, scope: str, *, engine_owned: bool) -> list[Piece]:
     pieces = []
     for match in re.finditer(r"^## (.+)$", text, re.MULTILINE):
         name = re.sub(r"\s*\(`[^`]*`\)\s*$", "", match.group(1)).strip()
         rest = text[match.end() :]
         paragraph = re.split(r"\n\s*\n", rest.strip(), maxsplit=1)[0]
         blurb = re.sub(r"`([^`]+)`", r"<code>\1</code>", " ".join(paragraph.split()))
-        pieces.append(Piece(name, slugify(name), scope, blurb))
+        pieces.append(Piece(name, slugify(name), scope, blurb, engine_owned))
     return pieces
 
 
 def discover_pieces(repo: Path) -> list[Piece]:
-    catalogs: list[tuple[Path, str]] = [
-        (repo / "templates" / "FURNITURE.md", "engine base")
+    catalogs: list[tuple[Path, str, bool]] = [
+        (repo / "templates" / "FURNITURE.md", "engine base", True)
     ]
     press_catalog = repo / "press" / "furniture" / "catalog.md"
     if press_catalog.is_file():
-        catalogs.append((press_catalog, "press shared"))
+        catalogs.append((press_catalog, "press shared", False))
     for root in (repo / "templates", repo / "press" / "templates"):
+        engine_owned = root == repo / "templates"
         if not root.is_dir():
             continue
         for folder in sorted(root.iterdir()):
             catalog = folder / "furniture.md"
             if catalog.is_file():
-                catalogs.append((catalog, f"template · {folder.name}"))
+                catalogs.append((catalog, f"template · {folder.name}", engine_owned))
     pieces = []
-    for path, scope in catalogs:
-        pieces.extend(parse_catalog(path.read_text(encoding="utf-8"), scope))
+    for path, scope, engine_owned in catalogs:
+        pieces.extend(
+            parse_catalog(
+                path.read_text(encoding="utf-8"), scope, engine_owned=engine_owned
+            )
+        )
     return pieces
 
 
@@ -117,15 +123,29 @@ def piece_card(piece: Piece, sample_html: str) -> str:
 
 def build(repo: Path = REPO, out: Path = DEFAULT_OUT) -> Path:
     pieces = discover_pieces(repo)
-    missing = [p for p in pieces if not (SAMPLES / f"{p.slug}.html").is_file()]
+    # The engine ships a sample for every piece it owns, and the suite holds
+    # that. A press's own furniture renders a placeholder instead of failing:
+    # the engine cannot ship samples for components it has never seen.
+    missing = [
+        p
+        for p in pieces
+        if p.engine_owned and not (SAMPLES / f"{p.slug}.html").is_file()
+    ]
     if missing:
         names = ", ".join(f"{p.scope}: {p.name} ({p.slug}.html)" for p in missing)
         raise SystemExit(f"gallery samples missing for: {names}")
 
-    cards = "\n".join(
-        piece_card(p, (SAMPLES / f"{p.slug}.html").read_text(encoding="utf-8"))
-        for p in pieces
-    )
+    def sample_of(piece: Piece) -> str:
+        path = SAMPLES / f"{piece.slug}.html"
+        if path.is_file():
+            return path.read_text(encoding="utf-8")
+        return (
+            '<p style="font-family: var(--mono); font-size: 12px; color: var(--faint)">'
+            f"no gallery sample yet — add scripts/gallery/samples/{piece.slug}.html"
+            "</p>"
+        )
+
+    cards = "\n".join(piece_card(p, sample_of(p)) for p in pieces)
     nb_js = os.path.relpath(repo / "engine" / "assets" / "nb.js", out.parent)
     page = f"""<!doctype html>
 <html lang="en">
