@@ -11,7 +11,7 @@ real numbers, then the holds-up grid (nb-holdsup) weighing what it buys
 against what it costs, then a "Verdict" note (nb-note nb-note-strong)
 before the close.
 
-Show the central idea in code with the rs-code furniture when a few lines make
+Show the central idea in code with the nb-code furniture when a few lines make
 it concrete. Show the part of the technique the prose cannot carry. Keep it
 short and cited.
 

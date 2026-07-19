@@ -11,7 +11,9 @@ open with an "In this article" note stating what the lesson makes doable,
 recap the previous lesson concretely, teach the core, and close with a
 self-check note of exercises and a "Next article" note bridging onward.
 
-Show real code with the rs-code furniture: Triton in Python, CUDA in C++. Keep
+Show real code with the nb-code furniture: Triton in Python, CUDA in C++.
+Escape the code as HTML: an unescaped `kernel<<<blocks, threads>>>` is read
+as a tag and silently eaten. Keep
 listings short and honest. The reader should be able to run what you print.
 
 Emphases:

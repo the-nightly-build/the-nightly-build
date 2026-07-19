@@ -5,7 +5,7 @@
    blocks; fonts and radius live in the base block). site.yaml points `theme:` at
    this file and the engine publishes it, concatenated with every furniture owner,
    as assets/theme.css on each build. This paper's furniture rides alongside it,
-   not inside it: shared pieces live in press/furniture/ (rs-code, rs-docket) and a
+   not inside it: shared pieces live in press/furniture/ (rs-docket) and a
    template's bespoke pieces live in its own folder. */
 :root {
   /* DAY — the base and universal fallback */

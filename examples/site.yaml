@@ -4,14 +4,13 @@ appearance: auto # auto | light | dark. auto follows the system. The no-JS fallb
 front: comfortable # show deks on front-page story cells (compact hides them)
 footer: "Filed while you slept." # left imprint on every page. Unset -> "A Nightly Build paper"
 
-# External libraries the site loads on every page. Here: Prism, which
-# syntax-highlights the code blocks in the Kernels and Inference Stack sections.
-# This is how a site uses a real JS library with no engine change: declare it
-# here (owner-authored on main) and the build injects it into every page.
-# Articles stay script-free. Every entry is version-pinned and
-# Subresource-Integrity-hashed (validate_config requires the hash), so the
-# browser refuses a tampered CDN response. Order matters: Prism language
-# components load after its core, and c/cpp build on clike.
+# Trusted external libraries (owner-authored on main, https + Subresource-
+# Integrity-pinned; docs/customization.md). The engine ships the code
+# listing's highlighter itself, python and javascript included, so most
+# papers declare nothing here. This paper teaches CUDA, so it pins its own
+# Prism chain to add C and C++: a press-declared copy outranks the
+# engine's, and language components build on this core (order matters:
+# core first, c/cpp on clike).
 assets:
   scripts:
     - url: https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-core.min.js
