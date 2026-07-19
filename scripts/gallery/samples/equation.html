@@ -1,0 +1,55 @@
+<p>
+  Inline math rides the prose line:
+  <span class="nb-math-in"
+    >\varphi(x) = 3.4445\,x - 4.7750\,x^{3} + 2.0315\,x^{5}</span
+  >, wrapping at operator boundaries when the line runs out.
+</p>
+<figure class="nb-math">
+  <div class="nb-math-eq">
+    \mathrm{Ortho}(G) \;=\; \operatorname*{arg\,min}_{O} \bigl\{\, \lVert O - G
+    \rVert_F \;:\; O^{\top} O = I \ \text{ or } \ O O^{\top} = I \,\bigr\}
+  </div>
+  <figcaption>
+    The orthogonalization Muon applies to every hidden-layer update.<sup
+      class="nb-cite"
+      ><a href="#s1">1</a></sup
+    >
+  </figcaption>
+</figure>
+<figure class="nb-math nb-math-annotated">
+  <div class="nb-math-eq">
+    \mathrm{Attention}(Q, K, V) \;=\; \mathrm{softmax}\!\left( \frac{
+    \htmlClass{nb-mc1}{Q} \, \htmlClass{nb-mc2}{K^{\top}} }{
+    \htmlClass{nb-mc3}{\sqrt{d_k}} } \right) \htmlClass{nb-mc4}{V}
+  </div>
+  <ul class="nb-math-legend">
+    <li>
+      <span class="nb-math-term nb-mc1">Q</span
+      ><span>what each token is looking for, one query row per position</span>
+    </li>
+    <li>
+      <span class="nb-math-term nb-mc2">K^{\top}</span
+      ><span
+        >what each token offers to be found by; the product scores every
+        pair</span
+      >
+    </li>
+    <li>
+      <span class="nb-math-term nb-mc3">\sqrt{d_k}</span
+      ><span
+        >the scale that keeps scores from saturating softmax as heads
+        widen</span
+      >
+    </li>
+    <li>
+      <span class="nb-math-term nb-mc4">V</span
+      ><span
+        >the content actually mixed together, weighted by those scores</span
+      >
+    </li>
+  </ul>
+  <figcaption>
+    Scaled dot-product attention, the operation FlashAttention reorders around
+    memory.<sup class="nb-cite"><a href="#s1">1</a></sup>
+  </figcaption>
+</figure>

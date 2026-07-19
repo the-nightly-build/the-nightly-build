@@ -29,7 +29,9 @@ sample data: replace it.
 The families, and how to choose within them. Evidence: a couple of
 heterogeneous headline numbers are a stat strip, rows of one shape three or
 more deep are a table, and anything the reader must see is a figure, drawn
-from data or captured from a source. Voice: a labeled passage of any kind is
+from data or captured from a source; a derivation the argument leans on is
+an equation, and a mechanism worth reading in source is a code listing.
+Voice: a labeled passage of any kind is
 the note, and the article's own best sentence, promoted, is a pull quote.
 Structure: stages in order are steps, events in time a timeline, a stance
 anyone holds a position card, strengths against caveats the holds-up grid.
@@ -116,6 +118,86 @@ alternative text, and restate what matters in caption and prose.
         data-nb-note="WHAT THIS ASSET SUPPORTS IN THIS ARTICLE."
         >1</a
       ></sup
+    >
+  </figcaption>
+</figure>
+```
+
+## Equation
+
+Math the argument leans on, typeset from LaTeX. The element's text is the
+TeX source and the runtime typesets it; a reader without JS sees the TeX
+itself, so keep it clean. Inline math rides in prose in an `nb-math-in`
+span. The bare display form carries a derivation the prose walks through.
+When one equation is the mechanism the article is about, use the annotated
+form instead: wrap each term the reader must track in
+`\htmlClass{nb-mc1}{…}` through `nb-mc5`, and name every colored term in
+the legend (the term cell repeats the TeX; the colors hold in both
+schemes). At most one annotated equation per article. Punctuation, spacing
+commands, and sizing are the writer's: what renders must read as one
+sentence with the prose around it.
+
+```html
+<p>
+  PROSE, WITH
+  <span class="nb-math-in">\varphi(x) = ax + bx^{3} + cx^{5}</span> RIDING
+  INLINE.
+</p>
+
+<figure class="nb-math">
+  <div class="nb-math-eq">
+    \mathrm{Ortho}(G) = \operatorname*{arg\,min}_{O} \bigl\{\, \lVert O - G
+    \rVert_F : O^{\top} O = I \,\bigr\}
+  </div>
+  <figcaption>
+    WHAT THE EQUATION SAYS, IN PROSE.<sup class="nb-cite"
+      ><a href="#s1">1</a></sup
+    >
+  </figcaption>
+</figure>
+
+<figure class="nb-math nb-math-annotated">
+  <div class="nb-math-eq">
+    \mathrm{softmax}\!\left( \frac{ \htmlClass{nb-mc1}{Q} \,
+    \htmlClass{nb-mc2}{K^{\top}} }{ \htmlClass{nb-mc3}{\sqrt{d_k}} } \right)
+    \htmlClass{nb-mc4}{V}
+  </div>
+  <ul class="nb-math-legend">
+    <li>
+      <span class="nb-math-term nb-mc1">Q</span
+      ><span>WHAT THIS TERM IS, IN ONE LINE.</span>
+    </li>
+    <li>
+      <span class="nb-math-term nb-mc2">K^{\top}</span
+      ><span>WHAT THIS TERM IS, IN ONE LINE.</span>
+    </li>
+  </ul>
+  <figcaption>
+    WHAT THE EQUATION SAYS, IN PROSE.<sup class="nb-cite"
+      ><a href="#s1">1</a></sup
+    >
+  </figcaption>
+</figure>
+```
+
+## Code listing
+
+A listing the reader should actually read: the mechanism itself, never
+decoration. The header names the source (a path, or a short context) and
+the language; the `language-…` class drives the highlighter (python and
+javascript ship with the engine; a press pins more via `site.yaml` assets,
+see docs/customization.md). Escape the code as HTML. The caption states
+what the listing shows and carries the citation.
+
+```html
+<figure class="nb-code">
+  <div class="nb-code-head">
+    <span class="nb-code-file">PATH/TO/FILE.PY</span><span>PYTHON</span>
+  </div>
+  <pre><code class="language-python">THE LISTING, HTML-ESCAPED.</code></pre>
+  <figcaption class="nb-code-cap">
+    Fig. 1 · WHAT THE LISTING SHOWS.<sup class="nb-cite"
+      ><a href="#s1">1</a></sup
     >
   </figcaption>
 </figure>

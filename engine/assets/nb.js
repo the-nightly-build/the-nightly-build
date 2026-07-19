@@ -3,9 +3,10 @@
  * Duties:
  *   1. Appearance: ◐ auto → ○ light → ● dark, persisted in
  *      localStorage("nb-appearance"). Base/no-JS fallback is light (see theme).
- *   2. Declarative charts: renders <script type="application/json"
- *      data-nb-chart> blocks with version-pinned Chart.js from cdnjs — the
- *      ONLY third-party script, loaded here, never by articles.
+ *   2. Vendor libraries for furniture that needs one, loaded here, never by
+ *      articles: KaTeX typesets nb-math, Prism highlights nb-code listings,
+ *      and Chart.js draws legacy declarative charts. Each is version-pinned,
+ *      fetched from cdnjs only when the page carries the furniture.
  *   3. Article furniture, retrofitted onto every article ever published:
  *      collapsible Contents, citation source-sheets with backrefs, byline
  *      normalization, series-linked eyebrow, sequence prev/next from
@@ -235,6 +236,146 @@
     }
     chartJsLoading.then(function () {
       if (window.Chart) cb();
+    });
+  }
+
+  /* ------------------------------------------------- math + code furniture
+   * nb-math and nb-code render with real libraries — KaTeX typesets, Prism
+   * highlights — loaded like Chart.js above but SRI-pinned: fetched only
+   * when the page carries the furniture, so light pages stay light. A press
+   * that pins its own copy in site.yaml assets wins; the engine defers to
+   * it. With no JS (or offline) the fallback is honest: raw TeX and plain
+   * monospace, both readable. */
+
+  /* KaTeX rides jsdelivr, not cdnjs like the others: its webfonts load
+     relative to the CSS, and cdnjs serves them as octet-stream, which
+     Chrome refuses for font loads. jsdelivr serves font/woff2. */
+  var KATEX_CSS = {
+    url: "https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css",
+    integrity:
+      "sha384-nB0miv6/jRmo5UMMR1wu3Gz6NLsoTkbqJghGIsx//Rlm+ZU03BU6SQNC66uf4l5+",
+  };
+  var KATEX_JS = {
+    url: "https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js",
+    integrity:
+      "sha384-7zkQWkzuo3B5mTepMUcHkMB5jZaolc2xDwL6VFqjFALcbeS9Ggm/Yr2r3Dy4lfFg",
+  };
+  var PRISM_JS = [
+    {
+      url: "https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-core.min.js",
+      integrity:
+        "sha384-MXybTpajaBV0AkcBaCPT4KIvo0FzoCiWXgcihYsw4FUkEz0Pv3JGV6tk2G8vJtDc",
+    },
+    {
+      url: "https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-clike.min.js",
+      integrity:
+        "sha384-7LHwxHIDSHTBleLmgDWZbC/IMJsfYfFVOihKhvsrxYW4j47YQcRwZja4ToFE3bA8",
+    },
+    {
+      url: "https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js",
+      integrity:
+        "sha384-D44bgYYKvaiDh4cOGlj1dbSDpSctn2FSUj118HZGmZEShZcO2v//Q5vvhNy206pp",
+    },
+    {
+      url: "https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js",
+      integrity:
+        "sha384-WJdEkJKrbsqw0evQ4GB6mlsKe5cGTxBOw4KAEIa52ZLB7DDpliGkwdme/HMa5n1m",
+    },
+  ];
+
+  function loadVendorStyle(spec) {
+    return new Promise(function (resolve) {
+      var l = document.createElement("link");
+      l.rel = "stylesheet";
+      l.href = spec.url;
+      l.integrity = spec.integrity;
+      l.crossOrigin = "anonymous";
+      l.referrerPolicy = "no-referrer";
+      l.onload = resolve;
+      l.onerror = resolve; /* offline: the fallback text stays readable */
+      document.head.appendChild(l);
+    });
+  }
+
+  function loadVendorScript(spec) {
+    return new Promise(function (resolve) {
+      var s = document.createElement("script");
+      s.src = spec.url;
+      s.integrity = spec.integrity;
+      s.crossOrigin = "anonymous";
+      s.referrerPolicy = "no-referrer";
+      s.onload = resolve;
+      s.onerror = resolve;
+      document.head.appendChild(s);
+    });
+  }
+
+  /* A press-declared copy of a library (site.yaml assets, injected into
+     head) outranks the engine's: same trust model, the press's version. */
+  function pressCopy(lib) {
+    return document.querySelector('script[src*="' + lib + '"]');
+  }
+
+  function typesetMath(els) {
+    els.forEach(function (el) {
+      if (el.querySelector(".katex")) return; /* already typeset */
+      try {
+        window.katex.render(el.textContent, el, {
+          displayMode: el.classList.contains("nb-math-eq"),
+          throwOnError: false,
+          strict: "ignore",
+          output: "htmlAndMathml",
+          /* \htmlClass only, for the annotated form's term colors: the
+             class lands on a span and nb.css colors it from the chart
+             tokens. Nothing else in the trust surface is enabled. */
+          trust: function (ctx) {
+            return ctx.command === "\\htmlClass";
+          },
+        });
+      } catch {
+        /* malformed TeX: the source stays visible; never break the page */
+      }
+    });
+  }
+
+  function renderMath() {
+    var els = document.querySelectorAll(
+      ".nb-math-eq, .nb-math-in, .nb-math-term",
+    );
+    if (!els.length) return;
+    if (window.katex) return typesetMath(els);
+    var press = pressCopy("katex");
+    if (press) {
+      /* deferred press scripts execute after nb.js: typeset once it lands */
+      press.addEventListener("load", function () {
+        if (window.katex) typesetMath(els);
+      });
+      return;
+    }
+    Promise.all([loadVendorStyle(KATEX_CSS), loadVendorScript(KATEX_JS)]).then(
+      function () {
+        if (window.katex) typesetMath(els);
+      },
+    );
+  }
+
+  function highlightCode() {
+    var blocks = document.querySelectorAll('.nb-code code[class*="language-"]');
+    if (!blocks.length) return;
+    if (pressCopy("prism")) return; /* the press's Prism highlights itself */
+    window.Prism = window.Prism || {};
+    window.Prism.manual = true; /* highlight after all components land */
+    var chain = Promise.resolve();
+    PRISM_JS.forEach(function (spec) {
+      chain = chain.then(function () {
+        return loadVendorScript(spec);
+      });
+    });
+    chain.then(function () {
+      if (!window.Prism.highlightElement) return;
+      blocks.forEach(function (b) {
+        window.Prism.highlightElement(b);
+      });
     });
   }
 
@@ -771,6 +912,8 @@
   function init() {
     bindChrome();
     renderCharts();
+    renderMath();
+    highlightCode();
 
     var meta = articleMeta();
     if (meta) {

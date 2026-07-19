@@ -2005,6 +2005,249 @@ figure.nb-chart noscript {
   padding: 2px 10px;
 }
 
+/* math: the writer authors LaTeX as the element's text and the runtime
+   typesets it with KaTeX (nb.js, pinned, loaded only when a page carries
+   the furniture). No JS, the raw TeX shows — honest and copyable. The
+   annotated form colors terms via \htmlClass spans (.nb-mc*) from the
+   chart tokens, so the palette holds in both schemes. */
+.nb-math {
+  margin: 26px 0;
+}
+
+.nb-math-eq {
+  overflow: auto hidden;
+  padding: 6px 3px;
+  text-align: center;
+  font-size: 17px;
+  color: var(--ink);
+}
+
+.nb-math-eq .katex {
+  font-size: 1.16em;
+}
+
+.nb-math-in .katex {
+  font-size: 1.02em;
+
+  /* inline math must ride the line: let it wrap at KaTeX's top-level
+     operator boundaries instead of forcing the page wide on a phone */
+  white-space: normal;
+}
+
+.nb-math figcaption {
+  margin-top: 7px;
+  text-align: center;
+  font-family: var(--sans);
+  font-size: 12.5px;
+  color: var(--ink-soft);
+}
+
+.nb-math-annotated {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 17px 18px 14px;
+}
+
+.nb-math-annotated .nb-math-eq {
+  padding: 5px 0 12px;
+}
+
+.nb-math-legend {
+  list-style: none;
+  margin: 0;
+  padding: 11px 0 0;
+  border-top: 1px solid var(--hair);
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: 7px 13px;
+  font-family: var(--sans);
+  font-size: 13.5px;
+  line-height: 1.5;
+  color: var(--ink-soft);
+}
+
+.nb-math-legend li {
+  display: contents;
+}
+
+.nb-math-legend .nb-math-term {
+  font-size: 13px;
+  white-space: nowrap;
+  justify-self: end;
+  padding-top: 1px;
+}
+
+.nb-math-annotated figcaption {
+  margin-top: 13px;
+  padding-top: 10px;
+  border-top: 1px solid var(--hair);
+  text-align: left;
+}
+
+.nb-math .nb-mc1 {
+  color: var(--chart-2);
+}
+
+.nb-math .nb-mc2 {
+  color: var(--chart-3);
+}
+
+.nb-math .nb-mc3 {
+  color: var(--chart-1);
+}
+
+.nb-math .nb-mc4 {
+  color: var(--chart-4);
+}
+
+.nb-math .nb-mc5 {
+  color: var(--chart-5);
+}
+
+/* phones: display math steps down a size before it resorts to scrolling */
+@media (width <= 480px) {
+  .nb-math-eq {
+    font-size: 15px;
+  }
+
+  .nb-math-eq .katex {
+    font-size: 1.05em;
+  }
+}
+
+/* code: a real listing with a header (file · language) and an optional
+   cited caption. The article writes plain <pre><code class="language-…">;
+   Prism (nb.js, pinned, loaded only when a page carries the furniture)
+   highlights it into .token spans colored below. No-JS readers get clean
+   monospace. Token colors are scoped to the component, set for day and
+   overridden for night, so they never leak into the page. */
+.nb-code {
+  --tk-com: #7a8494;
+  --tk-kw: #9a2b6b;
+  --tk-fn: #2b5b9a;
+  --tk-str: #2f7d4f;
+  --tk-num: #9c5a00;
+  --tk-builtin: #7a3ba0;
+
+  margin: 24px 0;
+  overflow: hidden;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+}
+
+@media (prefers-color-scheme: dark) {
+  .nb-code {
+    --tk-com: #7f8a9c;
+    --tk-kw: #e58ab8;
+    --tk-fn: #82b4ec;
+    --tk-str: #86cf9e;
+    --tk-num: #e6b968;
+    --tk-builtin: #c9a2ec;
+  }
+}
+
+:root[data-mode="light"] .nb-code {
+  --tk-com: #7a8494;
+  --tk-kw: #9a2b6b;
+  --tk-fn: #2b5b9a;
+  --tk-str: #2f7d4f;
+  --tk-num: #9c5a00;
+  --tk-builtin: #7a3ba0;
+}
+
+:root[data-mode="dark"] .nb-code {
+  --tk-com: #7f8a9c;
+  --tk-kw: #e58ab8;
+  --tk-fn: #82b4ec;
+  --tk-str: #86cf9e;
+  --tk-num: #e6b968;
+  --tk-builtin: #c9a2ec;
+}
+
+.nb-code-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 8px 14px;
+  border-bottom: 1px solid var(--hair);
+  background: var(--wash);
+  font-family: var(--sans);
+  font-size: 12px;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  color: var(--faint);
+}
+
+.nb-code-file {
+  color: var(--ink-soft);
+  font-weight: 600;
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+.nb-code pre {
+  margin: 0;
+  padding: 14px 16px;
+  overflow-x: auto;
+  font-family: var(--mono);
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--ink);
+}
+
+.nb-code pre code {
+  font-family: inherit;
+}
+
+.nb-code-cap {
+  display: block;
+  padding: 9px 14px;
+  border-top: 1px solid var(--hair);
+  font-family: var(--sans);
+  font-size: 12.5px;
+  color: var(--ink-soft);
+}
+
+.nb-code .token.comment,
+.nb-code .token.prolog,
+.nb-code .token.doctype {
+  color: var(--tk-com);
+  font-style: italic;
+}
+
+.nb-code .token.keyword {
+  color: var(--tk-kw);
+  font-weight: 500;
+}
+
+.nb-code .token.function,
+.nb-code .token.class-name {
+  color: var(--tk-fn);
+}
+
+.nb-code .token.string,
+.nb-code .token.char {
+  color: var(--tk-str);
+}
+
+.nb-code .token.number,
+.nb-code .token.boolean {
+  color: var(--tk-num);
+}
+
+.nb-code .token.builtin,
+.nb-code .token.decorator,
+.nb-code .token.annotation {
+  color: var(--tk-builtin);
+}
+
+.nb-code .token.operator {
+  color: var(--ink-soft);
+  background: none;
+}
+
 /* retired from the catalog (the claim card carries its own resolution);
    kept so the published shelf renders */
 .nb-grade {

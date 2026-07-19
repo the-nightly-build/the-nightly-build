@@ -376,3 +376,131 @@ test("citation sheet adds the clicked marker's locator, note, and direct target"
     /IsoFLOP minima/,
   );
 });
+
+/* ------------------------------------------------- math + code furniture */
+
+const MATH_FIGURE =
+  '<figure class="nb-math"><div class="nb-math-eq">\\varphi(x) = ax + bx^{3}</div></figure>' +
+  '<p><span class="nb-math-in">O^{\\top} O = I</span></p>';
+
+/* A KaTeX stub the page ships inline, standing in for window.katex. */
+const KATEX_STUB =
+  "<script>window.__mathCalls = [];" +
+  "window.katex = { render: function (tex, el, opts) {" +
+  "  window.__mathCalls.push({ tex: tex, display: opts.displayMode, trust: opts.trust });" +
+  "  el.innerHTML = '<span class=\"katex\"></span>';" +
+  "} };</script>";
+
+test("math typesets display and inline TeX, trusting only \\htmlClass", async () => {
+  const w = await loadNb(
+    articlePage(KATEX_STUB + "<article>" + MATH_FIGURE + "</article>"),
+  );
+
+  const calls = w.__mathCalls;
+  assert.equal(calls.length, 2);
+  assert.equal(calls[0].tex, "\\varphi(x) = ax + bx^{3}");
+  assert.equal(calls[0].display, true, "nb-math-eq renders in display mode");
+  assert.equal(calls[1].display, false, "nb-math-in renders inline");
+  assert.equal(calls[0].trust({ command: "\\htmlClass" }), true);
+  assert.equal(calls[0].trust({ command: "\\href" }), false);
+  assert.equal(
+    w.document.querySelectorAll('script[src*="katex"]').length,
+    0,
+    "katex already present: nothing is fetched",
+  );
+});
+
+test("math on a page without KaTeX loads the pinned engine copy; a page without math loads nothing", async () => {
+  const w = await loadNb(articlePage("<article>" + MATH_FIGURE + "</article>"));
+  const js = w.document.querySelector('script[src*="katex.min.js"]');
+  const css = w.document.querySelector('link[href*="katex.min.css"]');
+  assert.ok(js, "engine KaTeX script is appended");
+  assert.ok(css, "engine KaTeX stylesheet is appended");
+  assert.match(js.integrity, /^sha384-/, "script is SRI-pinned");
+  assert.match(css.integrity, /^sha384-/, "stylesheet is SRI-pinned");
+  assert.equal(js.crossOrigin, "anonymous");
+
+  const bare = await loadNb(
+    articlePage("<article><p>No math here.</p></article>"),
+  );
+  assert.equal(
+    bare.document.querySelectorAll('script[src*="katex"]').length,
+    0,
+  );
+  assert.equal(bare.document.querySelectorAll('link[href*="katex"]').length, 0);
+});
+
+test("a press-pinned KaTeX outranks the engine's and typesets once it lands", async () => {
+  const html =
+    "<!doctype html><html><head>" +
+    '<script src="https://cdn.example/katex@9/katex.min.js" defer></script>' +
+    "</head><body><article>" +
+    MATH_FIGURE +
+    "</body></html>";
+  const w = await loadNb(html);
+  assert.equal(
+    w.document.querySelectorAll('script[src*="katex"]').length,
+    1,
+    "the press copy is the only KaTeX tag",
+  );
+
+  /* the deferred press script executes after nb.js: stub it, then land it */
+  w.__mathCalls = [];
+  w.katex = {
+    render: (tex, el, opts) =>
+      w.__mathCalls.push({ tex, display: opts.displayMode }),
+  };
+  const press = w.document.querySelector('script[src*="cdn.example"]');
+  press.dispatchEvent(new w.Event("load"));
+  await settle(w);
+  assert.equal(w.__mathCalls.length, 2, "typeset ran against the press copy");
+});
+
+const CODE_FIGURE =
+  '<figure class="nb-code"><div class="nb-code-head"><span class="nb-code-file">a.py</span><span>python</span></div>' +
+  '<pre><code class="language-python">def f(x):\n    return x</code></pre></figure>';
+
+test("a code listing loads pinned Prism components in order, then highlights", async () => {
+  const w = await loadNb(articlePage("<article>" + CODE_FIGURE + "</article>"));
+  assert.equal(w.Prism.manual, true, "Prism auto-highlight is off");
+
+  /* components chain one at a time; land each load to advance the chain */
+  const seen = [];
+  const highlighted = [];
+  w.Prism.highlightElement = (el) => highlighted.push(el);
+  for (let i = 0; i < 4; i++) {
+    const tags = [...w.document.querySelectorAll('script[src*="prism-"]')];
+    assert.equal(tags.length, seen.length + 1, "one new component per load");
+    const tag = tags[tags.length - 1];
+    assert.match(tag.integrity, /^sha384-/, "component is SRI-pinned");
+    seen.push(tag.src);
+    tag.dispatchEvent(new w.Event("load"));
+    await settle(w, 5);
+  }
+  assert.match(seen[0], /prism-core/);
+  assert.match(seen[1], /prism-clike/);
+  assert.match(seen[2], /prism-javascript/);
+  assert.match(seen[3], /prism-python/);
+  assert.equal(highlighted.length, 1, "the listing is highlighted once ready");
+  assert.equal(highlighted[0].className, "language-python");
+});
+
+test("a press-pinned Prism is left to highlight on its own", async () => {
+  const html =
+    "<!doctype html><html><head>" +
+    '<script src="https://cdn.example/prism/prism-core.min.js" defer></script>' +
+    "</head><body><article>" +
+    CODE_FIGURE +
+    "</body></html>";
+  const w = await loadNb(html);
+  assert.equal(
+    w.document.querySelectorAll('script[src*="prism-"]').length,
+    1,
+    "no engine components are fetched beside the press copy",
+  );
+  assert.equal(
+    w.Prism,
+    undefined,
+    "the press copy's own bootstrap is untouched",
+  );
+});

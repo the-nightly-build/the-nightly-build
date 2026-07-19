@@ -86,9 +86,13 @@ engine updates never touch either.
 
 ### Furniture that needs a JavaScript library
 
-CSS covers most furniture. When a component needs a real library — a syntax
-highlighter, a math typesetter, a diagram renderer — declare it in
-`press/site.yaml` under `assets`, and the build injects it into every page:
+CSS covers most furniture, and the two components that need a real library,
+the equation (KaTeX) and the code listing (Prism), ship with the engine:
+`nb.js` loads each version-pinned, SRI-hashed, and only on pages that carry
+the furniture. For anything beyond them (more Prism languages than the
+shipped python and javascript, a diagram renderer, another typesetter),
+declare the library in `press/site.yaml` under `assets`, and the build
+injects it into every page:
 
 ```yaml
 # press/site.yaml
@@ -96,16 +100,17 @@ assets:
   scripts:
     - url: https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-core.min.js
       integrity: sha384-…
-    - url: https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js
+    - url: https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-rust.min.js
       integrity: sha384-…
   styles: [] # same shape, for a library that ships CSS
 ```
 
-With Prism loaded, a code component is pure markup — the article writes
-`<pre><code class="language-python">…escaped code…</code></pre>` and Prism
-highlights it; your furniture CSS colors the `.token` classes. The
-`examples/` paper does exactly this for its `rs-code` furniture, in
-`examples/furniture/`.
+A press-declared copy of a library the engine also ships wins: `nb.js` sees
+it in the page and loads nothing, so pinning Prism with extra languages (as
+above; Prism components load against your copy of its core) or a different
+KaTeX version behaves as declared. The component stays pure markup either
+way — the article writes `<pre><code class="language-rust">…escaped
+code…</code></pre>` and the highlighter finds it.
 
 This does not weaken the security model, because the trust boundary is
 **authorship**, not the presence of JavaScript:
@@ -122,8 +127,8 @@ This does not weaken the security model, because the trust boundary is
   ever.
 
 Readers with JavaScript off still get the raw content (plain monospace code,
-an unrendered figure), and the engine's own charts are plain PNGs, readable
-everywhere.
+the TeX source of an equation), and the engine's own charts are plain PNGs,
+readable everywhere.
 
 ## Voice: press/editorial.md
 

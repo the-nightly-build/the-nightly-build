@@ -24,6 +24,14 @@ source count. The reader's front page and a single article, on a phone:
 <img src="assets/screenshots/article-phone.png" width="48%" alt="An article on a phone">
 </p>
 
+Technical pieces typeset their math (KaTeX) and highlight their code (Prism),
+in both schemes. The annotated equation names each colored term in a legend:
+
+<p>
+<img src="assets/screenshots/math-code-phone.png" width="48%" alt="Equations and a code listing, day scheme">
+<img src="assets/screenshots/math-code-phone-night.png" width="48%" alt="The same equations and listing, night scheme">
+</p>
+
 ## Quickstart
 
 1. Fork this repository (keep GitHub's "Copy the main branch only" box
