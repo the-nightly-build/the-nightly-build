@@ -132,11 +132,11 @@ Math the argument leans on, typeset from LaTeX. The element's text is the
 TeX source and the runtime typesets it; a reader without JS sees the TeX
 itself, so keep it clean. Three tiers, chosen by how much the equation
 needs to say. Inline math rides in prose in an `nb-math-in` span. A bare
-display equation — no caption — sits open on the page for a step the
+display equation (no caption) sits open on the page for a step the
 surrounding prose fully carries, cited in that prose. Group text with the
 equation and the figure becomes a data-block card: a caption when the
 equation needs its own cited line, and for the one equation an article is
-really about, the annotated form — wrap each term the reader must track
+really about, the annotated form: wrap each term the reader must track
 in `\htmlClass{nb-mc1}{…}` through `nb-mc5` and name every colored term
 in the legend (the term cell repeats the TeX; the colors hold in both
 schemes). At most one annotated equation per article. Punctuation,

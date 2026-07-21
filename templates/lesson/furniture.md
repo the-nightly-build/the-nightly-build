@@ -26,7 +26,7 @@ apparatus, not claims, so they carry no citations.
   </div>
   <dl class="nb-bookend-reading">
     <dt>01</dt>
-    <dd><a href="../SERIES-ID/SLUG.html">TITLE</a> — WHAT IT COVERS.</dd>
+    <dd><a href="../SERIES-ID/SLUG.html">TITLE</a>: WHAT IT COVERS.</dd>
   </dl>
 </section>
 ```

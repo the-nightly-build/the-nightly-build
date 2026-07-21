@@ -87,8 +87,8 @@ per_item_sources: # only on a per-item template (the brief's cite_rule)
 `per_item_sources` applies uniformly to every item, so it holds however many
 items the night's writer chose. Both bands are BLOCKs regardless of `strict`,
 and a `per_item_sources` on a series that may cite per section is a
-configuration error, caught by `engine/validate_config.py` rather than at 2am —
-as is a band set on a series whose template ships source entries without
+configuration error, caught by `engine/validate_config.py` rather than at 2am.
+So is a band set on a series whose template ships source entries without
 `data-nb-kind`. Once either band is set, a source that declares no kind blocks:
 a source that will not say what it is escapes every rule written about the mix.
 A series that sets neither band never asks.

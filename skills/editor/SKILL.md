@@ -59,7 +59,7 @@ a kind (`data-nb-kind`), and the proof can only count the labels: it cannot see
 that a vendor's blog is tagged `primary`, or that the "independent" read of a
 paper is the lab's own announcement of it. Verify the kinds, never trust them.
 Open each source and ask who owns the claim. A primary owns it. A secondary
-reports on a primary from outside it, by someone with no stake in it — a
+reports on a primary from outside it, by someone with no stake in it: a
 different author, which is not the same as a different website. A mislabeled
 kind is a broken claim about the sourcing, so report it as one, say whether the
 piece is short the source it pretended to have, and record in your notes that
@@ -83,9 +83,10 @@ headed. So does language leaked from the briefing stack: skeleton
 placeholders, prompt phrases, taxonomy labels.
 
 Then trim inside the survivors. Cut from the middles, never the end. Read each
-remaining sentence against the Prose standard in `spec/editorial.md`:
-punctuation must serve the thought's pace, not add false weight or hide a
-run-on. Stop before a reader could point to a scar.
+remaining sentence against the Prose and Punctuation standards in
+`spec/editorial.md`: each mark does its one job, and the fix for a reflex
+em-dash is the period the thought wanted, not a semicolon or colon in its place.
+Stop before a reader could point to a scar.
 
 Read the paragraph endings in sequence, then read the draft against the library
 checkout. The checkout holds the whole paper, so the comparison does too: this
