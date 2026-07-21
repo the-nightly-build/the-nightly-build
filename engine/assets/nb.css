@@ -786,6 +786,25 @@ sup.nb-cite a[id],
   text-decoration-color: var(--accent);
 }
 
+/* Inline literals carry an exact spelling the reader must preserve. Scoped to
+   direct text children so code listings, citations, and source links keep their
+   own treatment. Long literals may wrap rather than forcing a narrow screen to
+   scroll sideways. */
+.nb-article .nb-reading :is(p, li, figcaption) > code {
+  padding: 0.08em 0.32em 0.13em;
+  overflow-wrap: anywhere;
+  border: 1px solid var(--line);
+  border-radius: 3px;
+  background: var(--wash);
+  color: var(--ink);
+  font-family: var(--mono);
+  font-size: 0.72em;
+  font-weight: 500;
+  letter-spacing: -0.035em;
+  font-variant-ligatures: none;
+  box-decoration-break: clone;
+}
+
 .nb-article .nb-eyebrow .nb-eyebrow-progress {
   color: var(--ink-soft);
 }
