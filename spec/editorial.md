@@ -145,6 +145,15 @@ piece closes. A press may shadow them. The floor holds those choices to a standa
 the writing easy to follow. End on the conclusion the argument built. Skip the generic
 moral. Let the teaching and the citations equip the reader to go further.
 
+### Literal strings
+
+Use inline `<code>` only when the reader must preserve a string's exact spelling: something
+they could type, paste, execute, match, or distinguish character-for-character. It is not
+technical emphasis. Ordinary terms, product names, model names, and prose do not wear it;
+neither does every repeat of a literal once the sentence has established it. When several
+tokens need comparison, give them a table or a code listing instead of turning a paragraph
+into labels.
+
 An article's form comes only from its template and its own content. Reading the published
 library informs content and context: what a series has covered, what not to repeat. It
 never informs form. A shape you find in an older piece records what the format was, not
