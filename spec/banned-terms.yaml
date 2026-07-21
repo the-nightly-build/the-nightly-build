@@ -1,7 +1,7 @@
 # The lexical bans the proof counts. Each entry names the exact strings to
 # count, the most uses an article may carry, and the note the writer sees when
-# the count runs over. Counting covers the article's rendered text — title,
-# dek, headings, body — minus the sources section, case-insensitively, so
+# the count runs over. Counting covers the article's rendered text (title,
+# dek, headings, body) minus the sources section, case-insensitively, so
 # "leverage" also catches "leveraged" and a heading cannot hide a use.
 #
 # A press extends this list in press/banned-terms.yaml. An entry with a new id

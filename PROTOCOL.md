@@ -46,7 +46,7 @@ dependencies. Do not substitute `pip install` in a harness or schedule.
    Then run the duty oracle:
    `uv run engine/duty.py --repo . --library <path-to-library-checkout>`
    Duty exits 2 and prints nothing when the tree is wrong: no press in it, or a
-   checkout behind `origin/main`. Both mean the same thing — the press, prompts,
+   checkout behind `origin/main`. Both mean the same thing: the press, prompts,
    and engine you are holding are not this paper's, so every article you write
    from them is confidently wrong. Do what duty says and run it again. Never
    work around a refusal, and never assemble a work list from anything but
@@ -252,8 +252,8 @@ commissions the piece (`task.md`), the coach studies how the best real writers o
 subject actually write (`voice.md`), the researcher builds the claims-and-evidence log
 (`research.md`), the writer drafts from that log and proves the result, and the editor
 attacks it (`requested-changes.md`). No stage is licensed to skim because the night is
-long. Artifacts are written for the next agent — conclusions first, stable
-headings — and to the floor's own standard: every role tunes its ear on what
+long. Artifacts are written for the next agent (conclusions first, stable
+headings) and to the floor's own standard: every role tunes its ear on what
 the others wrote. The PR body is assembled from them.
 
 The chain is a division of labor, not a checklist one agent walks. An artifact

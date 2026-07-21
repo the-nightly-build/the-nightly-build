@@ -4,7 +4,7 @@
 # sourced. Under a series that runs `strict: true` those are hard gates:
 # one-sided or uncited never publishes. Two sides and a crux are the whole
 # contract; everything else about the piece's shape is the writer's.
-about: "A both-sides format for one genuinely contested question — politics, news, economics, culture, technology — argued left vs right from named, vetted sources."
+about: "A both-sides format for one genuinely contested question (politics, news, economics, culture, technology) argued left vs right from named, vetted sources."
 class: longread
 words: [1200, 3500]
 sections: [orientation, crux, sources]

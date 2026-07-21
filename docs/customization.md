@@ -53,15 +53,15 @@ blocks, claim cards, and more. Any component in it works in any template.
 A drafter's furniture palette composes three scopes, so you extend the catalog
 without touching the engine:
 
-- **Engine base** — `templates/FURNITURE.md`, always available.
-- **Shared press furniture** — `press/furniture/`, a `catalog.md` (one read is
+- **Engine base**: `templates/FURNITURE.md`, always available.
+- **Shared press furniture**: `press/furniture/`, a `catalog.md` (one read is
   the whole palette) beside a `styles.css`. Anything every section might reach
   for lives here.
-- **Template-bespoke** — a `furniture.md` + `furniture.css` inside a template's
+- **Template-bespoke**: a `furniture.md` + `furniture.css` inside a template's
   own folder (`press/templates/<id>/`), for a component only that template
   renders.
 
-The builder concatenates every CSS owner — your theme plus all furniture files —
+The builder concatenates every CSS owner (your theme plus all furniture files)
 into the single `assets/theme.css` on each publish, so a class defined in any of
 them restyles past articles too. Define a component on your own prefix (`nb-` is
 reserved):
@@ -109,14 +109,14 @@ A press-declared copy of a library the engine also ships wins: `nb.js` sees
 it in the page and loads nothing, so pinning Prism with extra languages (as
 above; Prism components load against your copy of its core) or a different
 KaTeX version behaves as declared. The component stays pure markup either
-way — the article writes `<pre><code class="language-rust">…escaped
-code…</code></pre>` and the highlighter finds it.
+way. The article writes `<pre><code class="language-rust">…escaped
+code…</code></pre>`, and the highlighter finds it.
 
 This does not weaken the security model, because the trust boundary is
 **authorship**, not the presence of JavaScript:
 
 - Assets are declared in `site.yaml`, which lives on `main` and changes only
-  through your normal review — never through an auto-merged article PR. An
+  through your normal review, never through an auto-merged article PR. An
   untrusted night-shift run cannot add one.
 - Every asset must be **https and Subresource-Integrity-pinned**
   (`validate_config` enforces the hash), so the browser refuses a tampered CDN
@@ -191,7 +191,7 @@ run trips on it.
 
 ## Your own templates
 
-A template is a self-contained folder — the folder name is the template id —
+A template is a self-contained folder, its folder name the template id,
 under `templates/` (shipped) or `press/templates/` (yours):
 
 ```text
@@ -241,8 +241,8 @@ chrome the writer cannot reword.
    `cite_rule` is `per-section` or `per-item` (needs `data-nb-item` markers).
    An optional `cite_exempt: [names]` lets a template declare sections that
    need no citations, on top of the always-exempt `sources`. A
-   `chrome:` list names raw substrings of the skeleton — the body class,
-   fixed labels, fixed headings — that must survive the fill verbatim; the
+   `chrome:` list names raw substrings of the skeleton (the body class,
+   fixed labels, fixed headings) that must survive the fill verbatim. The
    proof blocks an article that alters them, so a writer can never unstyle
    a page by rewording its furniture. `validate_config.py` requires each
    string to appear in the skeleton, so rewording skeleton chrome without
