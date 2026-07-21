@@ -369,9 +369,7 @@ def check_template_overrides(overrides, templates, registry, *, where, errors):
     if overrides is None:
         return
     if not isinstance(overrides, dict):
-        errors.append(
-            f"{where}: 'overrides' must be a mapping of template band names"
-        )
+        errors.append(f"{where}: 'overrides' must be a mapping of template band names")
         return
     unknown = sorted(set(overrides) - set(TEMPLATE_OVERRIDE_KEYS))
     if unknown:

@@ -371,11 +371,7 @@ def test_validate_config_accepts_series_template_overrides(
 ) -> None:
     assert (
         vc_rc(
-            patched_repo(
-                "overrides:\n"
-                "  words: [1000, 5000]\n"
-                "  flex_sections: [1, 4]\n"
-            )
+            patched_repo("overrides:\n  words: [1000, 5000]\n  flex_sections: [1, 4]\n")
         )
         == 0
     )

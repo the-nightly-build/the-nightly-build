@@ -70,8 +70,8 @@ package, use `overrides:`. It can specialize the template's declared
 
 ```yaml
 overrides:
-  items: [10, 16]          # a brief with a longer nightly run
-  flex_sections: [3, 7]    # extra sections beyond the template's anchors
+  items: [10, 16] # a brief with a longer nightly run
+  flex_sections: [3, 7] # extra sections beyond the template's anchors
 ```
 
 The keys must already exist on every template the series can use. The word

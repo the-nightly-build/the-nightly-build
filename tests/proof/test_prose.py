@@ -134,11 +134,7 @@ def test_open_series_item_override_applies_after_template_selection(
     series = pathlib.Path(repo) / "press" / "series" / "wildcard"
     series.mkdir()
     (series / "series.yaml").write_text(
-        "name: Wildcard\n"
-        "mode: open\n"
-        "template: brief\n"
-        "overrides:\n"
-        "  items: [2, 3]\n"
+        "name: Wildcard\nmode: open\ntemplate: brief\noverrides:\n  items: [2, 3]\n"
     )
     html = _thin_brief().replace('"series": "ai-briefs"', '"series": "wildcard"')
     html = html.replace('"mode": "rolling"', '"mode": "open"')
