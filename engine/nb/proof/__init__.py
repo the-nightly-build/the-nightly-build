@@ -16,7 +16,12 @@ import os
 __all__ = ("check_article",)
 
 from nb.article import Article
-from nb.config import find_template, load_banned_terms, published_slugs
+from nb.config import (
+    apply_template_overrides,
+    find_template,
+    load_banned_terms,
+    published_slugs,
+)
 from nb.proof.meta import (
     bind_open_template,
     check_meta_agreement,
@@ -82,6 +87,7 @@ def check_article(
         if bound is None:
             return None
         template_id, treg = bound
+        treg = apply_template_overrides(treg, series)
 
     fname = os.path.basename(html_path)
     slug_from_path = fname[:-5] if fname.endswith(".html") else fname

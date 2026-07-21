@@ -13,6 +13,9 @@ except ImportError:
     sys.exit(2)
 
 
+TEMPLATE_OVERRIDE_KEYS = ("words", "items", "flex_sections")
+
+
 def load_yaml(path):
     with open(path, encoding="utf-8") as fh:
         return yaml.safe_load(fh)
@@ -72,6 +75,18 @@ def load_series(repo, series_id) -> tuple[dict | None, str]:
     if not os.path.isfile(path):
         return None, path
     return load_yaml(path), path
+
+
+def apply_template_overrides(template: dict, series: dict) -> dict:
+    """Return the template manifest after the series' safe band overrides."""
+    effective = dict(template)
+    overrides = series.get("overrides") or {}
+    if not isinstance(overrides, dict):
+        return effective
+    for key in TEMPLATE_OVERRIDE_KEYS:
+        if key in overrides:
+            effective[key] = overrides[key]
+    return effective
 
 
 def published_slugs(library_dir, series_id) -> set[str] | None:

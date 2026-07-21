@@ -64,6 +64,22 @@ policy: `required_docs`, `consult`, and
 `sources_exclusive`, described in the [README](../README.md) and
 demonstrated across `examples/series/`.
 
+When a series needs a different geometry band without replacing a template
+package, use `overrides:`. It can specialize the template's declared
+`words`, `items`, or `flex_sections` band:
+
+```yaml
+overrides:
+  items: [10, 16]          # a brief with a longer nightly run
+  flex_sections: [3, 7]    # extra sections beyond the template's anchors
+```
+
+The keys must already exist on every template the series can use. The word
+floor may only be tightened, and `words` cannot be declared both at the series
+top level and inside `overrides`. Other manifest rules remain inherited from
+the template. This is the series-level alternative to copying a shipped
+template into `press/templates/`.
+
 ## Source composition
 
 `min_sources` counts. It cannot see what kind of sources came in, so six items

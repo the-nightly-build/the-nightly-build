@@ -123,7 +123,8 @@ dependencies. Do not substitute `pip install` in a harness or schedule.
 
 6. **Render exactly one self-contained HTML file** from your series' template:
    - Fill every anchor section the manifest requires exactly once. If the
-     template declares `flex_sections: [min, max]`, add that many more
+     template or the series' `overrides.flex_sections` declares
+     `flex_sections: [min, max]`, add that many more
      sections between the anchors, each named by you for the topic
      (lowercase-hyphen `data-nb-section` labels). Every labeled section
      needs citations per the template's cite rule.

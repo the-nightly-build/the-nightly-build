@@ -207,3 +207,32 @@ def test_declared_chrome_must_appear_in_the_template_skeleton(
     rc: int,
 ) -> None:
     assert vc_rc(manifest_patched_repo(patch)) == rc
+
+
+@pytest.mark.parametrize(
+    ("patch", "message"),
+    [
+        pytest.param(
+            "overrides: {unknown: [1, 2]}\n",
+            "overrides has unknown keys",
+            id="unknown-override",
+        ),
+        pytest.param(
+            "overrides: {words: [100, 200]}\n",
+            "loosens the 'article' template floor",
+            id="loosened-word-floor",
+        ),
+        pytest.param(
+            "overrides: {items: [1, 2]}\n",
+            "cannot specialize template 'article'",
+            id="wrong-band-for-template",
+        ),
+    ],
+)
+def test_invalid_series_template_overrides_report_their_cause(
+    patched_repo: Callable[[str], str],
+    vc_output: Callable[[str], subprocess.CompletedProcess[str]],
+    patch: str,
+    message: str,
+) -> None:
+    assert message in vc_output(patched_repo(patch)).stdout

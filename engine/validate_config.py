@@ -24,6 +24,7 @@ import build_site
 import check
 import duty
 from nb import meta as nb_meta
+from nb.config import TEMPLATE_OVERRIDE_KEYS, apply_template_overrides
 
 try:
     import yaml
@@ -72,6 +73,7 @@ SERIES_KEYS = {
     "paused",
     "selection",
     "section",
+    "overrides",
 }
 BANNED_TERM_KEYS = {"id", "terms", "max", "suggestion", "enabled"}
 SELECTIONS = {"in-order", "random"}
@@ -362,6 +364,58 @@ def check_kind_bands(bands, *, key, where, errors):
             )
 
 
+def check_template_overrides(overrides, templates, registry, *, where, errors):
+    """Validate the series-level bands that specialize a template manifest."""
+    if overrides is None:
+        return
+    if not isinstance(overrides, dict):
+        errors.append(
+            f"{where}: 'overrides' must be a mapping of template band names"
+        )
+        return
+    unknown = sorted(set(overrides) - set(TEMPLATE_OVERRIDE_KEYS))
+    if unknown:
+        errors.append(
+            f"{where}: overrides has unknown keys {unknown} "
+            f"(known: {sorted(TEMPLATE_OVERRIDE_KEYS)})"
+        )
+    for key in sorted(set(overrides) & set(TEMPLATE_OVERRIDE_KEYS)):
+        band = overrides[key]
+        if (
+            not isinstance(band, list)
+            or len(band) != 2
+            or not all(check.is_count(value) for value in band)
+            or band[0] > band[1]
+        ):
+            errors.append(
+                f"{where}: overrides.{key} must be [low, high] integers "
+                "with low <= high"
+            )
+
+    for template_id in templates:
+        template = registry.get(template_id)
+        if not template:
+            continue
+        for key in sorted(set(overrides) & set(TEMPLATE_OVERRIDE_KEYS)):
+            if key not in template:
+                errors.append(
+                    f"{where}: overrides.{key} cannot specialize template "
+                    f"'{template_id}', which does not declare '{key}'"
+                )
+            elif (
+                key == "words"
+                and isinstance(overrides[key], list)
+                and len(overrides[key]) == 2
+                and template.get("words")
+                and overrides[key][0] < template["words"][0]
+            ):
+                errors.append(
+                    f"{where}: overrides.words low {overrides[key][0]} loosens "
+                    f"the '{template_id}' template floor {template['words'][0]} "
+                    "(may only tighten)"
+                )
+
+
 def check_kinded_skeletons(repo, templates, *, where, errors):
     """A composition rule needs source entries that declare a kind.
 
@@ -521,6 +575,23 @@ def check_series(repo, registry, *, errors):
                         f"template '{template}' "
                         f"(allowed: {treg.get('modes')})"
                     )
+        check_template_overrides(
+            cfg.get("overrides"),
+            allowed,
+            registry,
+            where=where,
+            errors=errors,
+        )
+        if (
+            isinstance(cfg.get("overrides"), dict)
+            and "words" in cfg["overrides"]
+            and cfg.get("words") is not None
+        ):
+            errors.append(
+                f"{where}: set the word band in either 'words' or "
+                "'overrides.words', not both"
+            )
+        tregs = [apply_template_overrides(treg, cfg) for treg in tregs]
         check_kind_bands(
             cfg.get("sources_by_kind"),
             key="sources_by_kind",

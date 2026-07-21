@@ -8,7 +8,7 @@ import yaml
 
 from nb import meta as nb_meta
 from nb.article import collapse_space
-from nb.config import load_registry, load_series
+from nb.config import apply_template_overrides, load_registry, load_series
 
 PROTOCOL_MAJOR = "1"
 MAX_BYTES = 2 * 1024 * 1024
@@ -146,7 +146,14 @@ def resolve_series_and_template(repo, series_id, rep):
             f"series mode '{mode_cfg}' not allowed for template "
             f"'{template_id}' (allowed: {treg.get('modes')})",
         )
-    return series, registry, mode_cfg, template_id, treg, None
+    return (
+        series,
+        registry,
+        mode_cfg,
+        template_id,
+        apply_template_overrides(treg, series),
+        None,
+    )
 
 
 def read_article_source(html_path, rep):

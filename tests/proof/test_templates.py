@@ -200,6 +200,24 @@ def test_chronicle_shaped_article_is_block_clean_and_warn_free(
         assert code not in result.codes
 
 
+def test_series_flex_override_replaces_the_template_band(
+    run_local: Callable[..., Findings], template_repo: str
+) -> None:
+    y = pathlib.Path(template_repo) / "press" / "series" / "histories" / "series.yaml"
+    y.write_text(y.read_text() + "overrides:\n  flex_sections: [6, 6]\n")
+    extra = "".join(
+        f'<section data-nb-section="extra-{i}"><p>{LOREM * 3}'
+        f'<sup class="nb-cite"><a href="#s1">1</a></sup></p></section>'
+        for i in range(3)
+    )
+    expanded = chronicle().replace(
+        '<section class="nb-sources" data-nb-section="sources">',
+        extra + '<section class="nb-sources" data-nb-section="sources">',
+    )
+    result = run_local(expanded, "histories", slug="unix", repo=template_repo)
+    assert not result.blocks
+
+
 OPINION = f"""<!DOCTYPE html>
 <html lang="en"><head><meta charset="utf-8"><title>Tariffs</title>
 <script type="application/json" id="nb-meta">
@@ -346,6 +364,21 @@ def test_validate_config_accepts_the_overlay_registry(
     vc_rc: Callable[[str], int], user_repo: str
 ) -> None:
     assert vc_rc(user_repo) == 0
+
+
+def test_validate_config_accepts_series_template_overrides(
+    vc_rc: Callable[[str], int], patched_repo: Callable[[str], str]
+) -> None:
+    assert (
+        vc_rc(
+            patched_repo(
+                "overrides:\n"
+                "  words: [1000, 5000]\n"
+                "  flex_sections: [1, 4]\n"
+            )
+        )
+        == 0
+    )
 
 
 def test_the_merged_registry_keeps_shipped_and_adds_press_templates(

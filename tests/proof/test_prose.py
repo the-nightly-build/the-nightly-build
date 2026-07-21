@@ -116,6 +116,38 @@ def test_brief_with_too_few_items_warns_on_length(
     assert not result.blocks
 
 
+def test_series_item_override_replaces_the_template_band(
+    run_local: Callable[..., Findings], clone_testrepo: Callable[..., str]
+) -> None:
+    repo = clone_testrepo("press", "templates")
+    y = pathlib.Path(repo) / "press" / "series" / "ai-briefs" / "series.yaml"
+    y.write_text(y.read_text() + "overrides:\n  items: [2, 4]\n")
+    result = run_local(_thin_brief(), "ai-briefs", slug=TODAY, repo=repo)
+    assert "W-LENGTH-LOW" not in result.codes
+    assert not result.blocks
+
+
+def test_open_series_item_override_applies_after_template_selection(
+    run_local: Callable[..., Findings], clone_testrepo: Callable[..., str]
+) -> None:
+    repo = clone_testrepo("press", "templates")
+    series = pathlib.Path(repo) / "press" / "series" / "wildcard"
+    series.mkdir()
+    (series / "series.yaml").write_text(
+        "name: Wildcard\n"
+        "mode: open\n"
+        "template: brief\n"
+        "overrides:\n"
+        "  items: [2, 3]\n"
+    )
+    html = _thin_brief().replace('"series": "ai-briefs"', '"series": "wildcard"')
+    html = html.replace('"mode": "rolling"', '"mode": "open"')
+    html = html.replace('"slug": "2026-07-06"', '"slug": "preview"')
+    result = run_local(html, "wildcard", slug="preview", repo=repo)
+    assert "W-LENGTH-LOW" not in result.codes
+    assert not result.blocks
+
+
 def test_required_doc_satisfied_when_attribute_present(
     run_local: Callable[..., Findings], reqdoc_repo: str
 ) -> None:
