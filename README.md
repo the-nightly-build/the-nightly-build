@@ -121,6 +121,7 @@ npm run lint
 ```
 
 Read [PROTOCOL.md](PROTOCOL.md) for the complete article contract and
-[Contributing](docs/press.md#updating-the-engine) for the fork update flow.
+[Updating the engine](docs/press.md#updating-the-engine) for the fork update
+flow.
 
 MIT licensed. The catalog and Atom feeds are the API.

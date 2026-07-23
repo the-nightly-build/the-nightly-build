@@ -6,8 +6,14 @@ web, and open a pull request on a nightly cron. This page is the provider-specif
 companion, the agents verified to do it, how to invoke each one headless, and
 whether a run is included in a subscription or metered on top.
 
-Provider capabilities move fast. The universal GitHub Actions path in
-scheduling.md always works regardless of anything on this page.
+Provider capabilities move fast. This table is a snapshot, not a compatibility
+promise: confirm the provider's current scheduler, repository permissions, and
+billing before you connect it. The universal GitHub Actions path in
+[scheduling.md](scheduling.md) remains the fallback for any agent with a
+headless entrypoint. Current references include [Claude Code
+Routines](https://code.claude.com/docs/en/routines), [Jules Scheduled
+Tasks](https://jules.google/docs/scheduled-tasks/), and the [Codex GitHub
+Action](https://github.com/openai/codex-action).
 
 ## Coverage and cost
 
@@ -18,7 +24,7 @@ whether tonight's run is already paid for or metered on top. Verified 2026-07.
 | --------------- | ----------------------------------------------------- | --------------------------------- | ------------------------------------------------------------- |
 | **Claude Code** | Yes: Routines                                         | `anthropics/claude-code-action`   | Routine: included in Pro/Max usage. Actions path: metered key |
 | **Jules**       | Yes: Scheduled Tasks                                  | `google-labs-code/jules-action`   | Included in your Jules plan (daily task quota)                |
-| **Codex**       | No (Automations need machine on)                      | `openai/codex-action`             | Metered `OPENAI_API_KEY`                                      |
+| **Codex**       | No (use Actions for laptop-off)                       | `openai/codex-action`             | Metered `OPENAI_API_KEY`                                      |
 | **Cursor**      | Not verified                                          | `cursor-agent -p`                 | Draws on your Cursor plan credits                             |
 | **opencode**    | Via its own Action on cron                            | `opencode run`                    | Metered: your own model key (BYOK)                            |
 | **Devin**       | Yes: Schedules                                        | `devin -p` / REST                 | Included in your Devin plan                                   |
@@ -61,11 +67,12 @@ metered key, and the model tier is fixed by your plan. The equivalent CI path is
 
 ### Codex (the universal path, worked)
 
-Codex's in-product Automations need your machine powered on, so the laptop-off
-path is the GitHub Actions workflow in scheduling.md with `openai/codex-action`
-in the marked step. It runs `codex exec` with a **metered `OPENAI_API_KEY`** (a
-repo secret), billed per token on top of any ChatGPT plan. Enable agent internet
-access on the environment, since it is **off by default**, or research fails.
+Codex's local Automations work best while the Codex app and your machine are
+available. For a laptop-off run, use the GitHub Actions workflow in
+[scheduling.md](scheduling.md) with `openai/codex-action` in the marked step. It
+runs `codex exec` with a **metered `OPENAI_API_KEY`** (a repo secret), billed per
+token on top of any ChatGPT plan. Enable agent internet access on the
+environment, since it is **off by default**, or research fails.
 (The interactive cloud tasks at chatgpt.com/codex are a separate, plan-gated
 surface; the Action is what runs unattended.)
 
@@ -75,7 +82,8 @@ Ask the user what they already pay for, then match it. State plainly which case
 applies and whether tonight's run is subscription-included or metered.
 
 - **Claude Pro/Max** → a Routine. Included in the plan, zero infra, laptop-off.
-- **Jules Pro/Ultra** → a Scheduled Task. Included in the task quota, zero infra.
+- **Jules (free, Pro, or Ultra)** → a Scheduled Task. Included in the plan's
+  daily task quota, zero infra.
 - **Devin or Copilot** → their native schedule.
 - **An OpenAI or Anthropic API key, or any agent with a headless command** → the
   universal Actions path. Say when it bills a metered key (Codex and the Claude

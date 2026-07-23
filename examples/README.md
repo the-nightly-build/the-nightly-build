@@ -23,10 +23,10 @@ cp -r examples/series/kernels press/series/my-course
 - `inference-stack/`: a collection of appraisals with per-item tags, live
   `consult` sources, and `required_docs` shown as a commented option.
 
-Together they exercise all four modes, both shipped templates plus a custom
-one, three furniture components, the source policy, `cadence` scheduling,
-word-band and source-floor calibration, tag fragments, and a voice file. How
-templates, themes, and furniture fit together is
+Together they exercise all four modes, three shipped templates (`article`,
+`brief`, and `unbiased`), multiple furniture components, the source policy,
+`cadence` scheduling, word-band and source-floor calibration, tag fragments,
+and a voice file. How templates, themes, and furniture fit together is
 [docs/customization.md](../docs/customization.md). The shipped palette in
 `themes/newsroom.css` is kept unchanged on purpose.
 

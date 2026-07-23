@@ -6,8 +6,9 @@
 themes, templates. The directory does not exist on the upstream repository,
 so upstream can never ship a change that collides with it.
 
-Everything else is the engine. You have no reason to touch it, but it is
-your fork and you can (see below).
+Everything outside `press/` is engine-owned. Keep paper-specific work inside
+`press/`; you can edit the engine in your fork, but future engine updates may
+then conflict with those changes.
 
 `examples/` is a complete working paper configuration kept as
 documentation. The engine never reads it. Copy from it into `press/`.

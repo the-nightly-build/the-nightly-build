@@ -1,8 +1,8 @@
 # Scheduling the night shift
 
-The night shift is just an agent that runs on a clock. Any agent that can check
-out your repo, browse the web, and open a pull request can be it. This page is
-how you put one on a nightly schedule.
+The night shift is an agent that runs on a clock. Any agent that can check out
+your repo, browse the web, and open a pull request can run it. This page helps
+you choose the scheduler and give it the access it needs.
 
 Two choices are involved, and they are independent:
 
@@ -13,11 +13,10 @@ Two choices are involved, and they are independent:
    You can do setup in one agent and schedule the night shift on another.
 
 The scheduler comes in two shapes. Some providers host their own; when yours
-does, that is the shortcut, and it is often included in a plan you already pay
-for. When it does not, the universal path below runs the same night shift on a
-GitHub Actions cron. That path always works. Which specific agents can be the
-night shift, how to invoke each, and what a run costs are in
-[harnesses.md](harnesses.md).
+does, that is the shortcut, and it may be included in a plan you already pay
+for. Otherwise, the universal path below runs the same night shift on a GitHub
+Actions cron. Which agents are supported, how to invoke them, and how usage is
+billed are in [harnesses.md](harnesses.md).
 
 ## What the night shift needs
 

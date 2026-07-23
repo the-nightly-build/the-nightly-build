@@ -3,6 +3,11 @@
 Everything here happens inside `press/` (see [press.md](press.md)). Engine
 updates never touch it. Working examples live in `examples/`.
 
+Most papers only need three files: `site.yaml` for the title and appearance,
+`editorial.md` for the paper-wide voice, and each series' `prompt.md` for its
+beat. Use the rest of this page when you want to change the visual system or
+add reusable furniture and templates.
+
 ## Look: themes
 
 The entire visual system reads about two dozen CSS variables from one token
@@ -37,12 +42,15 @@ included. Base tokens are light, the universal fallback; dark applies via
 `prefers-color-scheme` or the reader's toggle. Keep it that way in custom
 themes.
 
-Fonts load from Google Fonts. For an article's own `<head>`, that is the only
-external origin the sandbox allows besides the engine's own assets path (the
-page-injected `assets:` libraries below are a separate, owner-authored path
-with their own rules). Swapping families changes the chrome and new articles
-immediately; articles published earlier keep their frozen font links and
-fall back to system faces for any family they did not load.
+The shipped templates and generated site chrome load the default families from
+Google Fonts. Theme tokens choose the font stack, but they do not add a new
+font import: a custom web font needs a matching `<link>` in the template and,
+for generated pages, an engine change. Existing articles keep the font links
+from the templates they were written with and fall back to system faces when a
+requested family is unavailable. Google Fonts is the only external origin the
+article sandbox allows besides the engine's own assets path; page-injected
+`assets:` libraries below are a separate, owner-authored path with their own
+rules.
 
 ## Your own furniture
 
