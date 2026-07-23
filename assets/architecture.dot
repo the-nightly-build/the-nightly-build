@@ -1,0 +1,62 @@
+// Editable graph specification for architecture.svg.
+// The checked-in SVG keeps fixed coordinates so its routes stay legible in the README.
+digraph nightly_build {
+  graph [
+    bgcolor="#fbfaf7"
+    compound=true
+    fontname="Inter"
+    nodesep=0.55
+    rankdir=LR
+    ranksep=0.9
+    splines=spline
+  ]
+  node [
+    color="#d49620"
+    fillcolor="#fff3d7"
+    fontname="Inter"
+    shape=box
+    style="filled,rounded"
+  ]
+  edge [color="#71858d" fontname="Inter"]
+
+  main [color="#76a3ab" fillcolor="#e8f2f4" label="main\nengine + press/"]
+  orchestrator [label="Orchestrator\nsync · select · provision\ncommission task.md"]
+  worktrees [label="Worktrees × N\none isolated desk per article\none task.md each"]
+  pull_request [color="#9a7ab6" fillcolor="#f1ebf7" label="PR on library\narticle + record + assets\ndesk artifacts included"]
+  pages [color="#76a3ab" fillcolor="#e8f2f4" label="GitHub Pages"]
+
+  main -> orchestrator
+  orchestrator -> worktrees
+  pull_request -> pages [label="green"]
+  pull_request -> orchestrator [
+    color="#c16e61"
+    constraint=false
+    fontcolor="#a35349"
+    label="CI failure · repair run"
+    style=dashed
+  ]
+
+  subgraph cluster_worktree {
+    color="#afbfbd"
+    fontname="Inter"
+    label="INSIDE EACH ISOLATED WORKTREE\nThe same desk loop runs in parallel for every commissioned task."
+    style="dashed,rounded"
+
+    task [color="#76a3ab" fillcolor="#e8f2f4" label="Task\nfrom the orchestrator\ntask.md"]
+    voice [label="Voice\nstudy relevant writers\nfor voice + style\nvoice.md"]
+    research [label="Research\nread + verify every URL\nresearch.md"]
+    write [label="Write + proof\ndraft · check · revise\narticle.html"]
+    edit [label="Edit\n• concision · punctuation\n• citations · clarity\nrequested-changes.md"]
+    desk_check [color="#6f9a78" fillcolor="#e9f5ec" label="Desk check\nproof + render\ncheck.py"]
+
+    task -> voice -> research -> write -> edit -> desk_check
+    research -> research [color="#c98612" fontcolor="#9a680f" label="bad URL" style=dashed]
+    write -> write [color="#c98612" fontcolor="#9a680f" label="proof fails" style=dashed]
+    edit -> research [color="#c98612" constraint=false fontcolor="#9a680f" label="source gap" style=dashed]
+    edit -> write [color="#c98612" constraint=false fontcolor="#9a680f" label="rewrite" style=dashed]
+    desk_check -> edit [color="#c98612" constraint=false fontcolor="#9a680f" label="check fails" style=dashed]
+  }
+
+  worktrees -> task [lhead=cluster_worktree label="expanded below" style=dashed]
+  desk_check -> pull_request [ltail=cluster_worktree label="pass"]
+}

@@ -18,32 +18,22 @@ Your paper and its archive live in your fork. You own it.
 
 ## How it works
 
-```mermaid
-flowchart LR
-    A[Configure press/] --> B[Orchestrator]
-    B --> C[Parallel article desks]
-    C --> D["Voice → Research → Write → Edit"]
-    D --> E[Validate]
-    E -->|fix| D
-    E -->|pass| F[PR to library]
-    F -->|CI failure| B
-    F -->|green| G[GitHub Pages]
-```
+![The Nightly Build architecture](assets/architecture.svg)
 
-Each article gets its own desk and worktree. The PR carries the article, assets,
-and production record: the commission, voice brief, research log, and edit
-notes. [See the full architecture](docs/architecture.md) for the detailed flow.
+The orchestrator syncs `main`, reads `press/`, chooses what is due, and gives
+each article its own task and Git worktree. Those desks run in parallel.
 
-Sources are collected before writing. Editing is a separate pass. Validation
-and CI gate publication. The [FAQ](#faq) explains the boundaries.
+Inside a desk, the voice pass studies relevant writers before reporting begins.
+Researchers read every source before recording it. The writer runs the proof;
+the editor checks the prose and evidence, then routes changes back through the
+writer. Failures stay in that desk until its final check passes.
 
-`main` holds the engine and your configuration. `library` holds published
-articles. Keeping those branches separate makes engine updates and paper
-ownership straightforward.
+A passing desk opens a PR against `library`. The PR contains the article, its
+assets, and the production record. CI repeats the checks. Green publishes to
+GitHub Pages; red sends the work back to the orchestrator.
 
-Since you own the code, you can even make personal changes to the engine.
-However, note that then it is on you to resolve conflicts or issues when
-you sync your fork.
+`main` owns the engine and your configuration. `library` owns the published
+paper. [The FAQ](#faq) covers accuracy, access, cost, and privacy.
 
 ## Get started
 
@@ -124,65 +114,78 @@ For contributors and engine maintainers, start with [PROTOCOL.md](PROTOCOL.md) a
 
 ## FAQ
 
-<!-- Native disclosure controls keep the FAQ compact. -->
 <!-- markdownlint-disable MD033 -->
 
 <details>
-<summary>Why are the articles not just one model's first draft?</summary>
+<summary><strong>How do you keep the writing from sounding like AI?</strong></summary>
 
-Each article gets separate voice, research, writing, and editing passes. The
-editor can send a weak claim back for research or ask the writer to try again.
-
-</details>
-
-<details>
-<summary>How are claims and citations checked?</summary>
-
-Research records the claim and its source before the writer drafts. Validation
-checks citation structure and source policy. It cannot prove that every claim
-is true, so doubtful claims should be revised or removed.
+<p>Voice is set before drafting. Research, writing, and editing are separate
+jobs. The editor cuts repetition, fixes rhythm and punctuation, checks
+citations, and can send the piece back.</p>
 
 </details>
 
 <details>
-<summary>What access does the night shift need?</summary>
+<summary><strong>Can it still hallucinate?</strong></summary>
 
-It needs web access, both branches, and permission to open a pull request to
-`library`. PR checks run read-only and do not receive the scheduler's secrets.
-See [Scheduling](docs/scheduling.md).
-
-</details>
-
-<details>
-<summary>Can it use private or authenticated sources?</summary>
-
-Only if the agent you choose can access them. Do not commit credentials or put
-them in article content. Readers should still be able to audit important
-sources.
+<p>Yes. The workflow reduces that risk; it cannot remove it. Research happens
+before drafting, every recorded URL must be read, and the editor traces claims
+back to sources. The proof and CI enforce citation structure and source rules.
+Claims without enough evidence should be cut.</p>
 
 </details>
 
 <details>
-<summary>Why does every article use a pull request?</summary>
+<summary><strong>What can the night shift access?</strong></summary>
 
-The PR is the review record and the publishing gate. It contains the article,
-its production artifacts, and its validation status.
-
-</details>
-
-<details>
-<summary>What does it cost?</summary>
-
-There is no Nightly Build backend fee. Your agent's plan, the number of sections,
-and the depth of research determine usage. See [Harnesses](docs/harnesses.md).
+<p>Only what you grant it. A normal run needs the web, both repository branches,
+and permission to open a PR against <code>library</code>. CI is read-only and
+does not receive the scheduler's secrets. See <a href="docs/scheduling.md">Scheduling</a>.</p>
 
 </details>
 
 <details>
-<summary>Can I keep my paper private?</summary>
+<summary><strong>Can it read paywalled or authenticated sources?</strong></summary>
 
-Yes, when your GitHub plan supports private Pages. Public repositories are the
-simplest option for a free GitHub Pages setup.
+<p>Not as a built-in, portable feature yet. That work is tracked in
+<a href="https://github.com/the-nightly-build/the-nightly-build/issues/127">issue #127</a>.
+Credentials must stay outside the repository, and the system will not bypass
+access controls.</p>
+
+</details>
+
+<details>
+<summary><strong>Why does every article use a pull request?</strong></summary>
+
+<p>The PR is both the review record and the publishing gate. It carries the
+article, earned assets, production record, and validation result. Nothing
+reaches <code>library</code> without passing CI.</p>
+
+</details>
+
+<details>
+<summary><strong>What does it cost?</strong></summary>
+
+<p>The Nightly Build has no hosted service or fee. You pay for the agent or model
+runner you choose. More articles, broader research, and longer drafts use more
+tokens. See <a href="docs/harnesses.md">Harnesses</a>.</p>
+
+</details>
+
+<details>
+<summary><strong>Can I keep my paper private?</strong></summary>
+
+<p>Yes, if your GitHub plan supports Pages for private repositories. A public
+fork is the simplest free setup.</p>
+
+</details>
+
+<details>
+<summary><strong>Can I change the engine?</strong></summary>
+
+<p>Yes. Most changes belong in <code>press/</code>; start with
+<a href="docs/customization.md">Customization</a>. If you modify the engine
+itself, you also own any conflicts when syncing upstream updates.</p>
 
 </details>
 
