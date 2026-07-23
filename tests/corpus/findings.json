@@ -16,6 +16,30 @@
         "code": "B-DEPRECATED",
         "level": "BLOCK",
         "message": "'nb-callout-term' is a retired component; use 'nb-note' instead. Retired markup lingers in the published back-catalog but does not belong in a new article."
+      },
+      {
+        "code": "W-SENTENCE-DENSITY",
+        "level": "WARN",
+        "message": "sentence is 45 words with 3 clause joins",
+        "suggestion": "consider splitting it into multiple sentences"
+      },
+      {
+        "code": "W-SENTENCE-DENSITY",
+        "level": "WARN",
+        "message": "sentence is 40 words with 2 clause joins",
+        "suggestion": "consider splitting it into multiple sentences"
+      },
+      {
+        "code": "W-SENTENCE-DENSITY",
+        "level": "WARN",
+        "message": "sentence is 50 words with 4 clause joins, punctuation score 7",
+        "suggestion": "consider splitting it into multiple sentences"
+      },
+      {
+        "code": "W-SENTENCE-DENSITY",
+        "level": "WARN",
+        "message": "sentence is 54 words with 4 clause joins",
+        "suggestion": "consider splitting it into multiple sentences"
       }
     ],
     "notes": []
@@ -47,6 +71,42 @@
         "code": "B-DEPRECATED",
         "level": "BLOCK",
         "message": "'nb-paper-map' is a retired component; remove it. Retired markup lingers in the published back-catalog but does not belong in a new article."
+      },
+      {
+        "code": "W-SENTENCE-DENSITY",
+        "level": "WARN",
+        "message": "sentence is 43 words with 2 clause joins",
+        "suggestion": "consider splitting it into multiple sentences"
+      },
+      {
+        "code": "W-SENTENCE-DENSITY",
+        "level": "WARN",
+        "message": "sentence is 50 words with 2 clause joins, punctuation score 8",
+        "suggestion": "consider splitting it into multiple sentences"
+      },
+      {
+        "code": "W-SENTENCE-DENSITY",
+        "level": "WARN",
+        "message": "sentence is 43 words with 2 clause joins, punctuation score 6",
+        "suggestion": "consider splitting it into multiple sentences"
+      },
+      {
+        "code": "W-SENTENCE-DENSITY",
+        "level": "WARN",
+        "message": "sentence is 44 words with 2 clause joins",
+        "suggestion": "consider splitting it into multiple sentences"
+      },
+      {
+        "code": "W-SENTENCE-DENSITY",
+        "level": "WARN",
+        "message": "sentence is 49 words with 3 clause joins, punctuation score 6",
+        "suggestion": "consider splitting it into multiple sentences"
+      },
+      {
+        "code": "W-SENTENCE-DENSITY",
+        "level": "WARN",
+        "message": "sentence is 41 words with 3 clause joins",
+        "suggestion": "consider splitting it into multiple sentences"
       },
       {
         "code": "W-CITE-DENSITY",
@@ -191,6 +251,24 @@
         "message": "declarative data-nb-chart charts are retired; render a PNG with engine/render_chart.py and embed it as a figure (docs/charts.md)"
       },
       {
+        "code": "W-SENTENCE-DENSITY",
+        "level": "WARN",
+        "message": "sentence is 47 words with 3 clause joins, punctuation score 7",
+        "suggestion": "consider splitting it into multiple sentences"
+      },
+      {
+        "code": "W-SENTENCE-DENSITY",
+        "level": "WARN",
+        "message": "sentence is 44 words with 2 clause joins",
+        "suggestion": "consider splitting it into multiple sentences"
+      },
+      {
+        "code": "W-SENTENCE-DENSITY",
+        "level": "WARN",
+        "message": "sentence is 45 words with 3 clause joins, punctuation score 12",
+        "suggestion": "consider splitting it into multiple sentences"
+      },
+      {
         "code": "W-CITE-ORDER",
         "level": "WARN",
         "message": "citation '#s6' (source 6) is first cited before source 1; number sources in order of first appearance"
@@ -271,6 +349,54 @@
         "code": "B-SOURCE-KIND",
         "level": "BLOCK",
         "message": "0 primary source(s) cited; this series asks for at least 4"
+      },
+      {
+        "code": "W-SENTENCE-DENSITY",
+        "level": "WARN",
+        "message": "sentence is 43 words with 2 clause joins, punctuation score 7",
+        "suggestion": "consider splitting it into multiple sentences"
+      },
+      {
+        "code": "W-SENTENCE-DENSITY",
+        "level": "WARN",
+        "message": "sentence is 41 words with 2 clause joins, punctuation score 6",
+        "suggestion": "consider splitting it into multiple sentences"
+      },
+      {
+        "code": "W-SENTENCE-DENSITY",
+        "level": "WARN",
+        "message": "sentence is 60 words with 1 clause join, punctuation score 6",
+        "suggestion": "consider splitting it into multiple sentences"
+      },
+      {
+        "code": "W-SENTENCE-DENSITY",
+        "level": "WARN",
+        "message": "sentence is 56 words with 1 clause join",
+        "suggestion": "consider splitting it into multiple sentences"
+      },
+      {
+        "code": "W-SENTENCE-DENSITY",
+        "level": "WARN",
+        "message": "sentence is 40 words with 2 clause joins, punctuation score 6",
+        "suggestion": "consider splitting it into multiple sentences"
+      },
+      {
+        "code": "W-SENTENCE-DENSITY",
+        "level": "WARN",
+        "message": "sentence is 57 words with 1 clause join, punctuation score 7",
+        "suggestion": "consider splitting it into multiple sentences"
+      },
+      {
+        "code": "W-SENTENCE-DENSITY",
+        "level": "WARN",
+        "message": "sentence is 48 words with 3 clause joins, punctuation score 8",
+        "suggestion": "consider splitting it into multiple sentences"
+      },
+      {
+        "code": "W-SENTENCE-DENSITY",
+        "level": "WARN",
+        "message": "sentence is 45 words with 2 clause joins",
+        "suggestion": "consider splitting it into multiple sentences"
       }
     ],
     "notes": []

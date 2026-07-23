@@ -27,9 +27,23 @@ CLAUSE_JOIN = re.compile(
     r"|;\s*|:\s*|\b(?:although|because|while|whereas|unless)\b)",
     re.IGNORECASE,
 )
-MIN_SENTENCE_WORDS = 55
-LONG_SENTENCE_WORDS = 70
-MIN_CLAUSE_JOINS = 3
+PUNCTUATION_WEIGHTS = {
+    ",": 1,
+    ";": 2,
+    ":": 2,
+    "—": 2,
+    "–": 1,
+    "(": 1,
+    ")": 1,
+    "[": 1,
+    "]": 1,
+    "{": 1,
+    "}": 1,
+}
+MIN_SENTENCE_WORDS = 40
+LONG_SENTENCE_WORDS = 55
+MIN_CLAUSE_JOINS = 2
+MAX_PUNCTUATION_SCORE = 6
 
 
 def _caps_token(word):
@@ -74,12 +88,12 @@ def placeholder_entries(skeleton_path):
     return frozenset(entries)
 
 
-def sentence_density(text: str) -> list[tuple[str, int, int]]:
+def sentence_density(text: str) -> list[tuple[str, int, int, int]]:
     """Return long, structurally dense sentences as text and counts.
 
     This is deliberately a conservative surface heuristic, not a grammar
-    parser. It identifies prose worth an editor's attention without proposing
-    a semantic split point.
+    parser. It considers word count, clause joins, and weighted internal
+    punctuation without proposing a semantic split point.
     """
     dense = []
     for block in text.splitlines():
@@ -89,8 +103,13 @@ def sentence_density(text: str) -> list[tuple[str, int, int]]:
             if words < MIN_SENTENCE_WORDS:
                 continue
             joins = len(CLAUSE_JOIN.findall(sentence))
-            if words >= LONG_SENTENCE_WORDS or joins >= MIN_CLAUSE_JOINS:
-                dense.append((sentence, words, joins))
+            punctuation = sum(PUNCTUATION_WEIGHTS.get(mark, 0) for mark in sentence)
+            if (
+                words >= LONG_SENTENCE_WORDS
+                or joins >= MIN_CLAUSE_JOINS
+                or punctuation >= MAX_PUNCTUATION_SCORE
+            ):
+                dense.append((sentence, words, joins, punctuation))
     return dense
 
 
@@ -139,11 +158,19 @@ def check_warns(
                 suggestion="cut the weakest item to the band",
             )
 
-    for _sentence, words, joins in sentence_density(" ".join(ed._sentence_text_parts)):
-        clause_note = f" with {joins} clause joins" if joins else ""
+    for _sentence, words, joins, punctuation in sentence_density(
+        " ".join(ed._sentence_text_parts)
+    ):
+        notes = []
+        if joins:
+            label = "clause join" if joins == 1 else "clause joins"
+            notes.append(f"{joins} {label}")
+        if punctuation >= MAX_PUNCTUATION_SCORE:
+            notes.append(f"punctuation score {punctuation}")
+        density_note = f" with {', '.join(notes)}" if notes else ""
         rep.warn(
             "W-SENTENCE-DENSITY",
-            f"sentence is {words} words{clause_note}",
+            f"sentence is {words} words{density_note}",
             suggestion="consider splitting it into multiple sentences",
             promote=False,
         )

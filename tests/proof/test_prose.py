@@ -6,8 +6,8 @@ and the policy selected by the series. This keeps the tests focused on the
 author-facing warning and strict-mode contracts rather than private helpers.
 
 A warn is advice; a block is a refusal. Which one a finding lands at is the
-thing under test here — a series with `strict: true` turns every warn into a
-block, and three of the daily desks run that way.
+thing under test here — a series with `strict: true` normally turns warns into
+blocks, while sentence-density advice remains non-promotable.
 """
 
 import pathlib
@@ -27,6 +27,20 @@ DENSE_SENTENCE = (
     "more from each token, so a fixed compute budget is best spent on a very "
     "large model fed a comparatively modest amount of data, stopped well before "
     "it has squeezed the data dry."
+)
+SHORT_DENSE_SENTENCE = (
+    "The report compares several models, and it tracks how their results changed "
+    "over time; it also notes which assumptions failed during later experiments "
+    "conducted by independent teams across multiple regions and laboratories "
+    "before the policy change in three separate public studies."
+)
+PUNCTUATION_DENSE_SENTENCE = (
+    "The archive preserves the project record — interviews (engineers, editors, "
+    "archivists) [notebooks, drafts, calculations] — across several decades, "
+    "institutions, disciplines, laboratories, workshops, libraries, newsrooms, "
+    "studios, offices, conferences, journals, repositories, classrooms, courtrooms, "
+    "and private collections for later comparison by independent researchers from "
+    "different fields."
 )
 CITE_RE = re.compile(r'<sup class="nb-cite">.*?</sup>')
 DEBATE_RE = re.compile(
@@ -116,6 +130,37 @@ def test_dense_sentence_warns_but_does_not_block(
     assert "W-SENTENCE-DENSITY" in result.warns
     assert any(
         finding.suggestion == "consider splitting it into multiple sentences"
+        for finding in result.report.findings
+        if finding.code == "W-SENTENCE-DENSITY"
+    )
+    assert not result.blocks
+
+
+def test_shorter_sentence_threshold_warns_on_medium_dense_prose(
+    run_local: Callable[..., Findings],
+) -> None:
+    result = run_local(
+        mut(HEADING, f"{HEADING}<p>{SHORT_DENSE_SENTENCE}</p>"),
+        "semiconductors",
+    )
+    assert "W-SENTENCE-DENSITY" in result.warns
+    assert any(
+        "41 words" in finding.message
+        for finding in result.report.findings
+        if finding.code == "W-SENTENCE-DENSITY"
+    )
+    assert not result.blocks
+
+
+def test_punctuation_dense_sentence_warns(
+    run_local: Callable[..., Findings],
+) -> None:
+    result = run_local(
+        mut(HEADING, f"{HEADING}<p>{PUNCTUATION_DENSE_SENTENCE}</p>"),
+        "semiconductors",
+    )
+    assert any(
+        "punctuation score" in finding.message
         for finding in result.report.findings
         if finding.code == "W-SENTENCE-DENSITY"
     )
