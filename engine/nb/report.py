@@ -3,10 +3,12 @@
 Findings come in two tiers. BLOCK findings are integrity failures and CI
 refuses to publish on any of them. WARN findings are quality calibration:
 agents treat them as revision notes and they block only when a series sets
-strict true.
+strict true, unless a check marks an advisory warning as non-promotable.
 """
 
 import json
+
+__all__ = ("Finding", "Report", "emit")
 
 
 class Finding:
@@ -35,8 +37,15 @@ class Report:
         finding = Finding(code, "BLOCK", message=msg, suggestion=suggestion)
         self.findings.append(finding)
 
-    def warn(self, code, msg, *, suggestion=None):
-        level = "BLOCK" if self.strict else "WARN"
+    def warn(
+        self,
+        code: str,
+        msg: str,
+        *,
+        suggestion: str | None = None,
+        promote: bool = True,
+    ) -> None:
+        level = "BLOCK" if self.strict and promote else "WARN"
         finding = Finding(code, level, message=msg, suggestion=suggestion)
         self.findings.append(finding)
 

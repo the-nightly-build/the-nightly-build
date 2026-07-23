@@ -32,6 +32,54 @@ VOID = {
     "wbr",
 }
 
+SENTENCE_BREAK_TAGS = {
+    "article",
+    "aside",
+    "body",
+    "blockquote",
+    "br",
+    "dd",
+    "div",
+    "figcaption",
+    "figure",
+    "footer",
+    "h1",
+    "h2",
+    "h3",
+    "h4",
+    "h5",
+    "h6",
+    "head",
+    "header",
+    "html",
+    "li",
+    "main",
+    "nav",
+    "p",
+    "pre",
+    "section",
+    "table",
+    "td",
+    "th",
+    "title",
+    "tr",
+    "ul",
+}
+
+# These elements contain authored material the sentence-density heuristic
+# cannot fairly judge: code, quotations, and machine-rendered payloads.
+SENTENCE_SKIP_TAGS = {
+    "blockquote",
+    "code",
+    "math",
+    "noscript",
+    "pre",
+    "q",
+    "script",
+    "style",
+    "svg",
+}
+
 
 def collapse_space(text: str) -> str:
     return " ".join(text.split())
@@ -73,7 +121,9 @@ class Article(HTMLParser):
         self._dek_parts = None  # text of the first .nb-dekline; None until one opens
         self._text_parts = []
         self._prose_text_parts = []  # body prose only, excludes the sources section
+        self._sentence_text_parts = []  # prose eligible for sentence-quality checks
         self._suppress_text_depth = 0  # inside script/style
+        self._sentence_skip_depth = 0
 
     # -- helpers -------------------------------------------------------------
     def _attrs(self, attrs):
@@ -89,6 +139,11 @@ class Article(HTMLParser):
     def handle_starttag(self, tag, attrs):
         a = self._attrs(attrs)
         el = {"tag": tag, "id": a.get("id")}
+
+        if tag in SENTENCE_BREAK_TAGS:
+            self._sentence_text_parts.append("\n")
+        if tag in SENTENCE_SKIP_TAGS:
+            self._sentence_skip_depth += 1
 
         if a.get("id"):
             self.ids.add(a["id"])
@@ -202,6 +257,10 @@ class Article(HTMLParser):
             self.stack.append(el)
 
     def handle_endtag(self, tag):
+        if tag in SENTENCE_SKIP_TAGS:
+            self._sentence_skip_depth = max(0, self._sentence_skip_depth - 1)
+        if tag in SENTENCE_BREAK_TAGS:
+            self._sentence_text_parts.append("\n")
         if tag in ("script", "style"):
             self._suppress_text_depth = max(0, self._suppress_text_depth - 1)
             if tag == "script" and self._capture:
@@ -226,6 +285,8 @@ class Article(HTMLParser):
             sec = self._current("section")
             if sec is None or sec.get("section") != "sources":
                 self._prose_text_parts.append(data)
+                if self._sentence_skip_depth == 0:
+                    self._sentence_text_parts.append(collapse_space(data))
             if self._dek_parts is not None and self._current("dekline") is not None:
                 self._dek_parts.append(data)
             if self._current("rubric_score") is not None:

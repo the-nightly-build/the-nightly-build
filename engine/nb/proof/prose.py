@@ -10,11 +10,26 @@ import re
 from nb.article import Article
 from nb.source_policy import minimum
 
-__all__ = ("caps_runs", "check_warns", "placeholder_entries")
+__all__ = (
+    "caps_runs",
+    "check_warns",
+    "placeholder_entries",
+    "sentence_density",
+)
 
 DEFAULT_CITE_EXEMPT = ("sources",)  # a template extends this via registry cite_exempt
 SELF_COUNT_TOLERANCE = 0.20
 PLACEHOLDER_RUN_WORDS = 4  # a caps run this long warns even off-skeleton
+SENTENCE_WORDS = re.compile(r"\b[\w]+(?:[’'-][\w]+)*\b")
+SENTENCE_END = re.compile(r"(?<=[.!?])[\"'”’)\]]*(?=\s|$)")
+CLAUSE_JOIN = re.compile(
+    r"(?:,\s*(?:and|but|or|nor|yet|so|for|which|that|where|when)\b"
+    r"|;\s*|:\s*|\b(?:although|because|while|whereas|unless)\b)",
+    re.IGNORECASE,
+)
+MIN_SENTENCE_WORDS = 55
+LONG_SENTENCE_WORDS = 70
+MIN_CLAUSE_JOINS = 3
 
 
 def _caps_token(word):
@@ -57,6 +72,26 @@ def placeholder_entries(skeleton_path):
         elif len(run[0]) >= 3:
             entries.add(run[0])
     return frozenset(entries)
+
+
+def sentence_density(text: str) -> list[tuple[str, int, int]]:
+    """Return long, structurally dense sentences as text and counts.
+
+    This is deliberately a conservative surface heuristic, not a grammar
+    parser. It identifies prose worth an editor's attention without proposing
+    a semantic split point.
+    """
+    dense = []
+    for block in text.splitlines():
+        sentences = [part.strip() for part in SENTENCE_END.split(block) if part.strip()]
+        for sentence in sentences:
+            words = len(SENTENCE_WORDS.findall(sentence))
+            if words < MIN_SENTENCE_WORDS:
+                continue
+            joins = len(CLAUSE_JOIN.findall(sentence))
+            if words >= LONG_SENTENCE_WORDS or joins >= MIN_CLAUSE_JOINS:
+                dense.append((sentence, words, joins))
+    return dense
 
 
 def check_warns(
@@ -103,6 +138,15 @@ def check_warns(
                 f"{template_id} expects {lo}-{hi} items; found {n}",
                 suggestion="cut the weakest item to the band",
             )
+
+    for _sentence, words, joins in sentence_density(" ".join(ed._sentence_text_parts)):
+        clause_note = f" with {joins} clause joins" if joins else ""
+        rep.warn(
+            "W-SENTENCE-DENSITY",
+            f"sentence is {words} words{clause_note}",
+            suggestion="consider splitting it into multiple sentences",
+            promote=False,
+        )
 
     # source floor
     floor = minimum(series, treg)

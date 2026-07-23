@@ -20,6 +20,14 @@ from findings import Findings
 from press import LOREM, TODAY, article, brief, mut
 
 HEADING = "<h2>Orientation</h2>"
+DENSE_SENTENCE = (
+    "Kaplan and colleagues had measured how a transformer's loss falls as three "
+    "things grow, model size, data, and compute, and drawn a conclusion that "
+    "decided how the largest models of the era were built: bigger models learn "
+    "more from each token, so a fixed compute budget is best spent on a very "
+    "large model fed a comparatively modest amount of data, stopped well before "
+    "it has squeezed the data dry."
+)
 CITE_RE = re.compile(r'<sup class="nb-cite">.*?</sup>')
 DEBATE_RE = re.compile(
     r'(<section data-nb-section="bull-versus-bear">.*?</section>)', re.S
@@ -96,6 +104,70 @@ def test_uncited_section_warns_on_cite_density(
     result = run_local(_uncited_debate(), "semiconductors")
     assert "W-CITE-DENSITY" in result.warns
     assert not result.blocks
+
+
+def test_dense_sentence_warns_but_does_not_block(
+    run_local: Callable[..., Findings],
+) -> None:
+    result = run_local(
+        mut(HEADING, f"{HEADING}<p>{DENSE_SENTENCE}</p>"),
+        "semiconductors",
+    )
+    assert "W-SENTENCE-DENSITY" in result.warns
+    assert any(
+        finding.suggestion == "consider splitting it into multiple sentences"
+        for finding in result.report.findings
+        if finding.code == "W-SENTENCE-DENSITY"
+    )
+    assert not result.blocks
+
+
+def test_dense_sentence_stays_a_warning_in_a_strict_series(
+    run_local: Callable[..., Findings], clone_testrepo: Callable[..., str]
+) -> None:
+    repo = clone_testrepo("press", "templates")
+    y = pathlib.Path(repo) / "press" / "series" / "semiconductors" / "series.yaml"
+    y.write_text(y.read_text().replace("strict: false", "strict: true"))
+    result = run_local(
+        mut(HEADING, f"{HEADING}<p>{DENSE_SENTENCE}</p>"),
+        "semiconductors",
+        repo=repo,
+    )
+    assert "W-SENTENCE-DENSITY" in result.warns
+    assert "W-SENTENCE-DENSITY" not in result.blocks
+
+
+def test_split_sentences_stay_clean(
+    run_local: Callable[..., Findings],
+) -> None:
+    split = (
+        "Kaplan and colleagues measured how a transformer's loss falls as three "
+        "things grow: model size, data, and compute. They drew a conclusion that "
+        "decided how the largest models of the era were built. Bigger models learn "
+        "more from each token. Under a fixed compute budget, the best strategy was "
+        "to train a very large model on comparatively little data, stopping before "
+        "it had squeezed that data dry."
+    )
+    result = run_local(mut(HEADING, f"{HEADING}<p>{split}</p>"), "semiconductors")
+    assert "W-SENTENCE-DENSITY" not in result.codes
+
+
+@pytest.mark.parametrize(
+    "wrapped",
+    [
+        "<blockquote><p>{}</p></blockquote>",
+        "<q>{}</q>",
+        "<pre><code>{}</code></pre>",
+    ],
+)
+def test_code_and_quoted_text_do_not_trigger_sentence_density(
+    run_local: Callable[..., Findings], wrapped: str
+) -> None:
+    result = run_local(
+        mut(HEADING, f"{HEADING}{wrapped.format(DENSE_SENTENCE)}"),
+        "semiconductors",
+    )
+    assert "W-SENTENCE-DENSITY" not in result.codes
 
 
 def test_uncited_brief_item_warns_on_cite_density(
