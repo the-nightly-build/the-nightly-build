@@ -10,17 +10,17 @@ mean this project has stress-tested that harness end to end.
 
 ## Current paths
 
-| Agent | Laptop-off schedule | Unattended entrypoint | Billing |
-| --- | --- | --- | --- |
-| [Claude Code](https://code.claude.com/docs/en/routines) | Routines | `anthropics/claude-code-action` | Routines use plan allowance; the Actions path uses API billing |
-| [Jules](https://jules.google/docs/scheduled-tasks/) | Scheduled Tasks | Hosted task | Daily task quota for the plan |
-| [Codex](https://learn.chatgpt.com/docs/automations) | Cloud scheduled tasks | `openai/codex-action@v1` | Cloud tasks use plan allowance; the Action uses API billing |
-| [Cursor](https://docs.cursor.com/en/cli/headless) | Cloud Agents and Automations, plan-dependent | `cursor-agent -p --force` | Included usage, then on-demand usage where enabled |
-| [OpenCode](https://dev.opencode.ai/docs/github/) | GitHub Action on cron | `opencode run` | The model provider you connect |
-| [Devin](https://docs.devin.ai/product-guides/scheduled-sessions) | Automations | API or CLI | Devin plan usage |
-| [GitHub Copilot](https://docs.github.com/en/copilot/how-tos/github-copilot-app/using-automations) | Automations | Hosted coding agent | Included premium requests, then usage-based billing if enabled |
-| [Antigravity](https://codelabs.developers.google.com/getting-started-google-antigravity) | Local schedules; laptop-off is not established | CLI | Plan-dependent |
-| [Pi](https://github.com/badlogic/pi-mono/blob/main/packages/coding-agent/README.md) | No hosted scheduler | `pi -p` | The model provider you connect |
+| Agent                                                                                             | Laptop-off schedule                            | Unattended entrypoint           | Billing                                                        |
+| ------------------------------------------------------------------------------------------------- | ---------------------------------------------- | ------------------------------- | -------------------------------------------------------------- |
+| [Claude Code](https://code.claude.com/docs/en/routines)                                           | Routines                                       | `anthropics/claude-code-action` | Routines use plan allowance; the Actions path uses API billing |
+| [Jules](https://jules.google/docs/scheduled-tasks/)                                               | Scheduled Tasks                                | Hosted task                     | Daily task quota for the plan                                  |
+| [Codex](https://learn.chatgpt.com/docs/automations)                                               | Cloud scheduled tasks                          | `openai/codex-action@v1`        | Cloud tasks use plan allowance; the Action uses API billing    |
+| [Cursor](https://docs.cursor.com/en/cli/headless)                                                 | Cloud Agents and Automations, plan-dependent   | `cursor-agent -p --force`       | Included usage, then on-demand usage where enabled             |
+| [OpenCode](https://dev.opencode.ai/docs/github/)                                                  | GitHub Action on cron                          | `opencode run`                  | The model provider you connect                                 |
+| [Devin](https://docs.devin.ai/product-guides/scheduled-sessions)                                  | Automations                                    | API or CLI                      | Devin plan usage                                               |
+| [GitHub Copilot](https://docs.github.com/en/copilot/how-tos/github-copilot-app/using-automations) | Automations                                    | Hosted coding agent             | Included premium requests, then usage-based billing if enabled |
+| [Antigravity](https://codelabs.developers.google.com/getting-started-google-antigravity)          | Local schedules; laptop-off is not established | CLI                             | Plan-dependent                                                 |
+| [Pi](https://github.com/badlogic/pi-mono/blob/main/packages/coding-agent/README.md)               | No hosted scheduler                            | `pi -p`                         | The model provider you connect                                 |
 
 ## Hosted schedulers
 

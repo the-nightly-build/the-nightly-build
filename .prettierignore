@@ -5,6 +5,7 @@ press/
 docs/agent-only/
 press-check/
 .venv/
+.pytest_cache/
 node_modules/
 uv.lock
 package-lock.json

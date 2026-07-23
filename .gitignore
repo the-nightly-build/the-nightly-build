@@ -1,6 +1,7 @@
 press-check/
 node_modules/
 __pycache__/
+.pytest_cache/
 *.pyc
 .DS_Store
 docs/agent-only/
