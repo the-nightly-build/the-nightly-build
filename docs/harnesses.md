@@ -1,96 +1,54 @@
-# Harnesses: which agents can run the night shift, and what they cost
+# Harnesses
 
-The scheduling model lives in [scheduling.md](scheduling.md) and names no
-provider: the night shift is any agent that can check out your repo, browse the
-web, and open a pull request on a nightly cron. This page is the provider-specific
-companion, the agents verified to do it, how to invoke each one headless, and
-whether a run is included in a subscription or metered on top.
+The night shift needs a repository checkout, web access, and permission to
+open pull requests. [Scheduling](scheduling.md) defines that contract. This
+page maps it to current agent products.
 
-Provider capabilities move fast. This table is a snapshot, not a compatibility
-promise: confirm the provider's current scheduler, repository permissions, and
-billing before you connect it. The universal GitHub Actions path in
-[scheduling.md](scheduling.md) remains the fallback for any agent with a
-headless entrypoint. Current references include [Claude Code
-Routines](https://code.claude.com/docs/en/routines), [Jules Scheduled
-Tasks](https://jules.google/docs/scheduled-tasks/), and the [Codex GitHub
-Action](https://github.com/openai/codex-action).
+Provider features and prices move quickly. The links below are the source of
+truth. A documented entrypoint means the integration is possible; it does not
+mean this project has stress-tested that harness end to end.
 
-## Coverage and cost
+## Current paths
 
-Which agents can run the night shift laptop-off, how you invoke them headless, and
-whether tonight's run is already paid for or metered on top. Verified 2026-07.
+| Agent | Laptop-off schedule | Unattended entrypoint | Billing |
+| --- | --- | --- | --- |
+| [Claude Code](https://code.claude.com/docs/en/routines) | Routines | `anthropics/claude-code-action` | Routines use plan allowance; the Actions path uses API billing |
+| [Jules](https://jules.google/docs/scheduled-tasks/) | Scheduled Tasks | Hosted task | Daily task quota for the plan |
+| [Codex](https://learn.chatgpt.com/docs/automations) | Cloud scheduled tasks | `openai/codex-action@v1` | Cloud tasks use plan allowance; the Action uses API billing |
+| [Cursor](https://docs.cursor.com/en/cli/headless) | Cloud Agents and Automations, plan-dependent | `cursor-agent -p --force` | Included usage, then on-demand usage where enabled |
+| [OpenCode](https://dev.opencode.ai/docs/github/) | GitHub Action on cron | `opencode run` | The model provider you connect |
+| [Devin](https://docs.devin.ai/product-guides/scheduled-sessions) | Automations | API or CLI | Devin plan usage |
+| [GitHub Copilot](https://docs.github.com/en/copilot/how-tos/github-copilot-app/using-automations) | Automations | Hosted coding agent | Included premium requests, then usage-based billing if enabled |
+| [Antigravity](https://codelabs.developers.google.com/getting-started-google-antigravity) | Local schedules; laptop-off is not established | CLI | Plan-dependent |
+| [Pi](https://github.com/badlogic/pi-mono/blob/main/packages/coding-agent/README.md) | No hosted scheduler | `pi -p` | The model provider you connect |
 
-| Agent           | Native laptop-off scheduler                           | Headless entrypoint               | Cost of the automated run                                     |
-| --------------- | ----------------------------------------------------- | --------------------------------- | ------------------------------------------------------------- |
-| **Claude Code** | Yes: Routines                                         | `anthropics/claude-code-action`   | Routine: included in Pro/Max usage. Actions path: metered key |
-| **Jules**       | Yes: Scheduled Tasks                                  | `google-labs-code/jules-action`   | Included in your Jules plan (daily task quota)                |
-| **Codex**       | No (use Actions for laptop-off)                       | `openai/codex-action`             | Metered `OPENAI_API_KEY`                                      |
-| **Cursor**      | Not verified                                          | `cursor-agent -p`                 | Draws on your Cursor plan credits                             |
-| **opencode**    | Via its own Action on cron                            | `opencode run`                    | Metered: your own model key (BYOK)                            |
-| **Devin**       | Yes: Schedules                                        | `devin -p` / REST                 | Included in your Devin plan                                   |
-| **Copilot**     | Yes: Automations                                      | server-side / Copilot CLI         | Included in your Copilot plan                                 |
-| **Antigravity** | Not verified (native schedule runs via the local app) | IDE/CLI                           | Depends on the entrypoint you script                          |
-| **pi**          | No                                                    | CLI (no documented headless flag) | Metered: your own model key (BYOK)                            |
+## Hosted schedulers
 
-Invoke one-liners for the marked step in `nightly.yml` (each needs its key as a
-repo secret and web access enabled): `openai/codex-action` with `OPENAI_API_KEY`;
-`cursor-agent -p "<prompt>"` with `CURSOR_API_KEY`; `opencode run "<prompt>"`
-with your model key; `anthropics/claude-code-action` with `ANTHROPIC_API_KEY`
-(though a native Routine is cheaper, below). Each action's own README is the
-current source for inputs.
+Use a hosted scheduler when it can check out the fork, browse the web, and
+open a PR. Paste the canonical prompt from [Scheduling](scheduling.md) and run
+one task for the whole paper.
 
-## Native shortcuts
+- **Claude Code:** create a Routine and enable full, or suitably scoped,
+  network access. It runs in Anthropic's cloud and consumes your plan usage.
+- **Jules:** install its GitHub app, create a Scheduled Task, and select the
+  fork. Runs count against the plan's daily task quota.
+- **Codex:** choose a cloud environment for the scheduled task. Local tasks
+  need the computer; cloud tasks continue without it.
+- **Cursor, Devin, and Copilot:** use their hosted automation surface when
+  your plan includes it. Confirm repository permissions and usage limits in
+  the provider before scheduling.
 
-Skip the cron entirely when your provider hosts the scheduler. Paste the same
-schedule prompt (in [scheduling.md](scheduling.md)) into these.
+## GitHub Actions
 
-### Claude Code (Routines)
+The universal workflow in [Scheduling](scheduling.md) works with an agent that
+has a non-interactive command or Action. Typical invoke steps are:
 
-Create one Routine for the whole paper: type `/schedule` in the CLI, or use
-[claude.ai/code/routines](https://claude.ai/code/routines). Connect the fork
-once (grant contents and pull-requests access), set a nightly cron, paste the
-prompt, and pick the model. Also set the environment's **Network access** to
-**Full** (or Custom with your series' sources): Routines sandbox outbound web by
-default, so without it the night shift researches nothing and publishes nothing.
-Routines run in Anthropic's cloud, so your laptop can be off, and they **draw on
-your Pro/Max subscription like an interactive session**, so a nightly run costs
-nothing extra within your plan limits. Use **Run now** for tonight's first
-article instead of waiting.
+- Codex: `openai/codex-action@v1` with `OPENAI_API_KEY`.
+- Claude Code: `anthropics/claude-code-action` with `ANTHROPIC_API_KEY`.
+- Cursor: `cursor-agent -p --force "<prompt>"` with `CURSOR_API_KEY`.
+- OpenCode: `opencode run "<prompt>"` with the chosen model credentials.
+- Pi: `pi -p "<prompt>"` with the chosen model credentials.
 
-### Jules (Scheduled Tasks)
-
-Install the Jules GitHub app on your fork, then create a Scheduled Task with the
-prompt and a nightly cadence. It runs server-side in Jules's cloud VM against the
-connected repo. Runs **draw on your plan's daily task quota** rather than a
-metered key, and the model tier is fixed by your plan. The equivalent CI path is
-`google-labs-code/jules-action` on `on: schedule` with a `JULES_API_KEY` secret.
-
-### Codex (the universal path, worked)
-
-Codex's local Automations work best while the Codex app and your machine are
-available. For a laptop-off run, use the GitHub Actions workflow in
-[scheduling.md](scheduling.md) with `openai/codex-action` in the marked step. It
-runs `codex exec` with a **metered `OPENAI_API_KEY`** (a repo secret), billed per
-token on top of any ChatGPT plan. Enable agent internet access on the
-environment, since it is **off by default**, or research fails.
-(The interactive cloud tasks at chatgpt.com/codex are a separate, plan-gated
-surface; the Action is what runs unattended.)
-
-## Choosing, for the setup agent
-
-Ask the user what they already pay for, then match it. State plainly which case
-applies and whether tonight's run is subscription-included or metered.
-
-- **Claude Pro/Max** → a Routine. Included in the plan, zero infra, laptop-off.
-- **Jules (free, Pro, or Ultra)** → a Scheduled Task. Included in the plan's
-  daily task quota, zero infra.
-- **Devin or Copilot** → their native schedule.
-- **An OpenAI or Anthropic API key, or any agent with a headless command** → the
-  universal Actions path. Say when it bills a metered key (Codex and the Claude
-  Actions path both do; the native Routine does not).
-- **No verified laptop-off native scheduler** (Codex, Cursor, Antigravity, pi) →
-  the universal Actions path with that agent's headless entrypoint.
-
-If you (the setup agent) can create the schedule and fire the first run yourself,
-do it and confirm the run started. If you cannot, hand the user the filled prompt
-and the exact place to paste it, and say that pasting it is the one manual step.
+Use each provider's current documentation for installation and Action inputs.
+Give the runtime web access, keep credentials in repository secrets, and say
+plainly whether the run consumes a subscription allowance or a metered API.
