@@ -29,7 +29,10 @@ never summaries.
 1. Read `PROTOCOL.md`. Run `scripts/sync.sh` before touching tonight's work.
    It may open a protected workflow PR and wait for it to merge. If it fails,
    report the PR and check, then stop: do not commission articles against a
-   stale editor. Never pass its upstream-update flag on a scheduled run.
+   stale editor. Exit 3 with `NB_SYNC_PR_REQUIRED` is a handoff, not a failure:
+   use your connected GitHub tools exactly as its output directs, never edit
+   the generated branch, and rerun the script to verify the merge. Never pass
+   its upstream-update flag on a scheduled run.
    After it succeeds, fetch the now-current `library` branch to its own
    checkout and run the duty oracle. Never do calendar or queue math yourself:
    `uv run engine/duty.py --repo . --library <checkout>`

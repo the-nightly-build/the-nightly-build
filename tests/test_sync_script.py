@@ -47,12 +47,18 @@ class SyncRepo:
     fake_bin: pathlib.Path
 
     def run(
-        self, *args: str, check_failure: bool = False
+        self,
+        *args: str,
+        check_failure: bool = False,
+        gh_mode: Literal[
+            "available", "unauthenticated", "repo-unavailable", "protection-unavailable"
+        ] = "available",
     ) -> subprocess.CompletedProcess[str]:
         env = os.environ.copy()
         env.update(
             {
                 "FAKE_GH_LOG": str(self.gh_log),
+                "FAKE_GH_MODE": gh_mode,
                 "FAKE_ORIGIN": str(self.origin),
                 "NB_SYNC_MAX_POLLS": "2",
                 "NB_SYNC_POLL_SECONDS": "0",
@@ -85,6 +91,12 @@ class SyncRepo:
             check=True,
         ).stdout
 
+    def update_remote_ref(self, ref: str, target: str) -> None:
+        subprocess.run(
+            ["git", f"--git-dir={self.origin}", "update-ref", ref, target],
+            check=True,
+        )
+
 
 def write_fake_gh(fake_bin: pathlib.Path) -> None:
     fake_bin.mkdir()
@@ -93,6 +105,11 @@ def write_fake_gh(fake_bin: pathlib.Path) -> None:
         """#!/usr/bin/env sh
 set -eu
 printf '%s\\n' "$*" >> "$FAKE_GH_LOG"
+case "${FAKE_GH_MODE:-available}:$1:$2" in
+  unauthenticated:auth:status) exit 1 ;;
+  repo-unavailable:repo:view) exit 1 ;;
+  protection-unavailable:api:*) exit 1 ;;
+esac
 case "$1:$2" in
   auth:status) exit 0 ;;
   repo:view) printf '%s\\n' 'example/nightly-build' ;;
@@ -204,6 +221,15 @@ def test_default_sync_is_idempotent_and_never_fetches_upstream(
     assert "pr create" not in repo.gh_log.read_text()
 
 
+def test_current_workflows_do_not_require_gh(tmp_path: pathlib.Path) -> None:
+    repo = make_sync_repo(tmp_path, drift="none")
+
+    result = repo.run(gh_mode="unauthenticated")
+
+    assert result.returncode == 0, result.stderr
+    assert repo.gh_log.read_text() == ""
+
+
 def test_drift_opens_a_protected_pr_and_verifies_library(
     tmp_path: pathlib.Path,
 ) -> None:
@@ -228,6 +254,59 @@ def test_one_stale_workflow_self_heals(tmp_path: pathlib.Path) -> None:
     assert result.returncode == 0, result.stderr
     for path in WORKFLOWS:
         assert repo.remote_blob("main", path) == repo.remote_blob("library", path)
+
+
+def test_unauthenticated_gh_prepares_an_agent_handoff(
+    tmp_path: pathlib.Path,
+) -> None:
+    repo = make_sync_repo(tmp_path, drift="both")
+    library_before = repo.remote_ref("refs/heads/library")
+
+    result = repo.run(gh_mode="unauthenticated")
+
+    assert result.returncode == 3
+    assert repo.remote_ref("refs/heads/library") == library_before
+    for path in WORKFLOWS:
+        assert repo.remote_blob("main", path) == repo.remote_blob(SYNC_BRANCH, path)
+    assert "NB_SYNC_PR_REQUIRED" in result.stdout
+    assert "reason=gh is not authenticated" in result.stdout
+    assert "base=library" in result.stdout
+    assert f"head={SYNC_BRANCH}" in result.stdout
+    assert "Wait for the `validate` check" in result.stdout
+    assert "Rerun `scripts/sync.sh`" in result.stdout
+    assert "pr create" not in repo.gh_log.read_text()
+
+    repo.update_remote_ref("refs/heads/library", f"refs/heads/{SYNC_BRANCH}")
+    verified = repo.run(gh_mode="unauthenticated")
+
+    assert verified.returncode == 0, verified.stderr
+    assert "library workflows already match origin/main" in verified.stdout
+    assert repo.gh_log.read_text().count("auth status") == 1
+
+
+def test_repo_discovery_failure_uses_the_agent_handoff(
+    tmp_path: pathlib.Path,
+) -> None:
+    repo = make_sync_repo(tmp_path, drift="both")
+
+    result = repo.run(gh_mode="repo-unavailable")
+
+    assert result.returncode == 3
+    assert "reason=gh cannot resolve the origin repository" in result.stdout
+    assert "pr list" not in repo.gh_log.read_text()
+
+
+def test_protection_api_failure_uses_the_agent_handoff(
+    tmp_path: pathlib.Path,
+) -> None:
+    repo = make_sync_repo(tmp_path, drift="both")
+
+    result = repo.run(gh_mode="protection-unavailable")
+
+    assert result.returncode == 3
+    assert "reason=gh cannot read library branch protection" in result.stdout
+    assert "repository=example/nightly-build" in result.stdout
+    assert "pr list" not in repo.gh_log.read_text()
 
 
 def test_sync_refuses_to_overwrite_an_unrecognized_remote_branch(

@@ -8,9 +8,11 @@ SYNC_BRANCH=${NB_SYNC_BRANCH:-nb/sync-library-workflows}
 POLL_SECONDS=${NB_SYNC_POLL_SECONDS:-10}
 MAX_POLLS=${NB_SYNC_MAX_POLLS:-60}
 UPSTREAM_REPO=${UPSTREAM_REPO:-the-nightly-build/the-nightly-build}
+HANDOFF_EXIT=3
 CHECK_WORKFLOW=.github/workflows/check.yml
 PUBLISH_WORKFLOW=.github/workflows/publish.yml
 SYNC_MARKER="Nightly-Build-Sync: v1"
+PR_TITLE="Sync library workflows from main"
 temp_root=
 worktree=
 
@@ -37,19 +39,17 @@ cleanup() {
 trap cleanup EXIT HUP INT TERM
 
 require_tools() {
-	command -v gh >/dev/null 2>&1 || die "gh is required: https://cli.github.com"
 	command -v git >/dev/null 2>&1 || die "git is required"
 	command -v uv >/dev/null 2>&1 || die "uv is required: https://docs.astral.sh/uv/"
-	gh auth status >/dev/null 2>&1 || die "gh is not authenticated. Run: gh auth login"
 	git -C "$ROOT" rev-parse --is-inside-work-tree >/dev/null 2>&1 ||
 		die "scripts/sync.sh must live in a git checkout"
 }
 
 repository_name() {
 	origin_url=$(git -C "$ROOT" remote get-url origin 2>/dev/null) ||
-		die "no 'origin' remote. Is this your fork's checkout?"
+		return 1
 	gh repo view "$origin_url" --json nameWithOwner -q .nameWithOwner 2>/dev/null ||
-		die "no GitHub repository detected at origin ($origin_url)"
+		return 1
 }
 
 ref_has_workflows() {
@@ -66,12 +66,11 @@ library_matches_main() {
 		"$CHECK_WORKFLOW" "$PUBLISH_WORKFLOW"
 }
 
-require_library_protection() {
+library_protection_state() {
 	repo=$1
-	if ! gh api "repos/$repo/branches/library/protection/required_status_checks" \
-		--jq '.contexts[]' 2>/dev/null | grep -qx validate; then
-		die "library is not protected by the required 'validate' check. Run ./setup.sh"
-	fi
+	contexts=$(gh api "repos/$repo/branches/library/protection/required_status_checks" \
+		--jq '.contexts[]' 2>/dev/null) || return 2
+	printf '%s\n' "$contexts" | grep -qx validate
 }
 
 remote_sync_branch() {
@@ -125,6 +124,42 @@ write_canonical_workflows() {
 	done
 }
 
+emit_pr_body() {
+	cat <<'EOF'
+Copies the protected publishing workflows from this fork's `main` branch.
+
+The editor accepts this PR only when both workflow blobs match `main` exactly
+and no other files changed.
+EOF
+}
+
+emit_agent_handoff() {
+	reason=$1
+	repo=${2-}
+	printf '%s\n' \
+		"NB_SYNC_PR_REQUIRED" \
+		"reason=$reason"
+	if [ -n "$repo" ]; then
+		printf 'repository=%s\n' "$repo"
+	fi
+	printf '%s\n' \
+		"base=library" \
+		"head=$SYNC_BRANCH" \
+		"title=$PR_TITLE" \
+		"body<<NB_SYNC_BODY"
+	emit_pr_body
+	cat <<'EOF'
+NB_SYNC_BODY
+
+Use the runtime's connected GitHub tools to finish this generated sync:
+1. Reuse an open PR with this base and head, or open it with the title and body above.
+2. Never edit the generated branch or reproduce its commit by hand.
+3. Wait for the `validate` check. If it fails or never appears, stop and report it.
+4. After `validate` passes, squash-merge the PR through the protected branch.
+5. Rerun `scripts/sync.sh`; continue the night only after it verifies the blobs.
+EOF
+}
+
 prepare_sync_commit() {
 	remote_sha=$1
 	main_oid=$(git -C "$ROOT" rev-parse origin/main)
@@ -160,21 +195,16 @@ prepare_sync_commit() {
 open_or_update_pr() {
 	repo=$1
 	pr=$(gh pr list --repo "$repo" --base library --head "$SYNC_BRANCH" \
-		--state open --json number --jq '.[0].number // ""')
-	cat >"$temp_root/pr-body.md" <<'EOF'
-Copies the protected publishing workflows from this fork's `main` branch.
-
-The editor accepts this PR only when both workflow blobs match `main` exactly
-and no other files changed.
-EOF
+		--state open --json number --jq '.[0].number // ""') || return 1
+	emit_pr_body >"$temp_root/pr-body.md"
 	if [ -n "$pr" ]; then
 		gh pr edit "$pr" --repo "$repo" \
-			--title "Sync library workflows from main" \
-			--body-file "$temp_root/pr-body.md" >/dev/null
+			--title "$PR_TITLE" \
+			--body-file "$temp_root/pr-body.md" >/dev/null || return 1
 	else
 		pr_url=$(gh pr create --repo "$repo" --base library --head "$SYNC_BRANCH" \
-			--title "Sync library workflows from main" \
-			--body-file "$temp_root/pr-body.md")
+			--title "$PR_TITLE" \
+			--body-file "$temp_root/pr-body.md") || return 1
 		pr=${pr_url##*/}
 	fi
 	printf '%s\n' "$pr"
@@ -190,15 +220,20 @@ wait_for_library() {
 			ok "library workflows match origin/main"
 			return 0
 		fi
-		state=$(gh pr view "$pr" --repo "$repo" --json state --jq .state 2>/dev/null ||
-			printf UNKNOWN)
+		state=$(gh pr view "$pr" --repo "$repo" --json state --jq .state 2>/dev/null) ||
+			return "$HANDOFF_EXIT"
 		if [ "$state" = CLOSED ]; then
 			die "sync PR #$pr closed without updating library"
 		fi
-		failures=$(gh pr checks "$pr" --repo "$repo" \
+		if failures=$(gh pr checks "$pr" --repo "$repo" \
 			--json bucket,name,link \
 			--jq '.[] | select(.bucket == "fail" or .bucket == "cancel") | "\(.name): \(.link)"' \
-			2>/dev/null || true)
+			2>/dev/null); then
+			:
+		else
+			checks_status=$?
+			[ "$checks_status" -eq 8 ] || return "$HANDOFF_EXIT"
+		fi
 		if [ -n "$failures" ]; then
 			printf '%s\n' "$failures" >&2
 			die "sync PR #$pr failed. Fix the canonical engine on main, then rerun scripts/sync.sh; do not edit the generated branch"
@@ -211,7 +246,6 @@ wait_for_library() {
 }
 
 sync_library() {
-	repo=$1
 	say "checking protected library workflows"
 	git -C "$ROOT" fetch -q origin main library
 	ref_has_workflows origin/main || die "origin/main is missing a publishing workflow"
@@ -219,7 +253,6 @@ sync_library() {
 		ok "library workflows already match origin/main"
 		return 0
 	fi
-	require_library_protection "$repo"
 
 	remote_sha=$(remote_sync_branch || true)
 	if [ -n "$remote_sha" ]; then
@@ -231,17 +264,55 @@ sync_library() {
 	fi
 
 	prepare_sync_commit "$remote_sha"
-	pr=$(open_or_update_pr "$repo")
+
+	if ! command -v gh >/dev/null 2>&1; then
+		emit_agent_handoff "gh is not installed"
+		return "$HANDOFF_EXIT"
+	fi
+	if ! gh auth status >/dev/null 2>&1; then
+		emit_agent_handoff "gh is not authenticated"
+		return "$HANDOFF_EXIT"
+	fi
+	if ! repo=$(repository_name); then
+		emit_agent_handoff "gh cannot resolve the origin repository"
+		return "$HANDOFF_EXIT"
+	fi
+	if library_protection_state "$repo"; then
+		:
+	else
+		protection_status=$?
+		if [ "$protection_status" -eq 2 ]; then
+			emit_agent_handoff "gh cannot read library branch protection" "$repo"
+			return "$HANDOFF_EXIT"
+		fi
+		die "library is not protected by the required 'validate' check. Run ./setup.sh"
+	fi
+
+	if ! pr=$(open_or_update_pr "$repo"); then
+		emit_agent_handoff "gh cannot open or update the sync PR" "$repo"
+		return "$HANDOFF_EXIT"
+	fi
 	ok "workflow sync proposed in PR #$pr"
 	if ! gh pr merge "$pr" --repo "$repo" --auto --squash >/dev/null; then
 		git -C "$ROOT" fetch -q origin library
-		library_matches_main || die "could not enable protected auto-merge for PR #$pr"
+		if ! library_matches_main; then
+			emit_agent_handoff "gh cannot enable protected auto-merge for PR #$pr" "$repo"
+			return "$HANDOFF_EXIT"
+		fi
 	fi
-	wait_for_library "$repo" "$pr"
+	if wait_for_library "$repo" "$pr"; then
+		return 0
+	else
+		wait_status=$?
+		if [ "$wait_status" -eq "$HANDOFF_EXIT" ]; then
+			emit_agent_handoff "gh cannot inspect sync PR #$pr" "$repo"
+			return "$HANDOFF_EXIT"
+		fi
+		return "$wait_status"
+	fi
 }
 
 update_main_from_upstream() {
-	repo=$1
 	[ "$(git -C "$ROOT" branch --show-current)" = main ] ||
 		die "--update-main-from-upstream requires the main branch"
 	[ -z "$(git -C "$ROOT" status --porcelain)" ] ||
@@ -262,17 +333,16 @@ update_main_from_upstream() {
 	fi
 	git -C "$ROOT" push origin main
 	ok "fork main updated from upstream"
-	sync_library "$repo"
+	sync_library
 }
 
 main() {
 	require_tools
-	repo=$(repository_name)
 	case "${1-}" in
-	"") sync_library "$repo" ;;
+	"") sync_library ;;
 	--update-main-from-upstream)
 		[ "$#" = 1 ] || die "usage: scripts/sync.sh [--update-main-from-upstream]"
-		update_main_from_upstream "$repo"
+		update_main_from_upstream
 		;;
 	*) die "usage: scripts/sync.sh [--update-main-from-upstream]" ;;
 	esac

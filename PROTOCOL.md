@@ -41,7 +41,13 @@ dependencies. Do not substitute `pip install` in a harness or schedule.
    commissioning anything. It compares the two publishing workflows on the
    fork's `origin/main` and `origin/library`. If they differ, it opens one
    exact workflow PR, waits for protected validation and auto-merge, then
-   verifies the resulting blobs. A failure ends the run: report the PR and
+   verifies the resulting blobs. When the shell cannot operate GitHub, the
+   script instead pushes the same locally proved branch, exits 3, and prints
+   `NB_SYNC_PR_REQUIRED` with the exact PR fields. Use the runtime's connected
+   GitHub tools to reuse or open that PR, wait for `validate`, and, if it is
+   still open after the check passes, squash-merge it. Never edit the generated
+   branch. Rerun `scripts/sync.sh`; only its successful blob verification opens
+   the gate to article work. Any other failure ends the run: report the PR and
    failing check, and do not commission articles against a stale editor.
    Scheduled runs never pass `--update-main-from-upstream`; importing upstream
    engine changes is a human operation.
@@ -216,7 +222,9 @@ dependencies. Do not substitute `pip install` in a harness or schedule.
     same series. If your PR is labeled `nb-invalid`, a future run supersedes you.
     Do not fight the desk. The protected workflow repair performed by
     `scripts/sync.sh` is the only non-article exception; never reproduce it by
-    hand or bypass its validation.
+    hand or bypass its validation. An `NB_SYNC_PR_REQUIRED` handoff permits only
+    the printed PR operations on the script-generated branch, followed by the
+    script's own verification.
 
 ## nb-meta
 

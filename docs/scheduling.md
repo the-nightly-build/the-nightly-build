@@ -33,7 +33,10 @@ Four requirements. Everything past them lives in `PROTOCOL.md`.
 
 Every run starts with `scripts/sync.sh`. It follows the fork's `main`, waits
 for any protected workflow repair to merge, and stops before article work if
-the publishing boundary is not current.
+the publishing boundary is not current. With an authenticated GitHub CLI it
+performs the repair itself. Otherwise it prepares and proves the exact branch,
+then hands the PR operations to the same connected GitHub tools the agent uses
+for article PRs.
 
 ## The universal path: GitHub Actions
 
