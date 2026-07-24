@@ -47,6 +47,28 @@ press/
 
 ## Updating the engine
 
+### From GitHub
+
+Click **Sync fork**. This updates your fork's `main`; it never touches
+`library`. The next night shift runs `scripts/sync.sh`, updates the protected
+publishing workflows through CI if needed, and only then starts article work.
+
+To finish the workflow sync immediately from a local checkout:
+
+```sh
+git switch main
+git pull --ff-only origin main
+scripts/sync.sh
+```
+
+This is also how an older fork adopts `scripts/sync.sh` for the first time.
+Do not rerun setup or update `library` yourself.
+
+### From the command line
+
+Once your fork contains `scripts/sync.sh`, one command performs the complete
+engine update:
+
 ```sh
 scripts/sync.sh --update-main-from-upstream
 ```
@@ -56,9 +78,8 @@ pushes it, and brings the protected `library` workflows forward through an
 exact, CI-gated PR. A merge conflict stops before `library` changes and names
 the paths to resolve.
 
-The nightly command is simply `scripts/sync.sh`. It follows your fork's
-`origin/main`; it never imports upstream changes. If you update `main` with
-GitHub's Sync fork button, run that default command afterward.
+The default command follows your fork's `origin/main`; it never imports
+upstream changes. Only the explicit flag above fetches upstream.
 
 Upstream merges are clean by construction for anyone who only writes inside
 `press/`: your commits and upstream's commits touch disjoint paths, and
