@@ -188,9 +188,10 @@ Additionally, PRs are a natural entity that basically every AI harness interacts
 
 <p>The Nightly Build has no hosted service or fee. You pay for the agent or model
 runner you choose. More articles, broader research, and longer drafts use more
-tokens. See <a href="docs/harnesses.md">Harnesses</a>. Keep in mind this can be
-pretty token hungry. I would not recommend using something like Fable or Sol, unless
-you want to go through your weekly limits quickly.</p>
+tokens. The optional <a href="docs/production.md">production policy</a> routes
+article roles to portable model tiers while leaving the automation's orchestrator
+under your control. See <a href="docs/harnesses.md">Harnesses</a> for runner and
+billing options.</p>
 
 ---
 

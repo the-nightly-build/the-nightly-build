@@ -20,6 +20,7 @@ library. The maintainer dogfoods by copying it like any other user.
 press/
   site.yaml          masthead title, theme, appearance, front density
   editorial.md       your voice, composed into every article's instructions
+  production.yaml    optional paper-wide role model and effort guidance
   series/<id>/       series.yaml + prompt.md + sources/ per series
   series/_tags/      reusable prompt fragments shared across series
   themes/            custom design token files

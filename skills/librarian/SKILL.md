@@ -27,7 +27,9 @@ conflict-free (§7).
 **Fresh paper?** A fresh fork has no `press/` content of its own: upstream ships
 none and `setup.sh` scaffolds an empty one. The interview writes
 `press/site.yaml` (their title), `press/editorial.md` (their voice, §1), and
-`press/series/` from scratch. The complete working configuration in `examples/`
+keeps the scaffolded `press/production.yaml` unless they want a different cost
+profile, then writes `press/series/` from scratch. The complete working
+configuration in `examples/`
 is the living reference. Crib from it, never copy it wholesale.
 
 ## 1. Interview
@@ -109,7 +111,9 @@ template manifest > template identity > press/series/<id>/prompt.md
 
 Every other layer already holds, and so does the config the engine reads for
 itself: `series.yaml` (`template`/`templates`, `cadence`, `bands`, `min_sources`, `consult`,
-`required_docs`, `strict`, `tags`), `site.yaml`, and the furniture catalogues.
+`required_docs`, `strict`, `tags`), `site.yaml`, `production.yaml`, and the
+furniture catalogues. Production model and effort guidance belongs in
+`production.yaml`, not in a series prompt.
 If a fact lives in any of them, the prompt relies on it and never restates it:
 not PROTOCOL's rules (read the section's published articles first, meet the
 source floor, escape the markup), not the manifest's machine contract (the anchor

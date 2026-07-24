@@ -66,12 +66,18 @@ house style (spec/editorial.md). Tone, register, language, assumed
 background: make the paper yours. Ask your agent to interview you and fill
 this in, or write it by hand.
 MD
+	cat >press/production.yaml <<'YAML'
+# Portable role guidance. See docs/production.md.
+profile: balanced
+required: false
+YAML
 	cat >press/README.md <<'MD'
 # press/ is your side of the repo
 
 Everything here is yours; everything outside is the engine. Configure series
-under series/, your voice in editorial.md, your look via site.yaml and
-themes/. Copy working examples from examples/ to get started.
+under series/, your voice in editorial.md, role cost in production.yaml, and
+your look via site.yaml and themes/. Copy working examples from examples/ to
+get started.
 MD
 	ok "press/ scaffolded. Configure it, or ask your agent to set you up"
 else

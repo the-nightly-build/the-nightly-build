@@ -5,6 +5,11 @@ A series is one section of your paper: a directory under
 editorial instructions), and an optional `sources/` directory. Working
 examples of everything below live in `examples/series/`.
 
+Role model and effort guidance lives paper-wide in `press/production.yaml` and
+may be overridden for one section under `series.yaml`'s `production:` key. See
+[production.md](production.md); it is separate from editorial `strict` and
+never removes a role.
+
 ## The four modes
 
 | Mode         | You declare                   | Each night publishes                                                     | Ends                      |

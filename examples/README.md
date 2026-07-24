@@ -7,6 +7,10 @@ reads this folder. Copy pieces into your `press/` and edit:
 cp -r examples/series/kernels press/series/my-course
 ```
 
+`production.yaml` makes the balanced cost profile visible. Presses that omit it
+receive the same cost-aware default; set `profile: inherit` to keep the harness
+model for every role.
+
 - `the-divide/`: an open section on the shipped `unbiased` template, run
   `strict: true` so the per-side citation checks become hard BLOCKs. For
   building a template of your own, follow the lesson walkthrough in

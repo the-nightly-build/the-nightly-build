@@ -46,6 +46,14 @@ def directory_errors(directory: dict) -> list[str]:
     return errors
 
 
+def production_errors(policy: dict | None) -> list[str]:
+    errors: list[str] = []
+    validate_config.check_production_policy(
+        policy, where="press/production.yaml", errors=errors
+    )
+    return errors
+
+
 @pytest.fixture
 def manifest_patched_repo(clone_testrepo: Callable[..., str]) -> Callable[..., str]:
     """Return a copied press whose selected manifest has ``patch`` appended.
@@ -128,6 +136,51 @@ def test_the_directory_block_states_a_choice_and_a_description(
     directory: dict, valid: bool
 ) -> None:
     assert (directory_errors(directory) == []) is valid
+
+
+@pytest.mark.parametrize(
+    ("policy", "valid"),
+    [
+        pytest.param({"profile": "balanced"}, True, id="profile"),
+        pytest.param(
+            {
+                "profile": "economy",
+                "required": False,
+                "stages": {
+                    "writer": {
+                        "model": "provider/exact-model",
+                        "effort": "provider-specific",
+                        "required": True,
+                    }
+                },
+            },
+            True,
+            id="exact-stage-policy",
+        ),
+        pytest.param({"profile": "fastest"}, False, id="unknown-profile"),
+        pytest.param({"required": "yes"}, False, id="required-string"),
+        pytest.param({"stages": []}, False, id="stages-list"),
+        pytest.param(
+            {"stages": {"correspondent": {"model": "premium"}}},
+            False,
+            id="orchestrator-not-configurable",
+        ),
+        pytest.param(
+            {"stages": {"writer": {"model": ""}}},
+            False,
+            id="empty-model",
+        ),
+        pytest.param(
+            {"stages": {"writer": {"skip": True}}},
+            False,
+            id="stage-skipping-unknown",
+        ),
+    ],
+)
+def test_production_policy_has_a_small_portable_schema(
+    policy: dict | None, valid: bool
+) -> None:
+    assert (production_errors(policy) == []) is valid
 
 
 @pytest.mark.parametrize(

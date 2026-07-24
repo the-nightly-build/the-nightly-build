@@ -25,6 +25,7 @@ import check
 import duty
 from nb import meta as nb_meta
 from nb.config import TEMPLATE_BAND_KEYS, template_choices
+from nb.production_policy import PROFILES, STAGES
 
 try:
     import yaml
@@ -70,9 +71,12 @@ SERIES_KEYS = {
     "paused",
     "selection",
     "section",
+    "production",
 }
 BANNED_TERM_KEYS = {"id", "terms", "max", "suggestion", "enabled"}
 SELECTIONS = {"in-order", "random"}
+PRODUCTION_KEYS = {"profile", "required", "stages"}
+PRODUCTION_STAGE_KEYS = {"model", "effort", "required"}
 
 
 def load(path):
@@ -112,6 +116,74 @@ def check_site(repo, errors):
         )
     check_site_assets(site.get("assets"), errors=errors)
     check_site_directory(site.get("directory"), errors=errors)
+
+
+def check_production_policy(
+    value: dict | None, *, where: str, errors: list[str]
+) -> None:
+    """Validate one press- or series-scoped production policy mapping.
+
+    Model IDs and effort labels intentionally remain open strings because the
+    runtime owns their provider-specific vocabulary. The validator owns only
+    the stable Nightly Build shape and semantic profile/stage names.
+    """
+
+    if not isinstance(value, dict):
+        errors.append(f"{where}: must be a mapping")
+        return
+    unknown = set(value) - PRODUCTION_KEYS
+    if unknown:
+        errors.append(f"{where}: unknown keys {sorted(unknown)}")
+    profile = value.get("profile")
+    if profile is not None and profile not in PROFILES:
+        errors.append(f"{where}: profile must be one of {list(PROFILES)}")
+    required = value.get("required")
+    if required is not None and not isinstance(required, bool):
+        errors.append(f"{where}: required must be true or false")
+    stages = value.get("stages")
+    if stages is None:
+        return
+    if not isinstance(stages, dict):
+        errors.append(f"{where}: stages must be a mapping")
+        return
+    unknown_stages = set(stages) - set(STAGES)
+    if unknown_stages:
+        errors.append(
+            f"{where}: unknown stages {sorted(unknown_stages)} — known: {list(STAGES)}"
+        )
+    for stage, policy in stages.items():
+        if stage not in STAGES:
+            continue
+        stage_where = f"{where}.stages.{stage}"
+        if not isinstance(policy, dict):
+            errors.append(f"{stage_where}: must be a mapping")
+            continue
+        unknown_stage_keys = set(policy) - PRODUCTION_STAGE_KEYS
+        if unknown_stage_keys:
+            errors.append(f"{stage_where}: unknown keys {sorted(unknown_stage_keys)}")
+        for field in ("model", "effort"):
+            configured = policy.get(field)
+            if configured is not None and (
+                not isinstance(configured, str) or not configured.strip()
+            ):
+                errors.append(f"{stage_where}: {field} must be a non-empty string")
+        stage_required = policy.get("required")
+        if stage_required is not None and not isinstance(stage_required, bool):
+            errors.append(f"{stage_where}: required must be true or false")
+
+
+def check_production(repo: str, errors: list[str]) -> None:
+    path = os.path.join(repo, "press", "production.yaml")
+    if not os.path.isfile(path):
+        return
+    try:
+        policy = load(path)
+    except yaml.YAMLError as error:
+        errors.append(
+            f"press/production.yaml: not valid YAML ({error.__class__.__name__})"
+        )
+        return
+    check_production_policy(policy, where="press/production.yaml", errors=errors)
 
 
 def check_site_assets(assets, *, errors):
@@ -530,6 +602,13 @@ def check_series(repo, registry, *, errors):
         for flag in ("autopublish", "strict"):
             if not isinstance(cfg.get(flag, False), bool):
                 errors.append(f"{where}: '{flag}' must be true or false")
+        production = cfg.get("production")
+        if production is not None:
+            check_production_policy(
+                production,
+                where=f"{where}/series.yaml: production",
+                errors=errors,
+            )
         min_sources = cfg.get("min_sources")
         if min_sources is not None and (
             not isinstance(min_sources, int)
@@ -693,6 +772,7 @@ def main(argv=None):
 
     errors = []
     check_site(args.repo, errors)
+    check_production(args.repo, errors)
     check_banned_terms(args.repo, errors)
     registry = check_registry(args.repo, errors)
     check_series(args.repo, registry, errors=errors)
@@ -703,7 +783,7 @@ def main(argv=None):
             print(f"  ✗ {e}")
         return 1
     print(
-        "configuration valid: site.yaml, banned terms, registry, "
+        "configuration valid: site.yaml, production policy, banned terms, registry, "
         "and all series check out"
     )
     return 0
