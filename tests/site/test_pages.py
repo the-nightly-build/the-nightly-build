@@ -1,8 +1,8 @@
 """The pages around the front page: builds, sections, series, tags, and search.
 
-Archive and discovery pages expose the site's durable information architecture.
-The tests assert destinations, ordering, publication membership, and indexed
-content while leaving human-facing labels free to improve.
+Archive navigation must move chronologically while section and tag pages expose
+only published material. Search carries clean prose rather than copied markup,
+while human-facing labels remain free to improve.
 """
 
 import json

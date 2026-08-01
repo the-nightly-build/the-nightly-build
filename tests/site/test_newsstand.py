@@ -1,8 +1,8 @@
 """The front page: the latest build and its surrounding chrome.
 
-These tests cover the front page's article ordering, navigation destinations,
-external-link safety attributes, and press-specific repository discovery. Labels
-remain free to evolve without turning editorial copy into a test contract.
+The suite covers article ordering, navigation destinations, source metadata,
+appearance controls, external-link safety, and repository discovery. Labels
+remain free to evolve without becoming test contracts.
 """
 
 import build_site

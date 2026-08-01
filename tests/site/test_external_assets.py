@@ -1,4 +1,9 @@
-"""Third-party assets a press declares: pinned, hashed, or refused."""
+"""Third-party assets a press declares: pinned, hashed, or refused.
+
+Configuration validation admits only HTTPS resources carrying supported
+Subresource Integrity hashes. Once admitted, the builder must reproduce the
+integrity and cross-origin contract on chrome pages and dressed articles alike.
+"""
 
 import pathlib
 from collections.abc import Callable

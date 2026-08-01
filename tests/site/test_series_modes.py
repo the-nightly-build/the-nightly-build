@@ -1,8 +1,8 @@
 """Series modes the builder renders: a numbered sequence and an open series.
 
 Sequence pages preserve configured positions for published entries, while open
-series render whatever has actually shipped. Unpublished commissions must not
-leak into either page, and each mode keeps its own catalog metadata.
+series expose template choice and cadence without a fixed total. Neither mode
+renders pending configuration items as fake articles.
 """
 
 import pathlib

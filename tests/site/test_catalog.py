@@ -1,4 +1,9 @@
-"""The catalog: what the builder tells every other reader of the site."""
+"""The catalog: what the builder tells every other reader of the site.
+
+These tests pin article ordering, build and tag grouping, series progress, and
+the protocol fields consumed by renderers. They also cover repository identity
+and directory opt-out because those values leave the paper through catalog.json.
+"""
 
 import pathlib
 from collections.abc import Callable

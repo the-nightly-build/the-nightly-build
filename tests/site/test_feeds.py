@@ -1,4 +1,9 @@
-"""The Atom feeds: what a reader's feed reader gets, and how it tells papers apart."""
+"""The Atom feeds: what a reader's feed reader gets, and how it tells papers apart.
+
+The suite parses generated XML to verify global and per-series scope, embedded
+script-free article content, and author metadata. Stable IDs include each
+paper's host and path so independent publications never collide in feed readers.
+"""
 
 import xml.etree.ElementTree as ET
 

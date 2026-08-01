@@ -1,4 +1,9 @@
-"""A dateless article must not win the newsstand or blank it."""
+"""A dateless article must not win the newsstand or blank it.
+
+Missing dates belong to the explicit ``unknown`` build bucket and still receive
+an archive page. Sorting must nevertheless choose the newest real date for the
+front page, even when an undated article is present.
+"""
 
 import pathlib
 

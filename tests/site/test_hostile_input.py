@@ -1,8 +1,8 @@
 """Hostile series, slugs and tags: escaped in the markup, refused on the filesystem.
 
-series and slug flow raw from library directory and file names, so a quote or an
-ampersand must not break an href attribute or an Atom <id>, and a tag must never
-escape --out.
+Series and slug flow raw from library directory and file names, so quotes and
+ampersands must not break an href attribute or Atom identifier. Tags receive a
+stricter filesystem check because a traversal value must never escape ``--out``.
 """
 
 import pathlib

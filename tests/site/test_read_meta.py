@@ -1,4 +1,9 @@
-"""The builder reads the same nb-meta block the proof does, and no other."""
+"""The builder reads the same nb-meta block the proof does, and no other.
+
+Only an ``application/json`` script with the exact ``nb-meta`` identifier is
+article metadata. An earlier untyped decoy must remain ordinary page content,
+or the builder and publication proof would disagree about article identity.
+"""
 
 import pathlib
 

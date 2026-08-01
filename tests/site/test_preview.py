@@ -1,8 +1,8 @@
 """The press check: a draft previewed against the published library.
 
-A preview overlays one draft on the immutable published collection. The suite
-checks that catalogs mark the draft, article and asset bytes are copied correctly,
-and published entries remain visible beside the work in progress.
+A preview overlays one draft without hiding the existing published catalog and
+marks only that overlay as provisional. Its HTML and figure assets follow the
+production copy path.
 """
 
 import pathlib

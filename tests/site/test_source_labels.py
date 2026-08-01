@@ -1,4 +1,9 @@
-"""Source counts reach the reader through source_label, or not at all."""
+"""Source counts reach the reader through source_label, or not at all.
+
+Article metadata is untrusted input even after structural parsing, so only a
+well-formed integer becomes reader-facing copy. Malformed values are suppressed
+rather than escaped into a misleading label or rendered as authored markup.
+"""
 
 import pathlib
 
