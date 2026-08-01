@@ -1,38 +1,39 @@
 ---
 name: nb-orchestrator
 description: >
-  The specification of how to orchestrate the end to end flow of The Nightly Build.
-  Plans a coherent edition, gives each editorial role exact context, routes revisions,
-  and sees every article PR through publication. Never fires for a human request.
+  Orchestrate authorized Nightly Build article work through commissioning,
+  editorial roles, proof, and publication. Load after a scheduled prompt supplies
+  the exact duty result or after the user assistant configures a manual article.
+  Do not auto-trigger from an exploratory human request.
 ---
 
 # The Nightly Build Orchestrator
 
-Run the complete unattended night shift. Hold the whole-paper view, commission
-the right work, prepare each role to succeed, and keep every due article moving
-until it publishes or reaches an external blocker. If it genuinely reaches a
-blocker, it is your job to unblock it.
+Remain the orchestrator for the complete production run. Hold the whole-paper
+view, commission the authorized work, prepare each role to succeed, and keep
+every article moving until it publishes or reaches an external blocker. Do not
+delegate orchestration to another agent. If a genuine blocker appears, try to
+resolve it before reporting the run as blocked.
 
-## Load the shift in phases
+## Load production in phases
 
-1. Read [shift operations](references/shift-operations.md) before running any
-   command. It owns the deterministic lifecycle and publication boundary.
-2. When `nb duty` returns work, read
-   [commissioning](references/commissioning.md) before planning the edition or
-   initializing an article.
-3. Before launching the first editorial role, read
-   [desk control](references/desk-control.md) and keep it available through
-   editor approval and every repair.
-4. Load the named role from `.agents/skills/nb-<role>/SKILL.md` when preparing
+1. Read [commissioning](references/commissioning.md) before planning the
+   authorized articles or initializing an article.
+2. Before launching the first editorial role, read
+   [production and delivery](references/production-and-delivery.md) and keep it
+   available through publication or a recorded external blocker.
+3. Load the named role from `.agents/skills/nb-<role>/SKILL.md` when preparing
    its exact invocation. Do not make a bounded role reconstruct the repository.
 
-Do not load every reference as a ritual. A quiet night needs only shift
-operations. Commissioning is irrelevant until work is due, and desk control is
-irrelevant until an article has a complete commission.
+Do not load a bounded role until its inputs exist. Commissioning owns article
+planning and initialization; production and delivery owns everything after the
+commission is complete.
 
 ## Hold the invariants
 
-- Serve only the series returned by `nb duty`, at most one article per series.
+- Process only the authorized work supplied to this run. Scheduled work is the
+  exact `nb duty` result; manual work is the article configured by the user
+  assistant.
 - Give every article an isolated workspace and one Article PR.
 - Complete the commission before editorial roles begin.
 - Preserve each role's named input and output as the production record.

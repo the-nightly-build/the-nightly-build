@@ -1,7 +1,9 @@
 # Commissioning
 
-Plan the whole edition before launching an editorial role. This is where the
-orchestrator turns deterministic duty into article-specific judgment.
+Plan the complete authorized work set before launching an editorial role. For
+scheduled publication, this is where the orchestrator turns deterministic duty
+into article-specific judgment. For manual publication, the configured article
+is already the authorized work set.
 
 ## Read only the governing context
 
@@ -22,16 +24,34 @@ commissioning question requires it. Record relevant prior coverage and recent
 openers, section shapes, furniture, and conclusions as habits not to inherit
 automatically. Publication history informs context; it is never a template.
 
-## Plan the edition
+## Plan the articles together
 
 Prevent both editorial repetition—a topic, claim, or angle already covered—and
 structural repetition inherited from prior articles. Record neighboring
-articles from this shift so every piece adds distinct value and the edition
-reads as one paper.
+articles from this run so every piece adds distinct value and the articles read
+as one paper.
 
 Choose a subject, template, sources, tags, and production policy that fit the
 series. Complete every commission before any role begins so concurrent articles
 remain coherent and non-redundant.
+
+## Initialize each article
+
+Resolve the selected series with `nb source-policy` and
+`nb production-policy`. Honor required model selections and record the actual
+model and effort used for each role.
+
+Initialize the chosen series, slug, template, and tags with:
+
+```text
+nb start-article <series> <slug> --template <template> \
+  --workspace .nb-work/<series>/<slug> [--tag <tag> ...]
+```
+
+The command owns the initial article, generated editorial direction, effective
+template contract, runtime assets, and applicable furniture catalogs. Do not
+edit generated context or recreate it in a brief. Keep later role invocations
+numbered `02`, `03`, and onward without overwriting earlier work.
 
 ## Write the record
 

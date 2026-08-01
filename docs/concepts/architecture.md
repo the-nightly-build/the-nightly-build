@@ -25,10 +25,13 @@ returns the work that is due. A `manual` series never becomes due on its own.
 
 ## The orchestrator owns the run
 
-The scheduled agent acts as the orchestrator. It receives the
-work list, turns each due item into a precise commission, creates an isolated
-article workspace, and manages that article until it either produces a valid PR
-or reports a real blocker.
+The scheduled agent follows the repository's scheduled-publication prompt,
+resolves the work list, and then loads the orchestrator skill in the same
+context. It does not launch an orchestrator subagent. The orchestrator turns
+each authorized item into a precise commission, creates an isolated article
+workspace, and manages that article until it either produces a valid PR or
+reports a real blocker. A manual article enters at the same boundary after the
+user assistant configures it.
 
 When the runtime supports isolated child agents, separate articles can proceed
 in parallel. A runtime without that capability can execute the same commissions

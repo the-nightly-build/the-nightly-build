@@ -21,8 +21,9 @@ is safe to publish.
 - **A human paper owner** asking for setup, configuration, publication,
   revision, design, curation, or maintenance: load
   `.agents/skills/nb-user-assistant/SKILL.md`.
-- **An actual unattended scheduled run:** load
-  `.agents/skills/nb-orchestrator/SKILL.md` and follow its phased references.
+- **An actual unattended scheduled run:** follow
+  `.agents/prompts/run-scheduled-publication.md` in this agent. It resolves
+  scheduled work, loads the orchestrator skill, and remains the orchestrator.
 - **An explicit bounded editorial assignment:** load the named role under
   `.agents/skills/nb-<role>/SKILL.md` and use only its supplied brief and inputs.
 - **An engine, documentation, or test contribution:** work from the public

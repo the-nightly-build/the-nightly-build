@@ -1,7 +1,7 @@
-# Desk control
+# Production and delivery
 
 Read this reference before launching an editorial role. The orchestrator owns
-movement and context; the named role owns its bounded editorial decisions.
+movement and context; each named role owns its bounded editorial decisions.
 
 ## Run the role sequence
 
@@ -29,9 +29,9 @@ remain at the artifact root.
 
 The writer and editor both receive `editorial-direction.md`; the editor also
 receives the exact writer brief so instruction leakage remains visible. Every
-launch begins with its named inputs and permits focused tool use. A role may ask
-for more context; expand its inputs or route the question to the owner rather
-than inviting repository exploration.
+launch begins with its named inputs and permits focused tool use. A role may
+ask for more context; expand its inputs or route the question to the owner
+rather than inviting repository exploration.
 
 If isolated children are unavailable, perform the same numbered sequence in
 one context and preserve the same artifacts. Isolation changes execution, not
@@ -50,10 +50,10 @@ signal may be lost, so accept an output without one when the named artifact is
 complete and validated.
 
 Keep launched roles under active supervision with bounded waits. If twenty
-minutes pass without a relevant result, meaningful artifact change, or concrete
-control message, inspect the activity and ask what is missing. Clarify or
-supply context before relaunching. Confirm a role has died before replacing it;
-interrupt, reassign, or take over only as a last resort.
+minutes pass without a relevant result, meaningful artifact change, or
+concrete control message, inspect the activity and ask what is missing.
+Clarify or supply context before relaunching. Confirm a role has stopped before
+replacing it; interrupt, reassign, or take over only as a last resort.
 
 ## Route repairs without waiving gates
 
@@ -68,3 +68,25 @@ optional polish. A blocked role escalates to the orchestrator, which clarifies,
 reassigns, or takes over the owning work and records that resolution in the
 next brief. A takeover never waives writer proof or editor approval. Stop only
 for an external constraint no role can change.
+
+## Prepare and monitor the Article PR
+
+After editor approval and a fresh writer proof, run:
+
+```text
+nb prepare-pr <workspace>/library/<series>/<slug>.html --library <library>
+```
+
+The command creates the branch and commit from current `origin/library`, proves
+the submitted diff, pushes it, and opens or describes the one Article PR. If it
+prints `NB_ARTICLE_PR_REQUIRED`, use the connected GitHub tool exactly as the
+handoff directs. Never recreate or edit its generated branch manually.
+
+Monitor every Article PR through CI, merge, and the published website. Route a
+failure back through production, update the existing PR, and prove it again.
+The run ends only with published articles or a clearly recorded external
+blocker; it never leaves an abandoned red PR.
+
+Never merge or push to `library` directly. The protected workflow branch
+created by `nb sync` is the sole non-article exception and may be used only as
+that command directs.

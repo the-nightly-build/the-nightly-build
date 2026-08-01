@@ -1,4 +1,4 @@
-# Schedule the night shift
+# Schedule publication
 
 The setup assistant and the scheduled runtime may be different products. Audit
 the scheduled environment independently: it is the one that must check out the
@@ -6,7 +6,7 @@ paper, browse sources, push a branch, and open a PR while nobody is present.
 
 ## Runtime requirements
 
-The night shift needs:
+The scheduled runtime needs:
 
 1. A schedule or on-demand trigger.
 2. Current `main` plus access to `origin/main` and `origin/library`.
@@ -27,17 +27,15 @@ provider entrypoints are listed in [Integrations](../../integrations/README.md).
 
 Keep the external schedule prompt deliberately small:
 
-> You are the night shift for The Nightly Build repository `<repo>`. Check out
-> current `main`, read `AGENTS.md`, and load
-> `.agents/skills/nb-orchestrator/SKILL.md`. Follow that skill's phased references
-> as an actual scheduled run. Check out `library` beside it at `<checkout>`.
-> Use this checkout's `nb` command for system operations. Research requires web
-> access. This paragraph is the entire assignment. If the repository's current
-> scheduling guide differs, stop and tell the owner to replace this prompt.
+> Work in The Nightly Build repository `<repo>` on current `main`. Read
+> `.agents/prompts/run-scheduled-publication.md` and follow it in this agent.
+> This paragraph is the entire assignment. If that file is unavailable, stop
+> and report the missing repository entrypoint.
 
 The repository owns the workflow; the scheduler only owns location and
-authority. Replace prompts that restate role sequences, validation rules, or
-branch mechanics because those copies will drift.
+authority. The scheduled agent itself becomes the orchestrator; it never
+launches an orchestrator subagent. Replace prompts that restate commands, role
+sequences, validation rules, or branch mechanics because those copies drift.
 
 ## GitHub Actions boundary
 

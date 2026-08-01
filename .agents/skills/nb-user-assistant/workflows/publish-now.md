@@ -26,12 +26,10 @@ required by its mode; a manual open series always needs a matching item. If no
 existing series fits, discuss whether the request reveals a durable new series
 or is outside the paper. Do not create a throwaway series to satisfy one topic.
 
-Validate and commit the configuration on `main`. Then invoke the normal
-orchestrator production path locally, using `nb start-article` and the exact
-role sequence from the current production contract. Do not impersonate the
-roles inside this workflow or weaken their artifacts.
-
-Preview the approved article and use `nb prepare-pr` for delivery. Monitor the
-real Article PR through CI and rendering. Respect the series' normal
+Validate and commit the configuration on `main`. Then read
+`../../nb-orchestrator/SKILL.md` and continue in this same agent as the
+orchestrator, supplying this configured article as the exact authorized work.
+Do not run `nb duty`, delegate orchestration, copy the production sequence into
+this workflow, or weaken the required artifacts. Respect the series' normal
 autopublish setting unless the user asked for review first or the commission is
-a rehearsal.
+a test article.
