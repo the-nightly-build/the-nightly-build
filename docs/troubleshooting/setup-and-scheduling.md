@@ -18,7 +18,7 @@ remain idle.
 
 Test outbound access inside the scheduled environment. Changing access in the
 setup chat or local machine does not change the schedule. Enable the provider's
-network capability for that runtime, then rerun the failed canary step.
+network capability for that runtime, then rerun the failed test step.
 
 ## The run cannot push or open a PR
 
@@ -29,6 +29,6 @@ app permissions.
 
 ## The first run worked locally but fails on schedule
 
-The local run proved the wrong boundary. Trigger the canary in the exact
+The local run proved the wrong boundary. Trigger the test article in the exact
 scheduled environment with `autopublish: false`; fix its first failed
 requirement and resume there.

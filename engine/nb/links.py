@@ -47,10 +47,10 @@ def classify_link(status, error) -> Literal["dead", "ok", "unverified"]:
     legitimate article.
 
     A 403 does NOT gate publication, and it is tempting to think it should. The
-    floor says cite only what you have read, so a page the proof cannot read
-    looks like a citation nobody opened. It is not, and this was measured on
-    2026-07-14 against the whole published library: 37 of 244 cited URLs refused
-    this probe, which would have blocked 14 of 30 articles — every SEC EDGAR
+    editorial standard says cite only what you have read, so a page the proof
+    cannot read looks like a citation nobody opened. It is not, and this was
+    measured on 2026-07-14 against the whole published library: 37 of 244 cited
+    URLs refused this probe, which would have blocked 14 of 30 articles — every SEC EDGAR
     filing, a JAMA randomized trial, an EU Council release. All were readable.
     A real browser and the agent's own fetcher both opened them; one of the
     "gated" pages was read start to finish while the fix was being written.

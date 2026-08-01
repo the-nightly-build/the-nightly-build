@@ -1,4 +1,4 @@
-# Series: modes, rhythm, and governing your paper
+# Series: modes, cadence, and governing your paper
 
 A series is one section of your paper: a directory under
 `press/series/<id>/` holding `series.yaml` (the rules), `prompt.md` (the
@@ -12,7 +12,7 @@ never removes a role.
 
 ## The four modes
 
-| Mode         | You declare                   | Each night publishes                                                     | Ends                      |
+| Mode         | You declare                   | Each scheduled UTC date publishes                                        | Ends                      |
 | ------------ | ----------------------------- | ------------------------------------------------------------------------ | ------------------------- |
 | `collection` | an item list                  | the next unpublished item, or any of them with `selection: random`       | when the list is done     |
 | `sequence`   | an ordered syllabus           | the lowest-numbered missing item, building on the published ones         | when the syllabus is done |
@@ -25,11 +25,11 @@ orchestrator choose the best package for each article. `template:` and
 `templates:` are mutually exclusive, and a per-article choice is recorded in
 `nb-meta`; there is no template-level mode allowlist.
 
-Open mode is the hands-off paper. You describe a beat, the night shift
-reads the section's back catalog, picks something new, and chooses its template
+Open mode is the hands-off paper. You describe a beat, the orchestrator reads
+the section's back catalog, picks something new, and chooses its template
 from the series' declared choices.
 For several varied reads a day without curating items, run several open
-sections with distinct beats. One article per series per night is the
+sections with distinct beats. One article per series per UTC date is the
 invariant, so sections are how a paper gets breadth.
 
 Genre lives in the prompt, not the engine. Nearly every section runs on the
@@ -43,7 +43,7 @@ commission queue. Anything you add must be published, in any order, before
 the section freestyles again. The proof enforces this, so "cover X next" is a
 one-line edit with a guarantee.
 
-## Rhythm and shelving
+## Cadence, pausing, and sections
 
 ```yaml
 cadence: daily # default | weekdays | weekends | manual | [mon, thu]
@@ -51,8 +51,8 @@ paused: true # skip this series entirely; the archive stays up
 section: Foundations # optional shelf on the Sections page and in kickers
 ```
 
-Cadence is why one nightly schedule is enough forever: the run asks
-`nb duty` what is due tonight, so a weekly deep-dive section and a
+Cadence is why one schedule is enough: the run asks `nb duty` what is due for
+the selected UTC date, so a weekly deep-dive section and a
 daily brief coexist under the same schedule. Duty reckons in UTC: a
 `[mon, thu]` cadence means the run's UTC weekday, and `rolling` slugs the
 article by the run's UTC date, so a cron hour near midnight can land a
@@ -67,7 +67,7 @@ configured `items` entry in both initialization and CI.
 `section:` is the one level of hierarchy a paper needs. Series group under
 their `section:` heading on the Sections page, and front-page kickers show the
 `section:` heading before the series' name. Without it, series list flat. Completed and
-paused series sink into "In the stacks" automatically.
+paused series appear under "Completed and paused" automatically.
 
 ## Quality and sources
 
@@ -118,9 +118,9 @@ per_item_sources: # only when every selected template uses cite_rule: per-item
 ```
 
 `per_item_sources` applies uniformly to every item, so it holds however many
-items the night's writer chose. Both bands are BLOCKs regardless of `strict`,
+items the article's writer chose. Both bands are BLOCKs regardless of `strict`,
 and a `per_item_sources` on a series that may cite per section is a
-configuration error, caught by `nb validate` rather than at 2am.
+configuration error, caught by `nb validate` before a scheduled run.
 So is a source-composition band set on a series whose template ships source entries without
 `data-nb-kind`. Once either band is set, a source that declares no kind blocks:
 a source that will not say what it is escapes every rule written about the mix.
@@ -128,7 +128,7 @@ A series that sets neither band never asks.
 
 The proof counts the kinds the article declares. It does not judge them, and
 there is no rule here about hosts or domains: a paper and its own lab's write-up
-of it can sit on two websites, and a journal's news desk reporting on a paper it
+of it can sit on two websites, and a journal's reporters covering a paper it
 published is genuinely independent of that paper's authors while sharing their
 domain. No counter can tell those apart. The research log makes the call and
 records the reason, and the editor's skeptic read audits it. A source labeled
@@ -161,7 +161,7 @@ a BLOCK under `strict`. Whether a score is deserved is judgment: the cited
 justification carries it and the editor audits it; the engine only counts.
 
 The contract is attribute-driven, so it works on any template. A review
-desk is a genre, not a template: run the `article` template, pin the
+series is a genre, not a template: run the `article` template, pin the
 criteria here, and let the prompt name the rubric furniture
 (templates/FURNITURE.md). A series with no `rubric:` never asks, though any
 rubric rows an article renders are still integrity-checked.

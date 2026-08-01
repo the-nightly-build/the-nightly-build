@@ -14,7 +14,7 @@ these outcomes:
 
 - the paper's purpose and the change it should make in the reader;
 - a concrete reader model and reading situation;
-- series with distinct territory, exclusions, evidence standards, and rhythm;
+- series with distinct territory, exclusions, evidence standards, and cadence;
 - an editorial voice grounded in examples and anti-examples;
 - the first week's range, coherence, and likely failure modes;
 - the user's review appetite, budget posture, and autopublish comfort.
@@ -45,4 +45,4 @@ other config inside prompts.
 
 Run `nb validate`, build a preview where presentation changed, and show the
 user the material consequences. Commit the press configuration separately from
-any Article PR. Then return to [setup](setup.md) for the scheduled canary.
+any Article PR. Then return to [setup](setup.md) for the scheduled test article.

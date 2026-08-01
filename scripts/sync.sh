@@ -156,7 +156,7 @@ Use the runtime's connected GitHub tools to finish this generated sync:
 2. Never edit the generated branch or reproduce its commit by hand.
 3. Wait for the `validate` check. If it fails or never appears, stop and report it.
 4. After `validate` passes, squash-merge the PR through the protected branch.
-5. Rerun `nb sync`; continue the night only after it verifies the blobs.
+5. Rerun `nb sync`; continue the scheduled run only after it verifies the blobs.
 EOF
 }
 

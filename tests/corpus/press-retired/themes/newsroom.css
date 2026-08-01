@@ -109,14 +109,14 @@
 }
 
 /* ============================================================= *
- * This press's furniture (prefix rs-). Documented in each desk's
+ * This press's furniture (prefix rs-). Documented in each series'
  * prompt.md. These extend templates/FURNITURE.md without touching
  * the engine, and ride this theme file to the whole library.
  * ============================================================= */
 
 /* Code block — a real listing with a header (file · language) and an optional
    cited caption. This is the furniture that proves a press can use a real JS
-   library with no engine change: the edition writes plain
+   library with no engine change: the article writes plain
    <pre><code class="language-python">, Prism (declared in site.yaml, loaded on
    every page) highlights it into .token spans, and this file colors them. No-JS
    readers still get clean monospace. Token colors are set for light and

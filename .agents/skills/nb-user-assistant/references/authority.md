@@ -37,5 +37,5 @@ shortest exact action, say what success looks like, and resume from the result.
 Do not burden the user with actions the current assistant can safely perform.
 
 Validate every config change with `nb validate`. Before any Article PR, run the
-proof through this checkout's `nb`. Keep autopublish off during rehearsals and
+proof through this checkout's `nb`. Keep autopublish off during test runs and
 uncertain redesigns. Revisions never auto-merge regardless of series policy.

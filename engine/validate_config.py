@@ -539,7 +539,7 @@ def check_kinded_skeletons(repo, templates, *, where, errors):
 
     A skeleton whose sources carry no `data-nb-kind` renders an article the
     writer fills faithfully and the proof then blocks for "0 primary source(s)".
-    Say it at the author's desk instead.
+    Report it while the author is configuring the template instead.
     """
     for tid, folder in build_site.template_dirs(repo).items():
         skeleton = os.path.join(folder, "skeleton.html")

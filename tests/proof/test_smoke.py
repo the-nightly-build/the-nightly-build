@@ -46,7 +46,7 @@ def test_an_overcounted_source_list_warns_without_blocking(
 def test_a_report_filled_by_hand_reads_the_same() -> None:
     rep = check.Report()
     check.check_chrome(
-        '<body class="nb-edition"></body>',
+        '<body class="nb-page"></body>',
         treg={"chrome": ['<body class="nb-article">']},
         rep=rep,
     )

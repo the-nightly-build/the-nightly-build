@@ -1,5 +1,5 @@
 # Validates the reader's press/ config whenever it changes, so a broken press
-# is caught on push instead of at 2am when the night shift runs. This is FOR
+# is caught on push instead of during an unattended scheduled run. This is FOR
 # users: it fires only when a press/ exists and changes (their fork), never on
 # the engine repo upstream (which has no press/). Informational, not required.
 name: Validate press

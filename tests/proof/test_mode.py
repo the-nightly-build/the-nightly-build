@@ -1,9 +1,9 @@
-"""What a series lets through: which slug, in which order, on which night.
+"""What a series permits: which slug, in which order, on which UTC date.
 
 Mode is the rule that says a collection publishes each item once, a rolling
-series publishes tonight's date, a sequence publishes in order, and an open
-series publishes whatever it likes until the owner commissions something.
-Rhythm is the rule that says whether the series publishes at all tonight.
+series publishes the selected UTC date, a sequence publishes in order, and an
+open series publishes whatever it likes until the owner commissions something.
+Cadence says whether the series publishes on the selected UTC date.
 """
 
 import datetime as dt
@@ -68,25 +68,25 @@ def test_rolling_slug_must_be_a_real_date_not_in_the_future(
     assert "B-SLUG" in result.blocks
 
 
-def test_tonights_rolling_slug_passes_west_of_utc(testrepo: str) -> None:
+def test_the_current_utc_rolling_slug_passes_west_of_utc(testrepo: str) -> None:
     """The proof keeps duty's clock: UTC.
 
-    It used to keep the machine's, so a night shift running west of UTC — after
-    its own evening rollover, when the local date is still yesterday — read
-    tonight's correct rolling slug as a date in the future and blocked it. TZ
+    It used to keep the machine's local date, so a scheduled runtime west of
+    UTC read the correct rolling slug as a date in the future after UTC midnight
+    but before local midnight. TZ
     forces that machine, so the bug is reproducible rather than a thing that
     only bites after 8pm in New York.
     """
     utc_now = dt.datetime.now(dt.timezone.utc).date().isoformat()
-    tonight = pathlib.Path(tempfile.mkdtemp()) / "library" / "ai-briefs"
-    tonight.mkdir(parents=True)
-    (tonight / f"{utc_now}.html").write_text(brief(utc_now))
+    article_dir = pathlib.Path(tempfile.mkdtemp()) / "library" / "ai-briefs"
+    article_dir.mkdir(parents=True)
+    (article_dir / f"{utc_now}.html").write_text(brief(utc_now))
 
     run = subprocess.run(
         [
             sys.executable,
             str(REPO / "engine" / "check.py"),
-            str(tonight / f"{utc_now}.html"),
+            str(article_dir / f"{utc_now}.html"),
             "--series",
             "ai-briefs",
             "--repo",
@@ -179,7 +179,8 @@ def test_paused_series_blocks_publication(
         ("cadance: daily\n", "semiconductors", False),
     ],
 )
-def test_rhythm_configuration_validates(
+def test_cadence_configuration_validates(
+    *,
     vc_rc: Callable[[str], int],
     patched_repo: Callable[..., str],
     patch: str,

@@ -203,7 +203,7 @@ def test_intact_chrome_passes() -> None:
 def test_mutated_chrome_blocks() -> None:
     rep = check.Report()
     check.check_chrome(
-        '<body class="nb-edition"><h2>Sources →</h2></body>', treg=CHROME, rep=rep
+        '<body class="nb-page"><h2>Sources →</h2></body>', treg=CHROME, rep=rep
     )
 
     assert "B-CHROME" in findings_of(rep).blocks

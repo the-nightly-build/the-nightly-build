@@ -529,7 +529,7 @@ def test_no_links_to_probe_returns_empty() -> None:
     assert check.dead_source_links([]) == []
 
 
-# The local (rehearsal) branch of main() must forward --check-links, or a dead
+# The local test path through main() must forward --check-links, or a dead
 # citation passes the press check yet fails B-SOURCE-DEAD in CI. Every source
 # points at the reserved `.invalid` TLD (RFC 6761), which never resolves — so
 # the probe classifies it dead offline or online, making this deterministic
@@ -543,17 +543,18 @@ DEAD_ARTICLE = (
 
 
 @pytest.mark.parametrize(
-    ("name", "flags", "dead"),
+    ("_name", "flags", "dead"),
     [
         ("local mode probes links by default", [], True),
         ("--no-check-links suppresses probing locally", ["--no-check-links"], False),
     ],
 )
-def test_rehearsal_honors_check_links(
+def test_local_mode_honors_check_links(
+    *,
     run_main_json: Callable[[list[str]], dict],
     testrepo: str,
     tmp_path: pathlib.Path,
-    name: str,
+    _name: str,
     flags: list[str],
     dead: bool,
 ) -> None:

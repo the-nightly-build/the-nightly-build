@@ -38,7 +38,7 @@ for schedule verification.
 ## Acceptance
 
 Setup is not complete after a local validation or a successful provider form.
-Run the audit's immediate one-series canary in the exact scheduled environment
+Run the audit's immediate one-series test in the exact scheduled environment
 with `autopublish: false`. It must use the web, push its generated branch, open
 a real Article PR, and pass proof plus browser rendering. Keep the PR for human
 review. Report `ready` only after every audit surface passes; otherwise name

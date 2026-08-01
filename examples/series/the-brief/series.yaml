@@ -1,4 +1,4 @@
-# A rolling series: one article per night, slugged by UTC date. Missed nights
+# A rolling series: one article per scheduled UTC date. Missed dates
 # are skipped, never backfilled. No item list. The date is the item.
 name: The Brief
 mode: rolling

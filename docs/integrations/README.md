@@ -1,8 +1,8 @@
 # Agent and scheduler integrations
 
-The night shift needs a repository checkout, web access, and permission to
-open pull requests. [Schedule](../guides/operate/schedule.md) defines that contract. This
-page maps it to current agent products.
+The scheduled runtime needs a repository checkout, web access, and permission
+to open pull requests. [Schedule](../guides/operate/schedule.md) defines that
+contract. This page maps it to current agent products.
 
 Provider features and prices move quickly. The links below are the source of
 truth. A documented entrypoint means the integration is possible; it does not

@@ -53,9 +53,9 @@ def test_pr_happy_path(pr_repo: PressRepo) -> None:
 def test_preflight_passes_from_the_library_checkout(pr_repo: PressRepo) -> None:
     """Proof reads proposed blobs even when the checkout lacks the new bundle.
 
-    On 2026-07-16 two desks hit a false file-not-found block because preflight
-    ran from the library checkout. The named head, not the working tree, is the
-    exact content a merge would publish.
+    On 2026-07-16 two article runs hit a false file-not-found block because
+    preflight ran from the library checkout. The named head, not the working
+    tree, is the exact content a merge would publish.
     """
     pr_repo.checkout("library")
 
@@ -323,7 +323,7 @@ def test_paused_series_still_blocks_a_new_article(pr_repo: PressRepo) -> None:
     series = pathlib.Path(pr_repo.path, "press/series/semiconductors/series.yaml")
     series.write_text(series.read_text() + "paused: true\n")
     pr_repo.commit("pause semiconductors")
-    pr_repo.checkout("night/paused-new-article", new=True)
+    pr_repo.checkout("nb/paused-new-article", new=True)
     pr_repo.write(
         "library/semiconductors/tsmc.html",
         article().replace('"slug": "micron"', '"slug": "tsmc"'),
@@ -331,7 +331,7 @@ def test_paused_series_still_blocks_a_new_article(pr_repo: PressRepo) -> None:
     write_agent_artifacts(pr_repo.path, "semiconductors", slug="tsmc")
     pr_repo.commit("try paused publication")
 
-    result = pr_repo.run_pr(head="night/paused-new-article")
+    result = pr_repo.run_pr(head="nb/paused-new-article")
 
     assert "B-SERIES" in result.blocks
 

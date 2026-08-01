@@ -493,11 +493,11 @@ sup.nb-cite a[id],
   background: var(--accent);
 }
 
-.nb-stacks {
+.nb-inactive-series {
   margin-top: 28px;
 }
 
-.nb-stacks summary {
+.nb-inactive-series summary {
   cursor: pointer;
   list-style: none;
   font-family: var(--sans);
@@ -507,11 +507,11 @@ sup.nb-cite a[id],
   border-bottom: 1px solid var(--hair);
 }
 
-.nb-stacks summary::-webkit-details-marker {
+.nb-inactive-series summary::-webkit-details-marker {
   display: none;
 }
 
-.nb-stacks .nb-series {
+.nb-inactive-series .nb-series {
   opacity: 0.7;
 }
 

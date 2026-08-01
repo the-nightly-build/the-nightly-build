@@ -1,4 +1,4 @@
-"""The front page: tonight's build, and the chrome around it.
+"""The front page: the latest build and its surrounding chrome.
 
 These tests cover the front page's article ordering, navigation destinations,
 external-link safety attributes, and press-specific repository discovery. Labels

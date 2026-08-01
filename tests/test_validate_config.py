@@ -1,4 +1,4 @@
-"""Configuration is checked before the night shift runs, not after it fails.
+"""Configuration is checked before scheduled publication, not after it fails.
 
 These tests exercise the author-facing validator against real copied press
 trees. They focus on readable errors and on the contract's deliberately loose

@@ -13,9 +13,9 @@ links; the canonical files on the library branch stay byte-exact.
 Output layout:
 
     site/
-      index.html                       tonight's build
-      builds/<YYYY-MM-DD>/             one page per night, linked prev/next
-      builds/index.html                all nights
+      index.html                       latest build
+      builds/<YYYY-MM-DD>/             one page per publication date
+      builds/index.html                publication archive
       series/index.html                the Sections page
       series/<id>/index.html           per-series pages, mode-aware
       tags/<tag>/index.html            tag pages

@@ -79,5 +79,5 @@ several are allowed, the production workflow chooses one for the article and
 records it in nb-meta.
 
 See [Customize templates](../guides/customize/templates.md) for the design and
-rehearsal process, and [Furniture](../guides/customize/furniture.md) for the
+testing process, and [Furniture](../guides/customize/furniture.md) for the
 component scopes.

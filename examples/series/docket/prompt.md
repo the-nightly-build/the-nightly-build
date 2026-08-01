@@ -4,7 +4,7 @@ Track the law as it collides with AI: the cases and rules that decide what can
 be built and on whose data. One matter per article, written for an engineer who
 needs the stakes. Keep the citations a lawyer would demand.
 
-Pick tonight's matter like an editor:
+Pick a current matter like an editor:
 
 - Favor live cases and rules whose outcome would change how models are trained,
   deployed, or sold. The doctrine does not matter and neither does the venue.

@@ -2,7 +2,7 @@
 
 An empty fork still needs navigable chrome and an explicit empty-state container.
 A later build with no new articles must continue to identify the most recent real
-edition instead of pretending that the build date is a publication date.
+publication date instead of pretending that the build date published an article.
 """
 
 import datetime as dt

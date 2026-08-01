@@ -1,10 +1,10 @@
-# The house floor
+# Editorial standard
 
 The editorial standard every article meets, whatever its template. The engine
 places it first in generated editorial direction, before a paper's voice in
 `press/editorial.md` and the applicable template, series, tag, and item layers.
 
-The floor is prescriptive on purpose. Its job is to make the default professional:
+The standard is prescriptive on purpose. Its job is to make the default professional:
 research-grade writing. It reads in two registers.
 
 - **Standards a paper cannot loosen.** The quality bar below: sourced claims, teach don't
@@ -12,10 +12,10 @@ research-grade writing. It reads in two registers.
 - **Defaults a paper may override.** Everything that is taste rather than quality:
   register, formality, the assumed reader and that reader's background, how far to
   press a judgment, and any other choice of that kind. These belong to
-  `press/editorial.md` and the series prompts. The floor sets the quality of those
+  `press/editorial.md` and the series prompts. This standard sets the quality of those
   choices, never the choices themselves.
 
-The floor does not legislate trivia: no house-wide rule on the Oxford comma. Be
+The standard does not legislate trivia: no paper-wide rule on the Oxford comma. Be
 consistent within a piece.
 
 ## Teach, don't summarize
@@ -29,7 +29,7 @@ Ground abstract claims in a worked example.
 The declared reader centers the paper: the profile chooses what to cover and when, and
 what background to assume. Write each piece for the natural audience around that center.
 A paper declaring a new parent gets articles any parent could be handed. A declared
-practitioner gets pieces worth forwarding to a colleague. Narrowing a desk to
+practitioner gets pieces worth forwarding to a colleague. Narrowing a series to
 the reader personally takes an explicit ask in `press/editorial.md` or the series prompt.
 
 ## Report and analyze
@@ -40,7 +40,7 @@ Keep three things distinct: reported fact, estimate, and synthesis. Never write 
 someone hinted, implied, or signalled. That is the writer's guess wearing attribution.
 Synthesis with a point of view is welcome. Cut unsupported opinion. How hard to
 press a view is the paper's call, and a press that wants opinion may have a
-column or an editorial desk. The floor bans the unearned verdict, never the
+column or an opinion series. The standard bans the unearned verdict, never the
 verdict: an opinion meets the same bar as any analysis, cited, reasoned, shown.
 
 ## Citations
@@ -136,12 +136,12 @@ is right, and when in doubt the period is the default.
 - **Parentheses.** A true aside the sentence survives without. If the sentence
   needs what is inside them, it is not an aside, so fold it back in.
 
-A press extends this section for its own house. It does not loosen it.
+A press extends this section for its own paper. It does not loosen it.
 
 ## Form
 
 Each template's identity sets its own form: paragraph length, how the dek reads, how the
-piece closes. A press may shadow them. The floor holds those choices to a standard. Keep
+piece closes. A press may shadow them. This file holds those choices to a standard. Keep
 the writing easy to follow. End on the conclusion the argument built. Skip the generic
 moral. Let the teaching and the citations equip the reader to go further.
 

@@ -411,7 +411,7 @@ def test_lifted_skeleton_placeholder_warns_and_never_blocks(
 @pytest.mark.parametrize(
     ("name", "paragraph"),
     [
-        ("a long caps run, off-skeleton", "REPLACE THIS ENTIRE SENTENCE TONIGHT."),
+        ("a long caps run, off-skeleton", "REPLACE THIS ENTIRE SENTENCE IMMEDIATELY."),
         ("a lone skeleton placeholder word", "TITLE goes here."),
     ],
 )

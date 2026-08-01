@@ -12,6 +12,36 @@ import html
 from nb.site.catalog import DIRECTORY_URL
 from nb.site.library import article_text, by_date_and_slug, date_sort_key
 
+__all__ = (
+    "build_search_index",
+    "chrome_eco_links",
+    "chrome_footer",
+    "chrome_header",
+    "chrome_imprint",
+    "item_meta_row",
+    "kicker_text",
+    "month_label",
+    "night_body",
+    "page",
+    "pretty_date",
+    "render_assets_html",
+    "render_build_archive",
+    "render_build_page",
+    "render_collection_body",
+    "render_newsstand",
+    "render_search_page",
+    "render_sequence_body",
+    "render_series_index",
+    "render_series_page",
+    "render_tag_page",
+    "render_tags_index",
+    "render_timeline_body",
+    "series_head_html",
+    "series_status",
+    "source_label",
+    "story_item",
+)
+
 esc = html.escape
 
 FONTS = (
@@ -256,8 +286,8 @@ def render_newsstand(site, catalog, *, series_cfgs, articles, by_night):
         return page(site, site["title"], body=body, active="Today")
     dates = sorted(catalog["builds"], key=date_sort_key)
     latest = dates[-1]
-    tonight = by_night.get(latest, [])
-    body = night_body(tonight, series_cfgs, depth=0, date=latest)
+    latest_articles = by_night.get(latest, [])
+    body = night_body(latest_articles, series_cfgs, depth=0, date=latest)
     if len(dates) > 1:
         prev = dates[-2]
         body += (
@@ -312,8 +342,8 @@ def series_status(s, cfg):
 
     Finite series read complete once every configured item is published and
     otherwise report their published count; rolling series show their cadence.
-    Resting series (complete or paused) collect under the In-the-stacks
-    disclosure instead of their section.
+    Inactive series (complete or paused) collect under their own disclosure
+    instead of their section.
     """
     mode, count, total = s.get("mode"), s["count"], s.get("total")
     if cfg.get("paused"):
@@ -381,7 +411,7 @@ def render_series_index(site, catalog, *, series_cfgs, articles):
         )
     if resting:
         body += (
-            f'<details class="nb-stacks"><summary>In the stacks · '
+            f'<details class="nb-inactive-series"><summary>Completed and paused · '
             f"{len(resting)} series"
             f"</summary>{''.join(resting)}</details>"
         )

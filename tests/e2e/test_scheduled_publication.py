@@ -1,16 +1,16 @@
-"""The dress rehearsal: two nights against a real git press.
+"""Scheduled publication across two UTC dates against a real Git press.
 
 The press is laid out exactly like production — main carries the engine and the
-config, an orphan library branch carries what shipped. Each night shift branches
-off library, adds one article, is proofed in PR mode with the identical
-invocation check.yml makes, is gated by the autopublish helper, is squash-merged,
-and the site is rebuilt from the merged library as publish.yml does.
+config, and an orphan library branch carries what shipped. Each proposed
+article branches from library, passes the same PR-mode proof that check.yml
+invokes, passes the autopublish gate, is squash-merged, and then enters the site
+build that publish.yml runs.
 
-Night 1 (2026-07-05): a collection article and a rolling brief.
-Night 2 (2026-07-06): a rolling brief.
+First date (2026-07-05): a collection article and a rolling brief.
+Second date (2026-07-06): a rolling brief.
 
-The cloud half — a real scheduled run on a fork, for two nights — stays a
-human-run verification; see the phase 6 runbook.
+A real scheduled run on a fork remains a manual verification outside this
+deterministic suite.
 """
 
 import dataclasses
@@ -34,11 +34,11 @@ NS = "{http://www.w3.org/2005/Atom}"
 
 
 class Press:
-    """A real Git press whose helpers reproduce two scheduled nights.
+    """A real Git press whose helpers reproduce two publication dates.
 
     Main and library stay separate exactly as they do in production. Each
     method performs the actual Git, proof, merge, and build boundary so the
-    rehearsal detects integration drift that unit fixtures cannot represent.
+    test detects integration drift that unit fixtures cannot represent.
     """
 
     def __init__(self) -> None:
@@ -50,8 +50,8 @@ class Press:
             dirs_exist_ok=True,
         )
         git("init", "-q", "-b", "main", cwd=self.root)
-        git("config", "user.email", "night@shift", cwd=self.root)
-        git("config", "user.name", "night-shift", cwd=self.root)
+        git("config", "user.email", "scheduled@test.invalid", cwd=self.root)
+        git("config", "user.name", "scheduled-runtime", cwd=self.root)
         git("add", "-A", cwd=self.root)
         git("commit", "-qm", "engine", cwd=self.root)
         git("checkout", "-q", "--orphan", "library", cwd=self.root)
@@ -61,7 +61,7 @@ class Press:
         git("add", "-A", cwd=self.root)
         git("commit", "-qm", "library: initialize the empty press", cwd=self.root)
 
-        # scratch dirs live OUTSIDE the worktree, so a night's commit stays one file
+        # Scratch dirs live outside the worktree, so each article commit stays narrow.
         self.scratch = pathlib.Path(tempfile.mkdtemp())
         self.libdir = self.scratch / "libstate"
         self.maindir = self.scratch / "mainstate"
@@ -71,8 +71,9 @@ class Press:
         self._archive("main", self.maindir)
 
     def _archive(self, ref: str, into: pathlib.Path) -> None:
+        command = f"git archive {ref} | tar -x -C {into}"
         subprocess.run(
-            f"git archive {ref} | tar -x -C {into}",
+            command,
             shell=True,
             cwd=self.root,
             check=True,
@@ -85,11 +86,13 @@ class Press:
         return str(self.libdir)
 
     def rev(self, ref: str) -> str:
-        return subprocess.run(
-            ["git", "rev-parse", ref], cwd=self.root, capture_output=True, text=True
-        ).stdout.strip()
+        command = ["git", "rev-parse", ref]
+        completed = subprocess.run(
+            command, cwd=self.root, capture_output=True, text=True
+        )
+        return completed.stdout.strip()
 
-    def night_shift_run(
+    def propose_article(
         self,
         branch: str,
         series: str,
@@ -125,7 +128,7 @@ class Press:
             self.library_state(),
             "--today",
             today,
-            "--no-check-links",  # the rehearsal runs offline and deterministic
+            "--no-check-links",  # This integration test is offline and deterministic.
             "--json",
         )
         autopublish = self._run(
@@ -162,55 +165,56 @@ class Press:
         )
 
     def site_text(self, *parts: str) -> str:
-        return pathlib.Path(self.sitedir, *parts).read_text()
+        page = pathlib.Path(self.sitedir, *parts)
+        return page.read_text()
 
 
 @dataclasses.dataclass(frozen=True)
-class Rehearsal:
+class PublicationScenario:
     press: Press
     article_findings: dict
     autopublish: str
     brief_findings: dict
-    catalog1: dict
-    front1: str
-    feed1: str
+    first_catalog: dict
+    first_front: str
+    first_feed: str
     rival_findings: dict
-    night2_findings: dict
-    catalog2: dict
-    front2: str
+    second_findings: dict
+    second_catalog: dict
+    second_front: str
 
 
 @pytest.fixture(scope="module")
-def rehearsal() -> Rehearsal:
+def publication() -> PublicationScenario:
     press = Press()
 
-    article_findings, autopublish = press.night_shift_run(
-        "nb/n1-micron",
+    article_findings, autopublish = press.propose_article(
+        "nb/first-micron",
         "semiconductors",
         slug="micron",
         html=article().replace("2026-07-06", "2026-07-05"),
         today="2026-07-05",
     )
-    press.merge("nb/n1-micron")
+    press.merge("nb/first-micron")
 
     # the base a competing agent would have branched from, before the brief merged
     pre_merge_ref = press.rev("library")
-    brief_findings, _ = press.night_shift_run(
-        "nb/n1-brief",
+    brief_findings, _ = press.propose_article(
+        "nb/first-brief",
         "ai-briefs",
         slug="2026-07-05",
         html=brief("2026-07-05"),
         today="2026-07-05",
     )
-    press.merge("nb/n1-brief")
+    press.merge("nb/first-brief")
 
-    catalog1 = press.publish("2026-07-05T09:00:00+00:00")
-    front1 = press.site_text("index.html")
-    feed1 = press.site_text("feed.xml")
+    first_catalog = press.publish("2026-07-05T09:00:00+00:00")
+    first_front = press.site_text("index.html")
+    first_feed = press.site_text("feed.xml")
 
     # a competing agent raced the same slug from the pre-merge base, and lost
-    rival_findings, _ = press.night_shift_run(
-        "nb/n1-dupe",
+    rival_findings, _ = press.propose_article(
+        "nb/first-duplicate",
         "ai-briefs",
         slug="2026-07-05",
         html=brief("2026-07-05").replace(
@@ -221,108 +225,123 @@ def rehearsal() -> Rehearsal:
     )
     git("checkout", "-q", "library", cwd=press.root)
 
-    night2_findings, _ = press.night_shift_run(
-        "nb/n2-brief",
+    second_findings, _ = press.propose_article(
+        "nb/second-brief",
         "ai-briefs",
         slug="2026-07-06",
         html=brief("2026-07-06"),
         today="2026-07-06",
     )
-    press.merge("nb/n2-brief")
+    press.merge("nb/second-brief")
 
-    catalog2 = press.publish("2026-07-06T09:00:00+00:00")
+    second_catalog = press.publish("2026-07-06T09:00:00+00:00")
 
-    return Rehearsal(
+    return PublicationScenario(
         press=press,
         article_findings=article_findings,
         autopublish=autopublish,
         brief_findings=brief_findings,
-        catalog1=catalog1,
-        front1=front1,
-        feed1=feed1,
+        first_catalog=first_catalog,
+        first_front=first_front,
+        first_feed=first_feed,
         rival_findings=rival_findings,
-        night2_findings=night2_findings,
-        catalog2=catalog2,
-        front2=press.site_text("index.html"),
+        second_findings=second_findings,
+        second_catalog=second_catalog,
+        second_front=press.site_text("index.html"),
     )
 
 
 def entry_count(feed_xml: str) -> int:
-    return len(ET.fromstring(feed_xml).findall(f"{NS}entry"))
+    feed = ET.fromstring(feed_xml)
+    return len(feed.findall(f"{NS}entry"))
 
 
-def test_the_article_pr_validates_block_clean(rehearsal: Rehearsal) -> None:
-    assert rehearsal.article_findings["block_count"] == 0, rehearsal.article_findings[
+def test_the_article_pr_validates_block_clean(publication: PublicationScenario) -> None:
+    assert publication.article_findings["block_count"] == 0, (
+        publication.article_findings["findings"]
+    )
+
+
+def test_the_autopublish_gate_says_true(publication: PublicationScenario) -> None:
+    assert publication.autopublish == "true"
+
+
+def test_the_brief_pr_validates_block_clean(publication: PublicationScenario) -> None:
+    assert publication.brief_findings["block_count"] == 0, publication.brief_findings[
         "findings"
     ]
 
 
-def test_the_autopublish_gate_says_true(rehearsal: Rehearsal) -> None:
-    assert rehearsal.autopublish == "true"
+def test_first_date_renders_a_multi_article_front_page(
+    publication: PublicationScenario,
+) -> None:
+    assert "nb-lead-cell" in publication.first_front
+    assert 'class="nb-grid"' in publication.first_front
 
 
-def test_the_brief_pr_validates_block_clean(rehearsal: Rehearsal) -> None:
-    assert rehearsal.brief_findings["block_count"] == 0, rehearsal.brief_findings[
-        "findings"
-    ]
-
-
-def test_night_one_renders_a_multi_article_front_page(rehearsal: Rehearsal) -> None:
-    assert "nb-lead-cell" in rehearsal.front1
-    assert 'class="nb-grid"' in rehearsal.front1
-
-
-def test_night_one_build_lists_both_articles(rehearsal: Rehearsal) -> None:
-    assert rehearsal.catalog1["builds"]["2026-07-05"] == [
+def test_first_date_build_lists_both_articles(publication: PublicationScenario) -> None:
+    assert publication.first_catalog["builds"]["2026-07-05"] == [
         "ai-briefs/2026-07-05",
         "semiconductors/micron",
     ]
 
 
-def test_night_one_feed_has_both_entries(rehearsal: Rehearsal) -> None:
-    assert entry_count(rehearsal.feed1) == 2
+def test_first_date_feed_has_both_entries(publication: PublicationScenario) -> None:
+    assert entry_count(publication.first_feed) == 2
 
 
-def test_a_losing_race_for_the_same_night_is_blocked(rehearsal: Rehearsal) -> None:
-    findings = rehearsal.rival_findings["findings"]
+def test_a_losing_race_for_the_same_article_is_blocked(
+    publication: PublicationScenario,
+) -> None:
+    findings = publication.rival_findings["findings"]
     blocked = [f["code"] for f in findings if f["level"] == "BLOCK"]
 
     assert "B-MODE" in blocked, findings
 
 
-def test_the_night_two_brief_validates_block_clean(rehearsal: Rehearsal) -> None:
-    assert rehearsal.night2_findings["block_count"] == 0, rehearsal.night2_findings[
+def test_the_second_date_brief_validates_block_clean(
+    publication: PublicationScenario,
+) -> None:
+    assert publication.second_findings["block_count"] == 0, publication.second_findings[
         "findings"
     ]
 
 
-def test_the_front_page_rolls_over_to_night_two(rehearsal: Rehearsal) -> None:
-    assert "July 6, 2026" in rehearsal.front2
-    assert "2026-07-06" in json.dumps(rehearsal.catalog2["builds"])
+def test_the_front_page_rolls_over_to_the_second_date(
+    publication: PublicationScenario,
+) -> None:
+    assert "July 6, 2026" in publication.second_front
+    assert "2026-07-06" in json.dumps(publication.second_catalog["builds"])
 
 
-def test_both_nights_are_preserved_in_the_archive(rehearsal: Rehearsal) -> None:
-    assert list(rehearsal.catalog2["builds"]) == ["2026-07-06", "2026-07-05"]
+def test_both_dates_are_preserved_in_the_archive(
+    publication: PublicationScenario,
+) -> None:
+    assert list(publication.second_catalog["builds"]) == ["2026-07-06", "2026-07-05"]
     assert pathlib.Path(
-        rehearsal.press.sitedir, "builds", "2026-07-05", "index.html"
+        publication.press.sitedir, "builds", "2026-07-05", "index.html"
     ).is_file()
 
 
-def test_build_pages_link_across_nights(rehearsal: Rehearsal) -> None:
-    page = rehearsal.press.site_text("builds", "2026-07-06", "index.html")
+def test_build_pages_link_across_dates(publication: PublicationScenario) -> None:
+    page = publication.press.site_text("builds", "2026-07-06", "index.html")
 
     assert 'href="../2026-07-05/"' in page
 
 
-def test_the_feeds_update_after_night_two(rehearsal: Rehearsal) -> None:
-    assert entry_count(rehearsal.press.site_text("feed.xml")) == 3
+def test_the_feeds_update_after_the_second_date(
+    publication: PublicationScenario,
+) -> None:
+    assert entry_count(publication.press.site_text("feed.xml")) == 3
     assert (
-        entry_count(rehearsal.press.site_text("series", "ai-briefs", "feed.xml")) == 2
+        entry_count(publication.press.site_text("series", "ai-briefs", "feed.xml")) == 2
     )
 
 
-def test_the_sections_page_counts_published_not_progress(rehearsal: Rehearsal) -> None:
-    page = rehearsal.press.site_text("series", "index.html")
+def test_the_sections_page_counts_published_not_progress(
+    publication: PublicationScenario,
+) -> None:
+    page = publication.press.site_text("series", "index.html")
 
     assert "1 published" in page
     assert "1 of 5" not in page

@@ -1,11 +1,10 @@
-"""Tonight's work list: what publishes, what idles, and when duty refuses to answer.
+"""Scheduled work: what publishes, what idles, and when duty refuses to answer.
 
-duty.py decides whether a series publishes tonight. Every branch of that
-decision is a night the paper either ships or stays quiet, so the work list is
-asserted whole: the due entry, the idle reason, the candidates. Malformed
-configuration idles one series and never takes down the run. A tree that is not
-a press is not a quiet night — it exits 2 and prints nothing, because a run once
-read an empty work list as permission to go find a configuration of its own.
+duty.py decides whether a series publishes on the selected UTC date. The work
+list is asserted whole: the due entry, the idle reason, and the candidates.
+Malformed configuration idles one series and never takes down the run. A tree
+that is not a press exits 2 and prints nothing, because a scheduled run once
+read an empty work list as permission to find configuration of its own.
 """
 
 import json
@@ -40,8 +39,8 @@ def empty_lib(make_library: Callable[..., str]) -> str:
     return make_library({"semiconductors": [], "ai-briefs": []})
 
 
-def test_rolling_series_is_due_tonight_with_tonights_slug(
-    duty: Callable[..., dict], testrepo: str, empty_lib: str
+def test_rolling_series_is_due_with_the_selected_utc_date_slug(
+    *, duty: Callable[..., dict], testrepo: str, empty_lib: str
 ) -> None:
     report = duty(testrepo, empty_lib)
 
@@ -49,12 +48,15 @@ def test_rolling_series_is_due_tonight_with_tonights_slug(
     assert duty_of(report, "ai-briefs")["slug"] == TODAY
 
 
-def test_rolling_already_published_tonight_is_idle(
-    duty: Callable[..., dict], testrepo: str, make_library: Callable[..., str]
+def test_rolling_already_published_on_the_selected_date_is_idle(
+    *, duty: Callable[..., dict], testrepo: str, make_library: Callable[..., str]
 ) -> None:
     report = duty(testrepo, make_library({"ai-briefs": [TODAY]}))
 
-    assert duty_of(report, "ai-briefs")["reason"] == "already published tonight"
+    assert (
+        duty_of(report, "ai-briefs")["reason"]
+        == "already published on selected UTC date"
+    )
 
 
 def test_collection_in_order_offers_exactly_the_next_item(
@@ -91,8 +93,8 @@ def test_paused_series_is_idle(
     assert duty_of(report, "semiconductors")["reason"] == "paused"
 
 
-def test_cadence_off_night_is_idle(
-    duty: Callable[..., dict], patched_repo: Callable[..., str], empty_lib: str
+def test_cadence_excluding_the_selected_date_is_idle(
+    *, duty: Callable[..., dict], patched_repo: Callable[..., str], empty_lib: str
 ) -> None:
     report = duty(patched_repo("cadence: [tue]\n", series="ai-briefs"), empty_lib)
 
@@ -114,7 +116,7 @@ def test_manual_cadence_is_always_idle(
 
     entry = duty_of(report, "ai-briefs")
     assert entry in report["idle"]
-    assert entry["reason"] == "cadence manual — not tonight"
+    assert entry["reason"] == "cadence manual excludes the selected UTC date"
 
 
 def test_open_series_with_a_queue_lists_commissions(
@@ -127,8 +129,8 @@ def test_open_series_with_a_queue_lists_commissions(
     assert duty_of(report, "wildcard")["commissions"] == ["commissioned-piece"]
 
 
-def test_an_article_published_tonight_idles_its_series(
-    duty: Callable[..., dict], testrepo: str, make_library: Callable[..., str]
+def test_an_article_published_on_the_selected_date_idles_its_series(
+    *, duty: Callable[..., dict], testrepo: str, make_library: Callable[..., str]
 ) -> None:
     library = make_library({"semiconductors": []})
     pathlib.Path(library, "library", "semiconductors", "micron.html").write_text(
@@ -137,7 +139,10 @@ def test_an_article_published_tonight_idles_its_series(
 
     report = duty(testrepo, library)
 
-    assert duty_of(report, "semiconductors")["reason"] == "already published tonight"
+    assert (
+        duty_of(report, "semiconductors")["reason"]
+        == "already published on selected UTC date"
+    )
 
 
 def test_complete_collection_is_idle(
@@ -220,10 +225,10 @@ def test_sequence_progress_counts_syllabus_items_not_library_extras(
 
 
 # The 2026-07-14 failure: pointed at a tree with no press, duty printed an empty
-# work list and exited 0. The night shift read that as "nothing due", went
+# work list and exited 0. The scheduled agent read that as "nothing due", went
 # looking for a configuration, and adopted the engine's examples/ folder. An
 # empty answer is an invitation. A missing press must refuse, and it must not be
-# confusable with a paper whose desks are simply all idle tonight.
+# confusable with a paper whose series are simply all idle for the UTC date.
 
 
 @pytest.fixture
@@ -233,7 +238,8 @@ def no_press() -> str:
     return tmp
 
 
-def test_a_tree_with_no_press_refuses_instead_of_reporting_a_quiet_night(
+def test_a_tree_with_no_press_refuses_instead_of_reporting_no_scheduled_work(
+    *,
     run_duty: Callable[..., subprocess.CompletedProcess[str]],
     no_press: str,
     empty_lib: str,
@@ -266,39 +272,40 @@ def test_examples_copied_into_press_is_a_real_press(
     assert run.returncode == 0
 
 
-def test_a_press_whose_desks_are_all_idle_is_a_quiet_night_not_a_refusal(
+def test_a_press_whose_series_are_all_idle_returns_an_empty_work_list(
+    *,
     run_duty: Callable[..., subprocess.CompletedProcess[str]],
     clone_testrepo: Callable[..., str],
     empty_lib: str,
 ) -> None:
-    quiet = clone_testrepo("press", "templates")
-    for series_yaml in pathlib.Path(quiet, "press", "series").glob("*/series.yaml"):
+    idle = clone_testrepo("press", "templates")
+    for series_yaml in pathlib.Path(idle, "press", "series").glob("*/series.yaml"):
         series_yaml.write_text(series_yaml.read_text() + "paused: true\n")
 
-    run = run_duty("--repo", quiet, "--library", empty_lib)
+    run = run_duty("--repo", idle, "--library", empty_lib)
 
     assert run.returncode == 0
     assert json.loads(run.stdout)["due"] == []
 
 
 @pytest.fixture
-def night_clone(clone_testrepo: Callable[..., str]) -> tuple[str, str]:
+def scheduled_clone(clone_testrepo: Callable[..., str]) -> tuple[str, str]:
     origin = tempfile.mkdtemp()
     git("init", "--bare", "-q", "-b", "main", cwd=origin)
-    night = clone_testrepo("press", "templates")
-    git("init", "-q", "-b", "main", cwd=night)
-    git("config", "user.email", "t@t", cwd=night)
-    git("config", "user.name", "t", cwd=night)
-    git("remote", "add", "origin", origin, cwd=night)
-    git("add", "-A", cwd=night)
-    git("commit", "-qm", "the press as the night shift sees it", cwd=night)
-    git("push", "-q", "origin", "main", cwd=night)
-    return night, origin
+    scheduled = clone_testrepo("press", "templates")
+    git("init", "-q", "-b", "main", cwd=scheduled)
+    git("config", "user.email", "t@t", cwd=scheduled)
+    git("config", "user.name", "t", cwd=scheduled)
+    git("remote", "add", "origin", origin, cwd=scheduled)
+    git("add", "-A", cwd=scheduled)
+    git("commit", "-qm", "the press as the scheduled runtime sees it", cwd=scheduled)
+    git("push", "-q", "origin", "main", cwd=scheduled)
+    return scheduled, origin
 
 
 @pytest.fixture
-def stale_clone(night_clone: tuple[str, str]) -> str:
-    night, origin = night_clone
+def stale_clone(scheduled_clone: tuple[str, str]) -> str:
+    scheduled, origin = scheduled_clone
     owner = tempfile.mkdtemp()
     git("clone", "-q", origin, owner, cwd=tempfile.gettempdir())
     git("config", "user.email", "t@t", cwd=owner)
@@ -307,17 +314,18 @@ def stale_clone(night_clone: tuple[str, str]) -> str:
     git("add", "-A", cwd=owner)
     git("commit", "-qm", "retire the old press", cwd=owner)
     git("push", "-q", "origin", "main", cwd=owner)
-    return night
+    return scheduled
 
 
 def test_a_checkout_level_with_origin_main_computes_the_work_list(
+    *,
     run_duty: Callable[..., subprocess.CompletedProcess[str]],
-    night_clone: tuple[str, str],
+    scheduled_clone: tuple[str, str],
     empty_lib: str,
 ) -> None:
-    night, _ = night_clone
+    scheduled, _ = scheduled_clone
 
-    assert run_duty("--repo", night, "--library", empty_lib).returncode == 0
+    assert run_duty("--repo", scheduled, "--library", empty_lib).returncode == 0
 
 
 def test_a_checkout_behind_origin_main_refuses_to_compute_a_work_list(

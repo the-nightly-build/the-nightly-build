@@ -52,11 +52,10 @@ def check_article(
 ) -> dict | None:
     """Run every check against one article and record the findings on rep.
 
-    `today` defaults to the date in UTC, which is the clock duty.py keeps and
-    the clock PROTOCOL's rolling-slug rule names. The local clock would fail a
-    correct article: a night shift running west of UTC, after its own evening
-    rollover, computes yesterday and then reads tonight's rolling slug as a
-    date in the future.
+    `today` defaults to the date in UTC, which is the clock duty.py and the
+    rolling-slug proof use. A local clock could fail a correct article: after
+    UTC midnight but before local midnight, a runtime west of UTC would compute
+    the prior date and reject the current UTC slug as a date in the future.
     """
     today = today or _dt.datetime.now(_dt.timezone.utc).date()
 

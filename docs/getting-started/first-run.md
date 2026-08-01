@@ -1,11 +1,11 @@
 # Run the first article
 
-The first run is a capability test and an editorial rehearsal. Run it in the
+The first run is a capability and editorial test. Run it in the
 exact environment that will execute the schedule, not in the setup chat or a
 different local shell.
 
-Before triggering it, keep `autopublish: false` on the canary series. The run
-must:
+Before triggering it, keep `autopublish: false` on the series used for the
+test. The run must:
 
 1. Check out current `main` and `library` state.
 2. Run `nb sync` and `nb duty` successfully.
@@ -15,7 +15,7 @@ must:
 6. Pass the full proof and rendered-browser check in CI.
 
 Review the article and its rendering. If it misses editorial intent, improve
-the press and run the canary again. If a capability fails, fix only that
+the press and run the test article again. If a capability fails, fix only that
 boundary and resume from it; do not silently substitute the setup environment.
 
 Setup is ready only after the scheduled runtime returns a passing PR. Merge it

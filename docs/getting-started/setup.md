@@ -21,7 +21,7 @@ Start with [Ask your AI](ask-your-ai.md). A capable assistant should:
 3. Help you define the first version of `press/`.
 4. Configure one scheduled runtime using
    [Schedule](../guides/operate/schedule.md).
-5. Trigger the [first-run canary](first-run.md) in that exact runtime.
+5. Trigger the [first test article](first-run.md) in that exact runtime.
 
 `nb setup` scaffolds `press/`, creates the protected `library` branch, seeds its
 publishing workflows, and configures GitHub Pages and auto-merge. The local

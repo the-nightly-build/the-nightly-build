@@ -3,7 +3,7 @@
 # requires-python = ">=3.10"
 # dependencies = ["pyyaml"]
 # ///
-"""Compute tonight's work list deterministically from config and library state.
+"""Compute scheduled work deterministically from config and library state.
 
 The orchestrator runs this before researching anything. It is the single
 source of truth for cadence, pauses, completion, commission queues, and
@@ -13,11 +13,12 @@ Because it runs first, it is also where a wrong tree is caught. It refuses,
 rather than answering, in two cases:
 
   No press. An empty work list used to mean the same thing whether the paper
-  was resting or the tree had no press/ at all. On 2026-07-14 a night shift
-  read an empty list, went looking for a configuration, and adopted the
-  engine's own examples/ folder: three articles for series this paper retired
-  months ago, every local proof passing, CI blocking all of it. A missing
-  press is not a quiet night. It means you are in the wrong tree.
+  had no scheduled work or the tree had no press/ at all. On 2026-07-14 a
+  scheduled agent read an empty list, went looking for a configuration, and
+  adopted the engine's own examples/ folder: three articles for series this
+  paper retired months ago, every local proof passing, CI blocking all of it.
+  A missing press is not an empty scheduled run. It means you are in the wrong
+  tree.
 
   A stale checkout. A cached workspace serves a press, prompts, and an engine
   the paper has moved past, and nothing downstream can tell.
@@ -83,8 +84,8 @@ def cadence_includes(cadence, day: str) -> bool:
 def published_state(library: str, series_id: str) -> tuple[set[str], set[str]]:
     """Return (published slugs, published nb-meta dates) for one series.
 
-    Slugs drive dedupe and completion checks. The nb-meta dates exist
-    for rerun safety: an article published tonight idles its series even
+    Slugs drive dedupe and completion checks. The nb-meta dates exist for rerun
+    safety: an article published on the current UTC date idles its series even
     when its slug is topical rather than dated.
     """
     base = nb_meta.series_dir(library, series_id)
@@ -126,16 +127,16 @@ def series_duty(
     date: _dt.date,
     day: str,
 ) -> tuple[bool, dict[str, object]]:
-    """Decide whether one series publishes tonight, and why.
+    """Decide whether one series publishes on the selected UTC date, and why.
 
     Returns (is_due, entry). The entry always names the series and mode,
     then either a reason for sitting out (paused, off-cadence, already
-    published tonight, complete) or what to publish: a slug for sequence
-    and rolling, candidates for collection (all remaining items under
-    selection: random, otherwise just the next one), and commissions for
-    open series with queued items. Gates apply in order: paused, then
-    cadence, then already-published-tonight, so a paused series never
-    reports a cadence excuse.
+    published on the selected date, complete) or what to publish: a slug for
+    sequence and rolling, candidates for collection (all remaining items under
+    selection: random, otherwise just the next one), and commissions for open
+    series with queued items. Gates apply in order: paused, then cadence, then
+    already published on this date, so a paused series never reports a cadence
+    excuse.
     """
     mode = cfg.get("mode")
     entry = {"series": sid, "mode": mode}
@@ -144,9 +145,12 @@ def series_duty(
         return False, {**entry, "reason": "paused"}
     cadence = cfg.get("cadence")
     if not cadence_includes(cadence, day):
-        return False, {**entry, "reason": f"cadence {cadence} — not tonight"}
+        return False, {
+            **entry,
+            "reason": f"cadence {cadence} excludes the selected UTC date",
+        }
     if date.isoformat() in pub_dates:
-        return False, {**entry, "reason": "already published tonight"}
+        return False, {**entry, "reason": "already published on selected UTC date"}
 
     items = config_items(cfg)
     unpublished = [it["slug"] for it in items if it.get("slug") not in pub]
@@ -154,8 +158,15 @@ def series_duty(
     if mode == "rolling":
         slug = date.isoformat()
         if slug in pub:
-            return False, {**entry, "reason": "already published tonight"}
-        return True, {**entry, "slug": slug, "reason": "tonight's date is unpublished"}
+            return False, {
+                **entry,
+                "reason": "already published on selected UTC date",
+            }
+        return True, {
+            **entry,
+            "slug": slug,
+            "reason": "selected UTC date is unpublished",
+        }
     if mode == "sequence":
         if not unpublished:
             return False, {**entry, "reason": "complete"}
@@ -190,8 +201,8 @@ def series_duty(
         return True, {
             **entry,
             "commissions": [],
-            "reason": "open section — invent tonight's topic within "
-            "the beat; do not repeat a published slug",
+            "reason": "open section — choose a topic within the beat; "
+            "do not repeat a published slug",
         }
     return False, {**entry, "reason": f"unknown mode {mode!r}"}
 
@@ -238,25 +249,26 @@ def stale_checkout(repo) -> str | None:
 def missing_press(repo) -> str | None:
     """Say why this tree holds no press, or None when it holds one.
 
-    A paper whose series are all idle tonight is a quiet night, and duty
-    answers it with an empty due list. A tree with no press/series at all is
-    not a quiet night: it is the wrong directory, and an empty answer invites
-    the night shift to go find a configuration somewhere else.
+    A paper whose series are all idle for the selected UTC date has no scheduled
+    work, and duty answers with an empty due list. A tree with no press/series
+    at all is the wrong directory, and an empty answer could invite the
+    scheduled agent to find configuration somewhere else.
     """
     root = os.path.join(repo, "press", "series")
     if os.path.isdir(root) and nb_meta.series_ids(repo):
         return None
     return (
-        f"no press at {repo!r}: {root} holds no configured series. This is not a "
-        f"quiet night, it is the wrong tree. The press is press/ and nothing "
-        f"else: examples/ is documentation, never configuration, and an article "
+        f"no press at {repo!r}: {root} holds no configured series. This is not "
+        f"an empty scheduled run; it is the wrong tree. The press is press/ and "
+        f"nothing else: examples/ is documentation, never configuration, and "
+        f"an article "
         f"written from it names a series the proof will refuse. Check out the "
         f"paper's main branch and run duty from its root."
     )
 
 
 def main(argv=None) -> int:
-    p = argparse.ArgumentParser(description="Tonight's deterministic work list")
+    p = argparse.ArgumentParser(description="Deterministic scheduled work list")
     p.add_argument("--repo", default=".", help="repo root (main checkout)")
     p.add_argument(
         "--library", required=True, help="library-branch checkout (published state)"

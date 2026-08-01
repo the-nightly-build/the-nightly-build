@@ -40,7 +40,7 @@ COMMANDS = {
         "scripts/sync.sh", "Synchronize protected publishing workflows", "orchestrator"
     ),
     "duty": Command(
-        "engine/duty.py", "Resolve the articles due tonight", "orchestrator"
+        "engine/duty.py", "Resolve articles due for a UTC date", "orchestrator"
     ),
     "validate": Command(
         "engine/validate_config.py", "Validate press configuration", "human"

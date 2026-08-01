@@ -1,9 +1,9 @@
 # Headlines, deks, and section headings
 
-The floor for the three surfaces a reader meets first. It composes directly
-after `spec/editorial.md`, and that file's prose rules apply here word for
-word. One test runs under everything below: the line commits to something the
-piece establishes. The tells this file names all fail it.
+This file defines the standard for the three surfaces a reader meets first. It
+composes directly after `spec/editorial.md`, and that file's prose rules apply
+here word for word. One test runs under everything below: the line commits to
+something the piece establishes. The tells this file names all fail it.
 
 ## The headline
 
@@ -17,7 +17,7 @@ in them, ahead of every qualifier.
   "A decade of major cache incidents at Twitter" (Luu again) promises exactly
   what it delivers.
 - **Let a fresh verb carry it, in the present tense for events.** The classic
-  copy-desk pair: "Students applaud later start times" reports the event from
+  headline pair: "Students applaud later start times" reports the event from
   the side that felt it. "Officials approve schedule change" files a form.
 - **Numbers earn their spot when they are the story.** "Building a World Map
   with only 500 bytes" (Simon Willison): the figure is the surprise, so it

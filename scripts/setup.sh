@@ -178,7 +178,7 @@ if gh api -X PATCH "repos/$repo" -F allow_auto_merge=true >/dev/null 2>&1; then
 else
 	warn "could not enable auto-merge. Flip it at https://github.com/$repo/settings"
 fi
-# enforce_admins:true is deliberate: the night shift holds your (admin) token,
+# enforce_admins:true is deliberate: the scheduled runtime holds your (admin) token,
 # so the required 'validate' check must bind admins too, or a prompt-injected
 # run could merge past the proof. Auto-merge still works (it merges only after
 # 'validate' passes). See docs/concepts/publishing-and-security.md.

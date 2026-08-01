@@ -206,7 +206,7 @@ def vc_rc(
 
 @pytest.fixture
 def run_duty() -> Callable[..., subprocess.CompletedProcess[str]]:
-    """duty.py as the night shift invokes it, warts and exit codes included."""
+    """duty.py as the scheduled runtime invokes it, including exit codes."""
 
     def run(*args: str) -> subprocess.CompletedProcess[str]:
         return subprocess.run([*DUTY, *args], capture_output=True, text=True)
@@ -218,7 +218,7 @@ def run_duty() -> Callable[..., subprocess.CompletedProcess[str]]:
 def duty(
     run_duty: Callable[..., subprocess.CompletedProcess[str]],
 ) -> Callable[..., dict]:
-    """Tonight's work list, parsed. Use run_duty when the exit code is the point."""
+    """Parse scheduled work; use run_duty when the exit code is the point."""
 
     def work_list(repo: str, library: str, *, date: str = TODAY) -> dict:
         out = run_duty("--repo", str(repo), "--library", str(library), "--date", date)
@@ -241,7 +241,7 @@ def ci_helper() -> Callable[[str, str], str]:
         git("config", "user.name", "t", cwd=repo)
         git("add", "-A", cwd=repo)
         git("commit", "-qm", "config", cwd=repo)
-        git("checkout", "-qb", "night", cwd=repo)
+        git("checkout", "-qb", "article", cwd=repo)
         lib = pathlib.Path(repo) / "library" / "foo"
         lib.mkdir(parents=True)
         (lib / "story.html").write_text("<html></html>")
@@ -262,7 +262,7 @@ def ci_helper() -> Callable[[str, str], str]:
 class PressRepo:
     """A real git press: main carries the engine, library carries what shipped.
 
-    The night shift's branch (claude/night-run) already adds one article. Drive
+    The proposed branch (`nb/scheduled-article`) already adds one article. Drive
     it further with write/commit/checkout, then run_pr() to proof the PR as
     check.yml does.
     """
@@ -290,7 +290,7 @@ class PressRepo:
         self,
         *,
         base: str = "library",
-        head: str = "claude/night-run",
+        head: str = "nb/scheduled-article",
         library: str | None = None,
         today: str = TODAY,
         deletions_by_owner: bool = False,
@@ -326,7 +326,7 @@ def pr_repo(clone_testrepo: Callable[..., str]) -> PressRepo:
     repo.checkout("library", new=True)
     repo.write("library/.gitkeep", "")
     repo.commit("library init")
-    repo.checkout("claude/night-run", new=True)
+    repo.checkout("nb/scheduled-article", new=True)
     repo.write("library/semiconductors/micron.html", article())
     write_agent_artifacts(repo.path, "semiconductors", slug="micron")
     repo.commit("nb: semiconductors/micron")

@@ -2,14 +2,14 @@
 
 The easiest setup path is to give this repository to the AI tool you already
 use. It needs to be able to work with GitHub; it does not need to be the same
-tool that will run your scheduled night shift.
+tool that will run scheduled publication.
 
 Send it this repository URL and say:
 
 > Help me set up my own Nightly Build paper. Follow the repository's
 > instructions, tell me only the manual action you need from me right now, and
 > verify each capability before moving on. Do not publish automatically until
-> we have run and reviewed the first canary Article PR.
+> we have run the first test article and reviewed its Article PR.
 
 The assistant should first determine what it can do in the current chat. It may
 be able to fork, clone, configure, push, and open pull requests itself. When it

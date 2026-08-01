@@ -19,7 +19,7 @@ Then:
    a writer could accidentally preserve.
 3. Add bespoke furniture only when the template requires it.
 4. Point a test series at the template and run `nb validate`.
-5. Fill a realistic rehearsal article, build the site, and inspect the result
+5. Fill a realistic test article, build the site, and inspect the result
    in the browser at narrow and wide sizes and in both themes.
 6. Revise the manifest and skeleton together until the enforced contract is
    neither weaker nor broader than the design brief.

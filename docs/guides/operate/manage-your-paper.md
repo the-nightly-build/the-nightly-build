@@ -7,7 +7,7 @@ change, run `nb validate`, show the effect, and commit it for review.
 Common requests include:
 
 - pause or resume a series with `paused`;
-- change its rhythm with `cadence`;
+- change its schedule with `cadence`;
 - commission or reorder configured items;
 - refine a beat in `prompt.md`;
 - change paper-wide voice in `editorial.md`;

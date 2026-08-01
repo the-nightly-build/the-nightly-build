@@ -28,7 +28,7 @@ Give this repository URL to the AI tool you already use and say:
 > Help me set up my own Nightly Build paper. Follow the repository's
 > instructions, tell me only the manual action you need from me right now, and
 > verify each capability before moving on. Do not publish automatically until
-> we have run and reviewed the first canary Article PR.
+> we have run the first test article and reviewed its Article PR.
 
 The assistant will determine what it can do, walk you through the few actions
 that require your permission, interview you about the paper, configure the
@@ -54,9 +54,10 @@ Open that checkout in a coding agent and ask it to continue setup. Keep the
 fork public for GitHub Pages on the free plan; private Pages requires a
 supporting GitHub plan.
 
-Before unattended publication, run one canary in the exact scheduled runtime
-with `autopublish: false`. It must browse real sources, open a real Article PR,
-and pass proof plus browser-render CI. See [First run](docs/getting-started/first-run.md).
+Before unattended publication, run one test article in the exact scheduled
+runtime with `autopublish: false`. It must browse real sources, open a real
+Article PR, and pass proof plus browser-render CI. See
+[First run](docs/getting-started/first-run.md).
 
 ## FAQ
 
@@ -97,7 +98,7 @@ am sure there will be instances of incorrectness.</p>
 </details>
 
 <details>
-<summary><strong>What can the night shift access?</strong></summary>
+<summary><strong>What can the scheduled runtime access?</strong></summary>
 
 ---
 

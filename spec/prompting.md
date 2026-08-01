@@ -1,13 +1,13 @@
 # Prompting
 
-Every layer the night shift reads is a prompt: the orchestrator package, the
-spec files, the editorial-role skills, template identities, the furniture
-catalog, and the prompts a press writes for its series. Their prose trains the
-writer's prose. A layer that rambles produces articles that ramble, and a layer
-that lists produces articles that treat the list as the whole world. This file
-is the standard every prompt surface is written against. The user assistant
-applies it to every prompt it writes or edits, and engine contributors apply it
-to the shipped layers.
+Every layer an article-making agent reads is a prompt: the orchestrator
+package, spec files, editorial-role skills, template identities, furniture
+catalog, and prompts a press writes for its series. Their prose trains the
+writer's prose. A layer that rambles produces articles that ramble, and a
+layer that lists produces articles that treat the list as the whole world.
+This file is the standard every prompt surface is written against. The user
+assistant applies it to every prompt it writes or edits, and engine
+contributors apply it to the shipped layers.
 
 ## What a prompt carries
 
@@ -16,12 +16,12 @@ A prompt carries only what the engine cannot know. Config is not prose:
 directly, so a rule restated in prose drifts from the rule it copies and
 carries no force. Say each thing once in its owning file and reference the
 file. The editorial judgment no schema holds is what belongs in prose: the
-beat, the angle, the genre, the standard a source must clear, what a desk
+beat, the angle, the genre, the standard a source must clear, what a series
 refuses to do.
 
 ## Sentences
 
-Open concrete. The first sentence states the desk's job or the rule's
+Open concrete. The first sentence states the prompt's job or the rule's
 consequence, never a framing abstraction. "A performance number arrives with
 its baseline" instructs; "the conceptual equipment for reading AI" decorates.
 
@@ -50,7 +50,7 @@ correct. If a list could be read either way, reword it or delete it.
 ## References and labels
 
 Never name the reader in a series prompt. The audience lives in
-`press/editorial.md`; prompt rules are stated about the article, the desk,
+`press/editorial.md`; prompt rules are stated about the article, the series,
 or the subject.
 
 Keep planning labels in working files. Published prose should say what happened,

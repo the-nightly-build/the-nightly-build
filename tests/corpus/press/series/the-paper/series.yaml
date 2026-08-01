@@ -1,6 +1,6 @@
 # The annotated arXiv daily, on the press's own `paper` template. Open mode
 # with a commission queue: items publish first, in any order. An empty queue
-# means the desk picks tonight's paper itself.
+# means the orchestrator picks the paper for the current UTC date.
 name: The Paper
 mode: open
 section: "Research"

@@ -17,7 +17,7 @@ the path that matches what you are trying to do.
 ## Operate your paper
 
 - Operate: [manage your paper](guides/operate/manage-your-paper.md),
-  [schedule the night shift](guides/operate/schedule.md), or
+  [schedule publication](guides/operate/schedule.md), or
   [update the engine](guides/operate/update-engine.md)
 - Publish: [publish an article now](guides/publish/publish-now.md) or
   [revise a published article](guides/publish/revise-an-article.md)

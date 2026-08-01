@@ -1,4 +1,4 @@
-"""Keep the desk's visible source policy identical to the proof's policy.
+"""Keep the orchestrator's source policy identical to the proof's policy.
 
 The regression here is the hidden longread default. A series without an explicit
 minimum must still commission research for eight sources rather than discovering
@@ -9,7 +9,7 @@ from nb.config import apply_template_bands
 from nb.source_policy import minimum, resolve
 
 
-def test_template_default_is_visible_to_the_desk() -> None:
+def test_template_default_is_visible_to_the_orchestrator() -> None:
     assert resolve({}, {"class": "longread"}) == {"min_sources": 8}
     assert minimum({}, {"class": "longread"}) == 8
 

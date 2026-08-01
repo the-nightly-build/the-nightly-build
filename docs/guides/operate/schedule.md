@@ -51,7 +51,7 @@ scheduler secrets. See
 
 ## Prove it before relying on it
 
-Trigger an immediate canary in the exact scheduled environment with
+Trigger an immediate test article in the exact scheduled environment with
 `autopublish: false`. Setup is not complete until that runtime browses real
 sources, creates a real Article PR, and passes both proof and render CI. Use
 [First run](../../getting-started/first-run.md) as the acceptance test.
