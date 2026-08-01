@@ -60,7 +60,7 @@ def test_rolling_already_published_on_the_selected_date_is_idle(
 
 
 def test_collection_in_order_offers_exactly_the_next_item(
-    duty: Callable[..., dict], testrepo: str, make_library: Callable[..., str]
+    *, duty: Callable[..., dict], testrepo: str, make_library: Callable[..., str]
 ) -> None:
     report = duty(testrepo, make_library({"semiconductors": ["micron"]}))
 
@@ -68,6 +68,7 @@ def test_collection_in_order_offers_exactly_the_next_item(
 
 
 def test_collection_random_offers_every_unpublished_item(
+    *,
     duty: Callable[..., dict],
     patched_repo: Callable[..., str],
     make_library: Callable[..., str],
@@ -86,7 +87,7 @@ def test_collection_random_offers_every_unpublished_item(
 
 
 def test_paused_series_is_idle(
-    duty: Callable[..., dict], patched_repo: Callable[..., str], empty_lib: str
+    *, duty: Callable[..., dict], patched_repo: Callable[..., str], empty_lib: str
 ) -> None:
     report = duty(patched_repo("paused: true\n"), empty_lib)
 
@@ -120,6 +121,7 @@ def test_manual_cadence_is_always_idle(
 
 
 def test_open_series_with_a_queue_lists_commissions(
+    *,
     duty: Callable[..., dict],
     open_press: Callable[..., str],
     make_library: Callable[..., str],
@@ -146,7 +148,7 @@ def test_an_article_published_on_the_selected_date_idles_its_series(
 
 
 def test_complete_collection_is_idle(
-    duty: Callable[..., dict], testrepo: str, make_library: Callable[..., str]
+    *, duty: Callable[..., dict], testrepo: str, make_library: Callable[..., str]
 ) -> None:
     everything = make_library(
         {"semiconductors": ["micron", "tsmc", "asml", "sk-hynix", "nvidia"]}
@@ -158,6 +160,7 @@ def test_complete_collection_is_idle(
 
 
 def test_a_dict_item_without_a_slug_is_dropped_not_crashed_on(
+    *,
     duty: Callable[..., dict],
     overwrite_series: Callable[..., str],
     make_library: Callable[..., str],
@@ -170,7 +173,7 @@ def test_a_dict_item_without_a_slug_is_dropped_not_crashed_on(
 
 
 def test_a_non_mapping_series_yaml_idles_that_one_series_with_a_reason(
-    duty: Callable[..., dict], overwrite_series: Callable[..., str], empty_lib: str
+    *, duty: Callable[..., dict], overwrite_series: Callable[..., str], empty_lib: str
 ) -> None:
     report = duty(overwrite_series("just a bare string\n"), empty_lib)
 
@@ -180,7 +183,7 @@ def test_a_non_mapping_series_yaml_idles_that_one_series_with_a_reason(
 
 
 def test_unparseable_series_yaml_idles_rather_than_aborting_the_run(
-    duty: Callable[..., dict], overwrite_series: Callable[..., str], empty_lib: str
+    *, duty: Callable[..., dict], overwrite_series: Callable[..., str], empty_lib: str
 ) -> None:
     report = duty(overwrite_series("a: b: c\n"), empty_lib)
 
@@ -188,7 +191,7 @@ def test_unparseable_series_yaml_idles_rather_than_aborting_the_run(
 
 
 def test_a_non_mapping_nb_meta_payload_does_not_crash_published_state(
-    duty: Callable[..., dict], testrepo: str, make_library: Callable[..., str]
+    *, duty: Callable[..., dict], testrepo: str, make_library: Callable[..., str]
 ) -> None:
     library = make_library({"semiconductors": []})
     pathlib.Path(library, "library", "semiconductors", "micron.html").write_text(
@@ -202,6 +205,7 @@ def test_a_non_mapping_nb_meta_payload_does_not_crash_published_state(
 
 @pytest.mark.parametrize("cadence", ["[Mon]", "[Fortnight]"])
 def test_list_cadence_matches_case_insensitively_and_fails_open(
+    *,
     duty: Callable[..., dict],
     patched_repo: Callable[..., str],
     empty_lib: str,
@@ -213,6 +217,7 @@ def test_list_cadence_matches_case_insensitively_and_fails_open(
 
 
 def test_sequence_progress_counts_syllabus_items_not_library_extras(
+    *,
     duty: Callable[..., dict],
     seq_repo: Callable[[], str],
     make_library: Callable[..., str],
@@ -251,6 +256,7 @@ def test_a_tree_with_no_press_refuses_instead_of_reporting_no_scheduled_work(
 
 
 def test_the_refusal_says_which_tree_and_that_examples_is_not_a_press(
+    *,
     run_duty: Callable[..., subprocess.CompletedProcess[str]],
     no_press: str,
     empty_lib: str,
@@ -329,6 +335,7 @@ def test_a_checkout_level_with_origin_main_computes_the_work_list(
 
 
 def test_a_checkout_behind_origin_main_refuses_to_compute_a_work_list(
+    *,
     run_duty: Callable[..., subprocess.CompletedProcess[str]],
     stale_clone: str,
     empty_lib: str,
@@ -340,6 +347,7 @@ def test_a_checkout_behind_origin_main_refuses_to_compute_a_work_list(
 
 
 def test_the_stale_refusal_names_the_drift_and_the_command_that_fixes_it(
+    *,
     run_duty: Callable[..., subprocess.CompletedProcess[str]],
     stale_clone: str,
     empty_lib: str,
@@ -352,6 +360,7 @@ def test_the_stale_refusal_names_the_drift_and_the_command_that_fixes_it(
 
 
 def test_allow_stale_is_the_offline_escape_hatch(
+    *,
     run_duty: Callable[..., subprocess.CompletedProcess[str]],
     stale_clone: str,
     empty_lib: str,
@@ -363,6 +372,7 @@ def test_allow_stale_is_the_offline_escape_hatch(
 
 
 def test_a_tree_with_no_git_is_never_called_stale(
+    *,
     run_duty: Callable[..., subprocess.CompletedProcess[str]],
     testrepo: str,
     empty_lib: str,

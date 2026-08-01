@@ -24,7 +24,7 @@ DRAFT = (
 
 
 @pytest.fixture
-def preview_site(testrepo: str, full_site: Site, tmp_path: pathlib.Path) -> Site:
+def preview_site(*, testrepo: str, full_site: Site, tmp_path: pathlib.Path) -> Site:
     draft_root = str(tmp_path / "draft")
     write_article(draft_root, "semiconductors", slug="tsmc", html=DRAFT)
     return build_press(testrepo, full_site.library, preview_root=draft_root)

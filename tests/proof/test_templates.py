@@ -273,6 +273,7 @@ def test_unbiased_blocks_when_the_divide_chrome_is_reworded(
     ("nb-side-camp", "nb-side-thesis", "nb-side-argument", "nb-side-champion"),
 )
 def test_unbiased_blocks_when_either_side_loses_required_furniture(
+    *,
     run_local: Callable[..., Findings],
     template_repo: str,
     component: str,

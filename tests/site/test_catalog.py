@@ -77,7 +77,7 @@ def test_a_press_is_listed_by_default(full_site: Site) -> None:
     ids=["derived from a Pages URL", "explicit wins", "underivable"],
 )
 def test_self_repository_derivation(
-    explicit: str | None, base_url: str, expected: str | None
+    *, explicit: str | None, base_url: str, expected: str | None
 ) -> None:
     assert build_site.derive_self_repository(explicit, base_url) == expected
 

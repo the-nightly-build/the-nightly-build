@@ -30,7 +30,7 @@ from press import REPO
     ],
 )
 def test_only_a_real_boolean_true_auto_merges(
-    ci_helper: Callable[[str, str], str], series_yaml: str, expected: str
+    *, ci_helper: Callable[[str, str], str], series_yaml: str, expected: str
 ) -> None:
     assert ci_helper("autopublish", series_yaml) == expected
 

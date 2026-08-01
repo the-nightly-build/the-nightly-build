@@ -199,7 +199,11 @@ def test_production_policy_has_a_small_portable_schema(
     ],
 )
 def test_a_mistyped_series_key_is_a_validation_error(
-    patched_repo: Callable[..., str], vc_rc: Callable[[str], int], patch: str, rc: int
+    *,
+    patched_repo: Callable[..., str],
+    vc_rc: Callable[[str], int],
+    patch: str,
+    rc: int,
 ) -> None:
     assert vc_rc(patched_repo(patch)) == rc
 
@@ -241,6 +245,7 @@ def test_a_non_dict_series_yaml_is_a_readable_error_not_a_traceback(
     ],
 )
 def test_a_malformed_series_reports_what_is_wrong(
+    *,
     overwrite_series: Callable[..., str],
     vc_output: Callable[[str], subprocess.CompletedProcess[str]],
     series_yaml: str,
@@ -273,6 +278,7 @@ def test_two_slugless_items_never_report_a_false_duplicate(
     ],
 )
 def test_declared_chrome_must_appear_in_the_template_skeleton(
+    *,
     manifest_patched_repo: Callable[..., str],
     vc_rc: Callable[[str], int],
     patch: str,
@@ -291,6 +297,7 @@ def test_declared_chrome_must_appear_in_the_template_skeleton(
     ),
 )
 def test_flexible_component_contract_is_a_unique_css_class_list(
+    *,
     manifest_patched_repo: Callable[..., str],
     vc_rc: Callable[[str], int],
     patch: str,
@@ -308,6 +315,7 @@ def test_flexible_components_require_a_flexible_outline(
 
 @pytest.mark.parametrize("component_count", (0, 2))
 def test_every_skeleton_flex_section_contains_each_component_once(
+    *,
     manifest_patched_repo: Callable[..., str],
     vc_output: Callable[[str], subprocess.CompletedProcess[str]],
     component_count: int,

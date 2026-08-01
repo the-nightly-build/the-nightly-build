@@ -58,7 +58,7 @@ def test_an_article_with_no_sources_at_all_blocks(
 
 
 @pytest.mark.parametrize(
-    ("name", "old", "new"),
+    ("_name", "old", "new"),
     [
         (
             "http rather than https",
@@ -78,7 +78,7 @@ def test_an_article_with_no_sources_at_all_blocks(
     ],
 )
 def test_a_source_link_that_is_not_absolute_https_blocks(
-    run_local: Callable[..., Findings], name: str, old: str, new: str
+    *, run_local: Callable[..., Findings], _name: str, old: str, new: str
 ) -> None:
     result = run_local(mut(old, new), "semiconductors")
 
@@ -98,14 +98,14 @@ def test_a_required_source_may_cite_a_repo_relative_local_file(
 
 
 @pytest.mark.parametrize(
-    ("name", "new"),
+    ("_name", "new"),
     [
         ("a source number that does not exist", '<a href="#s99">99</a>'),
         ("an id that is not a source", '<a href="#nb-meta">5</a>'),
     ],
 )
 def test_a_citation_that_does_not_reach_a_source_blocks(
-    run_local: Callable[..., Findings], name: str, new: str
+    *, run_local: Callable[..., Findings], _name: str, new: str
 ) -> None:
     result = run_local(mut('<a href="#s5">5</a>', new), "semiconductors")
 
@@ -424,7 +424,7 @@ def test_a_band_the_config_botched_is_a_finding_not_a_traceback(
 
 
 def open_briefs_repo(
-    clone_testrepo: Callable[..., str], templates: list[str], patch: str = ""
+    clone_testrepo: Callable[..., str], templates: list[str], *, patch: str = ""
 ) -> str:
     """The rolling brief series reopened as an open section with a template choice."""
     tmp = clone_testrepo("press", "templates", "engine")
@@ -459,14 +459,16 @@ def test_per_item_sources_on_a_per_section_template_is_a_config_error(
 def test_per_item_sources_validates_when_every_template_choice_cites_per_item(
     vc_rc: Callable[[str], int], clone_testrepo: Callable[..., str]
 ) -> None:
-    assert vc_rc(open_briefs_repo(clone_testrepo, ["brief"], PER_ITEM_PATCH)) == 0
+    assert vc_rc(open_briefs_repo(clone_testrepo, ["brief"], patch=PER_ITEM_PATCH)) == 0
 
 
 def test_per_item_sources_a_template_choice_could_dodge_is_a_config_error(
     vc_rc: Callable[[str], int], clone_testrepo: Callable[..., str]
 ) -> None:
     assert (
-        vc_rc(open_briefs_repo(clone_testrepo, ["brief", "article"], PER_ITEM_PATCH))
+        vc_rc(
+            open_briefs_repo(clone_testrepo, ["brief", "article"], patch=PER_ITEM_PATCH)
+        )
         == 1
     )
 
@@ -478,7 +480,7 @@ def test_sources_by_kind_with_a_null_ceiling_validates(
 
 
 @pytest.mark.parametrize(
-    ("name", "patch"),
+    ("_name", "patch"),
     [
         ("a kind outside primary/secondary", "sources_by_kind:\n  tertiary: [1, 2]\n"),
         ("a band whose high is below its low", "sources_by_kind:\n  primary: [4, 2]\n"),
@@ -486,9 +488,10 @@ def test_sources_by_kind_with_a_null_ceiling_validates(
     ],
 )
 def test_a_composition_the_config_botched_is_rejected(
+    *,
     vc_rc: Callable[[str], int],
     patched_repo: Callable[..., str],
-    name: str,
+    _name: str,
     patch: str,
 ) -> None:
     assert vc_rc(patched_repo(patch)) == 1
@@ -508,7 +511,7 @@ def test_a_composition_on_a_template_that_omits_data_nb_kind_is_a_config_error(
 
 
 @pytest.mark.parametrize(
-    ("name", "status", "error", "verdict"),
+    ("_name", "status", "error", "verdict"),
     [
         ("404", 404, None, "dead"),
         ("410", 410, None, "dead"),
@@ -520,7 +523,7 @@ def test_a_composition_on_a_template_that_omits_data_nb_kind_is_a_config_error(
     ],
 )
 def test_classify_link(
-    name: str, status: int | None, error: str | None, verdict: str
+    *, _name: str, status: int | None, error: str | None, verdict: str
 ) -> None:
     assert check.classify_link(status, error) == verdict
 

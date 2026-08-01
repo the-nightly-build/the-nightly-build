@@ -115,6 +115,7 @@ def test_rolling_already_published_blocks(
 
 
 def test_sequence_first_item_into_an_empty_library_is_block_clean(
+    *,
     run_local: Callable[..., Findings],
     seq_repo: Callable[[], str],
     make_library: Callable[..., str],
@@ -130,6 +131,7 @@ def test_sequence_first_item_into_an_empty_library_is_block_clean(
 
 
 def test_sequence_wrong_next_item_blocks(
+    *,
     run_local: Callable[..., Findings],
     seq_repo: Callable[[], str],
     make_library: Callable[..., str],
@@ -145,6 +147,7 @@ def test_sequence_wrong_next_item_blocks(
 
 
 def test_sequence_wrong_order_number_blocks(
+    *,
     run_local: Callable[..., Findings],
     seq_repo: Callable[[], str],
     make_library: Callable[..., str],
@@ -191,6 +194,7 @@ def test_cadence_configuration_validates(
 
 
 def test_open_freestyle_pick_is_block_clean(
+    *,
     run_local: Callable[..., Findings],
     open_press: Callable[..., str],
     make_library: Callable[..., str],
@@ -207,6 +211,7 @@ def test_open_freestyle_pick_is_block_clean(
 
 
 def test_open_duplicate_slug_blocks(
+    *,
     run_local: Callable[..., Findings],
     open_press: Callable[..., str],
     make_library: Callable[..., str],
@@ -223,6 +228,7 @@ def test_open_duplicate_slug_blocks(
 
 
 def test_open_template_outside_the_choice_list_blocks(
+    *,
     run_local: Callable[..., Findings],
     open_press: Callable[..., str],
     make_library: Callable[..., str],
@@ -241,6 +247,7 @@ def test_open_template_outside_the_choice_list_blocks(
 
 
 def test_pending_commission_blocks_a_freestyle_pick(
+    *,
     run_local: Callable[..., Findings],
     open_press: Callable[..., str],
     make_library: Callable[..., str],
@@ -257,6 +264,7 @@ def test_pending_commission_blocks_a_freestyle_pick(
 
 
 def test_publishing_the_commissioned_item_is_block_clean(
+    *,
     run_local: Callable[..., Findings],
     open_press: Callable[..., str],
     make_library: Callable[..., str],

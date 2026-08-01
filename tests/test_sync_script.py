@@ -46,6 +46,9 @@ class SyncRepo:
     gh_log: pathlib.Path
     fake_bin: pathlib.Path
 
+    # Variadic command arguments are positional; both execution controls below
+    # are already keyword-only because they follow *args.
+    # ast-grep-ignore: keyword-only-args
     def run(
         self,
         *args: str,
