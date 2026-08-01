@@ -32,7 +32,8 @@ class Tier:
 
     @property
     def codes(self) -> list[str]:
-        return sorted({f.code for f in self._findings})
+        unique_codes = {finding.code for finding in self._findings}
+        return sorted(unique_codes)
 
     def __repr__(self) -> str:
         if not self._findings:
@@ -48,7 +49,8 @@ class Findings:
 
     @property
     def codes(self) -> list[str]:
-        return sorted({f.code for f in self.report.findings})
+        unique_codes = {finding.code for finding in self.report.findings}
+        return sorted(unique_codes)
 
     @property
     def notes(self) -> list[str]:
@@ -59,4 +61,11 @@ class Findings:
 
 
 def findings_of(report: Report) -> Findings:
+    """Adapt a directly populated proof report to the suite's assertion API.
+
+    Most tests receive ``Findings`` from a fixture, while a few call individual
+    checks with a bare ``Report``. This boundary gives both paths identical tier
+    and code assertions without exposing report internals at every call site.
+    """
+    # ast-grep-ignore: no-routing-functions
     return Findings(report)

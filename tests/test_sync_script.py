@@ -24,8 +24,9 @@ WORKFLOWS = (
 
 
 def git(cwd: pathlib.Path, *args: str) -> str:
+    command = ["git", *args]
     return subprocess.run(
-        ["git", *args],
+        command,
         cwd=cwd,
         capture_output=True,
         text=True,
@@ -80,8 +81,9 @@ class SyncRepo:
         )
 
     def remote_ref(self, ref: str) -> str:
+        command = ["git", f"--git-dir={self.origin}", "rev-parse", ref]
         return subprocess.run(
-            ["git", f"--git-dir={self.origin}", "rev-parse", ref],
+            command,
             capture_output=True,
             text=True,
             check=True,
@@ -96,8 +98,9 @@ class SyncRepo:
         ).stdout
 
     def update_remote_ref(self, ref: str, target: str) -> None:
+        command = ["git", f"--git-dir={self.origin}", "update-ref", ref, target]
         subprocess.run(
-            ["git", f"--git-dir={self.origin}", "update-ref", ref, target],
+            command,
             check=True,
         )
 

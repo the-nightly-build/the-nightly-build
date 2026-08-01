@@ -10,7 +10,8 @@ NS = "{http://www.w3.org/2005/Atom}"
 
 
 def entries(xml_text: str) -> list[ET.Element]:
-    return ET.fromstring(xml_text).findall(f"{NS}entry")
+    feed = ET.fromstring(xml_text)
+    return feed.findall(f"{NS}entry")
 
 
 def find_text(elem: ET.Element, path: str) -> str:

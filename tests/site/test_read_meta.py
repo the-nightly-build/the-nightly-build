@@ -13,10 +13,10 @@ DECOY = (
 )
 
 
+# The proof only recognizes <script type="application/json" id="nb-meta">, so
+# an untyped decoy placed first — invisible to check.py — must never override
+# the typed block the builder reads.
 def test_read_meta_ignores_an_untyped_decoy(tmp_path: pathlib.Path) -> None:
-    # The proof only recognizes <script type="application/json" id="nb-meta">, so
-    # an untyped decoy placed first — invisible to check.py — must never override
-    # the typed block the builder reads.
     page = tmp_path / "decoy.html"
     page.write_text(DECOY)
 

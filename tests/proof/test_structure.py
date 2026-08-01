@@ -360,7 +360,8 @@ def run_notes(
     *,
     sections: list[tuple[str, str]],
 ) -> Findings:
-    return run_local(flex_article(sections), "notes", slug="first-notes", repo=repo)
+    html = flex_article(sections)
+    return run_local(html, "notes", slug="first-notes", repo=repo)
 
 
 def test_flex_template_passes_with_agent_named_sections_in_band(

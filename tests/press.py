@@ -358,10 +358,6 @@ def make_full_library() -> str:
     return lib
 
 
-def read_text(root: str, *parts: str) -> str:
-    return pathlib.Path(root, *parts).read_text()
-
-
 def git(*args: str, cwd: str) -> None:
     run = subprocess.run(["git", *args], cwd=cwd, capture_output=True, text=True)
     if run.returncode:

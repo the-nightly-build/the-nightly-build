@@ -17,7 +17,8 @@ from press import article, make_full_library
 
 @pytest.fixture
 def micron_copy(full_site: Site) -> str:
-    return full_site.read("library", "semiconductors", "micron.html")
+    path = pathlib.Path(full_site.out, "library", "semiconductors", "micron.html")
+    return path.read_text()
 
 
 @pytest.mark.parametrize(

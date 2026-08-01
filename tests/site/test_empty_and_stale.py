@@ -12,7 +12,8 @@ from pages import Site, build_press
 
 
 def empty_site(testrepo: str) -> Site:
-    return build_press(testrepo, tempfile.mkdtemp())
+    empty_library = tempfile.mkdtemp()
+    return build_press(testrepo, empty_library)
 
 
 def test_a_fresh_fork_renders_an_empty_state(testrepo: str) -> None:

@@ -26,13 +26,12 @@ PAGES_URL = "https://alice.github.io/my-press"
 
 @pytest.fixture(scope="session")
 def full_site(testrepo: str) -> Site:
-    """The fixture press, fully published."""
-    return build_press(testrepo, make_full_library())
+    library = make_full_library()
+    return build_press(testrepo, library)
 
 
 @pytest.fixture
 def net_site(clone_testrepo: Callable[..., str]) -> Site:
-    """A press that opts into the directory, built with a Pages URL."""
     repo = clone_testrepo("press", "templates", "engine")
     pathlib.Path(repo, "press", "site.yaml").write_text(DIRECTORY_SITE_YAML)
     return build_press(repo, make_full_library(), base_url=PAGES_URL)

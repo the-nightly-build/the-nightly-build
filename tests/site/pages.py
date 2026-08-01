@@ -34,21 +34,26 @@ class Site:
     library: str
 
     def read(self, *parts: str) -> str:
-        return pathlib.Path(self.out, *parts).read_text()
+        page = pathlib.Path(self.out, *parts)
+        return page.read_text()
 
     def read_library(self, *parts: str) -> str:
-        return pathlib.Path(self.library, *parts).read_text()
+        article = pathlib.Path(self.library, *parts)
+        return article.read_text()
 
     def exists(self, *parts: str) -> bool:
-        return pathlib.Path(self.out, *parts).is_file()
+        path = pathlib.Path(self.out, *parts)
+        return path.is_file()
 
     @property
     def index(self) -> str:
-        return self.read("index.html")
+        index_path = pathlib.Path(self.out, "index.html")
+        return index_path.read_text()
 
     @property
     def stamp(self) -> str:
-        return asset_stamp_of(self.index)
+        index_html = self.index
+        return asset_stamp_of(index_html)
 
 
 def build_press(repo: str, library: str, **kwargs) -> Site:

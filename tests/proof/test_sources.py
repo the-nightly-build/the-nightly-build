@@ -123,7 +123,6 @@ def series_yaml(repo: str, series: str = "semiconductors") -> pathlib.Path:
 
 @pytest.fixture
 def exclusive_repo(clone_testrepo: Callable[..., str]) -> str:
-    """A press whose semiconductors series may cite only sec.gov and example.org."""
     tmp = clone_testrepo("press", "templates")
     y = series_yaml(tmp)
     y.write_text(
@@ -188,7 +187,6 @@ def test_exclusive_declared_required_doc_entries_are_exempt(
 
 
 def kinded_brief(items: list[list[tuple[str, str]]]) -> str:
-    """A brief whose items cite the (href, kind) sources named, in first-cite order."""
     numbered: dict[str, tuple[int, str]] = {}
     for item in items:
         for href, kind in item:
@@ -228,36 +226,34 @@ def kinded_brief(items: list[list[tuple[str, str]]]) -> str:
 
 
 def brief_with(first_item: list[tuple[str, str]]) -> str:
-    """The conforming brief, with its first item's sources swapped out."""
-    return kinded_brief(
+    items = [
+        first_item,
         [
-            first_item,
-            [
-                ("https://www.sec.gov/filings/x", "primary"),
-                ("https://ft.com/b", "secondary"),
-            ],
-            [
-                ("https://curia.europa.eu/r", "primary"),
-                ("https://apnews.com/c", "secondary"),
-            ],
-            [
-                ("https://www.federalregister.gov/d", "primary"),
-                ("https://wsj.com/e", "secondary"),
-            ],
-        ]
-    )
+            ("https://www.sec.gov/filings/x", "primary"),
+            ("https://ft.com/b", "secondary"),
+        ],
+        [
+            ("https://curia.europa.eu/r", "primary"),
+            ("https://apnews.com/c", "secondary"),
+        ],
+        [
+            ("https://www.federalregister.gov/d", "primary"),
+            ("https://wsj.com/e", "secondary"),
+        ],
+    ]
+    return kinded_brief(items)
 
 
 @pytest.fixture
 def per_item_briefs(patched_repo: Callable[..., str]) -> str:
-    """The brief series, asking every item for one primary and up to two reads."""
-    return patched_repo(PER_ITEM_PATCH, series="ai-briefs")
+    repo = patched_repo(PER_ITEM_PATCH, series="ai-briefs")
+    return repo
 
 
 @pytest.fixture
 def by_kind_semis(patched_repo: Callable[..., str]) -> str:
-    """The article series, asking the piece as a whole for a mix."""
-    return patched_repo(BY_KIND_PATCH)
+    repo = patched_repo(BY_KIND_PATCH)
+    return repo
 
 
 def test_a_brief_pairing_every_primary_with_an_independent_read_passes(
@@ -426,7 +422,6 @@ def test_a_band_the_config_botched_is_a_finding_not_a_traceback(
 def open_briefs_repo(
     clone_testrepo: Callable[..., str], templates: list[str], *, patch: str = ""
 ) -> str:
-    """The rolling brief series reopened as an open section with a template choice."""
     tmp = clone_testrepo("press", "templates", "engine")
     y = pathlib.Path(tmp) / "press" / "series" / "ai-briefs" / "series.yaml"
     y.write_text(
@@ -437,7 +432,6 @@ def open_briefs_repo(
 
 
 def unkinded_template_repo(patched_repo: Callable[..., str]) -> str:
-    """A series constraining the mix, on a template whose sources carry no kind."""
     tmp = patched_repo("sources_by_kind:\n  primary: [4, null]\n")
     skel = pathlib.Path(tmp) / "templates" / "article" / "skeleton.html"
     skel.write_text(skel.read_text().replace(' data-nb-kind="primary"', ""))

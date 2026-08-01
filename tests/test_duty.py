@@ -36,7 +36,8 @@ def duty_of(report: dict, series: str) -> dict:
 
 @pytest.fixture
 def empty_lib(make_library: Callable[..., str]) -> str:
-    return make_library({"semiconductors": [], "ai-briefs": []})
+    published = {"semiconductors": [], "ai-briefs": []}
+    return make_library(published)
 
 
 def test_rolling_series_is_due_with_the_selected_utc_date_slug(

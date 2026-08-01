@@ -39,14 +39,12 @@ CI_HELPERS = [sys.executable, str(REPO / "engine" / "ci_helpers.py")]
 
 @pytest.fixture(scope="session")
 def testrepo() -> str:
-    """The fixture press. Never mutate it; clone it."""
-    return make_press()
+    repo = make_press()
+    return repo
 
 
 @pytest.fixture
 def clone_testrepo(testrepo: str) -> Callable[..., str]:
-    """clone_testrepo("press", "templates") -> a scratch repo with those subtrees."""
-
     def clone(*subs: str) -> str:
         tmp = tempfile.mkdtemp()
         for sub in subs:
@@ -58,8 +56,6 @@ def clone_testrepo(testrepo: str) -> Callable[..., str]:
 
 @pytest.fixture
 def make_library() -> Callable[[dict[str, list[str]]], str]:
-    """make_library({"semiconductors": ["tsmc"]}) -> a library root of published slugs."""
-
     def library(published: dict[str, list[str]]) -> str:
         tmp = tempfile.mkdtemp()
         for series, slugs in published.items():
@@ -74,8 +70,6 @@ def make_library() -> Callable[[dict[str, list[str]]], str]:
 
 @pytest.fixture
 def run_local(testrepo: str) -> Callable[..., Findings]:
-    """Proof one article HTML string against a series, as local mode does."""
-
     def run(
         html_text: str,
         series: str,
@@ -115,8 +109,6 @@ def run_local(testrepo: str) -> Callable[..., Findings]:
 
 @pytest.fixture
 def run_main_json() -> Callable[[list[str]], dict]:
-    """Drive check.py's CLI in-process and read back its --json report."""
-
     def run(argv: list[str]) -> dict:
         buf = io.StringIO()
         with contextlib.redirect_stdout(buf):
@@ -128,8 +120,6 @@ def run_main_json() -> Callable[[list[str]], dict]:
 
 @pytest.fixture
 def patched_repo(clone_testrepo: Callable[..., str]) -> Callable[..., str]:
-    """A press whose series.yaml has `patch` appended to it."""
-
     def patch_repo(patch: str, series: str = "semiconductors") -> str:
         tmp = clone_testrepo("press", "templates", "engine")
         y = pathlib.Path(tmp) / "press" / "series" / series / "series.yaml"
@@ -141,8 +131,6 @@ def patched_repo(clone_testrepo: Callable[..., str]) -> Callable[..., str]:
 
 @pytest.fixture
 def overwrite_series(patched_repo: Callable[..., str]) -> Callable[..., str]:
-    """A press with one series.yaml replaced wholesale, shapes validate_config would refuse included."""
-
     def overwrite(body: str, series: str = "ai-briefs") -> str:
         tmp = patched_repo("", series=series)
         y = pathlib.Path(tmp) / "press" / "series" / series / "series.yaml"
@@ -154,8 +142,6 @@ def overwrite_series(patched_repo: Callable[..., str]) -> Callable[..., str]:
 
 @pytest.fixture
 def seq_repo(clone_testrepo: Callable[..., str]) -> Callable[[], str]:
-    """The semiconductors collection, reopened as a sequence."""
-
     def sequence() -> str:
         tmp = clone_testrepo("press", "templates")
         y = pathlib.Path(tmp) / "press" / "series" / "semiconductors" / "series.yaml"
@@ -167,8 +153,6 @@ def seq_repo(clone_testrepo: Callable[..., str]) -> Callable[[], str]:
 
 @pytest.fixture
 def open_press(clone_testrepo: Callable[..., str]) -> Callable[..., str]:
-    """A press carrying a `wildcard` open series. Pass a series.yaml to vary it."""
-
     def press(series_yaml: str = OPEN_YAML) -> str:
         tmp = clone_testrepo("press", "templates", "engine")
         d = pathlib.Path(tmp) / "press" / "series" / "wildcard"
@@ -182,12 +166,9 @@ def open_press(clone_testrepo: Callable[..., str]) -> Callable[..., str]:
 
 @pytest.fixture
 def vc_output() -> Callable[[str], subprocess.CompletedProcess[str]]:
-    """validate_config against a press: returncode, stdout, stderr."""
-
     def run(repo: str) -> subprocess.CompletedProcess[str]:
-        return subprocess.run(
-            [*VALIDATE_CONFIG, "--repo", str(repo)], capture_output=True, text=True
-        )
+        command = [*VALIDATE_CONFIG, "--repo", str(repo)]
+        return subprocess.run(command, capture_output=True, text=True)
 
     return run
 
@@ -196,8 +177,6 @@ def vc_output() -> Callable[[str], subprocess.CompletedProcess[str]]:
 def vc_rc(
     vc_output: Callable[[str], subprocess.CompletedProcess[str]],
 ) -> Callable[[str], int]:
-    """0 when the press validates, 1 when it does not."""
-
     def rc(repo: str) -> int:
         return vc_output(repo).returncode
 
@@ -206,10 +185,9 @@ def vc_rc(
 
 @pytest.fixture
 def run_duty() -> Callable[..., subprocess.CompletedProcess[str]]:
-    """duty.py as the scheduled runtime invokes it, including exit codes."""
-
     def run(*args: str) -> subprocess.CompletedProcess[str]:
-        return subprocess.run([*DUTY, *args], capture_output=True, text=True)
+        command = [*DUTY, *args]
+        return subprocess.run(command, capture_output=True, text=True)
 
     return run
 
@@ -218,8 +196,6 @@ def run_duty() -> Callable[..., subprocess.CompletedProcess[str]]:
 def duty(
     run_duty: Callable[..., subprocess.CompletedProcess[str]],
 ) -> Callable[..., dict]:
-    """Parse scheduled work; use run_duty when the exit code is the point."""
-
     def work_list(repo: str, library: str, *, date: str = TODAY) -> dict:
         out = run_duty("--repo", str(repo), "--library", str(library), "--date", date)
         return json.loads(out.stdout)
@@ -229,8 +205,6 @@ def duty(
 
 @pytest.fixture
 def ci_helper() -> Callable[[str, str], str]:
-    """ci_helper("autopublish", "autopublish: true\\n") -> what the workflow reads."""
-
     def helper(cmd: str, series_yaml: str) -> str:
         repo = tempfile.mkdtemp()
         sd = pathlib.Path(repo) / "press" / "series" / "foo"
@@ -271,7 +245,8 @@ class PressRepo:
         self.path = path
 
     def git(self, *args: str) -> None:
-        git(*args, cwd=self.path)
+        checkout = self.path
+        git(*args, cwd=checkout)
 
     def write(self, relpath: str, text: str) -> pathlib.Path:
         p = pathlib.Path(self.path, relpath)
@@ -284,7 +259,8 @@ class PressRepo:
         self.git("commit", "-qm", message)
 
     def checkout(self, branch: str, *, new: bool = False) -> None:
-        self.git("checkout", "-qb" if new else "-q", branch)
+        flag = "-qb" if new else "-q"
+        self.git("checkout", flag, branch)
 
     def run_pr(
         self,
@@ -335,11 +311,10 @@ def pr_repo(clone_testrepo: Callable[..., str]) -> PressRepo:
 
 @pytest.fixture
 def full_library() -> str:
-    """A published library the builder can build a site from."""
-    return make_full_library()
+    library = make_full_library()
+    return library
 
 
 @pytest.fixture
 def out_dir() -> Callable[[], str]:
-    """A fresh empty directory to build a site into."""
     return tempfile.mkdtemp
