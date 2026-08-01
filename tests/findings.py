@@ -58,14 +58,3 @@ class Findings:
 
     def __repr__(self) -> str:
         return f"Findings(blocks={self.blocks!r}\nwarns={self.warns!r}\n)"
-
-
-def findings_of(report: Report) -> Findings:
-    """Adapt a directly populated proof report to the suite's assertion API.
-
-    Most tests receive ``Findings`` from a fixture, while a few call individual
-    checks with a bare ``Report``. This boundary gives both paths identical tier
-    and code assertions without exposing report internals at every call site.
-    """
-    # ast-grep-ignore: no-routing-functions
-    return Findings(report)

@@ -11,7 +11,7 @@ never touches what is already published.
 from collections.abc import Callable
 
 import check
-from findings import Findings, findings_of
+from findings import Findings
 from nb.proof.structure import deprecated_classes
 from press import REPO, mut
 
@@ -23,7 +23,7 @@ def test_a_retired_component_declares_its_replacement() -> None:
         repo=str(REPO),
         rep=rep,
     )
-    result = findings_of(rep)
+    result = Findings(rep)
 
     assert "B-DEPRECATED" in result.blocks
     assert deprecated_classes(str(REPO))["nb-verdict"] == "nb-note"
@@ -37,7 +37,7 @@ def test_a_retired_subpart_blocks_as_deprecated() -> None:
         rep=rep,
     )
 
-    assert "B-DEPRECATED" in findings_of(rep).blocks
+    assert "B-DEPRECATED" in Findings(rep).blocks
 
 
 def test_a_retirement_can_declare_no_replacement() -> None:
@@ -47,7 +47,7 @@ def test_a_retirement_can_declare_no_replacement() -> None:
         repo=str(REPO),
         rep=rep,
     )
-    result = findings_of(rep)
+    result = Findings(rep)
 
     assert "B-DEPRECATED" in result.blocks
     assert deprecated_classes(str(REPO))["nb-paper-map"] is None
@@ -63,7 +63,7 @@ def test_live_components_are_not_deprecated() -> None:
         rep=rep,
     )
 
-    assert "B-DEPRECATED" not in findings_of(rep).codes
+    assert "B-DEPRECATED" not in Findings(rep).codes
 
 
 def test_the_full_proof_blocks_an_article_reaching_for_retired_markup(
