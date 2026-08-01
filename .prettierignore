@@ -12,4 +12,3 @@ package-lock.json
 .byor/
 /assets/
 engine/tests/fixtures/
-tests/corpus/

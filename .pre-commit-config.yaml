@@ -7,12 +7,11 @@ repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v5.0.0
     hooks:
-      # Byte-exact test fixtures must not be reflowed. tests/corpus/ is the
-      # paper's published articles, vendored verbatim; a reflow is a rewrite.
+      # Byte-exact test fixtures must not be reflowed.
       - id: trailing-whitespace
-        exclude: ^(engine/tests/fixtures|tests/corpus)/
+        exclude: ^engine/tests/fixtures/
       - id: end-of-file-fixer
-        exclude: ^(engine/tests/fixtures|tests/corpus)/
+        exclude: ^engine/tests/fixtures/
       - id: check-merge-conflict
       - id: check-added-large-files
       - id: check-yaml
