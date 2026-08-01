@@ -443,7 +443,7 @@ def check_registry(repo, errors):
     return registry
 
 
-def check_required_docs(docs, root, sid, where, errors):
+def check_required_docs(docs, root, *, sid, where, errors):
     if docs is None:
         return
     if not isinstance(docs, list):
@@ -771,8 +771,12 @@ def check_series(repo, registry, *, errors):
                 if slug in seen:
                     errors.append(f"{where}: duplicate item slug '{slug}'")
                 seen.add(slug)  # only valid slugs seed the duplicate check
-            check_required_docs(item.get("required_docs"), root, sid, where, errors)
-        check_required_docs(cfg.get("required_docs"), root, sid, where, errors)
+            check_required_docs(
+                item.get("required_docs"), root, sid=sid, where=where, errors=errors
+            )
+        check_required_docs(
+            cfg.get("required_docs"), root, sid=sid, where=where, errors=errors
+        )
         consult = cfg.get("consult")
         if consult is not None and not isinstance(consult, list):
             errors.append(f"{where}: 'consult' must be a list of https:// prefixes")

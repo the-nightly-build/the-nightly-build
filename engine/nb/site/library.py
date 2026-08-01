@@ -23,6 +23,21 @@ WORDS_PER_MINUTE = 230
 
 NO_DATE = "unknown"
 
+__all__ = (
+    "article_body_html",
+    "article_text",
+    "assign_positions",
+    "by_date_and_slug",
+    "collect_articles",
+    "date_sort_key",
+    "load_series_configs",
+    "load_site_config",
+    "load_yaml",
+    "night_date",
+    "reading_minutes",
+    "scan_library",
+)
+
 
 def night_date(meta):
     """The build-date bucket for an article: its nb-meta date, or the

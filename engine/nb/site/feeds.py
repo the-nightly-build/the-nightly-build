@@ -2,13 +2,22 @@
 
 The newest FEED_CONTENT_LIMIT entries carry the full article body, stripped
 of scripts and styles and with its links absolutized, so a reader who
-subscribes gets the piece and not a teaser.
+subscribes gets the piece and not a teaser. Stable tag IDs include the paper's
+host and path, which prevents otherwise identical feeds from colliding.
 """
 
 import html
 import re
 
 from nb.site.library import article_body_html
+
+__all__ = (
+    "absolutize_url",
+    "atom_feed",
+    "entry_year",
+    "feed_content_html",
+    "feed_tag_id",
+)
 
 esc = html.escape
 
@@ -76,13 +85,10 @@ def entry_year(meta, generated):
 def atom_feed(base_url, feed_path, *, title, eds, generated, author=None):
     author = author or title
 
-    def absolute(path):
-        return absolutize_url(base_url, path)
-
     entries = []
     for i, ed in enumerate(eds[:FEED_LIMIT]):
         meta = ed["meta"]
-        link = absolute(f"/library/{ed['series']}/{ed['slug']}.html")
+        link = absolutize_url(base_url, f"/library/{ed['series']}/{ed['slug']}.html")
         updated = f"{meta.get('date', generated.date().isoformat())}T00:00:00Z"
         entry_id = feed_tag_id(
             base_url,
@@ -102,13 +108,13 @@ def atom_feed(base_url, feed_path, *, title, eds, generated, author=None):
     <summary>{esc(str(meta.get("dek", "")))}</summary>{content}
     <category term="{esc(ed["series"])}"/>
   </entry>""")
-    self_link = absolute(f"/{feed_path}")
+    self_link = absolutize_url(base_url, f"/{feed_path}")
     feed_id = feed_tag_id(base_url, feed_path, year=generated.strftime("%Y"))
     return f"""<?xml version="1.0" encoding="utf-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom">
   <title>{esc(title)}</title>
   <link rel="self" type="application/atom+xml" href="{esc(self_link)}"/>
-  <link rel="alternate" type="text/html" href="{esc(absolute("/") or "/")}"/>
+  <link rel="alternate" type="text/html" href="{esc(absolutize_url(base_url, "/") or "/")}"/>
   <id>{esc(feed_id)}</id>
   <author><name>{esc(author)}</name></author>
   <updated>{generated.strftime("%Y-%m-%dT%H:%M:%SZ")}</updated>

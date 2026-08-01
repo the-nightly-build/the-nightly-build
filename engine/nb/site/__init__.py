@@ -33,6 +33,8 @@ from nb.site.pages import (
     render_tags_index,
 )
 
+__all__ = ("build",)
+
 
 def build(
     repo,

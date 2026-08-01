@@ -82,6 +82,13 @@ SENTENCE_SKIP_TAGS = {
 
 
 def collapse_space(text: str) -> str:
+    """Normalize authored HTML text to one space between non-whitespace tokens.
+
+    The parser, metadata checks, and prose checks use this operation as shared
+    vocabulary. Keeping it named prevents those consumers from drifting into
+    subtly different whitespace rules while preserving empty-string behavior.
+    """
+    # ast-grep-ignore: no-routing-functions
     return " ".join(text.split())
 
 

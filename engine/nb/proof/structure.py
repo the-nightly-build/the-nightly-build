@@ -83,7 +83,7 @@ def external_ref_allowed(normalized_url):
     return host.lower() in ALLOWED_EXTERNAL_HOSTS
 
 
-def check_required_sections(ed, treg, rep):
+def check_required_sections(ed, treg, *, rep):
     required_sections = treg.get("sections") or []
     counts = {s: ed.sections.count(s) for s in required_sections}
     for s in required_sections:

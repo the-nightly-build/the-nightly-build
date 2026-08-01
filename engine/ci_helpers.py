@@ -20,7 +20,7 @@ import yaml
 from nb import meta as nb_meta
 from nb.workflow_sync import classify_workflow_sync
 
-__all__ = ("added_article", "article_path", "autopublish", "changed_files")
+__all__ = ("autopublish", "changed_files")
 
 
 def changed_files(diff_base: str) -> list[tuple[str, str]]:
@@ -42,17 +42,8 @@ def changed_files(diff_base: str) -> list[tuple[str, str]]:
     return changes
 
 
-def added_article(diff_base: str) -> str | None:
-    return nb_meta.article_bundle_path(changed_files(diff_base))
-
-
-def article_path(diff_base: str) -> str | None:
-    changes = changed_files(diff_base)
-    return nb_meta.article_bundle_path(changes) or nb_meta.revision_bundle_path(changes)
-
-
 def autopublish(repo: str, diff_base: str) -> None:
-    path = added_article(diff_base)
+    path = nb_meta.article_bundle_path(changed_files(diff_base))
     if path is None:
         print("false")
         return
@@ -76,7 +67,11 @@ if __name__ == "__main__":
     if a.cmd == "autopublish":
         autopublish(a.repo, a.diff_base)
     elif a.cmd == "article-path":
-        print(article_path(a.diff_base) or "")
+        changes = changed_files(a.diff_base)
+        path = nb_meta.article_bundle_path(changes) or nb_meta.revision_bundle_path(
+            changes
+        )
+        print(path or "")
     else:
         sync = classify_workflow_sync(
             ".",

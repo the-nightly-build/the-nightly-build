@@ -116,7 +116,7 @@ def check_article(
         rep=rep,
     )
 
-    check_required_sections(ed, treg, rep)
+    check_required_sections(ed, treg, rep=rep)
     check_chrome(raw, treg=treg, rep=rep)
     check_classes(raw, repo=repo, rep=rep)
     check_deprecated(raw, repo=repo, rep=rep)
