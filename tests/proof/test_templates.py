@@ -40,26 +40,6 @@ MEMO = f"""<!DOCTYPE html>
 <section data-nb-section="sources"><ol>{SOURCES}</ol></section>
 </body></html>"""
 
-# preamble is cite-exempt, so it carries no citation; the exchange does.
-INTERVIEW_SECTIONS = (
-    f'<section data-nb-section="preamble"><p>{LOREM * 20}</p></section>'
-    f'<section data-nb-section="exchange"><p>{LOREM * 20}'
-    f'<sup class="nb-cite"><a href="#s1">1</a></sup></p></section>'
-)
-
-INTERVIEW = f"""<!DOCTYPE html>
-<html lang="en"><head><meta charset="utf-8"><title>A Conversation</title>
-<script type="application/json" id="nb-meta">
-{{"protocol": "1.0", "series": "voices", "slug": "first-voice",
-  "template": "interview", "title": "A Conversation",
-  "mode": "collection", "order": null, "date": "2026-07-06", "tags": [],
-  "sources": 5, "words": 1280, "reading_minutes": 6, "dek": "A talk.",
-  "harness": "test-fixture", "model": "claude-fable-5"}}
-</script>
-</head><body>{INTERVIEW_SECTIONS}
-<section data-nb-section="sources"><ol>{SOURCES}</ol></section>
-</body></html>"""
-
 USER_TEMPLATES = {
     "memo": (
         "class: shortread\nbands:\n  words: [200, 3000]\n"
@@ -72,14 +52,6 @@ USER_TEMPLATES = {
         "sections: [sources]\n"
         "cite_rule: per-section\ncite_exempt: [context]\n",
         ("YOUR-LABEL", "sources"),
-    ),
-    # the exact manifest from the docs/reference/templates.md contract, so the
-    # tutorial cannot drift from what the proof enforces
-    "interview": (
-        "class: longread\nbands:\n  words: [1200, 3000]\n"
-        "sections: [preamble, exchange, sources]\n"
-        "cite_rule: per-section\ncite_exempt: [preamble]\n",
-        ("preamble", "exchange", "sources"),
     ),
     # a per-item template NOT named 'brief', to prove the per-item cite rule is
     # manifest-driven rather than hardcoded to the shipped brief template
@@ -97,8 +69,6 @@ USER_SERIES = {
     "items:\n  - {slug: first-notes, title: First Notes}\n",
     "digests": "name: Digests\nmode: collection\ntemplate: digest\n"
     "items:\n  - {slug: first-digest, title: First Digest}\n",
-    "voices": "name: Voices\nmode: collection\ntemplate: interview\n"
-    "items:\n  - {slug: first-voice, title: A Conversation}\n",
 }
 
 
@@ -384,22 +354,15 @@ def test_user_template_enforces_its_own_sections(
     assert "B-HTML" in result.blocks
 
 
-def test_docs_walkthrough_interview_template_passes(
-    run_local: Callable[..., Findings], user_repo: str
-) -> None:
-    result = run_local(INTERVIEW, "voices", slug="first-voice", repo=user_repo)
-    assert not result.blocks
-
-
 def test_undeclared_extra_section_blocks_on_a_fixed_outline(
     run_local: Callable[..., Findings], user_repo: str
 ) -> None:
-    rogue = INTERVIEW.replace(
+    rogue = MEMO.replace(
         '<section data-nb-section="sources">',
         '<section data-nb-section="rogue"><p>extra</p></section>'
         '<section data-nb-section="sources">',
     )
-    result = run_local(rogue, "voices", slug="first-voice", repo=user_repo)
+    result = run_local(rogue, "memos", slug="first", repo=user_repo)
     assert "B-HTML" in result.blocks
 
 

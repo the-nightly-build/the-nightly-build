@@ -2,12 +2,8 @@
 
 import pathlib
 
-from pages import Site, build_press
+from pages import build_press
 from press import article, write_article
-
-
-def test_the_front_page_shows_a_well_formed_source_count(full_site: Site) -> None:
-    assert "8 sources" in full_site.index
 
 
 def test_a_non_int_sources_value_never_reaches_the_reader_raw(

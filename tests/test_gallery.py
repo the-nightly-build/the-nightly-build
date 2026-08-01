@@ -7,6 +7,7 @@ placeholder. These tests hold those ownership boundaries together.
 """
 
 import pathlib
+import re
 
 import pytest
 from gallery.build import build, discover_pieces
@@ -24,9 +25,13 @@ def test_every_engine_piece_has_a_sample() -> None:
 
 def test_table_sample_exercises_long_labels_and_prose_cells() -> None:
     sample = (REPO / "scripts/gallery/samples/table.html").read_text(encoding="utf-8")
+    labels = re.findall(r'<span class="nb-table-token">([^<]+)</span>', sample)
+    prose_cells = re.findall(r'<td class="txt">\s*(.*?)\s*</td>', sample, flags=re.S)
 
-    assert '<span class="nb-table-token">Tax Foundation</span>' in sample
-    assert '<td class="txt">' in sample
+    assert labels
+    assert prose_cells
+    assert max(map(len, labels)) >= 12
+    assert any(len(" ".join(cell.split())) >= 80 for cell in prose_cells)
 
 
 def test_the_built_page_shows_every_piece(tmp_path: pathlib.Path) -> None:
