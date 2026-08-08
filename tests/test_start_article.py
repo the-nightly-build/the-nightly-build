@@ -46,7 +46,8 @@ def test_configured_item_starts_from_exact_template_and_direction(
     ).read_text()
     ordered = [
         direction.index("## 1. House editorial standard"),
-        direction.index("## 2. Headline standard"),
+        direction.index("## 2. Slop standard"),
+        direction.index("## 3. Headline standard"),
         direction.index("Template identity"),
         direction.index("Series direction"),
         direction.index("Tag: equity"),

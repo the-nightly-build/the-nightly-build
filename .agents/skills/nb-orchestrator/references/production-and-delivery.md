@@ -12,11 +12,11 @@ in one burst at the start of production. Do not stage a warmup article and do
 not hold one article's roles for another's progress. Wall-clock is the slowest
 single article's chain, so any late start lands on the critical path.
 
-A series that sets `voice_guide` in its `series.yaml` has already settled its
-craft standard. `nb start-article` writes that guide into the article's
+A series that sets `voice_guide` in its `series.yaml` has already settled how
+it sounds. `nb start-article` writes that guide into the article's
 `writing-coach/01` pair, so launch only `nb-researcher` for those articles and
 brief the writer against the guide already on disk. Launching the coach anyway
-spends a role invocation to produce a standard the press has stated.
+spends a role invocation to restate what the press already wrote.
 
 Within one article, brief `nb-writer` only after the voice guide and evidence
 both exist. Brief `nb-editor` only after the writer proves the article. Use
@@ -41,14 +41,17 @@ remain at the artifact root.
 
 Every role receives `editorial-direction.md` with its brief. The writer's brief
 carries the recent openers, conclusions, and outline shapes the commission
-recorded as habits not to inherit. The voice guide states the craft standard
-and never names the last article, so the habits to avoid travel with the
+recorded as habits not to inherit. The voice guide says how the article should
+sound and never names the last article, so the habits to avoid travel with the
 article rather than with the guide. The editor also receives the exact writer
 brief so instruction leakage remains visible. A `review-brief.md` carries the
-named inputs, your recent-pattern notes, and the round's focus. Nothing more. Every launch begins with its named inputs and
-permits focused tool use. When a role asks for more context, expand its
-inputs or route the question to the owner rather than inviting repository
-exploration.
+named inputs, your recent-pattern notes, and the round's focus. Nothing more.
+The editor needs your recent-pattern notes to catch a formula or a catchphrase,
+which no single article can show. Never send a review brief without them.
+
+Every launch begins with its named inputs and permits focused tool use. When a
+role asks for more context, expand its inputs or route the question to the
+owner rather than inviting repository exploration.
 
 If isolated children are unavailable, perform the same numbered sequence in
 one context and preserve the same artifacts. Isolation changes execution, not

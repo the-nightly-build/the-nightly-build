@@ -2,8 +2,8 @@
 
 This file defines the standard for the three surfaces a reader meets first.
 The prose rules of `spec/editorial.md` apply here word for word. One test
-runs under everything below: the line commits to something the piece
-establishes. The tells this file names all fail it.
+governs all three: the line commits to something the piece establishes. Every
+tell named below fails that test.
 
 ## The headline
 
@@ -32,14 +32,14 @@ in them, ahead of every qualifier.
   branches: intuition & reality" (Evans). When the right half is atmosphere,
   cut the colon and write the claim.
 - **A triad of paired adjectives ("Faster Models, Firmer Rules, Tighter
-  Supply") performs comprehensiveness.** Pick the one development that matters
+  Supply") only sounds comprehensive.** Pick the one development that matters
   most and say what happened to it. The other two get their own sentences in
   the dek or the body.
 - **Anchor wit in the story's own nouns, with a plain dek beside it.** The
   Economist headlined a meat-producer merger "A steak in the market" and
   could afford to, because the standfirst under it stated the argument
-  plainly. Wordplay on an abstraction is noise, and no pun substitutes for
-  the dek.
+  plainly. Wordplay on an abstraction does not land, and no pun
+  substitutes for the dek.
 
 All of the above, at once: a piece that found two chip CEOs reading the
 same market data and reaching opposite conclusions could
@@ -60,13 +60,13 @@ executive" decorates without informing. One lean sentence, a stance and not
 a topic, and no detail that competes with the thesis for the reader's first
 impression.
 
-`spec/editorial.md` bans the hedged-contrast reflex in body prose, and the
+`spec/slop.md` bans the negative-parallelism reflex in body prose, and the
 dek gets no exemption. Three dek molds carry it: the semicolon reversal ("X
 did A; Y refuses B"), the suspended question ("...and the real question
 is whether"), and the comma triad, three clauses joined by commas and closed
 with "and" ("The trial cut the rate from 14 in 100 to 2, the
 general-population evidence is thinner, and the benefit depends on sustained
-feeding"). Cut them on sight. Even an earned shape reads stamped once it recurs, so check
+feeding"). Cut them on sight. Even a good mold looks stamped once it recurs, so check
 the recent library's deks before settling on one.
 
 ## Section headings
@@ -79,7 +79,7 @@ headings deleted, they were scaffolding, and scaffolding slots ("Background",
 `data-nb-section` label mirrors its heading, short and concrete. Fixed
 headings a template mandates ("Sources") are furniture and exempt. Every heading the writer names is held to this standard.
 
-Cadence repeats the same way dek molds do: a paper whose headings keep
-joining two clauses with a comma and "and" ("The scale, and what it is
-compounding against") reads stamped however sharp each line is. Vary the
-shape, and check the recent library's headings as you checked its deks.
+Headings repeat the same way deks do. A paper whose headings keep joining two
+clauses with a comma and "and" ("The scale, and what it is compounding
+against") looks stamped however sharp each line is. Vary how they are built,
+and check the recent library's headings as you checked its deks.

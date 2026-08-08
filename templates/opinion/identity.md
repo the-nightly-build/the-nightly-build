@@ -11,8 +11,8 @@ restate it. Title and dek sell the question or the consequence; the card
 answers where the piece lands.
 
 Build the argument sections the way the position's best advocate would, each
-cited to the record. The counter section is the piece's spine test: state
-the strongest opposing case in the form its own believers would sign, cited
-to its named holders, and answer it. A counter built to be knocked down
+cited to the record. In the counter section, state the strongest opposing
+case in the form its own believers would sign, cited to its named holders, and
+answer it. A counter built to be knocked down
 fails the piece. Close on what the argument earned, and where honesty
 allows, say what evidence would change that judgment.

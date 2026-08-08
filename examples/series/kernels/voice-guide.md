@@ -1,154 +1,149 @@
 # Voice guide: Kernels
 
+## How this piece should sound
+
 Write as a working kernel engineer teaching a peer. The reader is fluent in
 deep learning and new to the GPU, so they can carry a hard idea and will not
 forgive a paragraph that restates the previous one. Explain the machine. Never
 explain the reader's inexperience.
 
-Carry the mechanism in a short declarative and the consequence in the longer
-sentence that follows it. A one-sentence paragraph is a pivot between ideas,
-not emphasis, so spend them where the lesson turns.
+Say what you think of a number in the same breath as the number. Boehm calls a
+result "pretty bad" and has justified it by the end of the next sentence. A
+lesson can do the same: give the reading, then the comparison that makes it a
+reading, and do not save the assessment for a conclusion.
+
+Build one picture and keep returning to it. He runs a factory and a warehouse
+across his whole piece, naming a real quantity inside each part of it, so the
+bandwidth costs that arrive much later land somewhere the reader already has.
+Choose that picture before drafting and check it survives the hardest section.
+An analogy introduced once and abandoned is worse than none.
+
+Report what did not work. Boehm spends a sentence on an optimization he removed
+and names the cause he suspects. This matters more in a lesson than in a
+worklog, because a reader who sees only the choices that worked cannot tell
+which of them were forced.
+
+Put the warning where the reader will actually fail. Rush says the code looks
+like Python but is really CUDA at the moment before someone reaches for a list
+comprehension, not in a preface about how the languages differ. Find the place
+this lesson's reader will use an old habit, and interrupt them there.
 
 Prefer the concrete noun to the category. A warp, a bank conflict, and a store
-to global memory happen at an address; write them that way. When a number
-decides the argument, put the number in the sentence rather than gesturing at
-a benchmark below it.
-
-State what the hardware does before stating what the code should do. Every
-exemplar below earns the reader's trust the same way: it explains a behavior,
-then shows the measurement that behavior predicts.
-
-## Licenses
-
-```text
-form: the corrected intuition
-move: He states the belief a competent reader arrives with, then shows the
-      measurement that breaks it. Two chained cosines cost nearly what one
-      costs, which is why activation functions price alike however much
-      arithmetic they appear to do.
-bar:  the stated belief must be one a competent reader would defend out loud,
-      never a strawman, and the correction must carry its measurement
-
-form: the sustained physical analogy
-move: He runs one factory-and-warehouse picture across several diagrams and
-      then puts it under stress, asking what doubling the factory buys when
-      the road to it did not widen.
-bar:  the analogy must return later under changed conditions and pay off
-      differently; a simile used once is decoration and gets cut
-
-form: the reported negative result
-move: Boehm records optimizations that did not work and why he thinks so,
-      including a swizzling attempt he attributes to an already-high L2 hit
-      rate.
-bar:  it must name what was tried, the measurement that settled it, and the
-      suspected reason; a failure with no number is an anecdote
-
-form: the admitted limit
-move: Boehm marks where his understanding stops rather than papering over it,
-      saying plainly that he cannot explain why one autotuned parameter set
-      wins.
-bar:  it must bound a claim the lesson actually made; it may never excuse a
-      claim the lesson owed the reader and skipped
-
-form: the spec-to-consequence calculation
-move: Both He and Boehm start from published bandwidth and throughput numbers
-      and arrive at what the hardware should therefore take, before measuring
-      what it does take.
-bar:  the calculation must end at a number the lesson then checks against a
-      real measurement, and the gap between them must be addressed
-
-form: the withheld answer
-move: Rush gives the reader a tip before the attempt and nothing after it,
-      leaving the error loop to teach. The reader gets to be wrong first.
-bar:  the exercise must be answerable from the lesson alone, and no later
-      paragraph may resolve it
-```
+to global memory happen at an address, so write them that way. When a number
+decides the argument, put the number in the sentence rather than gesturing at a
+benchmark below it. Keep the technical vocabulary in the prose. A lesson that
+avoids it to stay accessible ends up sounding written from a distance.
 
 ## Simon Boehm, "How to Optimize a CUDA Matmul Kernel for cuBLAS-like Performance: a Worklog"
 
 ```text
 Source: https://siboehm.com/articles/22/CUDA-MMM
-Craft:
-- cadence: a blunt verdict on a result, then a long sentence explaining the
-  access pattern that produced it; single-sentence paragraphs carry the turns
-- argument: each kernel repeats one shape, motivation to visualization to code
-  to measurement to analysis, so complexity rises without the frame moving
-- evidence: timings on named hardware sit inside the sentence making the
-  claim, and napkin math predicts a number before the profiler reports one
-- stance: a practitioner working in the open who names what he could not find,
-  could not explain, or was surprised by
-- notice: the artifacts others drop, including wasted blocks when dimensions
-  do not divide evenly, and optimizations that produced no gain
-- diction: GPU literacy assumed, every new term anchored where it first does
-  work, asides pushed into sidenotes so the through-line survives
-- reader: first person plural, joint work rather than instruction, with
-  imperatives confined to headings
-- ordering: the diagram always precedes the code, and the profiler output
-  always follows it, so the reader never meets syntax before intent
+
+"Pretty bad, considering that the A6000 is advertised as being able to achieve
+almost 30 TFLOPs. Just for comparison, 300 GFLOPs is also roughly the
+performance achieved by the optimized BLAS library on the 2015 Haswell CPU that
+I used in my earlier post on CPU matmul."
+He gives his opinion of the number before the evidence for it, and the evidence
+lands in the next sentence. "Pretty bad" is how an engineer actually talks about
+their own result, and it sits inside a sentence that is exact about the
+hardware.
+
+"I like to think of the three dimensions x,y,z of threadId as being
+"column-major", due to the first dimension x being the one that's continuous in
+"warpspace". I don't know if others use that term, but it makes the concept
+more clear to me."
+He offers a private mental model and admits it may be his alone. The reader gets
+the idea and its standing at once, and nothing is dressed up as established
+usage. A writer who says where a framing came from is easier to trust on the
+things they then state flatly.
+
+"It didn't increase performance, presumably because L2 hit rate is already
+fairly high at 80%, so I ended up removing the swizzling code."
+He spends a sentence on an optimization he threw away, and gives the cause he
+suspects without claiming to have proved it. A reader who sees only the changes
+that worked cannot tell which of them were forced.
 ```
 
 ## Horace He, "Making Deep Learning go Brrrr From First Principles"
 
 ```text
 Source: https://horace.io/brrr_intro.html
-Craft:
-- cadence: a short hook sentence sets the stakes, then a longer sentence does
-  the explaining; the pattern repeats at the top of each section
-- argument: diagnosis before treatment. The piece refuses to recommend
-  anything until the reader can say which of three regimes they are in
-- evidence: published bandwidth and throughput figures are converted into an
-  operational statement about how many numbers move per unit of arithmetic
-- stance: impatient with guessing and generous toward the guesser, treating
-  the wrong intuition as the thing worth explaining
-- notice: the second-order fact, that fusing changes almost nothing about the
-  arithmetic and almost everything about the traffic
-- diction: informal register carrying exact claims; jargon is translated into
-  plain cost language the same sentence it appears
-- reader: addressed as a collaborator with a real problem, invited into a
-  shared "let's" rather than instructed
-- pressure: the central analogy is reused under changed conditions instead of
-  being stated once, so the reader can reason with it rather than admire it
+
+"Hey! This is a very stupid arrangement. Why are we sending the same data to
+global memory and then back to the compute units, over and over? We should just
+keep the data at the factory, perform all of our compute, and then send it
+back!"
+He interrupts his own explanation to react to it. The reader has just been shown
+a diagram and is thinking exactly this, and he says it first, in the words
+someone would use out loud. The exclamation marks carry it. The same words set
+flat would read as analysis.
+
+"On the other hand, if you're spending all of your time performing big chonky
+matmuls (i.e. a compute-bound regime), then rewriting your model logic into C++
+to reduce overhead won't help."
+"Big chonky" sits inside a sentence that is otherwise exact, next to a
+parenthetical giving the formal term. He does not choose between sounding like
+a person and being correct.
+
+"One way to think about compute is as a factory. We send instructions to our
+factory (overhead), send it materials (memory-bandwidth), all to keep our
+factory running efficiently (compute)."
+He builds one picture and names each real quantity inside it, so the analogy is
+load-bearing from the first sentence. He returns to the factory when bandwidth
+costs arrive much later, and by then the reader has somewhere to put them.
 ```
 
 ## Abhinav Upadhyay, "What Every Developer Should Know About GPU Computing"
 
 ```text
 Source: https://blog.codingconfessions.com/p/gpu-computing
-Craft:
-- cadence: balanced clauses for architectural comparison, then a short
-  sentence to release the tension before the next concept
-- argument: known territory first. CPU behavior anchors every GPU claim, and
-  sections close by naming the concept the next one needs
-- evidence: throughput figures are placed beside a CPU's so the magnitude is
-  legible instead of merely large
-- stance: assumes real competence in the reader and locates the gap precisely
-  rather than starting from zero
-- notice: asks why the architecture is shaped this way, so latency tolerance
-  arrives as a design consequence rather than a specification
-- diction: each term is defined in the clause that introduces it, before it is
-  ever used to carry an argument
-- reader: voices the reader's objection as a question and then answers it
-- recap: condenses a section into what it now makes possible, never a summary
-  of what was said
+
+"If you like numbers, let's talk about numbers. The performance of hardware for
+numerical computations is measured in terms of how many floating point
+operations it can do per second (FLOPS)."
+He announces the turn toward hard figures instead of sliding into it, and he
+does it in a friendly voice. The reader gets a moment to decide how closely to
+read, which is a small courtesy most technical writing skips.
+
+"CPUs dedicate a significant amount of chip area towards features which will
+reduce instruction latency, such as large caches, less ALUs and more control
+units. In contrast, GPUs use a large number of ALUs to maximize their
+computation power and throughput. They use a very small amount of the chip area
+for caches and control units, the things which reduce the latency for CPUs."
+Two long clauses set the contrast and a shorter third closes it by repeating the
+exact terms from the first. Nothing is renamed on its second appearance, so the
+reader tracks one comparison rather than two.
+
+"So, why can't we always reach 100% occupancy? The SM has a fixed set of
+execution resources, including registers, shared memory, thread block slots, and
+thread slots."
+He asks the question the reader has just formed and answers it immediately.
+Putting it in the reader's voice, with "we", makes the constraint arrive as
+something they worked out.
 ```
 
 ## Sasha Rush, "GPU Puzzles"
 
 ```text
 Source: https://github.com/srush/GPU-Puzzles
-Craft:
-- cadence: one imperative sentence per task, no preamble
-- argument: the problem is the explanation. Concepts are never taught before
-  the reader has failed at needing them
-- evidence: a runnable cell and a visual debugger; correctness is shown rather
-  than asserted
-- stance: exacting about the constraint and light about everything else
-- notice: the exact place a Python habit silently stops being valid on a
-  device, and warns there rather than generally
-- diction: plain, short, and free of ceremony; the constraint carries the
-  teaching
-- reader: treated as a participant who is about to attempt something, not an
-  audience being shown a result
-- restraint: scaffolding arrives before the attempt and nothing arrives after
-  it, so the error loop stays the teacher
+
+"It is hard to gain intuition working through abstractions. This notebook is an
+attempt to teach beginner GPU programming in a completely interactive fashion.
+Instead of providing text with concepts, it throws you right into coding and
+building GPU kernels."
+He says plainly what he is trying and owns it. "An attempt" is an unusual word
+to use about your own teaching material, and a reader who is told that much is
+willing to be thrown in.
+
+"This code looks like Python but it is really CUDA! You cannot use standard
+python tools like list comprehension"
+A warning written the moment before the reader would have hit the wall, in the
+place they will actually be looking. He knows exactly which habit is about to
+fail and stops it on the spot, instead of filing it in a general note about how
+the two languages differ.
+
+"If you get an error it is probably because you did something fancy :)."
+He tells the reader their error is expected and slightly their own fault, and
+the smiley keeps it warm, so the puzzles read as an invitation instead of a
+test.
 ```

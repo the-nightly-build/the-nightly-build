@@ -21,8 +21,8 @@ the orchestrator rather than reconstructing it yourself.
 ## Research procedure
 
 1. Read every required document and every declared `consult` source before
-   searching elsewhere. Read specific pages in full. An exclusive source policy
-   makes the declared set the whole menu.
+   searching elsewhere. Read specific pages in full. Under an exclusive source policy
+   the declared set is all you may cite.
 2. When coverage cites a report, hearing, filing, or paper, open the underlying
    source and read the cited passage. Read beyond summaries into appendices and
    transcripts.
@@ -105,6 +105,10 @@ Every source read far enough to reject, one line each:
 ```text
 URL: the reason it was rejected
 ```
+
+The record itself meets `spec/slop.md`. A writer drafts in the register they
+are handed, so an evidence record written in slop teaches the article to sound
+that way.
 
 The evidence record has two readers: a writer drafting from it and an editor
 trying to break the result. Make each claim traceable enough for either reader

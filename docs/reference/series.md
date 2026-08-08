@@ -188,7 +188,7 @@ copies the pinned file into the article's `writing-coach/01/voice-guide.md`
 with a brief recording where it came from, so the production record still
 names the standard that governed the article. `nb validate` fails when the
 path names a missing file, because a silently absent guide would cost the
-series its craft standard.
+series the voice it had settled on.
 
 The writing coach is the only optional role, and it is the largest usage
 reduction available to a press. See

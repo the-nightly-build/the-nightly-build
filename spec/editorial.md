@@ -3,7 +3,7 @@
 This is the editorial standard every article meets, whatever its template.
 
 The standard is prescriptive on purpose. Its job is to make the default professional:
-research-grade writing. It reads in two registers.
+research-grade writing. It has two parts.
 
 - **Standards a paper cannot loosen.** The quality bar below: sourced claims, teach don't
   summarize, earned analysis, and prose free of fluff, slop, and run-ons.
@@ -13,8 +13,8 @@ research-grade writing. It reads in two registers.
   `press/editorial.md` and the series prompts. This standard sets the quality of those
   choices, never the choices themselves.
 
-The standard bans failures, never forms. Any form is open to a voice that
-earns it and a paper that licenses it.
+This file bans failures of writing. How a paper sounds is its own to set in
+`press/editorial.md`.
 
 The standard does not legislate trivia: no paper-wide rule on the Oxford comma. Be
 consistent within a piece.
@@ -38,11 +38,11 @@ the reader personally takes an explicit ask in `press/editorial.md` or the serie
 Report what is true and analyze what it means. Hold the analysis to the same bar as the
 reporting. Analysis must be earned: grounded in the cited evidence, its reasoning shown.
 Keep three things distinct: reported fact, estimate, and synthesis. Never write that
-someone hinted, implied, or signalled. That is the writer's guess wearing attribution.
+someone hinted, implied, or signalled. That is the writer's guess presented as attribution.
 Synthesis with a point of view is welcome. Cut unsupported opinion. How hard to
 press a view is the paper's call, and a press that wants opinion may have a
-column or an opinion series. The standard bans the unearned verdict, never the
-verdict: an opinion meets the same bar as any analysis, cited, reasoned, shown.
+column or an opinion series. A verdict is welcome once it is earned, and it
+meets the same bar as any analysis: cited, reasoned, shown.
 
 ## Citations
 
@@ -64,64 +64,36 @@ every number a comparison the reader already knows. Say plainly what is unknown.
 ## Clarity
 
 An article is understood on the first read or it has failed. Abstraction is the usual
-reason it fails: every abstract noun asks the reader to carry something unstated, and each
-is a place a weak argument hides. Prefer the concrete. Reach for an abstraction only when
+reason it fails: every abstract noun asks the reader to carry something unstated, and a
+weak argument is easy to hide inside one. Prefer the concrete. Reach for an abstraction only when
 the abstraction itself is the subject, and build it up like any other term.
 
 Name a thing one way and keep that name. Once a term is set, reuse it exactly. A synonym
 reached for variety reads as a new thing.
 
-Default to short, single-purpose sentences, and vary length for rhythm: a long
-sentence in control is craft, and a page of uniform declaratives is a metronome. If a
+Default to short, single-purpose sentences, and vary their length. A long
+sentence under control is good writing, and a page of same-length declaratives
+is monotonous. If a
 sentence can be misread, rewrite it rather than trust the next one to rescue it.
-Shorten by cutting, never by packing ideas denser. A paragraph carrying more ideas
-than sentences has stopped explaining.
+Shorten by cutting, never by packing ideas denser. If a paragraph holds more ideas than it has
+sentences, it is no longer explaining them.
 
 ## Prose
 
-The register is a serious paper, not a feed. Some habits are always cut. They are the
-tells of slop.
+The house register is a serious paper, not a feed. It is a default, and a press
+may move it. `spec/slop.md` is the standard for prose that reads as
+machine-written. It binds every article at every register, and nothing a press
+sets below loosens it.
 
-- **Fluff.** Filler openings ("In today's fast-paced world"), empty connectives,
-  throat-clearing ("As you might know"), and openers that lecture: Note, Consider,
-  Imagine. If a sentence carries no information, it goes.
-- **Slop.** The median AI read: smooth, hedged, reaching for the generic phrasing. Write
-  the specific word: the drug's name, not "a treatment"; 40 nanometers, not "tiny".
-  Commit where the evidence lets you. Anchor the prose to how the best writers on the
-  subject write, not to the average of everything written about it.
-- **Run-ons.** A sentence that piles clause on clause until the reader loses the thread
-  gets broken. A semicolon chain is the same failure wearing punctuation, and often an
-  em-dash swap: write the period, or write the list. Let the verbs carry the weight.
-- **Unearned punchlines.** Cut the sentence that announces stakes the argument has not
-  built ("that's the whole point", "here's the kicker", "the catch is"). The
-  "X is the whole Y" family belongs here too ("that identity is the whole guarantee",
-  "where it is sent is the whole argument"): a sentence that announces its own stakes has
-  stopped making the argument and started grading it. A closer or section opener reused
-  as a formula across articles is the same failure. So is a house catchphrase. A punch
-  sentence the argument has built and a license admits is craft, not a punchline.
-- **Hedged contrast.** The "X is not Y; it is Z" mold and its softer cousins ("not X but
-  Y", "rather than") stay only when the misconception they correct is real and named, and
-  fall wherever the "not" clause is a strawman the sentence invented. One or two earned
-  contrasts per piece is the ceiling.
-- **Self-reference.** The piece never narrates itself or its newsroom ("this dossier",
-  "what follows") and never gestures at a hypothetical reader ("a reader will
-  notice", "where a reader's scrutiny belongs"). Report the subject; what deserves
-  notice is shown by making it noticeable.
-- **Banned terms.** `spec/banned-terms.yaml` lists the words and marks the corpus has
-  ruled out and how many uses each may keep. A press extends or adjusts the list in
-  `press/banned-terms.yaml`, and the proof counts every article against the merged list.
-  When a count runs over, rewrite rather than substitute: a synonym carries the same
-  vagueness, and repunctuating an em-dash keeps the fluff the dash was carrying. Delete
-  first, then rewrite what remains. Keep an em-dash for a real aside or a sharp
-  break, not as a reflex.
+Register and formality belong to `press/editorial.md`, which a paper writes for
+itself, and to the article's voice guide, which sets how one piece should
+sound. A paper that wants to be funny, loose, or direct with its reader says so
+there, and every article inherits it. No form is forbidden for being
+expressive. What gets cut is writing that fails `spec/slop.md`, at whatever
+register the paper has chosen.
 
-That is the default register. An expressive form beyond it (e.g., direct
-address, fragments, open humor, etc.) is licensed, never free.
-`press/editorial.md` or the article's voice guide grants the license by naming
-the form, the exemplar move being transferred, and the bar any single use must
-meet. An unlicensed form is cut. A licensed use still meets every test above.
-
-Break any rule here sooner than write a sentence no honest voice would say aloud.
+If following a rule here would produce a sentence you would not say aloud,
+break the rule.
 
 ## Punctuation
 
@@ -129,18 +101,18 @@ Punctuation sets the pace of a thought, and each mark has one job. Reach for the
 plainest mark that does the job. When two marks would both work, the plainer one
 is right, and when in doubt the period is the default.
 
-- **Period.** The default. Two thoughts are two sentences. Most of the em-dashes,
-  semicolons, and colons a draft reaches for are a period avoiding itself.
+- **Period.** The default. Two thoughts are two sentences. Most em-dashes, semicolons,
+  and colons in a draft belong where a period would do.
 - **Comma.** Joins within a single thought, and sets off a short aside. It is not
   a splice: two independent clauses joined by a comma alone are two sentences.
 - **Colon.** Introduces what the clause before it promises, a list or a
   definition or the payoff. The clause before it stands on its own. It is not a
   general connector between two thoughts.
 - **Semicolon.** Rare. Two independent clauses so tightly bound that a period
-  would over-separate them. Never a chain, never a patch on a comma splice, never
-  a way to keep a run-on running.
+  would over-separate them. Do not chain them, do not use one to patch a comma
+  splice, and do not use one to extend a run-on.
 - **Em-dash.** A real interruption or a sharp aside, at most once in a stretch.
-  It is not a connective and not a semicolon in disguise. When you delete one,
+  It is not a general connective and not a substitute for a semicolon. When you delete one,
   the fix is usually the period the thought wanted, not another mark in its place.
 - **Parentheses.** A true aside the sentence survives without. If the sentence
   needs what is inside them, it is not an aside, so fold it back in.
@@ -158,15 +130,15 @@ moral. Let the teaching and the citations equip the reader to go further.
 
 Use inline `<code>` only when the reader must preserve a string's exact spelling: something
 they could type, paste, execute, match, or distinguish character-for-character. It is not
-technical emphasis. Ordinary terms, product names, model names, and prose do not wear it;
+technical emphasis. Ordinary terms, product names, model names, and prose do not take it;
 neither does every repeat of a literal once the sentence has established it. When several
 tokens need comparison, give them a table or a code listing instead of turning a paragraph
 into labels.
 
 An article's form comes only from its template and its own content. Reading the published
 library informs content and context: what a series has covered, what not to repeat. It
-never informs form. A shape you find in an older piece records what the format was, not
-what it should be now. A template that has moved on leaves its old structure in the
+never informs form. A structure in an older piece records what the format was at the
+time. It does not say what the format should be now. A template that has moved on leaves its old structure in the
 back-catalog, and copying that structure forward is how a retired section reappears where
 it no longer belongs.
 

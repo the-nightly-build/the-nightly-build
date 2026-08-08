@@ -138,7 +138,7 @@ alternative text, and restate what matters in caption and prose.
 Math the argument leans on, typeset from LaTeX. The element's text is the
 TeX source and the runtime typesets it; a reader without JS sees the TeX
 itself, so keep it clean. Three tiers, chosen by how much the equation
-needs to say. Inline math rides in prose in an `nb-math-in` span. A bare
+needs to say. Inline math sits in prose in an `nb-math-in` span. A bare
 display equation (no caption) sits open on the page for a step the
 surrounding prose fully carries, cited in that prose. Group text with the
 equation and the figure becomes a data-block card: a caption when the

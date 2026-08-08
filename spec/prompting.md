@@ -4,7 +4,9 @@ Every layer an article-making agent reads is a prompt: the orchestrator
 package, spec files, editorial-role skills, template identities, furniture
 catalog, and prompts a press writes for its series. Their prose trains the
 writer's prose. A layer that rambles produces articles that ramble, and a
-layer that lists produces articles that treat the list as the whole world.
+layer that lists produces articles that treat the list as everything allowed.
+A layer that reaches for a memorable phrase teaches the writer to reach for
+one, so keep slogans out of every prompt surface, including this one.
 This file is the standard every prompt surface is written against. The user
 assistant applies it to every prompt it writes or edits, and engine
 contributors apply it to the shipped layers.
@@ -25,13 +27,15 @@ Open concrete. The first sentence states the prompt's job or the rule's
 consequence, never a framing abstraction. "A performance number arrives with
 its baseline" instructs; "the conceptual equipment for reading AI" decorates.
 
-Write flat declaratives that carry consequences. Vary the rhythm; a prompt
-whose every sentence lands the same aphoristic beat reads as performance,
-and the writer learns to perform. No fragment openers.
+Write flat declaratives that carry consequences. Vary the rhythm. A prompt
+whose sentences all land the same aphoristic beat reads as performance, and
+the writer learns to perform. Name a rule or a test after what it does ("the
+delete test"), never after a virtue ("the earns-its-place test"), because a
+name that sounds good invites argument about the name. No fragment openers.
 
-Prefer the period. An em-dash used as a connective, a semicolon chain, or a
-stacked-colon sentence is a run-on wearing punctuation. Write the period, or
-write the list.
+Prefer the period. An em-dash used as a connective, a semicolon chain, and a
+stacked-colon sentence are all run-ons held together by punctuation. Write the
+period, or write the list.
 
 Name the actual thing. Container nouns (machinery, landscape, space,
 equipment, dynamics) gesture at a subject instead of stating it. A sentence

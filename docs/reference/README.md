@@ -83,7 +83,7 @@ The engine does not estimate model cost. Use the provider's usage reporting.
 | Atom feeds                             | Publishes a paper-wide feed and one feed per series with full recent article content                                                         | [Delivery](delivery.md#feeds-zero-setup)                                 |
 | Shared directory                       | Makes a public fork discoverable from the Nightly Build directory, with an explicit opt-out                                                  | `directory` in `site.yaml`; see [Delivery](delivery.md#the-directory)    |
 | Article history search                 | Gives production agents narrowly requested prior coverage without loading the whole archive                                                  | The `nb history` command and [Architecture](../concepts/architecture.md) |
-| Pinned series voice guide              | States a settled section's craft standard once, so the writing coach never runs for it                                                       | `voice_guide` in [Series](series.md#pinning-a-voice-guide)               |
+| Pinned series voice guide              | States once how a settled section should sound, so the writing coach never runs for it                                                       | `voice_guide` in [Series](series.md#pinning-a-voice-guide)               |
 
 For a complete working press, browse `examples/`. It demonstrates all four
 modes, daily and day-list cadences, source policies, production policy,

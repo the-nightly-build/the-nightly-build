@@ -16,7 +16,7 @@ Emphases:
   item to reach the count.
 - Link each headline to the document that owns its claim, and to someone with no
   stake in that document reading the same thing. A write-up that only restates
-  the announcement is the announcement again.
+  the announcement has added nothing.
 - The tweet already made the rounds. Add what it left out: the number,
-  the caveat, the thing that makes it real or makes it noise.
+  the caveat, the detail that decides whether it matters.
 - Reference earlier briefs when a story develops ("we noted last week...").

@@ -146,6 +146,7 @@ def _editorial_direction(
     series_root = repo / "press" / "series" / series_id
     layers = [
         _Layer("House editorial standard", repo / "spec" / "editorial.md"),
+        _Layer("Slop standard", repo / "spec" / "slop.md"),
         _Layer("Headline standard", repo / "spec" / "headlines.md"),
     ]
     optional = (

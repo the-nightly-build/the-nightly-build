@@ -66,14 +66,23 @@ Record the read in the review's Skeptic section.
 
 ## Second read: the cut
 
-Run the earns-its-place test sentence by sentence. A sentence stays for a
-fact, a disputable claim, a reasoning step, or a move the voice guide
-licenses. Remove the rest. Cut any form no license admits and any licensed
-use that misses its exemplar's bar. Protect the licensed use that clears it.
-Cut self-grading, summaries of the article's own method, and signposts
-describing where the piece has been or will go. Cut unearned punchlines:
-sentences that announce stakes the argument has not built. The editorial
-direction defines that family. Enforce it as written there.
+Make a dedicated pass for slop against `spec/slop.md`, over every sentence
+including display text and furniture prose. Sweep all of it. Hunting for the
+worst line leaves the rest, and a draft whose every sentence sounds capable can
+fail on many of them. Cutting slop does not mean flattening the piece, so a
+light or funny sentence written for this subject stays.
+
+Then run the delete test. Remove a sentence whose deletion loses no fact, no
+disputable claim, and no reasoning step. A reasoning step contains the
+reasoning, so a sentence that only reports where the argument stands is a
+signpost however analytical it sounds. Cut self-grading, summaries of the
+article's own method, and signposts describing where the piece has gone.
+
+The voice guide says how this article should sound. Hold the piece to it in
+both directions. A sentence that lands flatter than the guide asks for needs
+fixing as much as one that overreaches. Structure, argument order, and headline
+craft are yours to judge. How the prose sounds is the guide's call, so do not
+substitute your own taste.
 
 Check the article for correctness in writing, not just content. Every
 sentence must be grammatically and syntactically correct, including the
@@ -91,11 +100,11 @@ editorial direction, including its repairs for reflex punctuation. Cut from
 middles, never the ending.
 
 Read paragraph endings in sequence. Compare opener, closer, headings, dek,
-furniture, and rhetorical shapes with the orchestrator's recent-pattern notes.
-A repeated shape is a formula. Break it without copying any prior structure.
-An ending gone soft often finished a paragraph earlier. Hold the voice
-guide's register, and delete voiced sentences with no cargo instead of
-flattening them.
+furniture, and sentence patterns with the orchestrator's recent-pattern notes.
+An opener, closer, or heading built like a prior article's is a formula. Break
+it without copying any prior structure. An ending gone soft often finished a
+paragraph earlier. Hold the voice guide's register, and delete voiced sentences
+with nothing in them instead of flattening them.
 
 Apply the same test to furniture. A verdict block, callout, or other component
 does not survive because the paper used it before, but deliberate emphasis is a
@@ -136,7 +145,7 @@ Never edit assets or markup yourself.
 
 Make cuts and small prose fixes directly in the article. Cutting has no size
 limit. New prose does: past a word or clause, writing belongs to the writer,
-because an editor who rewrites regresses the voice toward its own median.
+because an editor who rewrites replaces the writer's voice with their own.
 Missing material, wrong framing, major structure, sourcing, assets, markup, and
 proof belong to the responsible role.
 
@@ -163,7 +172,8 @@ The thesis and the claims it stands on. Each load-bearing claim tested and
 how it held. Each break with its evidence and the fix made or routed.
 
 ## Cut
-The cuts made and why, the worst tell found, and any repeated pattern named.
+The cuts made and why, how many sentences failed the slop test, and any
+repeated pattern named.
 
 ## Reader
 What the piece gives beyond its sources, and whether the prose sits closer
@@ -179,7 +189,8 @@ Each remaining item with its owner: researcher | writer | orchestrator.
 approve | revise, with the reason in a sentence.
 ```
 
-Write in your own words, never the draft's. Later editor invocations write a
+Write in your own words, never the draft's, and hold the review to
+`spec/slop.md` as you held the article. Later editor invocations write a
 new numbered artifact and never append to or overwrite an earlier review.
 
 Report the editorial-review path and final decision. When more work is needed,

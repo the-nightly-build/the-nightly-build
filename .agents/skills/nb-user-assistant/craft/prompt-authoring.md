@@ -15,8 +15,9 @@ selected by tag, so the copies cannot drift.
 
 Write editorial judgment with consequences. Define territory by the principle
 that admits and excludes work. Define evidence by what a claim must survive.
-Define voice through attention, compression, rhythm, stance, and concrete
-examples or anti-examples, not through celebrity names or empty adjectives.
+Define voice by showing it: passages quoted from writers who already sound the
+way the work should sound, each with a note on why it is worth reading. Names
+and adjectives about tone do not carry a voice.
 
 Use requirements lists only for closed contracts. Territory prose stays open
 ground. Never write sample article sentences. Any line the writer could paste

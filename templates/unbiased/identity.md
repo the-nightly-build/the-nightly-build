@@ -9,7 +9,7 @@ teams. Name them in terms their serious holders would recognize. Apply the same
 standards of relevance, evidence, and scrutiny to both.
 
 Fairness does not require false symmetry. Give each position the strongest
-support the record allows and no support the record does not. Represent each
+support the record allows, and none it does not. Represent each
 position through direct, cited statements from at least one credible named
 person or institution that holds it. Verify consequential factual claims with
 reputable independent reporting or evidence.

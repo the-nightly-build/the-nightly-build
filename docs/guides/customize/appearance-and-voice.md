@@ -44,14 +44,32 @@ running for that section. See
 [Series reference](../../reference/series.md#pinning-a-voice-guide) for the
 key and [Production](../../reference/production.md) for what it saves.
 
-Write the guide the way the coach would, because the writer and the editor
-both read it as one. Ask your assistant to study strong writers in the
-section's territory and produce the guide from that reading rather than
-drafting it cold: the value is in the exemplars and in licensing specific
-expressive forms, not in adjectives about tone. A guide states register, the
-relationship with the reader, the forms an article may use and the bar each
-use must clear, and the craft notes drawn from each exemplar. Working examples
-live in `examples/series/kernels/voice-guide.md`.
+Write the guide the way the coach would, because the writer and the editor both
+read it as one. Ask your assistant to study strong writers in the section's
+territory and produce the guide from that reading rather than drafting it cold.
+The value is in the exemplars, not in adjectives about tone. A guide records
+each exemplar with passages quoted from it, then opens with a few paragraphs on
+how the section should sound, written last so it describes the writers actually
+read. A working example lives in `examples/series/kernels/voice-guide.md`.
+
+Each exemplar gets two or three passages taken from different parts of the
+piece, each followed by two or three sentences on why it is worth reading and
+where the person is visible in it. Quote enough to hear the writing. Keep the
+subject's own vocabulary inside the quotations, because a passage flattened
+into general English stops showing what it was picked for. A note explains a
+passage and never instructs: the moment a guide says to put the verdict first,
+it has begun commissioning sentences.
+
+Do not give the guide a list of permitted moves. A list of moves gets read as a
+set of sentences to produce, and the writer will produce them whether or not
+the material calls for one.
+
+Check every quotation against the source before you commit the guide. This
+applies to a guide you write by hand exactly as it applies to one the coach
+produces, and it is the one error nothing downstream can catch: a fabricated
+quotation reads perfectly, ships in a public file, and puts words in a named
+writer's mouth. A quotation you cannot find in the piece is cut rather than
+approximated.
 
 A pinned guide never mentions a particular article. Revisit it when the
 section's voice genuinely moves, and expect a fresh coach reading to beat a

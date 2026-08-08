@@ -13,7 +13,8 @@ is safe to publish.
   documentation, never live configuration.
 - `library` is protected publication state. Never commit, push, or merge to it
   directly.
-- `spec/editorial.md` and `spec/headlines.md` govern article quality.
+- `spec/editorial.md`, `spec/slop.md`, and `spec/headlines.md` govern article
+  quality.
   `spec/prompting.md` governs changes to shipped or press-owned prompts.
 
 ## Route by invocation

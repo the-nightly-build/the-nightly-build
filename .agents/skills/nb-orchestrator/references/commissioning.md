@@ -63,7 +63,8 @@ numbered `02`, `03`, and onward without overwriting earlier work.
 Write `commission.md` as the record of every decision production needs. A
 reader should reconstruct the assignment, its boundaries, and its required
 contribution without the chat. Record the actual harness and model choices.
-Write directions, never sample article sentences.
+Write directions, never sample article sentences. A commission and a brief
+meet `spec/slop.md`, because every role you brief reads them first.
 
 Create each numbered role brief only when its inputs exist. The coach and
 researcher briefs have no upstream outputs, so write them with the commissions

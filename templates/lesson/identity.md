@@ -39,8 +39,8 @@ sentence to rescue it. Prefer concrete statements. Every abstraction asks
 the reader to hold something unstated in their head, and each one makes
 the lesson harder to follow. Use an abstraction only when the abstraction
 itself is what is being taught, and set it up like any other term. Shorten
-by cutting material, never by packing ideas closer together. A paragraph
-holding more ideas than sentences has stopped teaching.
+by cutting material, never by packing ideas closer together. If a paragraph
+holds more ideas than it has sentences, it is no longer teaching them.
 
 The two bookends are written together, after the body, and they are read
 together. Why this matters gives the reader a real reason to read the

@@ -39,7 +39,7 @@ per-stage tiers decide what each role costs. A pinned voice guide removes the
 writing coach for a section whose sound has settled, the only lever that drops
 a role invocation instead of making one cheaper. Write a pinned guide against
 the standard in `.agents/skills/nb-writing-coach/SKILL.md`, so it carries real
-exemplars and licensed forms rather than adjectives about tone.
+exemplars quoted from real writers rather than adjectives about tone.
 
 ## Interview loop
 
