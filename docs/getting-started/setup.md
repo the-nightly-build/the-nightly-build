@@ -24,8 +24,8 @@ Start with [Ask your AI](ask-your-ai.md). A capable assistant should:
 5. Offer to [verify that runtime](first-run.md) with a non-publishing smoke
    test.
 
-When the assistant cannot perform a step itself, expect one exact manual
-action from it, and it continues from your result.
+When the assistant cannot perform a step itself, expect one exact manual action
+from it, and it continues from your result.
 
 `nb setup` scaffolds `press/`, creates the protected `library` branch, seeds its
 publishing workflows, enables Actions, and configures GitHub Pages and

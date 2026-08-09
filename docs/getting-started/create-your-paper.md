@@ -4,9 +4,9 @@ A paper is the published result. Its press is the configuration under `press/`
 that produces it.
 
 You do not need answers prepared. Start the conversation and expect the
-assistant to propose directions, test them with representative article ideas
-and counterexamples, and simulate a first week before asking for approval.
-Every decision the press encodes gets settled this way. At a minimum:
+assistant to propose directions, test them with representative article ideas and
+counterexamples, and simulate a first week before asking for approval. Every
+decision the press encodes gets settled this way. At a minimum:
 
 - what the paper is for and who reads it
 - the territory each series owns, and what it refuses to cover

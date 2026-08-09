@@ -9,8 +9,8 @@ brief.
 State the prompt's job before drafting. Identify the decisions its reader must
 make, the context only this layer owns, and the observable failure it should
 prevent. Delete anything already encoded by YAML, a manifest, the proof
-contract, a catalog, or another prompt layer. When the same guidance belongs
-in two prompts, give it one home: a shared fragment under `press/series/_tags/`
+contract, a catalog, or another prompt layer. When the same guidance belongs in
+two prompts, give it one home: a shared fragment under `press/series/_tags/`
 selected by tag, so the copies cannot drift.
 
 Write editorial judgment with consequences. Define territory by the principle
@@ -18,8 +18,8 @@ that admits and excludes work. Define evidence by what a claim must survive.
 Define voice by showing it: passages quoted from writers who already sound the
 way the work should sound, each with a note on why it is worth reading. That is
 what a voice guide is for. A paper-wide file in `press/editorial.md` sets a
-register instead, and may name a publication as a reference point, but adjectives
-about tone on their own carry nothing.
+register instead, and may name a publication as a reference point, but
+adjectives about tone on their own carry nothing.
 
 ## Critique before shipping
 

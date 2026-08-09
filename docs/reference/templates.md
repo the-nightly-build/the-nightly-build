@@ -1,7 +1,7 @@
 # Template reference
 
-A template is an enforceable article package under shipped `templates/<id>/`
-or user-owned `press/templates/<id>/`:
+A template is an enforceable article package under shipped `templates/<id>/` or
+user-owned `press/templates/<id>/`:
 
 ```text
 <id>/
@@ -26,12 +26,11 @@ geometry. Their one-line identities:
 - `article`: enforced cited prose, two anchors plus flexible sections, every
   section cited.
 - `brief`: enforced structure, several tagged items, every item cited.
-- `lesson`: a teaching piece framed by two anchored bookends the proof
-  requires.
-- `opinion`: an argued position that discloses its stance up front and can
-  never skip the strongest opposing case.
-- `paper`: reporting on one research paper, with the source's abstract and
-  link anchored first.
+- `lesson`: a teaching piece framed by two anchored bookends the proof requires.
+- `opinion`: an argued position that discloses its stance up front and can never
+  skip the strongest opposing case.
+- `paper`: reporting on one research paper, with the source's abstract and link
+  anchored first.
 - `unbiased`: an enforced two-sided format where a one-sided article blocks.
 
 ## Manifest
@@ -63,9 +62,9 @@ flex_components: [my-required-component]
 | `flex_components` | CSS classes required once in every flexible section          |
 
 `bands.flex_sections` turns the outline into a flexible one: declared sections
-remain anchors and the article adds a number of subject-specific sections
-within the band. Without it, `sections` is a fixed outline. A series may
-replace template bands field by field.
+remain anchors and the article adds a number of subject-specific sections within
+the band. Without it, `sections` is a fixed outline. A series may replace
+template bands field by field.
 
 `per-item` citation geometry requires `data-nb-item` markers. A series using
 `per_item_sources` may select only templates with that cite rule. Source
@@ -90,10 +89,10 @@ with nb-meta because the home page and feed read the metadata value.
 
 ## Selection
 
-Every series declares either `template: <id>` or `templates: [<id>, ...]`.
-They are mutually exclusive. Any scheduling mode may use any template. When
-several are allowed, the production workflow chooses one for the article and
-records it in nb-meta.
+Every series declares either `template: <id>` or `templates: [<id>, ...]`. They
+are mutually exclusive. Any scheduling mode may use any template. When several
+are allowed, the production workflow chooses one for the article and records it
+in nb-meta.
 
 See [Customize templates](../guides/customize/templates.md) for the design and
 testing process, and [Furniture](../guides/customize/furniture.md) for the

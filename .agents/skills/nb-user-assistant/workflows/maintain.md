@@ -13,20 +13,20 @@ engine updates separate from press edits. Run `nb sync` through the documented
 path, and never repair protected `library` workflow files by hand.
 
 For curation, distinguish correction from removal. A correction uses the
-revision workflow. A retraction is an owner-authored deletion-only PR
-removing one article, its matching local assets, and its `agent-artifacts`
-production record. Git history preserves what it removes. Never push the
-deletion directly to `library`.
+revision workflow. A retraction is an owner-authored deletion-only PR removing
+one article, its matching local assets, and its `agent-artifacts` production
+record. Git history preserves what it removes. Never push the deletion directly
+to `library`.
 
 Real usage settles what the interview could only estimate, so review cost once
-the paper has published for a week. Read the provider's usage report against
-the plan the user is on, and count published articles against the observed
-per-role work in `docs/reference/production.md`. Bring back a decision rather
-than a statistic: a section not earning its nightly research can drop cadence,
-downgrade a stage, or pin a voice guide. Confirm the change with the user
-before editing `press/`.
+the paper has published for a week. Read the provider's usage report against the
+plan the user is on, and count published articles against the observed per-role
+work in `docs/reference/production.md`. Bring back a decision rather than a
+statistic: a section not earning its nightly research can drop cadence,
+downgrade a stage, or pin a voice guide. Confirm the change with the user before
+editing `press/`.
 
-When troubleshooting, report the failing boundary, direct evidence, and the
-next test. Do not retry unchanged work indefinitely or paper over a permission
-failure with a different environment. Resume at the failed requirement after
-the user or provider changes it.
+When troubleshooting, report the failing boundary, direct evidence, and the next
+test. Do not retry unchanged work indefinitely or paper over a permission
+failure with a different environment. Resume at the failed requirement after the
+user or provider changes it.

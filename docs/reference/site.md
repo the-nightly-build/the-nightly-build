@@ -31,8 +31,8 @@ directory:
 | `directory.publish`     | Boolean; set `false` to opt out of the shared directory                      |
 
 External assets are owner-authored configuration. Scripts do not relax the
-article sandbox: articles still cannot add scripts, handlers, frames, forms,
-or other active content. Pin exact versions and preview both success and
+article sandbox: articles still cannot add scripts, handlers, frames, forms, or
+other active content. Pin exact versions and preview both success and
 no-JavaScript behavior. Declared stylesheets also join the proof's class
 inventory, so a dependency's classes are never reported dead. See
 [Furniture reference](furniture.md).

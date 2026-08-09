@@ -7,8 +7,8 @@ catalogue plus the press's shared furniture plus these.
 
 ## Lesson bookends (`nb-bookend`)
 
-Two cards frame every lesson: Why this matters opens it, The takeaway closes
-it. Both are written after the body; the template's `identity.md` carries the
+Two cards frame every lesson: Why this matters opens it, The takeaway closes it.
+Both are written after the body; the template's `identity.md` carries the
 writing rules. The name lines, the band labels (Background, Go deeper), and the
 words "optional reading" are fixed chrome. Reading rows are editorial: each row
 is a link and one line on what it covers. Background rows may point into this

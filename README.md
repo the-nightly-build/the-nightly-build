@@ -12,8 +12,8 @@ your own GitHub Pages site every morning.
 
 Your paper and its archive live in your fork. You own it.
 
-> [!NOTE]
-> Your articles will be searchable from [the-nightly-build.github.io](https://the-nightly-build.github.io/)
+> [!NOTE] Your articles will be searchable from
+> [the-nightly-build.github.io](https://the-nightly-build.github.io/)
 >
 > If you don't want that, opt out in your `site.yaml`:
 >
@@ -31,9 +31,9 @@ Give this repository URL to the AI tool you already use and say:
 > offer to verify the actual scheduled environment before we rely on it.
 
 The assistant will determine what it can do, walk you through the few actions
-that require your permission, interview you about the paper, configure the
-fork, and verify the actual scheduled environment. The AI you talk to now and
-the AI that works overnight can be different products.
+that require your permission, interview you about the paper, configure the fork,
+and verify the actual scheduled environment. The AI you talk to now and the AI
+that works overnight can be different products.
 
 Start with [Ask your AI](docs/getting-started/ask-your-ai.md), or read the full
 [documentation](docs/README.md). The [feature catalog](docs/reference/README.md)
@@ -50,9 +50,9 @@ cd <your-paper>
 ./nb setup
 ```
 
-Open that checkout in a coding agent and ask it to continue setup. Keep the
-fork public for GitHub Pages on the free plan; private Pages requires a
-supporting GitHub plan.
+Open that checkout in a coding agent and ask it to continue setup. Keep the fork
+public for GitHub Pages on the free plan; private Pages requires a supporting
+GitHub plan.
 
 Before unattended publication, you can verify that the exact scheduled runtime
 can reach the repository, install the required tools, browse real sources, and

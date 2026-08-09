@@ -86,7 +86,7 @@ The engine does not estimate model cost. Use the provider's usage reporting.
 | Pinned series voice guide              | States once how a settled section should sound, so the writing coach never runs for it                                                       | `voice_guide` in [Series](series.md#pinning-a-voice-guide)               |
 
 For a complete working press, browse `examples/`. It demonstrates all four
-modes, daily and day-list cadences, source policies, production policy,
-themes, furniture, and series prompts without acting as configuration for your
-own paper. Not every capability in this catalog has an example. The reference
-pages above are the complete contract.
+modes, daily and day-list cadences, source policies, production policy, themes,
+furniture, and series prompts without acting as configuration for your own
+paper. Not every capability in this catalog has an example. The reference pages
+above are the complete contract.

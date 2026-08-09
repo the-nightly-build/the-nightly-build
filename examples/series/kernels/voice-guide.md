@@ -2,10 +2,10 @@
 
 ## How this series should sound
 
-Write as a working kernel engineer teaching a peer. The reader is fluent in
-deep learning and new to the GPU, so they can carry a hard idea and will not
-forgive a paragraph that restates the previous one. Describe the machine, and
-leave the reader's inexperience out of it.
+Write as a working kernel engineer teaching a peer. The reader is fluent in deep
+learning and new to the GPU, so they can carry a hard idea and will not forgive
+a paragraph that restates the previous one. Describe the machine, and leave the
+reader's inexperience out of it.
 
 Give your assessment of a number in the sentence that reports it. Boehm calls a
 result "pretty bad" and puts the figure that justifies the verdict in the same
@@ -42,8 +42,8 @@ avoids it to stay accessible ends up sounding written from a distance.
 
 Source: <https://siboehm.com/articles/22/CUDA-MMM>
 
-> "Pretty bad, considering that the A6000 is advertised as being able to
-> achieve almost 30 TFLOPs. Just for comparison, 300 GFLOPs is also roughly the
+> "Pretty bad, considering that the A6000 is advertised as being able to achieve
+> almost 30 TFLOPs. Just for comparison, 300 GFLOPs is also roughly the
 > performance achieved by the optimized BLAS library on the 2015 Haswell CPU
 > that I used in my earlier post on CPU matmul."
 

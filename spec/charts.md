@@ -2,8 +2,8 @@
 
 An article's chart is a PNG the writer renders at production time from a
 committed plotly script. The script is the chart's provenance: it carries the
-data (inline literals, or a sibling `.csv`/`.json` it reads) and publishes
-with the article, so the data behind a chart is published with it.
+data (inline literals, or a sibling `.csv`/`.json` it reads) and publishes with
+the article, so the data behind a chart is published with it.
 
 Install the repository-managed chart toolchain once:
 
@@ -12,8 +12,8 @@ Install the repository-managed chart toolchain once:
 ```
 
 Write the chart script beside the article's other assets, at
-`library/<series>/<slug>/chart-N.py`. It must build a plotly figure and bind
-it to a module-level `fig`:
+`library/<series>/<slug>/chart-N.py`. It must build a plotly figure and bind it
+to a module-level `fig`:
 
 ```python
 import plotly.graph_objects as go
@@ -35,15 +35,15 @@ nb chart library/<series>/<slug>/chart-1.py
 ```
 
 The tool registers the paper's `nb` plotly template as the default before the
-script runs, so a bare figure comes out already in the house style:
-fixed light chart paper (a PNG cannot follow the reader's theme, so it
-renders identically in both themes), series colors from the press
-theme's `--chart-1..6` tokens in order, and a line-dash and marker cycle so
-series never differ by color alone. The full plotly API is available when a
-chart needs more than the default look. Keep axes labeled, note a non-linear
-scale, and keep decoration out of the drawing.
+script runs, so a bare figure comes out already in the house style: fixed light
+chart paper (a PNG cannot follow the reader's theme, so it renders identically
+in both themes), series colors from the press theme's `--chart-1..6` tokens in
+order, and a line-dash and marker cycle so series never differ by color alone.
+The full plotly API is available when a chart needs more than the default look.
+Keep axes labeled, note a non-linear scale, and keep decoration out of the
+drawing.
 
-The output lands beside the script as `chart-N.png`, sized inside the
-proof's figure limits (2400px maximum edge, 2 MiB). Inspect the PNG and the
-rendered article before opening the PR. The editor compares the script's
-data against the evidence record and reads the image like any other figure.
+The output lands beside the script as `chart-N.png`, sized inside the proof's
+figure limits (2400px maximum edge, 2 MiB). Inspect the PNG and the rendered
+article before opening the PR. The editor compares the script's data against the
+evidence record and reads the image like any other figure.

@@ -11,11 +11,11 @@ would make true. Inspect before proposing a method. Distinguish a literal fix
 from a change to meaning, evidence, voice, structure, or visual communication,
 and surface any consequence the user may not have intended.
 
-Choose the smallest process that can produce a trustworthy result. Do not
-assign a tier or require a questionnaire. A direct local edit can be right
-for a typo, and a researcher, writer, editor, writing coach, web search, or
-complete redraft can be right for deeper work. No role is mandatory, and
-using a role does not make its artifact part of the revision PR.
+Choose the smallest process that can produce a trustworthy result. Do not assign
+a tier or require a questionnaire. A direct local edit can be right for a typo,
+and a researcher, writer, editor, writing coach, web search, or complete redraft
+can be right for deeper work. No role is mandatory, and using a role does not
+make its artifact part of the revision PR.
 
 ## Make and verify the change
 
@@ -33,19 +33,18 @@ When another role or model would help, give it a purpose-built brief containing:
 
 Reopen and verify evidence when claims, citations, numbers, or interpretations
 change. For a figure, inspect its source data, labels, caption, alternative
-text, article references, and narrow/wide rendering. Regenerate or replace
-the matching asset rather than preserving a misleading visual.
+text, article references, and narrow/wide rendering. Regenerate or replace the
+matching asset rather than preserving a misleading visual.
 
 Run the full current proof. Preview every visual or structural change and
 compare it with the published page and the user's requested outcome.
 
 ## Record and deliver
 
-Add exactly the next
-`agent-artifacts/<series>/<slug>/revisions/NN.md`. Write a concise durable
-account of why the revision was needed, what materially changed, and any
-verification a later reviewer would need. Do not impose a template on the
-prose, modify prior notes, or rewrite historical role artifacts.
+Add exactly the next `agent-artifacts/<series>/<slug>/revisions/NN.md`. Write a
+concise durable account of why the revision was needed, what materially changed,
+and any verification a later reviewer would need. Do not impose a template on
+the prose, modify prior notes, or rewrite historical role artifacts.
 
 Commit the result, run the checkout-owned proof in PR mode, and open a PR
 against `library`. Confirm that the PR changes one published article and/or its
@@ -53,5 +52,5 @@ matching assets and adds only its one new revision note. The article can change
 anything the normal proof permits, but its path, series, and slug remain
 aligned. Revisions never auto-merge.
 
-Present the changed meaning, evidence, and visual result, so the user can
-decide whether to merge. Do not add steps this workflow does not require.
+Present the changed meaning, evidence, and visual result, so the user can decide
+whether to merge. Do not add steps this workflow does not require.

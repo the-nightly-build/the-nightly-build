@@ -33,8 +33,7 @@ the path that matches what you are trying to do.
   [ownership and branches](concepts/ownership-and-branches.md), and
   [publishing and security](concepts/publishing-and-security.md)
 - Reference details: [site](reference/site.md), [series](reference/series.md),
-  [templates](reference/templates.md),
-  [furniture](reference/furniture.md),
+  [templates](reference/templates.md), [furniture](reference/furniture.md),
   [production](reference/production.md), and [delivery](reference/delivery.md)
 - [Agent and scheduler integrations](integrations/README.md)
 - Troubleshoot [setup and scheduling](troubleshooting/setup-and-scheduling.md)

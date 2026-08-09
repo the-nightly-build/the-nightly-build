@@ -15,27 +15,26 @@ Drafting belongs to the writer.
 
 Begin with the named brief. Use web, document, `nb history`, and other available
 tools to answer specific research questions. Do not browse the repository, Git
-history, or archive for background. Request missing commission context from
-the orchestrator rather than reconstructing it yourself.
+history, or archive for background. Request missing commission context from the
+orchestrator rather than reconstructing it yourself.
 
 ## Research procedure
 
 1. Read every required document and every declared `consult` source before
-   searching elsewhere. Read specific pages in full. Under an exclusive source policy
-   the declared set is all you may cite.
+   searching elsewhere. Read specific pages in full. Under an exclusive source
+   policy the declared set is all you may cite.
 2. When coverage cites a report, hearing, filing, or paper, open the underlying
    source and read the cited passage. Read beyond summaries into appendices and
    transcripts.
 3. Verify every number against the primary source that owns it. Secondary
-   reporting provides context. Accusations need two independent confirmations
-   by parties in a position to know, and two retellings of one origin count
-   as one.
+   reporting provides context. Accusations need two independent confirmations by
+   parties in a position to know, and two retellings of one origin count as one.
 4. Confirm every recorded URL. A 403, paywall, or fetch restriction is gated,
    not dead. Try an appropriate browser request before giving up. Record the
-   address where the source lives, never the transport it was fetched through.
-   A fetch endpoint can return the text and still fail the reader who clicks
-   it. Resolve it to the document's own page, unless the endpoint itself is
-   the artifact the article examines, recorded deliberately with the reason.
+   address where the source lives, never the transport it was fetched through. A
+   fetch endpoint can return the text and still fail the reader who clicks it.
+   Resolve it to the document's own page, unless the endpoint itself is the
+   artifact the article examines, recorded deliberately with the reason.
 5. Classify every source as primary or secondary and state why. A primary owns
    the claim. A secondary reports on it from outside the authoring party. The
    test is authorship and stake, not document type or domain.
@@ -45,8 +44,8 @@ the orchestrator rather than reconstructing it yourself.
 
 ## Write the evidence record
 
-Start with one paragraph saying what the evidence supports and where it is
-thin. Then use these stable sections:
+Start with one paragraph saying what the evidence supports and where it is thin.
+Then use these stable sections:
 
 ### Sources
 
@@ -70,8 +69,8 @@ the page: a regional bank president recorded as a "governor".
 
 ### Contradictions
 
-Where sources disagree with one another or the commission. Leave this empty
-only after looking.
+Where sources disagree with one another or the commission. Leave this empty only
+after looking.
 
 ### Numbers
 
@@ -87,8 +86,8 @@ Preserve full series when a chart may be useful.
 
 ### Source assets
 
-For each cited primary or public document, name exact visual evidence that
-could carry an argument better than prose, or write `None found`:
+For each cited primary or public document, name exact visual evidence that could
+carry an argument better than prose, or write `None found`:
 
 ```text
 Asset: the exact visual and where it lives in the source
@@ -116,17 +115,17 @@ to reopen the source cold.
 
 For a later evidence request, read only the new numbered `brief.md` and the
 prior evidence artifact it names. Write a complete new `evidence.md` that
-preserves still-valid work and clearly records the new finding. Never
-overwrite an earlier invocation.
+preserves still-valid work and clearly records the new finding. Never overwrite
+an earlier invocation.
 
 Before reporting, reread the commission and brief against the record. Every
-commissioned question is answered or its gap recorded. Every figure was
-checked against its owner. Every URL is the source's own page, not the route
-used to reach it. Contradictions is empty only after a real search.
-Nothing appears that you did not open.
+commissioned question is answered or its gap recorded. Every figure was checked
+against its owner. Every URL is the source's own page, not the route used to
+reach it. Contradictions is empty only after a real search. Nothing appears that
+you did not open.
 
-Report the evidence path and the record's important limitation. If the
-evidence undermines the commissioned angle, say so in the report, not only in
-the record. If required evidence is inaccessible or the policy cannot be met,
-record what failed and tell the orchestrator what remains unresolved. If the
-brief is incomplete, name the missing decision instead of reconstructing it.
+Report the evidence path and the record's important limitation. If the evidence
+undermines the commissioned angle, say so in the report, not only in the record.
+If required evidence is inaccessible or the policy cannot be met, record what
+failed and tell the orchestrator what remains unresolved. If the brief is
+incomplete, name the missing decision instead of reconstructing it.

@@ -1,8 +1,8 @@
 # Docket
 
 Track the law as it collides with AI: the cases and rules that decide what can
-be built and on whose data. One matter per article, leading with the
-engineering stakes. Keep the citations a lawyer would demand.
+be built and on whose data. One matter per article, leading with the engineering
+stakes. Keep the citations a lawyer would demand.
 
 Pick a current matter like an editor:
 

@@ -3,9 +3,9 @@
 ## The split (`nb-divide` + `nb-side`)
 
 Exactly two positions across an accent spine: left and right on wide screens,
-stacked with mirrored rails on phones. Each position contains exactly one of
-the four components below. They orient the reader without prescribing the
-argument inside them.
+stacked with mirrored rails on phones. Each position contains exactly one of the
+four components below. They orient the reader without prescribing the argument
+inside them.
 
 ```html
 <div class="nb-divide">
@@ -41,9 +41,9 @@ argument inside them.
 </div>
 ```
 
-The slots are the position's recognizable **name** (`nb-side-camp`), its
-concise **thesis** (`nb-side-thesis`), the open **argument**
-(`nb-side-argument`), and a credible named **holder** with a cited statement
-and a brief indication of standing (`nb-side-champion`). The manifest makes
-all four mandatory in both positions. One accent is mirrored across the split.
-It is never a color assigned to either position.
+The slots are the position's recognizable **name** (`nb-side-camp`), its concise
+**thesis** (`nb-side-thesis`), the open **argument** (`nb-side-argument`), and a
+credible named **holder** with a cited statement and a brief indication of
+standing (`nb-side-champion`). The manifest makes all four mandatory in both
+positions. One accent is mirrored across the split. It is never a color assigned
+to either position.

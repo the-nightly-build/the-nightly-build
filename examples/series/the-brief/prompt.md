@@ -16,6 +16,6 @@ Emphases:
 - Link each headline to the document that owns its claim, and to someone with no
   stake in that document reading the same thing. A write-up that only restates
   the announcement has added nothing.
-- The tweet already made the rounds. Add what it left out: the number,
-  the caveat, the detail that decides whether it matters.
+- The tweet already made the rounds. Add what it left out: the number, the
+  caveat, the detail that decides whether it matters.
 - Reference earlier briefs when a story develops ("we noted last week...").

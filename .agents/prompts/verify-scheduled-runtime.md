@@ -2,8 +2,8 @@
 
 Run a non-publishing capability smoke test in this scheduled environment. Use
 the repository and identity configured for the real schedule. Do not load the
-production orchestrator, run `nb sync` or `nb duty`, generate an article,
-target `library`, merge a pull request, or trigger Pages.
+production orchestrator, run `nb sync` or `nb duty`, generate an article, target
+`library`, merge a pull request, or trigger Pages.
 
 ## Protect the repository and credentials
 
@@ -12,12 +12,11 @@ target `library`, merge a pull request, or trigger Pages.
 - Preserve existing tracked and untracked work. Use an isolated worktree from
   `origin/main` when the checkout is not clean.
 - Never print or commit a secret value in any form (e.g., tokens, cookies,
-  authorization headers, environment dumps, etc.). Report only the
-  authenticated account name and permission result when they are safe to
-  expose.
+  authorization headers, environment dumps, etc.). Report only the authenticated
+  account name and permission result when they are safe to expose.
 - Name the run with its UTC timestamp plus a short random suffix. Use
-  `nb/smoke/<run-id>` for the temporary branch and
-  `.nb-smoke/<run-id>.md` for its report.
+  `nb/smoke/<run-id>` for the temporary branch and `.nb-smoke/<run-id>.md` for
+  its report.
 
 ## Exercise the scheduled environment
 
@@ -33,12 +32,11 @@ target `library`, merge a pull request, or trigger Pages.
    applicable.
 4. Use the same search and browsing tools scheduled research will use. Search
    for a harmless current topic, then open two independent non-GitHub source
-   pages. Do not treat snippets or cached knowledge as opened pages. Record
-   each page's URL, title, and one short paraphrased fact.
+   pages. Do not treat snippets or cached knowledge as opened pages. Record each
+   page's URL, title, and one short paraphrased fact.
 5. From `origin/main`, create the temporary branch and commit the sanitized
    smoke report. Push it, then use the runtime's authenticated GitHub interface
-   to open a draft pull request against `main`. Never open it against
-   `library`.
+   to open a draft pull request against `main`. Never open it against `library`.
 6. Confirm that GitHub registers the ordinary `main` pull-request checks. A
    registered check may still be running. The purpose here is to prove the
    trigger and permissions, not to certify the engine through a smoke-only
@@ -68,7 +66,7 @@ CI registration:           ...
 PR closed and branch deleted: ...
 ```
 
-For every failure, give the single next action and the narrow step to rerun.
-Do not claim the smoke passed while a temporary PR or branch remains. State
+For every failure, give the single next action and the narrow step to rerun. Do
+not claim the smoke passed while a temporary PR or branch remains. State
 explicitly that article proof, automatic merge, and Pages publication were not
 tested.

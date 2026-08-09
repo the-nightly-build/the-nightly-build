@@ -26,8 +26,8 @@ requirements. Verified runtimes and remaining candidates are listed in
 A self-hosted GitHub Actions cron path is planned but not yet verified: a PR
 opened with the workflow's own `GITHUB_TOKEN` cannot trigger the required
 `validate` check, so that recipe needs a separately scoped token and an
-end-to-end test before this documentation can recommend it. Progress is
-tracked in
+end-to-end test before this documentation can recommend it. Progress is tracked
+in
 [issue #148](https://github.com/the-nightly-build/the-nightly-build/issues/148).
 
 ## Canonical prompt
@@ -35,29 +35,29 @@ tracked in
 Keep the external schedule prompt deliberately small:
 
 > Work in The Nightly Build repository `<repo>`. Update the checkout to the
-> current remote `main` before reading anything; a stale clone may predate
-> the entrypoint. Read `.agents/prompts/run-scheduled-publication.md` and
-> follow it in this agent. This paragraph is the entire assignment. If that
-> file is missing from up-to-date remote `main`, stop and report the missing
-> repository entrypoint.
+> current remote `main` before reading anything; a stale clone may predate the
+> entrypoint. Read `.agents/prompts/run-scheduled-publication.md` and follow it
+> in this agent. This paragraph is the entire assignment. If that file is
+> missing from up-to-date remote `main`, stop and report the missing repository
+> entrypoint.
 
 The repository owns the workflow. The scheduler owns only location and
-authority. The scheduled agent loads the orchestrator skill in the same
-context. It does not launch an orchestrator subagent. Replace prompts that
-restate commands, role sequences, validation rules, or branch mechanics
-because those copies drift.
+authority. The scheduled agent loads the orchestrator skill in the same context.
+It does not launch an orchestrator subagent. Replace prompts that restate
+commands, role sequences, validation rules, or branch mechanics because those
+copies drift.
 
 ## Verification prompt
 
-To test the exact scheduled environment without publishing, trigger an
-on-demand task with this assignment:
+To test the exact scheduled environment without publishing, trigger an on-demand
+task with this assignment:
 
 > Work in The Nightly Build repository `<repo>`. Update the checkout to the
-> current remote `main` before reading anything; a stale clone may predate
-> the entrypoint. Read `.agents/prompts/verify-scheduled-runtime.md` and
-> follow it in this agent. This paragraph is the entire assignment. If that
-> file is missing from up-to-date remote `main`, stop and report the missing
-> repository entrypoint.
+> current remote `main` before reading anything; a stale clone may predate the
+> entrypoint. Read `.agents/prompts/verify-scheduled-runtime.md` and follow it
+> in this agent. This paragraph is the entire assignment. If that file is
+> missing from up-to-date remote `main`, stop and report the missing repository
+> entrypoint.
 
 The smoke prompt opens and cleans up a draft PR against `main`. It never loads
 the orchestrator or touches `library`.

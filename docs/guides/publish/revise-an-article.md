@@ -1,9 +1,9 @@
 # Revise a published article
 
 A revision changes one published article without erasing how it reached the
-paper. It can be a spelling correction, a factual update, a substantial
-rewrite, or a replacement for a bad figure. The process should fit the work.
-The PR contract does not prescribe roles, prompts, or an editorial workflow.
+paper. It can be a spelling correction, a factual update, a substantial rewrite,
+or a replacement for a bad figure. The process should fit the work. The PR
+contract does not prescribe roles, prompts, or an editorial workflow.
 
 Revisions always open a human-reviewed PR and never auto-merge.
 
@@ -22,9 +22,9 @@ requested outcome and inspect only the context needed to make it safely:
 Those are editorial choices, not CI requirements. A large LLM-assisted rewrite
 and a one-character correction produce the same narrow kind of PR.
 
-Fetch `origin/library` and create an ordinary branch or worktree from that
-exact ref. Edit the published files in place on the new branch. Never commit or
-push directly to the `library` branch.
+Fetch `origin/library` and create an ordinary branch or worktree from that exact
+ref. Edit the published files in place on the new branch. Never commit or push
+directly to the `library` branch.
 
 ## Record the reason
 
@@ -52,9 +52,9 @@ local. It is not part of the revision PR.
 
 While iterating on the file itself, preflight it locally with
 `nb check FILE --series ID --library DIR --revision`. The flag skips the
-already-published and paused-series blocks, exactly as the PR proof does for
-a revision diff. Commit the revision branch, then run the full PR proof
-through the current `main` checkout:
+already-published and paused-series blocks, exactly as the PR proof does for a
+revision diff. Commit the revision branch, then run the full PR proof through
+the current `main` checkout:
 
 ```sh
 PATH-TO-MAIN/nb check --pr \
@@ -72,8 +72,8 @@ branch and open a human-reviewed PR against `library`.
 The generated PR must:
 
 - modify `library/SERIES/SLUG.html`, its matching assets, or both
-- add, modify, or delete files only under the matching
-  `library/SERIES/SLUG/` asset directory
+- add, modify, or delete files only under the matching `library/SERIES/SLUG/`
+  asset directory
 - add exactly the next `agent-artifacts/SERIES/SLUG/revisions/NN.md`
 - leave every other article and historical artifact untouched
 

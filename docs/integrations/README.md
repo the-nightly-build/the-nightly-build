@@ -6,9 +6,9 @@ checkout, access to `main` and `library`, live web research, non-interactive
 tool use, and permission to push a branch and open a pull request. See
 [Schedule](../guides/operate/schedule.md) for the complete contract.
 
-A paper needs a product for two jobs: manual work in a session you watch
-(setup, publishing now, revising), and scheduled publication while nobody is
-present. Some products do both through different surfaces.
+A paper needs a product for two jobs: manual work in a session you watch (setup,
+publishing now, revising), and scheduled publication while nobody is present.
+Some products do both through different surfaces.
 
 ## Verified
 
@@ -18,9 +18,9 @@ present. Some products do both through different surfaces.
 | Codex       | ✓ (local CLI)      | TBD ([Cloud automations](https://openai.com/academy/codex-automations/)) | Subscription |
 
 A ✓ means that path has passed the non-publishing smoke test and published at
-least one real article in that exact environment, and Billing records what
-the verified runs drew down. Scheduled publication on Claude Code Routines
-runs a production paper nightly.
+least one real article in that exact environment, and Billing records what the
+verified runs drew down. Scheduled publication on Claude Code Routines runs a
+production paper nightly.
 
 ## Other candidates
 
@@ -30,9 +30,9 @@ end-to-end run has been verified:
 [Cursor](https://cursor.com/automate),
 [Devin](https://docs.devin.ai/product-guides/scheduled-sessions),
 [GitHub Copilot](https://docs.github.com/en/copilot/how-tos/github-copilot-app/using-automations),
-and [OpenCode](https://dev.opencode.ai/docs/github/). A product's existence
-does not prove that it meets the contract, and provider behavior,
-permissions, and billing change independently. Before relying on one, run the
+and [OpenCode](https://dev.opencode.ai/docs/github/). A product's existence does
+not prove that it meets the contract, and provider behavior, permissions, and
+billing change independently. Before relying on one, run the
 [scheduled-runtime smoke test](../getting-started/first-run.md) in the same
 environment that will publish the paper.
 

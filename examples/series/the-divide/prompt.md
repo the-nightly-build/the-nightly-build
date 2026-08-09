@@ -5,8 +5,8 @@ them, and argue both sides at their strongest.
 
 Pick a current question like an editor:
 
-- Live and genuinely two-sided. If one side is plainly right, it is a news
-  item for The Brief, not a Divide.
+- Live and genuinely two-sided. If one side is plainly right, it is a news item
+  for The Brief, not a Divide.
 - Prefer questions where credentialed people disagree in public, so each side
   has a named holder to quote at full strength.
 - Argue each side from the sources its own believers cite, never from its

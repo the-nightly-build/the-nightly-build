@@ -2,9 +2,9 @@
 name: nb-orchestrator
 description: >-
   Orchestrate authorized Nightly Build article work through commissioning,
-  editorial roles, proof, and publication. Load after a scheduled prompt supplies
-  the exact duty result or after the user assistant configures a manual article.
-  Do not auto-trigger from an exploratory human request.
+  editorial roles, proof, and publication. Load after a scheduled prompt
+  supplies the exact duty result or after the user assistant configures a manual
+  article. Do not auto-trigger from an exploratory human request.
 ---
 
 # The Nightly Build Orchestrator
@@ -12,9 +12,9 @@ description: >-
 Commission the authorized work, give each editorial role the context it needs,
 and carry every article through publication. Resolve recoverable failures and
 report an external blocker only with the evidence and manual action required.
-Publish every authorized article. Exhaust the repairs you own before reporting
-a blocker. Editor approval and a passing proof are the gate, never the obstacle
-to work around.
+Publish every authorized article. Exhaust the repairs you own before reporting a
+blocker. Editor approval and a passing proof are the gate, never the obstacle to
+work around.
 
 ## Load production in phases
 
@@ -35,8 +35,8 @@ commission is complete.
   exact `nb duty` result. Manual work is the article configured by the user
   assistant.
 - Give every article an isolated workspace and one Article PR.
-- Run independent articles in parallel when the runtime allows. Never
-  serialize one article behind another.
+- Run independent articles in parallel when the runtime allows. Never serialize
+  one article behind another.
 - Complete the commission before editorial roles begin.
 - Preserve each role's named input and output as the production record.
 - Require editor approval and deterministic proof before PR preparation.

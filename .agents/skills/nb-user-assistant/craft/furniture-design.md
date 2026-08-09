@@ -1,7 +1,7 @@
 # Furniture design
 
-Read `docs/reference/furniture.md`, the current catalogs, styles, and
-gallery tooling before proposing a new component.
+Read `docs/reference/furniture.md`, the current catalogs, styles, and gallery
+tooling before proposing a new component.
 
 ## Design brief
 
@@ -16,8 +16,8 @@ Write the brief before markup:
 - narrow, wide, print-like, light, and dark presentation
 - behavior without JavaScript or when an optional library fails
 
-Use representative real content, including the longest plausible label and
-the sparsest valid case.
+Use representative real content, including the longest plausible label and the
+sparsest valid case.
 
 ## Implement and inspect
 
@@ -37,6 +37,6 @@ paper under all tested cases. A passing stylesheet or attractive screenshot is
 not sufficient evidence.
 
 The component belongs to the user's taste. Build the candidates as genuinely
-different options, offer to open the rendered gallery and article pages in
-their browser for reaction, and iterate from what they say before treating
-the design as done.
+different options, offer to open the rendered gallery and article pages in their
+browser for reaction, and iterate from what they say before treating the design
+as done.

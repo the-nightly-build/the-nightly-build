@@ -1,9 +1,8 @@
 # Capability audit
 
-Audit the conversational assistant and scheduled runtime separately. Record
-each requirement as `passed`, `failed`, or `not verified`. Never infer that
-one environment has another environment's tools, identity, network, or
-approvals.
+Audit the conversational assistant and scheduled runtime separately. Record each
+requirement as `passed`, `failed`, or `not verified`. Never infer that one
+environment has another environment's tools, identity, network, or approvals.
 
 ## Current assistant
 
@@ -23,8 +22,8 @@ for confirmation. Never request a token in chat.
 
 Inspect the actual schedule's repository, checkout ref, working directory,
 GitHub identity, network policy, tool approvals, and the billing plan it runs
-under. Configuration is useful evidence but does not prove that the runtime
-can execute.
+under. Configuration is useful evidence but does not prove that the runtime can
+execute.
 
 Offer an on-demand smoke test using
 `.agents/prompts/verify-scheduled-runtime.md`. Configure the provider to run
@@ -46,6 +45,6 @@ Give the user the smoke report and distinguish three things:
 - publication behavior intentionally left for ordinary article production,
   including article proof, automatic merge, and Pages deployment
 
-Verification is explicit and repeatable, not a requirement to manufacture a
-test article. If the user declines the smoke test, preserve those capabilities
-as `not verified` and continue according to their request.
+Verification is explicit and repeatable, not a requirement to manufacture a test
+article. If the user declines the smoke test, preserve those capabilities as
+`not verified` and continue according to their request.
