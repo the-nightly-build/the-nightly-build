@@ -29,10 +29,12 @@ The checks themselves live in nb/proof/; this file is the door they open by.
 
 import argparse
 import datetime as _dt
+import pathlib
 import sys
 
 from nb.article import Article
 from nb.config import find_template, load_registry, load_series
+from nb.library_checkout import MANAGED
 from nb.links import classify_link, dead_source_links
 from nb.proof import check_article
 from nb.proof.pr import run_pr_mode
@@ -82,7 +84,11 @@ def main(argv=None):
         "--main",
         help="main checkout for configs/registry (PR mode; defaults to --repo)",
     )
-    p.add_argument("--library", help="published library state (branch checkout dir)")
+    p.add_argument(
+        "--library",
+        help="published library state (branch checkout dir); local mode reads "
+        ".nb-work/library under --repo when that checkout exists",
+    )
     p.add_argument(
         "--revision",
         action="store_true",
@@ -133,11 +139,19 @@ def main(argv=None):
             p.error("local mode requires FILE and --series")
         series, _ = load_series(args.repo, args.series)
         rep.strict = bool(series and series.get("strict"))
+        library_dir = args.library
+        if library_dir is None:
+            # the checkout nb duty, nb history, and nb prepare-pr keep; an
+            # article's own workspace library/ holds the draft and must never
+            # stand in for it
+            managed = pathlib.Path(args.repo) / MANAGED
+            if managed.is_dir():
+                library_dir = str(managed)
         check_article(
             args.file,
             args.series,
             repo=args.repo,
-            library_dir=args.library,
+            library_dir=library_dir,
             rep=rep,
             today=args.today and _dt.date.fromisoformat(args.today),
             check_links=args.check_links,

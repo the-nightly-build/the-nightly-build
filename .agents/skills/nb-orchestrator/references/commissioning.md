@@ -57,9 +57,14 @@ nb start-article <series> <slug> --template <template> \
 ```
 
 The command owns the initial article, generated editorial direction, effective
-template contract, runtime assets, and applicable furniture catalogs. Do not
-edit generated context or recreate it in a brief. Keep later role invocations
-numbered `02`, `03`, and onward without overwriting earlier work.
+template contract, runtime assets, and applicable furniture catalogs, and it
+prints the article's proof command. That command reads the published library
+from the checkout `nb duty`, `nb history`, and `nb prepare-pr` keep under
+`.nb-work/library`. Never pass the workspace's own `library/` folder as
+`--library`: it holds the draft, and the proof reads the draft as already
+published. Do not edit generated context or recreate it in a brief. Keep later
+role invocations numbered `02`, `03`, and onward without overwriting earlier
+work.
 
 ## Write the record
 
@@ -82,7 +87,7 @@ brief in this shape:
 Inputs: the named files, one line each, with a clarifying phrase only where
         a file's job is not obvious from its name
 Output: <path>
-Proof:  the exact nb check command        (writer and editor briefs only)
+Proof:  the proof line nb start-article printed, verbatim (writer and editor briefs only)
 
 Nothing else, unless a decision the inputs do not carry needs stating
 (e.g., a run-environment caveat, recent shapes to break, this round's focus).

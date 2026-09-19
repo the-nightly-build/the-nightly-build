@@ -13,7 +13,7 @@ import pytest
 import yaml
 
 from nb.artifacts import validate_artifacts
-from nb.start_article import StartArticleError, initialize
+from nb.start_article import StartArticleError, initialize, main
 
 
 def test_configured_item_starts_from_exact_template_and_direction(
@@ -344,3 +344,33 @@ def test_a_missing_pinned_guide_leaves_no_partial_article(
         )
 
     assert not workspace.exists()
+
+
+def test_main_prints_the_article_path_and_its_proof_command(
+    clone_testrepo,
+    tmp_path: pathlib.Path,
+    capsys,
+) -> None:
+    repo = pathlib.Path(clone_testrepo("press", "templates", "spec"))
+    workspace = tmp_path / "article"
+
+    main(
+        [
+            "semiconductors",
+            "micron",
+            "--template",
+            "article",
+            "--workspace",
+            str(workspace),
+            "--repo",
+            str(repo),
+        ]
+    )
+
+    first, proof = capsys.readouterr().out.strip().splitlines()
+    article = workspace / "library" / "semiconductors" / "micron.html"
+    assert pathlib.Path(first) == article
+    assert proof == (
+        f"proof: {repo.resolve() / 'nb'} check {article.resolve()}"
+        f" --series semiconductors --repo {repo.resolve()}"
+    )

@@ -400,6 +400,11 @@ def main(arguments: list[str] | None = None) -> None:
     except StartArticleError as error:
         raise SystemExit(f"cannot initialize article: {error}") from error
     print(article)
+    root = options.repo.resolve()
+    print(
+        f"proof: {root / 'nb'} check {article.resolve()}"
+        f" --series {options.series} --repo {root}"
+    )
 
 
 if __name__ == "__main__":
