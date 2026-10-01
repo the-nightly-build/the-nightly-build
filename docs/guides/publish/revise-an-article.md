@@ -50,7 +50,9 @@ local. It is not part of the revision PR.
 
 ## Prove and deliver the result
 
-While iterating on the file itself, preflight it locally with
+After editing article text, run `nb stamp FILE --revision` to refresh counts and
+reading time while preserving the original publication date. While iterating on
+the file itself, preflight it locally with
 `nb check FILE --series ID --library DIR --revision`. The flag skips the
 already-published and paused-series blocks, exactly as the PR proof does for a
 revision diff. Commit the revision branch, then run the full PR proof through

@@ -61,8 +61,8 @@ what it shows in the argument. Capture it with `nb asset`, keep the evidence in
 the crop, drop the unrelated clutter, and look at the result. Write helpful alt
 text and a factual cited caption.
 
-Fill the `nb-meta` fields the engine cannot compute: the dates, the harness and
-the writer model. `nb stamp` writes the counts.
+Fill the `nb-meta` fields the engine cannot compute: the harness and the writer
+model. `nb stamp` writes the UTC publication date and counts.
 
 ## Do original work
 

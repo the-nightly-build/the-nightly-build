@@ -6,6 +6,7 @@ projects reading time into the standard byline, and refuses files it cannot
 stamp precisely.
 """
 
+import datetime as dt
 import pathlib
 
 import pytest
@@ -88,3 +89,40 @@ def test_stamp_cli_writes_in_place(tmp_path) -> None:
     assert stamp.main([str(target)]) == 0
     meta = nb_meta.read_meta(str(target))
     assert meta is not None and meta["sources"] == 8
+
+
+@pytest.mark.parametrize("template", TEMPLATES, ids=lambda path: path.parent.name)
+def test_stamp_sets_metadata_and_byline_date_from_utc(template, monkeypatch) -> None:
+    class Clock(dt.datetime):
+        @classmethod
+        def now(cls, tz=None):
+            assert tz is dt.timezone.utc
+            return cls(2026, 10, 1, 0, 30, tzinfo=tz)
+
+    monkeypatch.setattr(stamp.dt, "datetime", Clock)
+    source = template.read_text()
+    stamped, counts = stamp.stamp_source(source)
+
+    metadata = nb_meta.parse_meta(stamped)
+    assert metadata is not None and metadata["date"] == "2026-10-01"
+    assert "<span>2026-10-01</span>" in stamped
+    assert counts == stamp.computed_counts(stamped)
+
+
+def test_revision_cli_preserves_date_and_refreshes_counts(tmp_path) -> None:
+    target = tmp_path / "piece.html"
+    source = article().replace(
+        "</header>",
+        '<div class="nb-byline"><span>N min read</span><span>2026-07-06</span></div></header>',
+        1,
+    )
+    target.write_text(source)
+
+    assert stamp.main([str(target), "--revision"]) == 0
+
+    stamped = target.read_text()
+    metadata = nb_meta.parse_meta(stamped)
+    assert metadata is not None and metadata["date"] == "2026-07-06"
+    assert "<span>2026-07-06</span>" in stamped
+    assert metadata["words"] == stamp.computed_counts(stamped)["words"] > 0
+    assert "N min read" not in stamped

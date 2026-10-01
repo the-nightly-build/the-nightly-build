@@ -60,7 +60,7 @@ COMMANDS = {
     ),
     "stamp": Command(
         "engine/stamp.py",
-        "Write computed article counts and reading time",
+        "Write the UTC publication date, article counts, and reading time",
         "writer, editor",
     ),
     "preview": Command(
