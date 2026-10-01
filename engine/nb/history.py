@@ -19,6 +19,7 @@ from dataclasses import dataclass, field
 from html.parser import HTMLParser
 
 from nb import meta as nb_meta
+from nb.git_handoff import GitHandoffError
 from nb.library_checkout import LibraryCheckoutError, ensure_library
 from nb.site.library import article_body_html, article_text, read_meta, scan_library
 
@@ -443,6 +444,8 @@ def main(arguments: list[str] | None = None) -> None:
             )
         except LibraryCheckoutError as error:
             raise SystemExit(f"nb history: {error}") from error
+        except GitHandoffError as error:
+            raise SystemExit(error.emit()) from error
     if options.structure:
         if options.query or options.series or options.show:
             command.error(

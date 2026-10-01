@@ -12,6 +12,8 @@ import os
 import pathlib
 import subprocess
 
+from nb.git_handoff import GitHandoffError
+
 __all__ = ("LibraryCheckoutError", "ensure_library", "repo_root")
 
 MANAGED = pathlib.Path(".nb-work", "library")
@@ -28,11 +30,18 @@ def repo_root() -> pathlib.Path:
 # Git's argv is naturally variadic.
 # ast-grep-ignore: keyword-only-args
 def _git(cwd: pathlib.Path, *arguments: str) -> str:
-    result = subprocess.run(
-        ["git", "-C", str(cwd), *arguments], capture_output=True, text=True
-    )
+    try:
+        result = subprocess.run(
+            ["git", "-C", str(cwd), *arguments], capture_output=True, text=True
+        )
+    except OSError as error:
+        raise GitHandoffError(
+            repo=cwd, arguments=arguments, reason=str(error)
+        ) from error
     if result.returncode:
         detail = result.stderr.strip() or result.stdout.strip()
+        if arguments[0] == "fetch":
+            raise GitHandoffError(repo=cwd, arguments=arguments, reason=detail)
         raise LibraryCheckoutError(f"git {' '.join(arguments)} failed: {detail}")
     return result.stdout.strip()
 
@@ -40,17 +49,7 @@ def _git(cwd: pathlib.Path, *arguments: str) -> str:
 def ensure_library(root: pathlib.Path | None = None) -> pathlib.Path:
     base = (root or repo_root()).resolve()
     checkout = base / MANAGED
-    fetched = subprocess.run(
-        ["git", "-C", str(base), "fetch", "-q", "origin", "library"],
-        capture_output=True,
-        text=True,
-    )
-    if fetched.returncode:
-        detail = fetched.stderr.strip() or fetched.stdout.strip()
-        raise LibraryCheckoutError(
-            f"cannot fetch origin/library ({detail}); "
-            "if the branch does not exist yet, run nb setup"
-        )
+    _git(base, "fetch", "-q", "origin", "library")
     if checkout.exists():
         if not (checkout / ".git").exists():
             raise LibraryCheckoutError(

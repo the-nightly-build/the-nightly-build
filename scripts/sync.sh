@@ -23,6 +23,27 @@ die() {
 	exit 1
 }
 
+emit_git_handoff() {
+	printf '%s\n' "NB_GIT_REQUIRED" "reason=$1" "checkout=$ROOT" >&2
+	shift
+	printf 'argument=%s\n' "$@" >&2
+	cat >&2 <<'EOF'
+Use the runtime's connected Git/GitHub tools to resolve Git access and refresh
+local refs, or restore CLI Git access. Then rerun the interrupted nb command.
+After a failed push, rerun preparation; temporary worktrees may be removed.
+EOF
+}
+
+remote_git() {
+	if git "$@"; then
+		return 0
+	else
+		git_status=$?
+		emit_git_handoff "Git remote operation failed (exit $git_status)" "$@"
+		return 3
+	fi
+}
+
 cleanup() {
 	if [ -n "$worktree" ]; then
 		git -C "$ROOT" worktree remove --force "$worktree" >/dev/null 2>&1 || true
@@ -39,7 +60,10 @@ cleanup() {
 trap cleanup EXIT HUP INT TERM
 
 require_tools() {
-	command -v git >/dev/null 2>&1 || die "git is required"
+	command -v git >/dev/null 2>&1 || {
+		emit_git_handoff "git is not installed" "nb sync"
+		exit 3
+	}
 	command -v uv >/dev/null 2>&1 || die "uv is required: https://docs.astral.sh/uv/"
 	git -C "$ROOT" rev-parse --is-inside-work-tree >/dev/null 2>&1 ||
 		die "nb sync must run from a complete Nightly Build checkout"
@@ -74,8 +98,8 @@ library_protection_state() {
 }
 
 remote_sync_branch() {
-	git -C "$ROOT" ls-remote --exit-code --heads origin "$SYNC_BRANCH" 2>/dev/null |
-		awk 'NR == 1 { print $1 }'
+	remote_listing=$(remote_git -C "$ROOT" ls-remote --heads origin "$SYNC_BRANCH") || return $?
+	printf '%s\n' "$remote_listing" | awk 'NR == 1 { print $1 }'
 }
 
 generated_branch_is_safe() {
@@ -181,12 +205,11 @@ prepare_sync_commit() {
 		die "the generated workflow sync did not pass the local proof"
 
 	if [ -n "$remote_sha" ]; then
-		git -C "$worktree" push -q \
+		remote_git -C "$worktree" push -q \
 			--force-with-lease="refs/heads/$SYNC_BRANCH:$remote_sha" \
-			origin "HEAD:refs/heads/$SYNC_BRANCH" ||
-			die "the sync branch changed while it was being prepared; run nb sync again"
+			origin "HEAD:refs/heads/$SYNC_BRANCH" || exit $?
 	else
-		git -C "$worktree" push -q origin "HEAD:refs/heads/$SYNC_BRANCH"
+		remote_git -C "$worktree" push -q origin "HEAD:refs/heads/$SYNC_BRANCH" || exit $?
 	fi
 	git -C "$ROOT" worktree remove --force "$worktree"
 	worktree=
@@ -215,7 +238,7 @@ wait_for_library() {
 	pr=$2
 	attempt=0
 	while [ "$attempt" -le "$MAX_POLLS" ]; do
-		git -C "$ROOT" fetch -q origin library
+		remote_git -C "$ROOT" fetch -q origin library || exit $?
 		if library_matches_main; then
 			ok "library workflows match origin/main"
 			return 0
@@ -254,17 +277,17 @@ validate_press() {
 
 sync_library() {
 	say "checking protected library workflows"
-	git -C "$ROOT" fetch -q origin main library
+	remote_git -C "$ROOT" fetch -q origin main library || exit $?
 	ref_has_workflows origin/main || die "origin/main is missing a publishing workflow"
 	if library_matches_main; then
 		ok "library workflows already match origin/main"
 		return 0
 	fi
 
-	remote_sha=$(remote_sync_branch || true)
+	remote_sha=$(remote_sync_branch) || exit $?
 	if [ -n "$remote_sha" ]; then
-		git -C "$ROOT" fetch -q origin \
-			"refs/heads/$SYNC_BRANCH:refs/remotes/origin/$SYNC_BRANCH"
+		remote_git -C "$ROOT" fetch -q origin \
+			"refs/heads/$SYNC_BRANCH:refs/remotes/origin/$SYNC_BRANCH" || exit $?
 		if ! generated_branch_is_safe "origin/$SYNC_BRANCH"; then
 			die "origin/$SYNC_BRANCH contains unrecognized edits. Preserve or remove that branch, then retry"
 		fi
@@ -301,7 +324,7 @@ sync_library() {
 	fi
 	ok "workflow sync proposed in PR #$pr"
 	if ! gh pr merge "$pr" --repo "$repo" --auto --squash >/dev/null; then
-		git -C "$ROOT" fetch -q origin library
+		remote_git -C "$ROOT" fetch -q origin library || exit $?
 		if ! library_matches_main; then
 			emit_agent_handoff "gh cannot enable protected auto-merge for PR #$pr" "$repo"
 			return "$HANDOFF_EXIT"
@@ -324,7 +347,7 @@ update_main_from_upstream() {
 		die "--update-main-from-upstream requires the main branch"
 	[ -z "$(git -C "$ROOT" status --porcelain)" ] ||
 		die "--update-main-from-upstream requires a clean working tree"
-	git -C "$ROOT" fetch -q origin main
+	remote_git -C "$ROOT" fetch -q origin main || exit $?
 	[ "$(git -C "$ROOT" rev-parse HEAD)" = "$(git -C "$ROOT" rev-parse origin/main)" ] ||
 		die "local main must match origin/main. Reconcile it before importing upstream"
 
@@ -332,13 +355,13 @@ update_main_from_upstream() {
 		git -C "$ROOT" remote add upstream "https://github.com/$UPSTREAM_REPO.git"
 	fi
 	say "fetching the engine's upstream main branch"
-	git -C "$ROOT" fetch upstream main
+	remote_git -C "$ROOT" fetch upstream main || exit $?
 	if ! git -C "$ROOT" merge --no-edit upstream/main; then
 		printf '%s\n' "Conflicts:" >&2
 		git -C "$ROOT" diff --name-only --diff-filter=U >&2
 		die "resolve and commit these paths, push main, then run nb sync; or run git merge --abort"
 	fi
-	git -C "$ROOT" push origin main
+	remote_git -C "$ROOT" push origin main || exit $?
 	ok "fork main updated from upstream"
 	say "schedule prompts live outside Git; compare yours with docs/guides/operate/schedule.md"
 	sync_library

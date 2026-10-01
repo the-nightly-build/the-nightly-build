@@ -13,7 +13,9 @@ import shutil
 import subprocess
 import sys
 
-from press import article, git, make_press, write_agent_artifacts
+import pytest
+
+from press import article, git, make_press, refuse_git_remote, write_agent_artifacts
 
 
 def make_library(tmp_path: pathlib.Path) -> tuple[pathlib.Path, pathlib.Path]:
@@ -362,3 +364,46 @@ def test_normal_prepare_pr_rejects_an_already_published_article(
 
     assert result.returncode == 1
     assert "article is already published" in result.stderr
+
+
+@pytest.mark.parametrize("managed", [False, True])
+def test_prepare_pr_hands_off_when_git_is_missing(tmp_path, *, managed) -> None:
+    library, _origin = make_library(tmp_path)
+    article_path = make_workspace(tmp_path)
+    empty_bin = tmp_path / "empty-bin"
+    empty_bin.mkdir()
+
+    result = run_prepare(
+        article_path,
+        library=None if managed else library,
+        main_root=pathlib.Path(make_press()),
+        path=str(empty_bin),
+        extra=("--hold",),
+    )
+
+    assert result.returncode == 3
+    assert "NB_GIT_REQUIRED" in result.stdout
+    assert "NB_ARTICLE_PR_REQUIRED" not in result.stdout
+    assert "Traceback" not in result.stderr
+
+
+@pytest.mark.parametrize("operation", ["fetch", "ls-remote", "push"])
+def test_prepare_pr_hands_off_failed_remote_operations(tmp_path, operation) -> None:
+    library, _origin = make_library(tmp_path)
+    article_path = make_workspace(tmp_path)
+    fake_bin = tmp_path / "bin"
+    refuse_git_remote(fake_bin, operation=operation)
+
+    result = run_prepare(
+        article_path,
+        library=library,
+        main_root=pathlib.Path(make_press()),
+        path=f"{fake_bin}{os.pathsep}{os.environ['PATH']}",
+        extra=("--hold",),
+    )
+
+    assert result.returncode == 3, result.stderr
+    assert "NB_GIT_REQUIRED" in result.stdout
+    assert "remote access unavailable" in result.stdout
+    assert f'"{operation}"' in result.stdout
+    assert "NB_ARTICLE_PR_REQUIRED" not in result.stdout

@@ -17,6 +17,7 @@ import pathlib
 import re
 import shutil
 import subprocess
+import sys
 import tempfile
 
 from nb.artifacts import ROLE_FILES
@@ -361,3 +362,19 @@ def git(*args: str, cwd: str) -> None:
         raise RuntimeError(
             f"git {' '.join(args)} failed in {cwd}: {run.stderr.strip()}"
         )
+
+
+def refuse_git_remote(fake_bin: pathlib.Path, *, operation: str) -> None:
+    executable = shutil.which("git")
+    assert executable is not None
+    fake_bin.mkdir(exist_ok=True)
+    wrapper = fake_bin / "git"
+    wrapper.write_text(
+        f"#!{sys.executable}\n"
+        "import os, sys\n"
+        f"if {operation!r} in sys.argv[1:]:\n"
+        "    print('remote access unavailable', file=sys.stderr)\n"
+        "    sys.exit(128)\n"
+        f"os.execv({executable!r}, [{executable!r}, *sys.argv[1:]])\n"
+    )
+    wrapper.chmod(0o755)

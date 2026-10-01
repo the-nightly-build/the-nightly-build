@@ -161,7 +161,7 @@ def test_scaffolded_paper_has_daily_work_and_dispatches_never_does(
     assert {entry["series"] for entry in report["idle"]} == {"dispatches"}
 
 
-def test_setup_lists_a_refused_scaffold_push_as_a_step(tmp_path: pathlib.Path) -> None:
+def test_setup_hands_off_a_refused_scaffold_push(tmp_path: pathlib.Path) -> None:
     # origin's main moves on before setup pushes, so the push is not a fast-forward
     repo = make_setup_repo(tmp_path)
     other = tmp_path / "other"
@@ -174,10 +174,11 @@ def test_setup_lists_a_refused_scaffold_push_as_a_step(tmp_path: pathlib.Path) -
 
     result = repo.run(gh_mode="available")
 
-    assert result.returncode == 0, result.stderr + result.stdout
+    assert result.returncode == 3, result.stderr + result.stdout
     assert "press/series/dispatches/series.yaml" not in repo.main_files()
-    assert "get the press/ commit onto remote main" in result.stdout
-    assert "Still to do" in result.stdout
+    assert "NB_GIT_REQUIRED" in result.stderr
+    assert "argument=push" in result.stderr
+    assert "argument=main" in result.stderr
 
 
 def test_setup_with_gh_makes_the_settings_and_skips_the_environment(
@@ -208,3 +209,29 @@ def test_setup_is_idempotent_over_a_healthy_fork(tmp_path: pathlib.Path) -> None
 
     assert second.returncode == 0, second.stderr + second.stdout
     assert "library branch already exists" in second.stdout
+
+
+def test_setup_failed_branch_query_never_creates_library(tmp_path) -> None:
+    from press import refuse_git_remote
+
+    repo = make_setup_repo(tmp_path)
+    refuse_git_remote(repo.fake_bin, operation="ls-remote")
+
+    result = repo.run(gh_mode="available")
+
+    assert result.returncode == 3, result.stderr
+    assert "NB_GIT_REQUIRED" in result.stderr
+    assert "creating orphan library branch" not in result.stdout
+    assert (
+        subprocess.run(
+            [
+                "git",
+                f"--git-dir={repo.origin}",
+                "show-ref",
+                "--verify",
+                "refs/heads/library",
+            ],
+            capture_output=True,
+        ).returncode
+        != 0
+    )

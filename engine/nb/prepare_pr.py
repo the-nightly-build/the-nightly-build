@@ -20,6 +20,7 @@ from dataclasses import dataclass
 
 from nb import meta as nb_meta
 from nb.artifacts import validate_artifacts
+from nb.git_handoff import GitHandoffError
 from nb.library_checkout import LibraryCheckoutError, ensure_library, repo_root
 from nb.proof.pr import run_pr_mode
 from nb.report import Report, emit
@@ -53,11 +54,24 @@ class _PreparedBranch:
 # Git's argv is naturally variadic; ``check`` remains explicit at the call site.
 # ast-grep-ignore: keyword-only-args
 def _git(repo: pathlib.Path, *arguments: str, check: bool = True) -> str:
-    result = subprocess.run(
-        ["git", "-C", str(repo), *arguments],
-        capture_output=True,
-        text=True,
-    )
+    try:
+        result = subprocess.run(
+            ["git", "-C", str(repo), *arguments],
+            capture_output=True,
+            text=True,
+        )
+    except OSError as error:
+        raise GitHandoffError(
+            repo=repo, arguments=arguments, reason=str(error)
+        ) from error
+    if result.returncode and arguments[0] in ("fetch", "push", "ls-remote"):
+        raise GitHandoffError(
+            repo=repo,
+            arguments=arguments,
+            reason=result.stderr.strip()
+            or result.stdout.strip()
+            or "Git remote operation failed",
+        )
     if check and result.returncode:
         detail = result.stderr.strip() or result.stdout.strip()
         raise _PrepareError(f"git {' '.join(arguments)} failed: {detail}")
@@ -499,6 +513,8 @@ def main(arguments: list[str] | None = None) -> int:
     except (_PrepareError, LibraryCheckoutError) as error:
         print(f"nb prepare-pr: {error}", file=sys.stderr)
         return 1
+    except GitHandoffError as error:
+        return error.emit()
 
 
 if __name__ == "__main__":

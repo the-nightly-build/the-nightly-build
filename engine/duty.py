@@ -40,6 +40,7 @@ import subprocess
 import sys
 
 from nb import meta as nb_meta
+from nb.git_handoff import GitHandoffError
 from nb.library_checkout import LibraryCheckoutError, ensure_library
 
 try:
@@ -301,6 +302,8 @@ def main(argv=None) -> int:
         except LibraryCheckoutError as error:
             sys.stderr.write(f"duty.py: {error}\n")
             return 2
+        except GitHandoffError as error:
+            return error.emit()
 
     date = (
         _dt.date.fromisoformat(args.date)

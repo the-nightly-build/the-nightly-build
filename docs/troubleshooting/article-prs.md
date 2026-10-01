@@ -40,3 +40,12 @@ The generated branch is complete and proved, but the environment lacks a working
 GitHub CLI path. The PR is opened or updated through whatever GitHub access the
 runtime does have, with exactly the reported base, head, title, and body. The
 generated commit is final and is never recreated or edited.
+
+## Delivery reports `NB_GIT_REQUIRED`
+
+Git is missing or a remote fetch, push, or branch query failed. The output names
+its checkout and arguments and exits 3. Resolve Git access through the runtime's
+connected tools or restore CLI access, refresh local refs, and rerun the
+command. After a failed push, rerun preparation because its temporary worktree
+is removed. This output does not claim a completed PR. A failed query does not
+mean a branch is absent.
