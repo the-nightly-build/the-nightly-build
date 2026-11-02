@@ -31,7 +31,8 @@ claim down to an instance before moving on. Order the piece so each section uses
 what you set up earlier.
 
 **It stands on its own.** Someone arriving from a link has read nothing else.
-Introduce every term and event inside the article.
+Introduce every term and event inside the article. A lesson in a running course
+is the exception, because it may rely on the earlier lessons it links.
 
 **It does original work.** Do something with the sources that the sources did
 not do. Say in one sentence what that was. If you cannot write that sentence,
