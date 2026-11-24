@@ -1,9 +1,8 @@
 # Production cost and role models
 
-The orchestrator, whether it is the assistant you asked or the scheduled
-runtime, uses the model its harness selected. Article roles can use cheaper
-models without changing that by adding the optional `press/production.yaml`
-file:
+Configure article-role models and reasoning effort in optional
+`press/production.yaml` (paper-wide) and under `production:` in `series.yaml`
+(per-series). The orchestrator always uses its harness or scheduler model.
 
 ```yaml
 profile: balanced
@@ -14,71 +13,32 @@ stages:
     effort: high
 ```
 
-The four profiles are `inherit`, `economy`, `balanced`, and `quality`. A press
-with no production file uses `balanced`, the cost-aware default. Set
-`profile: inherit` explicitly to preserve the harness's existing model and
-effort for every role.
+## Profiles and portable tiers
 
-Profiles use portable model tiers:
+If `press/production.yaml` is absent, the press defaults to `balanced`.
 
-- `efficient`: the lowest-cost available model competent for tool work.
-- `capable`: a strong general model below the harness's premium tier.
-- `premium`: the strongest available model.
-- `inherit`: the model already selected by the runtime.
+| Profile    | Purpose                                                     |
+| ---------- | ----------------------------------------------------------- |
+| `balanced` | Cost-aware default across roles                             |
+| `economy`  | Lower-cost role mapping                                     |
+| `quality`  | Higher-capability role mapping                              |
+| `inherit`  | Keep the harness's current model and effort for every stage |
 
-The orchestrator maps these tiers to models the current harness actually offers.
-To pin one provider instead, write its exact model ID. Effort is also a plain
-string because providers expose different levels.
+| Portable tier | Meaning                                               |
+| ------------- | ----------------------------------------------------- |
+| `efficient`   | Lowest-cost model competent for tool work             |
+| `capable`     | Strong general model below the harness's premium tier |
+| `premium`     | Strongest available model                             |
+| `inherit`     | Model already selected by the runtime                 |
 
-## Billing model comes first
-
-Production policy controls model selection. It cannot predict how a provider
-bills or limits the resulting work.
-
-A subscription converts model work into plan usage according to rules owned by
-the provider. Token observations do not reliably predict the share of a weekly
-or monthly allowance that one run will consume. Use the provider's usage report
-after the first production run as the baseline for that paper.
-
-A metered API charges for the exact models and token classes used. Estimate
-dollars only after those models are selected and their current input, output,
-and cached-token prices are known. Include repeated role invocations and leave
-room for orchestration. The orchestrator selects topics, commissions articles,
-supervises roles, routes repairs, prepares PRs, and follows publication. That
-work sits outside the four configured role stages.
-
-## Observed workload
-
-One asked-for article, produced by an assistant in a session on the economy
-profile with the writer and editor on a capable-tier model, took about 45
-minutes of agent time: the writing coach 6 minutes and about 94k tokens, the
-researcher 9 minutes and 135k, the writer 13 minutes and 167k, the editor 11
-minutes and 157k, before any repair round. The coach and researcher ran in
-parallel.
-
-One scheduled configuration produced five to seven articles in 45 to 90 minutes
-because independent articles ran in parallel. Its role invocations consumed:
-
-| Work                       | Observed time | Observed tokens |
-| -------------------------- | ------------- | --------------- |
-| Initial orchestration      | 10–15 minutes | About 100k      |
-| Researcher, per article    | 10–15 minutes | 100k–200k       |
-| Writing coach, per article | 5–10 minutes  | 50k–100k        |
-| Writer, per article        | 15–25 minutes | 150k–350k       |
-| Editor, per article        | 5–15 minutes  | 150k–250k       |
-
-These are observations, not limits or promises. A role may run again after an
-editorial request or failed check. The table covers role invocations and
-excludes the orchestrator's continuing work. It describes workload, not a
-guaranteed subscription allowance or API bill.
+The orchestrator maps tiers to models available in the active harness. To pin a
+specific model instead, set `model` to the provider's exact model ID. `effort`
+takes a provider-supported string (e.g., `low`, `medium`, `high`).
 
 ## Stage directives
 
-The orchestrator launches every article role directly. Each role receives an
-exact brief and only the article context it needs. When isolated children are
-unavailable, the same artifact sequence runs in one context. The policy controls
-those four launches. It does not select the orchestrator itself and does not
-require nested agents or a provider-specific team feature.
+Configurable stages: `writing-coach`, `researcher`, `writer`, and `editor`. The
+orchestrator is configured in your scheduler, not here.
 
 ```yaml
 stages:
@@ -88,48 +48,20 @@ stages:
     required: true
 ```
 
-`required` controls who may change a directive, and it never stops an article.
-With `required: false`, the setting is guidance: the orchestrator may deviate
-when its judgment calls for it, recording the choice in the commission. With
-`required: true`, the directive is not the orchestrator's to change: no judgment
-call, no cost-driven downgrade. When the runtime genuinely cannot honor or
-verify a required directive, the orchestrator uses the closest available option,
-records the deviation prominently in the commission, and production continues. A
-stage-level value overrides the paper-wide value.
+| `required` | Behavior                                                                                                                                                      |
+| ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `false`    | Guidance: the orchestrator may adjust when warranted and logs the choice in the commission.                                                                   |
+| `true`     | Binding: no judgment-based downgrade. If the runtime cannot honor or verify it, the orchestrator uses the closest option, logs it prominently, and continues. |
 
-The configurable stages are `writing-coach`, `researcher`, `writer`, and
-`editor`. The orchestrator is deliberately absent: choose its model in the
-automation itself, where the run begins.
+- When isolated child contexts are unavailable, the same four stages run
+  sequentially with identical records.
+- If a series pins a `voice_guide`, `writing-coach` does not run (its stage
+  directives are ignored, while `writing-coach/01` still records the pinned
+  guide).
 
-A series that pins a voice guide never launches the writing coach, so its
-`writing-coach` directives do not apply. Nothing else changes: the article still
-carries a `writing-coach/01` record holding the pinned guide.
+## Precedence and inspection
 
-## Reduce usage without weakening the paper
-
-Start with the commission. A broad or ambiguous series spends more work
-discovering candidate subjects and deciding what belongs. Current-events
-coverage often adds verification because claims change quickly and sources
-disagree. Narrower series boundaries and precise queued commissions settle more
-of those decisions before research begins.
-
-Pin a voice guide on any series whose sound is settled. This is the only
-reduction that removes a role invocation rather than making one cheaper: the
-writing coach does not run, and the observed 5 to 10 minutes and 50k to 100k
-tokens above go with it, every article, every night. See
-[Series](series.md#pinning-a-voice-guide).
-
-Then match models to the role each series needs. Research quality may dominate a
-news-heavy series, while another series depends more on voice or drafting. Use
-paper-wide defaults for the common case and per-series overrides for the
-exceptions. Lowering cadence or running fewer series reduces total article work.
-Parallel execution reduces elapsed time, but every article still consumes its
-own role invocations.
-
-## Per-series overrides
-
-A costly or unusually demanding section can specialize the press defaults in its
-`series.yaml`:
+Per-series overrides live under `production:` in `series.yaml`:
 
 ```yaml
 production:
@@ -140,14 +72,52 @@ production:
       effort: high
 ```
 
-Resolution starts from the series profile when one is present, otherwise the
-press profile. Press stage fields apply next, then series stage fields. For
-`required`, the order is press-wide, press stage, series-wide, series stage.
-Inspect the exact result with:
+Resolution order:
+
+1. **Base profile:** series `profile` if set, otherwise press `profile` (default
+   `balanced`).
+2. **Stage fields:** press stage fields, then series stage fields.
+3. **`required`:** press-wide -> press stage -> series-wide -> series stage.
+
+Inspect resolved directives for any series:
 
 ```sh
 nb production-policy --repo . --series <id>
 ```
 
-Production policy never skips an editorial stage and does not estimate token or
-dollar usage. Only the harness can report authoritative usage.
+## Billing and observed workload
+
+Production policy selects models; it never estimates cost or subscription share.
+Check your provider's usage report after a baseline run for subscriptions, or
+calculate metered API spend from actual model rates (including repair rounds and
+orchestrator overhead).
+
+**Single requested article** (`economy` profile, `writer` and `editor` on
+`capable`, coach and researcher in parallel, before repairs): ~45 minutes total
+agent time (coach ~6m / 94k tokens, researcher ~9m / 135k, writer ~13m / 167k,
+editor ~11m / 157k).
+
+**Scheduled run of 5–7 parallel articles** (45–90 minutes wall-clock):
+
+| Work                       | Observed time | Observed tokens |
+| -------------------------- | ------------- | --------------- |
+| Initial orchestration      | 10–15 minutes | ~100k           |
+| Researcher, per article    | 10–15 minutes | 100k–200k       |
+| Writing coach, per article | 5–10 minutes  | 50k–100k        |
+| Writer, per article        | 15–25 minutes | 150k–350k       |
+| Editor, per article        | 5–15 minutes  | 150k–250k       |
+
+These figures are observations, not guarantees; repair rounds and ongoing
+orchestration add work.
+
+## Reducing usage
+
+1. **Pin a voice guide** on settled series to skip `writing-coach` completely
+   (saving ~5–10 min and 50k–100k tokens per article). See
+   [Series reference](series.md#pinning-a-voice-guide).
+2. **Tighten commissions and series scope** so discovery and verification spend
+   fewer turns (current-events beats require heavier verification).
+3. **Match models to bottlenecks** using paper-wide defaults and per-series
+   overrides (e.g., stronger researcher on news, stronger writer on essays).
+4. **Lower cadence or series count.** Parallelism reduces wall-clock time, not
+   total token consumption.

@@ -1,38 +1,36 @@
 # Manage your paper
 
-Day-to-day changes belong on `main` under `press/`. Ask your AI in plain
-language and expect the smallest configuration change that satisfies the
-request, validated and committed for your review.
+Day-to-day changes live under `press/` on `main`. Ask your AI in plain language
+("pause the docket series", "make the brief weekdays only", "commission a deep
+dive on ASML", "less policy in the brief", "use a cheaper model for research")
+and review the small validated diff it commits.
 
-Common requests: "pause the docket series", "make the brief weekdays only",
-"commission a deep dive on ASML", "less policy in the brief for a while", "use a
-cheaper model for research", "give the paper a new look". Each lands as one
-small diff under `press/`.
+## Adjusting coverage and cadence
 
-What a series covers is the paragraph that opens its prompt. "More health, less
-policy" is an edit to that paragraph, and for the scaffolded News Brief and
-Feature it is the same edit the two questions in
-[Create your paper](../../getting-started/create-your-paper.md) make.
+- **Topic focus:** edit the opening paragraph of a series's `prompt.md` (the
+  same paragraph updated by the two-question flow in
+  [Create your paper](../../getting-started/create-your-paper.md)).
+- **Manual-only series:** set `cadence: manual` so `nb duty` never schedules it.
+  In an open manual series, any slug is allowed and `items` acts only as topic
+  suggestions.
+- **Same-day runs:** you can request multiple articles in one series on the same
+  day. On scheduled runs, `nb duty` treats a series as done once an article
+  dated today (UTC) is published, so a requested article counts as that day's
+  scheduled slot.
 
-Use `cadence: manual` for a series that should publish only when someone asks.
-`nb duty` never returns it as due. A manual open series admits any slug because
-the owner requests each article. Its `items` field suggests topics and does not
-restrict commissions.
+Configuration edits never change published articles on `library`. To edit a
+published piece, see [Revise an article](../publish/revise-an-article.md).
 
-You can request several articles for one series on the same day. Scheduled work
-follows a different rule. `nb duty` treats a series with an article dated today
-as complete for that run. A requested article therefore counts as that day's
-scheduled article.
+## Retracting a published article
 
-Configuration changes do not edit the published archive. To correct an article
-already on `library`, use [Revise an article](../publish/revise-an-article.md).
+Open a PR against `library` that only deletes:
 
-To retract an article, open a PR against `library` that only deletes
-`library/SERIES/SLUG.html`, its matching `library/SERIES/SLUG/` assets, and the
-article's `agent-artifacts/SERIES/SLUG/` production record. CI accepts that
-shape only when the PR author is the repository owner, and a curation PR never
-auto-merges. You review and merge it yourself. The next build removes the
-article from every index, feed, and the catalog. Git history preserves
-everything a retraction deletes.
+- `library/SERIES/SLUG.html`
+- matching assets under `library/SERIES/SLUG/`
+- production records under `agent-artifacts/SERIES/SLUG/`
 
-The exact series fields live in [Series reference](../../reference/series.md).
+CI allows this diff only when authored by the repository owner and never
+auto-merges it. Once you merge the PR, the next build removes the article from
+all indexes, feeds, and `catalog.json`. Git history preserves the deleted files.
+
+See [Series reference](../../reference/series.md) for all configuration keys.

@@ -1,34 +1,29 @@
 # Use Codex
 
-Use Codex CLI from a local clone to set up a paper and publish articles through
-the repository's Article PR workflow.
+Use Codex CLI in a local clone to set up your paper and publish articles through
+the Article PR workflow.
 
 ## Publish an article now
 
-Install Codex CLI, Git, `gh`, `uv`, and Python 3.10 or newer. Authenticate `gh`
-with an account that can administer the GitHub fork.
+**Prerequisites:** Codex CLI, `git`, `gh` (authenticated as the fork owner),
+`uv`, and Python 3.10+.
 
-Fork this repository, clone your fork, and open the clone in Codex. Ask:
+Fork this repository, clone your fork, open it in Codex, and ask:
 
 > Help me set up my Nightly Build paper and publish my first article about
 > `<topic>`. Follow the repository's instructions. Let me review the article
 > before it publishes.
 
-The assistant runs `./nb setup` when the paper needs setup, then follows the
-article workflow. The request to review first makes the Article PR a draft. To
-publish without a review hold, omit that sentence.
+Codex runs `./nb setup` if needed and opens an Article PR. Omit the last
+sentence to auto-merge after checks pass instead of opening a draft PR.
 
-For unattended publication, use a
-[ChatGPT Work scheduled task or Claude Code Routine](../guides/operate/schedule.md).
-The scheduled workflow itself lives in
-`.agents/prompts/run-scheduled-publication.md`.
+For unattended daily editions, pair Codex with a
+[ChatGPT Work scheduled task or Claude Code Routine](../guides/operate/schedule.md)
+pointing at `.agents/prompts/run-scheduled-publication.md`.
 
 ## After publication
 
-Your site is `https://<owner>.github.io/<repo>/`. The assistant reports the
-published article and its URL when the workflow completes. If GitHub does not
-start the `validate` check on an Article PR, enable Actions for the fork and
-close and reopen the PR.
-
-For setup problems, see
+Your paper publishes to `https://<owner>.github.io/<repo>/`. If `validate` never
+starts on an Article PR, enable Actions in the fork's **Actions** tab, then
+close and reopen the PR. See
 [Troubleshoot setup and scheduling](../troubleshooting/setup-and-scheduling.md).

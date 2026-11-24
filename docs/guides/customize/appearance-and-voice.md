@@ -1,107 +1,87 @@
 # Appearance and voice
 
-Paper-wide identity has two owners:
+Paper-wide identity lives in two files:
 
-- `press/editorial.md` describes the reader, register, point of view, recurring
+- `press/editorial.md`: target reader, register, point of view, recurring
   editorial moves, and habits to avoid.
-- `press/site.yaml` selects the masthead, theme, appearance, front-page density,
+- `press/site.yaml`: masthead, theme, color appearance, front-page density,
   footer, and directory settings. See [Site reference](../../reference/site.md).
 
-Write editorial direction as decisions a writer can apply. Ground it in specific
-examples and counterexamples. Naming an outlet or asking for "engaging" prose is
-not enough. Put paper-wide commitments here, series territory in each
-`prompt.md`, and one-off angles in configured item prompts.
+Write `press/editorial.md` as concrete decisions with examples and
+counterexamples, not vague adjectives like "engaging". Keep paper-wide rules
+here, beat territory in each series `prompt.md`, and one-off angles in item
+prompts.
 
-To create a custom theme:
+## Create a custom theme
 
 1. Copy `engine/assets/themes/newspaper.css` to `press/themes/<name>.css`.
-2. Edit every light, dark, and manual-override token block.
-3. Keep chart colors distinguishable without color alone and check text and
+2. Update all light, dark, and manual-override token blocks.
+3. Keep chart colors distinguishable without color alone and verify text and
    status contrast.
-4. Set `theme: press/themes/<name>.css` in `site.yaml`.
-5. Build a preview and inspect generated pages plus several old articles in both
+4. Set `theme: press/themes/<name>.css` in `press/site.yaml`.
+5. Build a preview and inspect generated pages and several past articles in both
    color schemes.
 
-The builder republishes the selected theme as `assets/theme.css`, so theme and
-furniture CSS restyle the back catalog. Template HTML keeps the font links it
-was authored with, so changing a font token alone does not install a web font.
+The builder publishes the active theme as `assets/theme.css`, so theme and
+furniture CSS restyle the back catalog. Because published article HTML keeps its
+original font links, changing a font token alone does not load a new web font.
 
-Themes, furniture, and templates are yours to define in `press/` with no engine
-edit. The site's frame is not: the top navigation, the front-page layout, and
-how each series-page mode renders are fixed by the engine. A new navigation
-entry or a different front page is an engine contribution, which takes the fork
-off the conflict-free `press/`-only update path.
+Themes, furniture, and templates live in `press/` without engine changes. The
+site frame (top navigation, front-page layout, and series-page modes) is fixed
+by the engine. Changing it requires editing engine files and leaves the
+conflict-free `press/` update path.
 
 ## Pinning a series voice guide
 
-The writing coach normally studies exemplars fresh for every article. That is
-right for a section whose voice should track its subject, and wasteful for one
-that has settled. A course should sound the same lesson to lesson.
+By default, the writing coach studies exemplars fresh for every article. For a
+section with a settled sound (such as a course), pin a guide with `voice_guide:`
+in `series.yaml` to skip the coach run. See
+[Series reference](../../reference/series.md#pinning-a-voice-guide) and
+[Production](../../reference/production.md).
 
-Pin the standard with `voice_guide:` in `series.yaml` and the coach stops
-running for that section. See
-[Series reference](../../reference/series.md#pinning-a-voice-guide) for the key
-and [Production](../../reference/production.md) for what it saves.
+Write the guide as the coach would, because the writer and editor read it
+directly:
 
-Write the guide the way the coach would, because the writer and the editor both
-read it as one. Ask your assistant to study strong writers in the section's
-territory and produce the guide from that reading rather than drafting it cold.
-The value is in the exemplars, not in adjectives about tone. A guide records
-each exemplar with passages quoted from it, then opens with a few paragraphs on
-how the section should sound under a `## How this series should sound` heading,
-written last so it can point at the passages actually chosen. A working example
-lives in `examples/series/kernels/voice-guide.md`.
+- Ask your assistant to study strong writers in the series's territory rather
+  than drafting cold. See `examples/series/kernels/voice-guide.md` for a working
+  example.
+- Open with `## How this series should sound` (written last so it references the
+  selected passages).
+- Give each exemplar two or three passages from different parts of the piece,
+  preserving domain vocabulary, followed by two or three sentences explaining
+  why each passage works. Describe the passage instead of issuing instructions.
+- Do not add a list of "permitted moves" (writers treat checklists as mandatory
+  quotas regardless of fit).
+- Verify every quotation against its raw source per
+  `.agents/skills/nb-writing-coach/SKILL.md`. No later role re-checks a pinned
+  guide.
+- Keep the guide general to the series, never tied to one article. Revisit it if
+  the series's voice shifts.
 
-Each exemplar gets two or three passages taken from different parts of the
-piece, each followed by two or three sentences on why it is worth reading and
-where the person is visible in it. Quote enough to hear the writing. Keep the
-subject's own vocabulary inside the quotations, because a passage flattened into
-general English stops showing what it was picked for. A note describes the
-passage and does not tell the writer to write one like it.
+## Banned terms (`press/banned-terms.yaml`)
 
-Do not give the guide a list of permitted moves. A list of moves gets read as a
-set of sentences to produce, and the writer will produce them whether or not the
-material calls for one.
+The proof checks rendered article text (title, dek, headings, and body,
+excluding the sources section) case-insensitively against a list of banned
+strings seeded in `spec/banned-terms.yaml`. Exceeding a limit raises
+`W-BANNED-TERM` (promoted to a block when the series sets `strict: true`).
 
-Check every quotation against the raw source before you commit the guide, on the
-terms `.agents/skills/nb-writing-coach/SKILL.md` sets out. This applies to a
-guide you write by hand exactly as it applies to one the coach produces, and no
-later role checks it.
-
-A pinned guide never mentions a particular article. Revisit it when the
-section's voice genuinely moves, and expect a fresh coach reading to beat a
-stale pin.
-
-## Banned terms: press/banned-terms.yaml
-
-The proof counts every article against a list of ruled-out strings. Each entry
-carries the exact strings to match, the most uses an article may keep, and the
-note the writer sees when the count runs over. The engine seeds the list in
-`spec/banned-terms.yaml`. An over-limit count is a `W-BANNED-TERM` warning,
-promoted to a block when the series sets `strict`. Counting covers the rendered
-text (title, dek, headings, body) minus the sources section, case-insensitively,
-so "leverage" also catches "leveraged".
-
-Your press layers `press/banned-terms.yaml` over the seed, by `id`:
+Layer `press/banned-terms.yaml` over the seed by `id`:
 
 ```yaml
-# A new id adds a ban. State every field: the strings to count, the
-# ceiling, and the note the writer acts on.
+# Add a new ban (all fields required).
 - id: synergy
   terms: [synergy, synergies]
   max: 0
   suggestion: name the mechanism. What does the combination actually do?
 
-# Reusing an engine id changes only the fields you state.
+# Override selected fields on an engine entry.
 - id: em-dash
   max: 8
 
-# Retire an engine entry outright.
+# Disable an engine entry.
 - id: leverage
   enabled: false
 ```
 
-Write each `suggestion` as the correction you would give a writer. A synonym
-swap keeps the underlying problem, so point the note at rewriting the sentence,
-not replacing the word. `nb validate` checks both files, so a typo surfaces
-before a scheduled run trips on it.
+Write `suggestion` as an actionable rewrite instruction rather than a synonym
+swap. Run `nb validate` to catch typos before a scheduled run.

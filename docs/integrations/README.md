@@ -1,29 +1,27 @@
 # Choose an agent
 
-The Nightly Build works with an agent that can follow repository instructions,
-run commands, research the web, and use GitHub. Choose a path by what you want
-to do.
+The Nightly Build works with any coding agent that can follow repository
+instructions, run commands, browse the web, and use GitHub.
 
-## Publish an article now
+## On-demand articles
 
-- [Claude Code](./claude-code.md): work in a local clone from the terminal.
-- [Codex](./codex.md): work in a local clone with Codex CLI.
-- [ChatGPT Work](./chatgpt-work.md): work in a cloud session with a connected
-  GitHub account.
+| Agent                             | Where it runs                | Best for                                  |
+| --------------------------------- | ---------------------------- | ----------------------------------------- |
+| [Claude Code](./claude-code.md)   | Local clone in terminal      | Interactive setup, articles, and Routines |
+| [Codex](./codex.md)               | Local clone with Codex CLI   | Interactive setup and articles            |
+| [ChatGPT Work](./chatgpt-work.md) | Cloud session via GitHub app | No local terminal, cloud tasks            |
 
-Each path can set up the paper and publish an article through the repository's
-Article PR workflow. For the general setup flow, see
-[Set up](../getting-started/setup.md).
+Each path runs `./nb setup` and opens validated Article PRs. See
+[Set up your paper](../getting-started/setup.md) for the general flow.
 
-## Publish on a schedule
+## Scheduled publication
 
-- [ChatGPT Work scheduled task](./chatgpt-work.md#schedule-publication): use a
-  recurring Work task with GitHub access and a fresh cloud checkout.
-- [Claude Code Routine](https://code.claude.com/docs/en/routines): use a
-  scheduled cloud routine with the repository and required tools connected.
+- **[ChatGPT Work scheduled task](./chatgpt-work.md#schedule-publication):**
+  recurring cloud task with GitHub access and a fresh checkout.
+- **[Claude Code Routine](https://code.claude.com/docs/en/routines):** scheduled
+  cloud routine connected to your fork and required tools.
 
-Both paths read their run instructions from
-[`run-scheduled-publication.md`](../../.agents/prompts/run-scheduled-publication.md).
-The scheduler prompt should point to that file rather than copy its workflow.
-See [Schedule publication](../guides/operate/schedule.md) for the prompt and the
-publication choices.
+Point your scheduler at
+[`run-scheduled-publication.md`](../../.agents/prompts/run-scheduled-publication.md)
+rather than copying workflow steps. See
+[Schedule publication](../guides/operate/schedule.md) for the canonical prompt.

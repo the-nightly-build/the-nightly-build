@@ -2,51 +2,47 @@
 
 ## Setup cannot create or configure the fork
 
-Confirm the current assistant is connected to the intended GitHub account and
-repository. Without `gh`, `nb setup` cannot change or read Pages and Actions. It
-lists both under "Still to do" with their GitHub settings links, even if you
-already enabled them. Make any missing changes in GitHub. Do not paste a token
-into chat.
+Verify the assistant is connected to the fork's owner GitHub account and
+repository. Without `gh`, `./nb setup` cannot read or change Pages or Actions
+settings and lists both under "Still to do" with direct links, even if already
+enabled. Apply any missing settings in GitHub directly. Never paste a GitHub
+token into chat.
 
-## The first article's check reports an unknown series
+## First article check reports an unknown series
 
-The check reads the press from remote `main`. If `press/` exists in the checkout
-but was never pushed, because the push was refused or setup predates the push,
-get that commit onto `main`, then close and reopen the pull request so the check
-runs again.
+Validation reads `press/` from remote `main`. If `press/` exists locally but was
+never pushed, push that commit to `main`, then close and reopen the PR to re-run
+the check.
 
-## Article PR checks never register
+## Article PR checks never start
 
-If an Article PR sits with no `validate` check and never merges, the fork's
-workflows are probably disabled: forks start that way, and GitHub runs no
-Actions until they are enabled. Enable workflows from the fork's Actions tab (or
-re-run `nb setup`, which enables them when it can), then close and reopen the
-stalled PR so the check triggers.
+Forks start with GitHub Actions disabled. Enable workflows in the fork's
+**Actions** tab (or rerun `./nb setup` with `gh`), then close and reopen the
+stalled PR to trigger `validate`.
 
-## The schedule starts but produces no work
+## Schedule runs but produces no work
 
-Run `nb duty` in the scheduled checkout and read its idle reasons. A series may
-have no work because it is paused, does not run on the current UTC day, has
-already published for that day, or uses `cadence: manual`. An empty due list is
-expected when every series is idle.
+Run `./nb duty` in the scheduled checkout and inspect its idle reasons. A series
+produces no due work when it is paused, does not run on the current UTC weekday,
+already has an article dated today (UTC), or uses `cadence: manual`.
 
 ## Research cannot reach sources
 
-Test outbound access inside the scheduled environment. Changing access in the
-setup chat or local machine does not change the schedule. Enable the provider's
-network capability for that runtime, then rerun the failed test step.
+Test outbound web access inside the scheduled runtime itself. Network access in
+your local terminal or interactive chat does not apply to a hosted scheduler.
+Enable outbound network access in the provider's scheduled-task settings and
+retest.
 
-## The run cannot push or open a PR
+## Run cannot push or open a PR
 
-Verify the scheduled identity can push a generated branch and create a PR
-against `library`. Confirm GitHub Actions are enabled for the fork and that the
-identity's pull requests start the `validate` check. Provider-hosted tasks may
-need separate repository app permissions.
+Confirm the scheduled identity has permission to push branches and open PRs
+against `library`, GitHub Actions are enabled on the fork, and its PRs trigger
+`validate`. Hosted schedulers may require separate GitHub app repository
+permissions.
 
-## A local check works but the scheduled task fails
+## Local checks pass, scheduled task fails
 
-The local environment may have different repository access, tools, and network
-permissions. Check the scheduled task's run details. If they do not identify the
-problem, use the
-[optional scheduled runtime check](../guides/operate/verify-scheduled-runtime.md)
-in the same environment.
+Local and hosted environments often differ in credentials, tools, and network
+rules. Inspect the scheduled task's run log, then run the
+[scheduled runtime smoke test](../guides/operate/verify-scheduled-runtime.md) in
+that exact environment.

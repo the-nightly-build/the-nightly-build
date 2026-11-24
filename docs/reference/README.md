@@ -1,93 +1,88 @@
 # Feature catalog
 
-The Nightly Build is a configurable publishing system. This catalog maps what
-the released engine supports and where each capability is controlled.
+Map of supported capabilities and where each is configured.
 
 ## Shape the paper
 
-| Capability                | What it supports                                                                                     | Configure or learn more                                                                                          |
-| ------------------------- | ---------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
-| Paper identity            | Masthead, footer, public description, and paper-wide editorial direction                             | `press/site.yaml`, `press/editorial.md`, and [Appearance and voice](../guides/customize/appearance-and-voice.md) |
-| Default paper             | Three scaffolded series and a default voice. Edit the opening paragraph in each prompt.              | `nb setup`. See [Create your paper](../getting-started/create-your-paper.md)                                     |
-| Recurring series          | Separate beats, genres, prompts, quality rules, and schedules within one paper                       | `press/series/<id>/` and [Series reference](series.md)                                                           |
-| Series modes              | Curated collections, ordered sequences, date-based rolling coverage, and open-ended beats            | `mode` in `series.yaml`. See [the four modes](series.md#the-four-modes)                                          |
-| Sections                  | One level of named grouping for the home page, Sections page, and article kickers                    | `section` in `series.yaml`. See [cadence, pausing, and sections](series.md#cadence-pausing-and-sections)         |
-| Commissions and queues    | Required topics for collection and sequence series, plus a priority commission queue for open series | `items` and optional item prompts or tags in `series.yaml`                                                       |
-| Shared prompt fragments   | Reusable editorial instructions selected by item tags                                                | `tags` in `series.yaml` and Markdown fragments under `press/series/_tags/`                                       |
-| Multiple article packages | One enforced template for a series or several choices selected article by article                    | `template` or `templates` in `series.yaml`. See [Template reference](./templates.md)                             |
+| Capability                | What it supports                                                    | Configure or learn more                                                                                      |
+| ------------------------- | ------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| Paper identity            | Masthead, footer, description, and paper-wide editorial direction   | `press/site.yaml`, `press/editorial.md`, [Appearance and voice](../guides/customize/appearance-and-voice.md) |
+| Default paper             | Three starter series; edit each prompt's opening paragraph          | `nb setup`, [Create your paper](../getting-started/create-your-paper.md)                                     |
+| Recurring series          | Independent beats, genres, prompts, quality rules, and schedules    | `press/series/<id>/`, [Series reference](series.md)                                                          |
+| Series modes              | `collection`, `sequence`, `rolling`, and `open`                     | `mode` in `series.yaml`, [The four modes](series.md#the-four-modes)                                          |
+| Sections                  | Single-level grouping on the home page, Sections page, and kickers  | `section` in `series.yaml`, [Cadence, pausing, and sections](series.md#cadence-pausing-and-sections)         |
+| Commissions and queues    | Required items (`collection`/`sequence`) or priority queue (`open`) | `items` (with optional prompts/tags) in `series.yaml`                                                        |
+| Shared prompt fragments   | Reusable editorial rules attached by item tag                       | `tags` in `series.yaml`, `press/series/_tags/*.md`                                                           |
+| Multiple article packages | One fixed template or per-article selection from a list             | `template` or `templates` in `series.yaml`, [Template reference](./templates.md)                             |
 
 ## Control timing and publication
 
-| Capability              | What it supports                                                                                                        | Configure or learn more                                                                                  |
-| ----------------------- | ----------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------- |
-| Mixed cadences          | Daily, weekdays, weekends, selected UTC weekdays, and manual-only series under one scheduled run                        | `cadence` in `series.yaml`. See [cadence, pausing, and sections](series.md#cadence-pausing-and-sections) |
-| Pause and resume        | Stop new scheduled articles while leaving the archive published                                                         | `paused` in `series.yaml`                                                                                |
-| Deterministic duty list | Computes what is due from current press configuration and published state                                               | `nb duty` and [Schedule](../guides/operate/schedule.md)                                                  |
-| Manual publication      | Commission an article from a topic, question, URL, documents, event, or detailed brief without waiting for cadence      | [Publish an article now](../guides/publish/publish-now.md)                                               |
-| Hold before publish     | Open an asked-for article's PR as a draft that CI validates. Nothing merges until you mark it ready.                    | `nb prepare-pr --hold`. See [Your first article](../getting-started/first-article.md)                    |
-| Reviewed revisions      | Change one published article and/or its matching figures or other local assets through the normal proof and render gate | [Revise an article](../guides/publish/revise-an-article.md)                                              |
-| Retraction              | Remove one article, its assets, and its production record through a narrow, owner-reviewed PR                           | [Manage your paper](../guides/operate/manage-your-paper.md)                                              |
-| Automatic publication   | Auto-merges every clean new-article PR and exact workflow sync. Revisions and owner curation wait for human review.     | [Publishing and security](../concepts/publishing-and-security.md)                                        |
+| Capability              | What it supports                                                    | Configure or learn more                                                                              |
+| ----------------------- | ------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------- |
+| Mixed cadences          | `daily`, `weekdays`, `weekends`, UTC weekday lists, and `manual`    | `cadence` in `series.yaml`, [Cadence, pausing, and sections](series.md#cadence-pausing-and-sections) |
+| Pause and resume        | Halt new scheduled articles while keeping the archive live          | `paused` in `series.yaml`                                                                            |
+| Deterministic duty list | Computes due work from `main` press config and `library` state      | `nb duty`, [Schedule publication](../guides/operate/schedule.md)                                     |
+| Manual publication      | Commission an article from a topic, URL, docs, or brief anytime     | [Publish an article now](../guides/publish/publish-now.md)                                           |
+| Hold before publish     | Open a draft PR that CI validates and merges only when marked ready | `nb prepare-pr --hold`, [Your first article](../getting-started/first-article.md)                    |
+| Reviewed revisions      | Update one published article and/or assets through proof and render | [Revise an article](../guides/publish/revise-an-article.md)                                          |
+| Retraction              | Delete one article, its assets, and records via owner-reviewed PR   | [Manage your paper](../guides/operate/manage-your-paper.md)                                          |
+| Automatic publication   | Auto-merges clean new articles and exact workflow syncs             | [Publishing and security](../concepts/publishing-and-security.md)                                    |
 
 ## Govern editorial quality
 
-| Capability                    | What it supports                                                                                                            | Configure or learn more                                                                                            |
-| ----------------------------- | --------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
-| Paper and series voice        | Paper-wide reader and register plus series-specific territory, structure, and editorial moves                               | `press/editorial.md` and each `prompt.md`. See [Appearance and voice](../guides/customize/appearance-and-voice.md) |
-| Four editorial roles          | Writing coach, researcher, writer, and editor with isolated briefs and recorded outputs for new articles                    | [Architecture](../concepts/architecture.md)                                                                        |
-| Deterministic proof           | Checks PR shape, metadata, structure, prose, citations, source policy, rubrics, and rendered behavior                       | The checkout-owned `nb check` command and [Publishing and security](../concepts/publishing-and-security.md)        |
-| Strict mode                   | Promotes proof warnings to blocking failures for selected series, except advisory warnings marked non-promotable            | `strict` in `series.yaml`                                                                                          |
-| Geometry guidance             | Sets recommended ranges for words, repeated items, and flexible sections                                                    | `bands` in `series.yaml`. See [quality and sources](series.md#quality-and-sources)                                 |
-| Source floors                 | Requires a minimum number of cited sources, with template-aware defaults                                                    | `min_sources` in `series.yaml`                                                                                     |
-| Source composition            | Requires primary and secondary source ranges for an article or for every repeated item                                      | `sources_by_kind` and `per_item_sources`. See [source composition](series.md#source-composition)                   |
-| Required and bounded research | Requires configured documents, asks agents to consult background documents, or confines research to an exclusive source set | `required_docs`, `consult`, and `sources_exclusive` in `series.yaml`                                               |
-| Enforced review rubrics       | Pins criteria, validates score rows and citations, and permits subject-specific additions                                   | `rubric` in `series.yaml`. See [Rubrics](series.md#rubrics)                                                        |
-| Banned prose patterns         | Applies the engine's maintained vocabulary and prose checks, with press-owned additions                                     | `press/banned-terms.yaml` and [Appearance and voice](../guides/customize/appearance-and-voice.md)                  |
+| Capability                    | What it supports                                                      | Configure or learn more                                                                                |
+| ----------------------------- | --------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------ |
+| Paper and series voice        | Paper-wide register plus series territory, structure, and moves       | `press/editorial.md`, `prompt.md`, [Appearance and voice](../guides/customize/appearance-and-voice.md) |
+| Four editorial roles          | Writing coach, researcher, writer, and editor with saved records      | [Architecture](../concepts/architecture.md)                                                            |
+| Deterministic proof           | Checks diff shape, metadata, structure, citations, rubrics, rendering | `nb check`, [Publishing and security](../concepts/publishing-and-security.md)                          |
+| Strict mode                   | Promotes proof warnings to blocks (except non-promotable advisories)  | `strict` in `series.yaml`                                                                              |
+| Geometry guidance             | Recommended ranges for words, repeated items, and flexible sections   | `bands` in `series.yaml`, [Quality and sources](series.md#quality-and-sources)                         |
+| Source floors                 | Minimum cited sources with template-aware defaults                    | `min_sources` in `series.yaml`                                                                         |
+| Source composition            | Primary/secondary source counts per article or per item               | `sources_by_kind`, `per_item_sources`, [Source composition](series.md#source-composition)              |
+| Required and bounded research | Mandatory citations, background docs, or closed-world source sets     | `required_docs`, `consult`, `sources_exclusive` in `series.yaml`                                       |
+| Enforced review rubrics       | Pinned criteria, 0–5 score integrity, and cited justifications        | `rubric` in `series.yaml`, [Rubrics](series.md#rubrics)                                                |
+| Banned prose patterns         | Engine vocabulary/prose rules plus press overrides and additions      | `press/banned-terms.yaml`, [Appearance and voice](../guides/customize/appearance-and-voice.md)         |
 
 ## Choose models and execution
 
-| Capability                       | What it supports                                                                                                        | Configure or learn more                                                         |
-| -------------------------------- | ----------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------- |
-| Portable cost profiles           | `inherit`, `economy`, `balanced`, and `quality` profiles mapped to models available in the current harness              | `profile` in `press/production.yaml`. See [Production policy](production.md)    |
-| Portable model tiers             | `efficient`, `capable`, `premium`, or the runtime's inherited model                                                     | `model` for a production stage                                                  |
-| Exact model selection            | Provider-specific model IDs when portability is less important than pinning a model                                     | Set the stage `model` to the exact provider model ID                            |
-| Per-role reasoning effort        | Provider-supported effort value for writing coach, researcher, writer, or editor                                        | `effort` for a production stage                                                 |
-| Required or best-effort routing  | Require a model or effort directive. Record unavoidable deviations without stopping production.                         | `required` paper-wide or per stage                                              |
-| Per-series production overrides  | Give one demanding or inexpensive series a different profile, model, effort, or requirement                             | `production` in that `series.yaml`                                              |
-| Isolated or sequential execution | Run article roles in isolated child contexts where supported. Otherwise, run them sequentially with the same artifacts. | Selected by runtime capability. See [Architecture](../concepts/architecture.md) |
+| Capability                       | What it supports                                                     | Configure or learn more                                                     |
+| -------------------------------- | -------------------------------------------------------------------- | --------------------------------------------------------------------------- |
+| Portable cost profiles           | `inherit`, `economy`, `balanced`, and `quality`                      | `profile` in `press/production.yaml`, [Production](production.md)           |
+| Portable model tiers             | `efficient`, `capable`, `premium`, or `inherit`                      | `model` on a stage                                                          |
+| Exact model selection            | Pin a provider-specific model ID                                     | Set stage `model` to the exact provider model ID                            |
+| Per-role reasoning effort        | Provider-supported effort level per stage                            | `effort` on a stage                                                         |
+| Required or best-effort routing  | Enforce stage model/effort or allow logged orchestrator judgment     | `required` paper-wide or per stage                                          |
+| Per-series production overrides  | Override profile, stage model/effort, or `required` for one series   | `production` in `series.yaml`                                               |
+| Isolated or sequential execution | Isolated child roles when supported; sequential fallback with parity | Selected by runtime capability, [Architecture](../concepts/architecture.md) |
 
-The production policy controls article roles, not the scheduled orchestrator.
-Choose the orchestrator's model in the scheduler or automation where it runs.
-The engine does not estimate model cost. Use the provider's usage reporting.
+Production policy applies to article roles only. Configure the orchestrator's
+model in your scheduler, and check provider reports for actual usage and cost.
 
 ## Design articles and the site
 
-| Capability               | What it supports                                                                                  | Configure or learn more                                                                                                                      |
-| ------------------------ | ------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
-| Theme and color mode     | Shipped or press-owned CSS with automatic, light, and dark appearance                             | `theme` and `appearance` in `site.yaml`. See [Appearance and voice](../guides/customize/appearance-and-voice.md)                             |
-| Front-page density       | Compact story cells or comfortable cells with deks                                                | `front` in `site.yaml`. See [Site reference](site.md)                                                                                        |
-| Reusable furniture       | Timelines, comparison grids, evidence cards, pull quotes, rubrics, and custom semantic components | Shipped `templates/FURNITURE.md` or `press/furniture/`. See [Furniture reference](furniture.md)                                              |
-| Custom templates         | Press-owned article skeletons with enforceable sections, citation geometry, chrome, and furniture | `press/templates/<id>/` with finished packages to copy in `examples/templates/`. See [Customize templates](../guides/customize/templates.md) |
-| Figures and charts       | Store local images and data-backed charts with an article. Revisions can replace them.            | The article's matching asset directory and [Architecture](../concepts/architecture.md)                                                       |
-| Trusted external assets  | Owner-selected HTTPS scripts and styles with exact Subresource Integrity pins                     | `assets` in `site.yaml`. See [Site reference](site.md)                                                                                       |
-| Accessible static output | Semantic, script-free article content with responsive layouts and browser-render checks           | [Template reference](./templates.md) and [Publishing and security](../concepts/publishing-and-security.md)                                   |
+| Capability               | What it supports                                                      | Configure or learn more                                                                                   |
+| ------------------------ | --------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------- |
+| Theme and color mode     | Shipped or press-owned CSS with `auto`, `light`, or `dark` appearance | `theme`, `appearance` in `site.yaml`, [Appearance and voice](../guides/customize/appearance-and-voice.md) |
+| Front-page density       | Compact cells or comfortable cells with deks                          | `front` in `site.yaml`, [Site reference](site.md)                                                         |
+| Reusable furniture       | Timelines, tables, figures, pull quotes, rubrics, reading/quote cards | `templates/FURNITURE.md`, `press/furniture/`, [Furniture reference](furniture.md)                         |
+| Custom templates         | Press-owned skeletons with enforced sections, chrome, and citations   | `press/templates/<id>/`, `examples/templates/`, [Customize templates](../guides/customize/templates.md)   |
+| Figures and charts       | Local images and charts stored with each article; revisable later     | `library/SERIES/SLUG/`, [Architecture](../concepts/architecture.md)                                       |
+| Trusted external assets  | Owner-declared HTTPS scripts and styles with exact SRI hashes         | `assets` in `site.yaml`, [Site reference](site.md)                                                        |
+| Accessible static output | Script-free semantic articles checked in a headless browser           | [Template reference](./templates.md), [Publishing and security](../concepts/publishing-and-security.md)   |
 
 ## Operate and deliver
 
-| Capability                         | What it supports                                                                                                                                       | Configure or learn more                                                  |
-| ---------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------ |
-| Guided setup                       | Creates the press, publication branch, and workflows. Configures GitHub settings when the account permits it and reports settings that need the owner. | `./nb setup` and [Set up](../getting-started/setup.md)                   |
-| Separate setup and schedule agents | Set up and request articles with one agent, then use ChatGPT Work or Claude Code Routines for scheduled publication                                    | [Integrations](../integrations/README.md)                                |
-| Engine updates                     | Sync upstream engine changes without mixing `press/` or `library` state, then repair protected workflow copies                                         | `nb sync` and [Update the engine](../guides/operate/update-engine.md)    |
-| Static GitHub Pages paper          | Publishes the complete site without an application backend or database                                                                                 | [Delivery](delivery.md)                                                  |
-| Full-text search and catalog API   | Generates `search-index.json` and machine-readable paper state in `catalog.json`                                                                       | [Delivery](delivery.md#catalogjson-the-api)                              |
-| Atom feeds                         | Publishes a paper-wide feed and one feed per series with full recent article content                                                                   | [Delivery](delivery.md#feeds-zero-setup)                                 |
-| Shared directory                   | Makes a public fork discoverable from the Nightly Build directory, with an explicit opt-out                                                            | `directory` in `site.yaml`. See [Delivery](delivery.md#the-directory)    |
-| Article history search             | Gives production agents narrowly requested prior coverage without loading the whole archive                                                            | The `nb history` command and [Architecture](../concepts/architecture.md) |
-| Pinned series voice guide          | States once how a settled section should sound, so the writing coach never runs for it                                                                 | `voice_guide` in [Series](series.md#pinning-a-voice-guide)               |
+| Capability                         | What it supports                                                     | Configure or learn more                                              |
+| ---------------------------------- | -------------------------------------------------------------------- | -------------------------------------------------------------------- |
+| Guided setup                       | Initializes `press/`, `library`, workflows, and GitHub settings      | `./nb setup`, [Set up](../getting-started/setup.md)                  |
+| Separate setup and schedule agents | Pair any interactive agent with ChatGPT Work or Claude Code Routines | [Integrations](../integrations/README.md)                            |
+| Engine updates                     | Merge upstream engine changes cleanly and sync `library` workflows   | `nb sync`, [Update the engine](../guides/operate/update-engine.md)   |
+| Static GitHub Pages paper          | Full static site with zero backend or database                       | [Delivery](delivery.md)                                              |
+| Full-text search and catalog API   | `search-index.json` and machine-readable `catalog.json`              | [Delivery](delivery.md#catalogjson-the-api)                          |
+| Atom feeds                         | Paper-wide and per-series feeds with full recent article HTML        | [Delivery](delivery.md#feeds-zero-setup)                             |
+| Shared directory                   | Automatic listing on the Nightly Build directory with opt-out        | `directory` in `site.yaml`, [Delivery](delivery.md#the-directory)    |
+| Article history search             | Targeted prior-coverage lookup without loading the full archive      | `nb history`, [Architecture](../concepts/architecture.md)            |
+| Pinned series voice guide          | Fixed series voice standard that skips the writing coach stage       | `voice_guide` in [Series reference](series.md#pinning-a-voice-guide) |
 
-For a complete working press, browse `examples/`. It demonstrates all four
-modes, daily and day-list cadences, source policies, production policy, themes,
-furniture, and series prompts without acting as configuration for your own
-paper. Not every capability in this catalog has an example. The reference pages
-above are the complete contract.
+Browse `examples/` for a complete sample press (never read as live config). The
+reference pages above are the complete contract.

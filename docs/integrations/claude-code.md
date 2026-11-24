@@ -1,29 +1,27 @@
 # Use Claude Code
 
-Claude Code can set up a local paper and publish articles from a local clone. It
-can also run unattended with
-[Claude Code Routines](https://code.claude.com/docs/en/routines).
+Use Claude Code in a local clone for interactive setup and articles, and
+[Claude Code Routines](https://code.claude.com/docs/en/routines) for unattended
+scheduled runs.
 
 ## Publish an article now
 
-Install Claude Code, Git, `uv`, and Python 3.10 or newer. Authenticate `gh` with
-an account that can administer the GitHub fork.
+**Prerequisites:** Claude Code, `git`, `gh` (authenticated as the fork owner),
+`uv`, and Python 3.10+.
 
-Fork this repository, clone your fork, and open the clone in Claude Code. Ask:
+Fork this repository, clone your fork, open it in Claude Code, and ask:
 
 > Help me set up my Nightly Build paper and publish my first article about
 > `<topic>`. Follow the repository's instructions. Let me review the article
 > before it publishes.
 
-The assistant runs `./nb setup` when the paper needs setup, then follows the
-article workflow. The request to review first makes the Article PR a draft. To
-publish without a review hold, omit that sentence.
+Claude Code runs `./nb setup` if needed and opens an Article PR. Omit the last
+sentence to auto-merge after checks pass instead of opening a draft PR.
 
 ## Schedule publication
 
-Create a cloud Routine and give it access to the fork, web research, GitHub, and
-the tools required by the scheduled prompt. Set its schedule and use this
-prompt:
+Create a cloud Routine with access to your fork, web search, GitHub, and
+required tools. Set the schedule and use this prompt:
 
 > Work in The Nightly Build repository `<owner>/<repo>`. Update the checkout to
 > the current remote `main` before reading anything. Read
@@ -31,16 +29,13 @@ prompt:
 > This paragraph is the entire assignment. If that file is missing from
 > up-to-date remote `main`, stop and report the missing repository entrypoint.
 
-Choose whether the routine may publish automatically or should stop with a draft
-PR for review. For current Routine setup steps and limits, see
-[Claude Code's Routines guide](https://code.claude.com/docs/en/routines).
+Choose automatic publication or draft-only PRs. See
+[Claude Code's Routines guide](https://code.claude.com/docs/en/routines) for
+current setup steps and limits.
 
 ## After publication
 
-Your site is `https://<owner>.github.io/<repo>/`. The assistant reports the
-published article and its URL when the workflow completes. If GitHub does not
-start the `validate` check on an Article PR, enable Actions for the fork and
-close and reopen the PR.
-
-For setup problems, see
+Your paper publishes to `https://<owner>.github.io/<repo>/`. If `validate` never
+starts on an Article PR, enable Actions in the fork's **Actions** tab, then
+close and reopen the PR. See
 [Troubleshoot setup and scheduling](../troubleshooting/setup-and-scheduling.md).
