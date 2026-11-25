@@ -51,60 +51,69 @@ class _PreparedBranch:
     commit: str
 
 
-# Git's argv is naturally variadic; ``check`` remains explicit at the call site.
-# ast-grep-ignore: keyword-only-args
+def _git_binary(repo: pathlib.Path, arguments: tuple[str, ...]) -> str:
+    git_bin = shutil.which("git")
+    if git_bin is None:
+        raise GitHandoffError(repo=repo, arguments=arguments, reason="git executable not found")
+    return git_bin
+
+
 def _git(repo: pathlib.Path, *arguments: str, check: bool = True) -> str:
+    git_bin = _git_binary(repo, arguments)
     try:
         result = subprocess.run(
-            ["git", "-C", str(repo), *arguments],
+            [git_bin, "-C", str(repo), *arguments],
             capture_output=True,
             text=True,
+            check=False,
         )
     except OSError as error:
-        raise GitHandoffError(
-            repo=repo, arguments=arguments, reason=str(error)
-        ) from error
+        raise GitHandoffError(repo=repo, arguments=arguments, reason=str(error)) from error
     if result.returncode and arguments[0] in ("fetch", "push", "ls-remote"):
         raise GitHandoffError(
             repo=repo,
             arguments=arguments,
-            reason=result.stderr.strip()
-            or result.stdout.strip()
-            or "Git remote operation failed",
+            reason=result.stderr.strip() or result.stdout.strip() or "Git remote operation failed",
         )
     if check and result.returncode:
         detail = result.stderr.strip() or result.stdout.strip()
-        raise _PrepareError(f"git {' '.join(arguments)} failed: {detail}")
+        message = f"git {' '.join(arguments)} failed: {detail}"
+        raise _PrepareError(message)
     return result.stdout.strip()
 
 
 def _article_from_workspace(path: pathlib.Path) -> _Article:
     article_path = path.resolve()
     if not article_path.is_file() or article_path.is_symlink():
-        raise _PrepareError(f"article must be a regular file: {article_path}")
+        message = f"article must be a regular file: {article_path}"
+        raise _PrepareError(message)
     metadata = nb_meta.read_meta(str(article_path))
     if metadata is None:
-        raise _PrepareError("article has no readable nb-meta block")
+        message = "article has no readable nb-meta block"
+        raise _PrepareError(message)
 
     series = metadata.get("series")
     slug = metadata.get("slug")
     title = metadata.get("title")
     if not isinstance(series, str) or nb_meta.SERIES_RE.fullmatch(series) is None:
-        raise _PrepareError("article nb-meta has an invalid series")
+        message = "article nb-meta has an invalid series"
+        raise _PrepareError(message)
     if not isinstance(slug, str) or nb_meta.SLUG_RE.fullmatch(slug) is None:
-        raise _PrepareError("article nb-meta has an invalid slug")
+        message = "article nb-meta has an invalid slug"
+        raise _PrepareError(message)
     if not isinstance(title, str) or not title.strip():
-        raise _PrepareError("article nb-meta has no title")
+        message = "article nb-meta has no title"
+        raise _PrepareError(message)
 
     expected_tail = pathlib.Path("library") / series / f"{slug}.html"
     if pathlib.Path(*article_path.parts[-3:]) != expected_tail:
-        raise _PrepareError(
-            f"article must be at <workspace>/{expected_tail.as_posix()}"
-        )
+        message = f"article must be at <workspace>/{expected_tail.as_posix()}"
+        raise _PrepareError(message)
     workspace = article_path.parents[2]
     errors = validate_artifacts(workspace, series=series, slug=slug)
     if errors:
-        raise _PrepareError("invalid agent artifacts:\n- " + "\n- ".join(errors))
+        message = "invalid agent artifacts:\n- " + "\n- ".join(errors)
+        raise _PrepareError(message)
     return _Article(article_path, workspace, series, slug, title.strip())
 
 
@@ -150,9 +159,7 @@ def _generated_branch_is_safe(
     if not expected_lines.issubset(set(message.splitlines())):
         return False
     changes = []
-    for line in _git(
-        library, "diff", "--name-status", "--no-renames", base, remote_commit
-    ).splitlines():
+    for line in _git(library, "diff", "--name-status", "--no-renames", base, remote_commit).splitlines():
         state, separator, changed_path = line.partition("\t")
         if not separator:
             return False
@@ -174,14 +181,14 @@ def _copy_bundle(
     target_assets = worktree / source_assets.relative_to(article.workspace)
     if source_assets.exists():
         if not source_assets.is_dir() or source_assets.is_symlink():
-            raise _PrepareError(f"article assets must be a directory: {source_assets}")
+            message = f"article assets must be a directory: {source_assets}"
+            raise _PrepareError(message)
         if any(path.is_symlink() for path in source_assets.rglob("*")):
-            raise _PrepareError("article assets cannot contain symbolic links")
+            message = "article assets cannot contain symbolic links"
+            raise _PrepareError(message)
         shutil.copytree(source_assets, target_assets)
 
-    source_artifacts = (
-        article.workspace / "agent-artifacts" / article.series / article.slug
-    )
+    source_artifacts = article.workspace / "agent-artifacts" / article.series / article.slug
     target_artifacts = worktree / source_artifacts.relative_to(article.workspace)
     target_artifacts.parent.mkdir(parents=True, exist_ok=True)
     shutil.copytree(source_artifacts, target_artifacts)
@@ -208,9 +215,10 @@ def _prove_branch(
         deletions_by_owner=False,
         rep=report,
     )
-    emit(report, False)
+    emit(report, as_json=False)
     if report.blocks:
-        raise _PrepareError("the generated Article PR did not pass nb check")
+        message = "the generated Article PR did not pass nb check"
+        raise _PrepareError(message)
 
 
 def _prepare_branch(
@@ -225,13 +233,16 @@ def _prepare_branch(
     _git(library, "fetch", "-q", "origin", "library")
     base = _git(library, "rev-parse", "origin/library")
     article_target = f"library/{article.series}/{article.slug}.html"
+    cat_args = ("cat-file", "-e", f"{base}:{article_target}")
+    git_bin = _git_binary(library, cat_args)
     published = subprocess.run(
-        ["git", "-C", str(library), "cat-file", "-e", f"{base}:{article_target}"],
+        [git_bin, "-C", str(library), *cat_args],
         capture_output=True,
+        check=False,
     )
-    is_published = published.returncode == 0
-    if is_published:
-        raise _PrepareError(f"article is already published: {article_target}")
+    if published.returncode == 0:
+        message = f"article is already published: {article_target}"
+        raise _PrepareError(message)
     name = f"nb/article/{article.series}/{article.slug}"
     remote_commit = _remote_branch(library, name)
     if remote_commit and not _generated_branch_is_safe(
@@ -240,9 +251,8 @@ def _prepare_branch(
         remote_commit=remote_commit,
         article=article,
     ):
-        raise _PrepareError(
-            f"origin/{name} contains unrecognized edits; preserve or remove it first"
-        )
+        message = f"origin/{name} contains unrecognized edits; preserve or remove it first"
+        raise _PrepareError(message)
 
     with tempfile.TemporaryDirectory(prefix="nb-article-pr-") as temporary:
         worktree = pathlib.Path(temporary) / "worktree"
@@ -314,94 +324,66 @@ def _repository_name(library: pathlib.Path, gh: str) -> str | None:
         [gh, "repo", "view", origin, "--json", "nameWithOwner", "-q", ".nameWithOwner"],
         capture_output=True,
         text=True,
+        check=False,
     )
     return result.stdout.strip() if result.returncode == 0 else None
 
 
-def _handoff(
-    prepared: _PreparedBranch, *, reason: str, repository: str | None, hold: bool
-) -> int:
-    print("NB_ARTICLE_PR_REQUIRED")
-    print(f"reason={reason}")
+def _handoff(prepared: _PreparedBranch, *, reason: str, repository: str | None, hold: bool) -> int:
+    lines = ["NB_ARTICLE_PR_REQUIRED", f"reason={reason}"]
     if repository:
-        print(f"repository={repository}")
-    print("base=library")
+        lines.append(f"repository={repository}")
+    lines.append("base=library")
     if hold:
-        print("draft=true")
-    print(f"head={prepared.name}")
-    print(f"title={_pr_title(prepared)}")
-    print("body<<NB_ARTICLE_BODY")
-    print(_pr_body(prepared), end="")
-    print("NB_ARTICLE_BODY")
-    print()
-    print("Use the runtime's connected GitHub tools to finish this exact request:")
-    print("1. Reuse an open PR with this base and head, or open it as specified.")
-    print("2. Do not edit the generated branch or recreate its commit.")
-    print("3. Monitor CI and route any failure back to the orchestrator.")
+        lines.append("draft=true")
+    lines.extend(
+        (
+            f"head={prepared.name}",
+            f"title={_pr_title(prepared)}",
+            "body<<NB_ARTICLE_BODY",
+            _pr_body(prepared).rstrip("\n"),
+            "NB_ARTICLE_BODY",
+            "",
+            "Use the runtime's connected GitHub tools to finish this exact request:",
+            "1. Reuse an open PR with this base and head, or open it as specified.",
+            "2. Do not edit the generated branch or recreate its commit.",
+            "3. Monitor CI and route any failure back to the orchestrator.",
+        )
+    )
+    sys.stdout.write("\n".join(lines) + "\n")
     return HANDOFF_EXIT
 
 
-def _open_pr(prepared: _PreparedBranch, *, library: pathlib.Path, hold: bool) -> int:
+def _resolve_gh_context(library: pathlib.Path) -> tuple[str | None, str | None, str | None]:
     gh = shutil.which("gh")
     if gh is None:
-        return _handoff(
-            prepared, reason="gh is not installed", repository=None, hold=hold
-        )
-    authenticated = subprocess.run(
-        [gh, "auth", "status"], capture_output=True, text=True
-    )
+        return None, None, "gh is not installed"
+    authenticated = subprocess.run([gh, "auth", "status"], capture_output=True, text=True, check=False)
     if authenticated.returncode:
-        return _handoff(
-            prepared, reason="gh is not authenticated", repository=None, hold=hold
-        )
+        return None, None, "gh is not authenticated"
     repository = _repository_name(library, gh)
     if repository is None:
-        return _handoff(
-            prepared,
-            reason="gh cannot resolve the origin repository",
-            repository=None,
-            hold=hold,
-        )
+        return None, None, "gh cannot resolve the origin repository"
+    return gh, repository, None
 
-    existing = subprocess.run(
-        [
-            gh,
-            "pr",
-            "list",
-            "--repo",
-            repository,
-            "--base",
-            "library",
-            "--head",
-            prepared.name,
-            "--state",
-            "open",
-            "--json",
-            "url",
-            "--jq",
-            '.[0].url // ""',
-        ],
-        capture_output=True,
-        text=True,
-    )
-    if existing.returncode:
-        return _handoff(
-            prepared,
-            reason="gh cannot inspect Article PRs",
-            repository=repository,
-            hold=hold,
-        )
 
+def _submit_pr(
+    gh: str,
+    prepared: _PreparedBranch,
+    *,
+    repository: str,
+    existing_url: str,
+    hold: bool,
+) -> tuple[str | None, str | None]:
     with tempfile.NamedTemporaryFile("w", encoding="utf-8") as body_file:
         body_file.write(_pr_body(prepared))
         body_file.flush()
-        url = existing.stdout.strip()
-        if url:
+        if existing_url:
             command = [
                 gh,
                 "pr",
                 "edit",
-                url,
+                existing_url,
                 "--repo",
                 repository,
                 "--title",
@@ -427,29 +409,72 @@ def _open_pr(prepared: _PreparedBranch, *, library: pathlib.Path, hold: bool) ->
             ]
             if hold:
                 command.append("--draft")
-        result = subprocess.run(command, capture_output=True, text=True)
+        result = subprocess.run(command, capture_output=True, text=True, check=False)
     if result.returncode:
+        return None, "gh cannot open or update the Article PR"
+    if existing_url and hold:
+        # an existing PR is re-held rather than left ready to merge
+        held = subprocess.run(
+            [gh, "pr", "ready", "--undo", existing_url, "--repo", repository],
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+        if held.returncode:
+            return None, "gh cannot mark the Article PR as a draft"
+    return existing_url or result.stdout.strip(), None
+
+
+def _open_pr(prepared: _PreparedBranch, *, library: pathlib.Path, hold: bool) -> int:
+    gh, repository, error = _resolve_gh_context(library)
+    if error is not None or gh is None or repository is None:
         return _handoff(
             prepared,
-            reason="gh cannot open or update the Article PR",
+            reason=error or "gh is unavailable",
             repository=repository,
             hold=hold,
         )
-    if url and hold:
-        # an existing PR is re-held rather than left ready to merge
-        held = subprocess.run(
-            [gh, "pr", "ready", "--undo", url, "--repo", repository],
-            capture_output=True,
-            text=True,
+
+    existing = subprocess.run(
+        [
+            gh,
+            "pr",
+            "list",
+            "--repo",
+            repository,
+            "--base",
+            "library",
+            "--head",
+            prepared.name,
+            "--state",
+            "open",
+            "--json",
+            "url",
+            "--jq",
+            '.[0].url // ""',
+        ],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    if existing.returncode:
+        return _handoff(
+            prepared,
+            reason="gh cannot inspect Article PRs",
+            repository=repository,
+            hold=hold,
         )
-        if held.returncode:
-            return _handoff(
-                prepared,
-                reason="gh cannot mark the Article PR as a draft",
-                repository=repository,
-                hold=hold,
-            )
-    print(url or result.stdout.strip())
+
+    pr_url, submit_error = _submit_pr(
+        gh,
+        prepared,
+        repository=repository,
+        existing_url=existing.stdout.strip(),
+        hold=hold,
+    )
+    if submit_error is not None:
+        return _handoff(prepared, reason=submit_error, repository=repository, hold=hold)
+    sys.stdout.write(f"{pr_url}\n")
     return 0
 
 
@@ -475,9 +500,7 @@ def _prepare(
 
 
 def _parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(
-        description="Validate, commit, push, and open one exact Article PR"
-    )
+    parser = argparse.ArgumentParser(description="Validate, commit, push, and open one exact Article PR")
     parser.add_argument("article", type=pathlib.Path)
     parser.add_argument(
         "--library",
@@ -511,7 +534,7 @@ def main(arguments: list[str] | None = None) -> int:
             today=parsed.today,
         )
     except (_PrepareError, LibraryCheckoutError) as error:
-        print(f"nb prepare-pr: {error}", file=sys.stderr)
+        sys.stderr.write(f"nb prepare-pr: {error}\n")
         return 1
     except GitHandoffError as error:
         return error.emit()

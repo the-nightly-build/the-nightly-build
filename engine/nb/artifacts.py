@@ -8,11 +8,14 @@ Markdown note without rewriting that production history.
 
 from __future__ import annotations
 
-import pathlib
 import re
-from collections.abc import Mapping, Sequence
+from typing import TYPE_CHECKING
 
 from nb import meta as nb_meta
+
+if TYPE_CHECKING:
+    import pathlib
+    from collections.abc import Mapping, Sequence
 
 __all__ = (
     "ROLE_FILES",
@@ -30,6 +33,7 @@ ROLE_FILES: Mapping[str, tuple[str, str]] = {
 }
 ROOT_FILES = ("editorial-direction.md", "commission.md")
 INVOCATION_RE = re.compile(r"^[0-9]{2}$")
+MAX_REVISION_NUMBER = 99
 
 
 def artifact_root(root: pathlib.Path, *, series: str, slug: str) -> pathlib.Path:
@@ -46,6 +50,20 @@ def _readable_markdown(path: pathlib.Path) -> str | None:
     if not content.strip():
         return f"empty artifact: {path.name}"
     return None
+
+
+def _invocation_errors(child: pathlib.Path, *, role: str, expected_files: set[str]) -> list[str]:
+    if not child.is_dir() or child.is_symlink():
+        return [f"{role}/{child.name}: must be a directory"]
+    actual_files = {path.name for path in child.iterdir()}
+    if actual_files != expected_files:
+        return [f"{role}/{child.name}: expected {sorted(expected_files)}; found {sorted(actual_files)}"]
+    errors: list[str] = []
+    for filename in sorted(expected_files):
+        issue = _readable_markdown(child / filename)
+        if issue:
+            errors.append(f"{role}/{child.name}: {issue}")
+    return errors
 
 
 def _role_errors(root: pathlib.Path, role: str) -> list[str]:
@@ -70,20 +88,7 @@ def _role_errors(root: pathlib.Path, role: str) -> list[str]:
     errors: list[str] = []
     expected_files = set(ROLE_FILES[role])
     for child in children:
-        if not child.is_dir() or child.is_symlink():
-            errors.append(f"{role}/{child.name}: must be a directory")
-            continue
-        actual_files = {path.name for path in child.iterdir()}
-        if actual_files != expected_files:
-            errors.append(
-                f"{role}/{child.name}: expected {sorted(expected_files)}; "
-                f"found {sorted(actual_files)}"
-            )
-            continue
-        for filename in sorted(expected_files):
-            issue = _readable_markdown(child / filename)
-            if issue:
-                errors.append(f"{role}/{child.name}: {issue}")
+        errors.extend(_invocation_errors(child, role=role, expected_files=expected_files))
     return errors
 
 
@@ -94,11 +99,7 @@ def validate_artifacts(root: pathlib.Path, *, series: str, slug: str) -> list[st
 
     allowed = {*ROOT_FILES, *ROLE_FILES}
     actual = {path.name for path in artifacts.iterdir()}
-    errors = (
-        [f"unexpected artifact entries: {sorted(actual - allowed)}"]
-        if actual - allowed
-        else []
-    )
+    errors = [f"unexpected artifact entries: {sorted(actual - allowed)}"] if actual - allowed else []
     for filename in ROOT_FILES:
         issue = _readable_markdown(artifacts / filename)
         if issue:
@@ -129,19 +130,15 @@ def validate_revision_note(
     prior_numbers = {
         int(prior.group(3))
         for base_path in base_paths
-        if (prior := nb_meta.REVISION_NOTE_RE.fullmatch(base_path)) is not None
-        and prior.group(1, 2) == (series, slug)
+        if (prior := nb_meta.REVISION_NOTE_RE.fullmatch(base_path)) is not None and prior.group(1, 2) == (series, slug)
     }
     expected = max(prior_numbers, default=0) + 1
     number = int(match.group(3))
     errors: list[str] = []
-    if expected > 99:
-        errors.append("revision note numbering is exhausted at 99")
+    if expected > MAX_REVISION_NUMBER:
+        errors.append(f"revision note numbering is exhausted at {MAX_REVISION_NUMBER}")
     elif number != expected:
-        errors.append(
-            f"revision note must be revisions/{expected:02d}.md; "
-            f"found revisions/{number:02d}.md"
-        )
+        errors.append(f"revision note must be revisions/{expected:02d}.md; found revisions/{number:02d}.md")
 
     issue = _readable_markdown(root / path)
     if issue:

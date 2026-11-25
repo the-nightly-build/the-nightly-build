@@ -12,10 +12,15 @@ from __future__ import annotations
 import json
 import pathlib
 import tempfile
-from collections.abc import Callable
+from typing import TYPE_CHECKING
 
 import check
 from press import TODAY, article
+
+if TYPE_CHECKING:
+    from collections.abc import Callable
+
+    import pytest
 
 
 def _draft() -> pathlib.Path:
@@ -25,7 +30,7 @@ def _draft() -> pathlib.Path:
     return path
 
 
-def _run(repo: str, draft: pathlib.Path, capsys) -> dict:
+def _run(repo: str, draft: pathlib.Path, *, capsys: pytest.CaptureFixture[str]) -> dict:
     check.main(
         [
             str(draft),
@@ -43,26 +48,23 @@ def _run(repo: str, draft: pathlib.Path, capsys) -> dict:
 
 
 def test_local_mode_reads_the_managed_library_when_no_library_is_given(
-    clone_testrepo: Callable[..., str], capsys
+    clone_testrepo: Callable[..., str], capsys: pytest.CaptureFixture[str]
 ) -> None:
     repo = clone_testrepo("press", "templates", "spec", "engine")
     published = pathlib.Path(repo, ".nb-work", "library", "semiconductors")
     published.mkdir(parents=True)
     (published / "micron.html").write_text("")
 
-    report = _run(repo, _draft(), capsys)
+    report = _run(repo, _draft(), capsys=capsys)
 
-    assert any(
-        f["code"] == "B-MODE" and "already published" in f["message"]
-        for f in report["findings"]
-    )
+    assert any(f["code"] == "B-MODE" and "already published" in f["message"] for f in report["findings"])
 
 
 def test_local_mode_without_a_managed_library_cannot_know_what_is_published(
-    clone_testrepo: Callable[..., str], capsys
+    clone_testrepo: Callable[..., str], capsys: pytest.CaptureFixture[str]
 ) -> None:
     repo = clone_testrepo("press", "templates", "spec", "engine")
 
-    report = _run(repo, _draft(), capsys)
+    report = _run(repo, _draft(), capsys=capsys)
 
     assert not any(f["code"] == "B-MODE" for f in report["findings"])

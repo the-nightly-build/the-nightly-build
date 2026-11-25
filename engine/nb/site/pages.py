@@ -6,11 +6,17 @@ splices the same bar and footer into an article copy. A change here changes
 the whole paper on the next build.
 """
 
+from __future__ import annotations
+
 import datetime as dt
 import html
+from typing import TYPE_CHECKING
 
 from nb.site.catalog import DIRECTORY_URL
 from nb.site.library import article_text, by_date_and_slug, date_sort_key
+
+if TYPE_CHECKING:
+    from collections.abc import Mapping, Sequence
 
 __all__ = (
     "build_search_index",
@@ -89,7 +95,7 @@ MONTHS = (
 )
 
 
-def pretty_date(iso):
+def pretty_date(iso: str) -> str:
     try:
         d = dt.date.fromisoformat(iso)
     except (ValueError, TypeError):
@@ -97,7 +103,7 @@ def pretty_date(iso):
     return f"{WEEKDAYS[d.weekday()]}, {MONTHS[d.month - 1]} {d.day}, {d.year}"
 
 
-def month_label(iso, fallback):
+def month_label(iso: str, fallback: str) -> str:
     try:
         md = dt.date.fromisoformat(iso)
     except ValueError:
@@ -105,7 +111,7 @@ def month_label(iso, fallback):
     return f"{MONTHS[md.month - 1]} {md.year}"
 
 
-def render_assets_html(assets):
+def render_assets_html(assets: dict | None) -> str:
     """Head tags for a press's declared trusted external assets.
 
     Presses may load popular libraries (a syntax highlighter, a math
@@ -118,15 +124,14 @@ def render_assets_html(assets):
     """
     if not assets:
         return ""
-    parts = []
     # Owner-authored assets must be https and Subresource-Integrity-pinned: the
     # integrity hash is what lets the browser refuse a tampered CDN response.
-    for st in assets.get("styles") or []:
-        parts.append(
-            f'<link rel="stylesheet" href="{esc(st["url"])}" '
-            f'integrity="{esc(st["integrity"])}" '
-            'crossorigin="anonymous" referrerpolicy="no-referrer">'
-        )
+    parts = [
+        f'<link rel="stylesheet" href="{esc(st["url"])}" '
+        f'integrity="{esc(st["integrity"])}" '
+        'crossorigin="anonymous" referrerpolicy="no-referrer">'
+        for st in assets.get("styles") or []
+    ]
     for sc in assets.get("scripts") or []:
         defer = "" if sc.get("defer") is False else " defer"
         parts.append(
@@ -137,32 +142,24 @@ def render_assets_html(assets):
     return "\n".join(parts)
 
 
-def chrome_eco_links(site):
+def chrome_eco_links(site: dict) -> str:
     ext = 'target="_blank" rel="noopener noreferrer"'
     links = []
     if site.get("repository"):
-        links.append(
-            f'<a href="https://github.com/{site["repository"]}" {ext}>'
-            f"Star on GitHub ↗</a>"
-        )
-    links.append(
-        f'<a href="https://github.com/{site["upstream"]}" {ext}>Start your own ↗</a>'
-    )
+        links.append(f'<a href="https://github.com/{site["repository"]}" {ext}>Star on GitHub ↗</a>')
+    links.append(f'<a href="https://github.com/{site["upstream"]}" {ext}>Start your own ↗</a>')
     links.append(f'<a href="{DIRECTORY_URL}" {ext}>The whole newspaper ↗</a>')
     return "".join(links)
 
 
-def chrome_imprint(site):
+def chrome_imprint(site: dict) -> str:
     ext = 'target="_blank" rel="noopener noreferrer"'
     if site.get("footer"):
         return f'<span class="nb-imprint">{esc(site["footer"])}</span>'
-    return (
-        f'<a class="nb-imprint" href="https://github.com/{site["upstream"]}" {ext}>'
-        f"A Nightly Build paper</a>"
-    )
+    return f'<a class="nb-imprint" href="https://github.com/{site["upstream"]}" {ext}>A Nightly Build paper</a>'
 
 
-def chrome_header(site, *, depth=0, active=None):
+def chrome_header(site: dict, *, depth: int = 0, active: str | None = None) -> str:
     rel = "../" * depth
     nav_parts = []
     for label, href in NAV_ITEMS:
@@ -177,20 +174,23 @@ def chrome_header(site, *, depth=0, active=None):
 </div></header>"""
 
 
-def chrome_footer(site):
+def chrome_footer(site: dict) -> str:
     return f"""<footer class="nb-footer"><div class="nb-footer-in">
   {chrome_imprint(site)}
   <button class="nb-appearance" type="button">◐ auto</button>
 </div></footer>"""
 
 
-def page(site, title, *, body, depth=0, active=None):
+def page(
+    site: dict,
+    title: str,
+    *,
+    body: str,
+    depth: int = 0,
+    active: str | None = None,
+) -> str:
     rel = "../" * depth
-    mode_attr = (
-        f' data-mode="{site["appearance"]}"'
-        if site["appearance"] in ("light", "dark")
-        else ""
-    )
+    mode_attr = f' data-mode="{site["appearance"]}"' if site["appearance"] in ("light", "dark") else ""
     press_assets = f"\n{site['assets_html']}" if site.get("assets_html") else ""
     return f"""<!DOCTYPE html>
 <html lang="en"{mode_attr}>
@@ -218,28 +218,34 @@ def page(site, title, *, body, depth=0, active=None):
 </body></html>"""
 
 
-def kicker_text(ed, series_cfgs):
+def kicker_text(ed: dict, series_cfgs: Mapping[str, dict]) -> str:
     cfg = series_cfgs.get(ed["series"], {})
     name = cfg.get("name", ed["series"])
     section = cfg.get("section")
     return f"{section} · {name}" if section else name
 
 
-def source_label(meta):
+def source_label(meta: Mapping[str, object]) -> str:
     n = meta.get("sources")
     if not isinstance(n, int) or n <= 0:
         return ""
     return f"{n} source" if n == 1 else f"{n} sources"
 
 
-def item_meta_row(ed):
+def item_meta_row(ed: dict) -> str:
     return (
         f'<div class="nb-meta"><span>{ed["reading_minutes"]} min read</span>'
         f"<span>{esc(source_label(ed['meta']))}</span></div>"
     )
 
 
-def story_item(ed, series_cfgs, *, depth=0, lead=False):
+def story_item(
+    ed: dict,
+    series_cfgs: Mapping[str, dict],
+    *,
+    depth: int = 0,
+    lead: bool = False,
+) -> str:
     rel = "../" * depth
     dek = str(ed["meta"].get("dek", ""))
     if lead:
@@ -256,7 +262,13 @@ def story_item(ed, series_cfgs, *, depth=0, lead=False):
     )
 
 
-def night_body(eds, series_cfgs, *, depth, date):
+def night_body(
+    eds: Sequence[dict],
+    series_cfgs: Mapping[str, dict],
+    *,
+    depth: int,
+    date: str,
+) -> str:
     """Render one night as an article line plus a single ruled table.
 
     The longest read leads as the table's full-width first cell and the
@@ -275,7 +287,14 @@ def night_body(eds, series_cfgs, *, depth, date):
     return body + f'<div class="nb-grid">{cells}</div>'
 
 
-def render_newsstand(site, catalog, *, series_cfgs, articles, by_night):
+def render_newsstand(
+    site: dict,
+    catalog: dict,
+    *,
+    series_cfgs: Mapping[str, dict],
+    articles: Mapping[tuple[str, str], dict],
+    by_night: Mapping[str, list[dict]],
+) -> str:
     if not articles:
         body = (
             '<div class="nb-empty" style="margin-top:26px">'
@@ -290,22 +309,23 @@ def render_newsstand(site, catalog, *, series_cfgs, articles, by_night):
     body = night_body(latest_articles, series_cfgs, depth=0, date=latest)
     if len(dates) > 1:
         prev = dates[-2]
-        body += (
-            f'<nav class="nb-nightnav"><a href="builds/{prev}/">'
-            f"← {esc(pretty_date(prev))}</a></nav>"
-        )
+        body += f'<nav class="nb-nightnav"><a href="builds/{prev}/">← {esc(pretty_date(prev))}</a></nav>'
     return page(site, site["title"], body=body, active="Today")
 
 
-def render_build_page(site, date, *, ordered, i, eds, series_cfgs):
+def render_build_page(
+    site: dict,
+    date: str,
+    *,
+    ordered: Sequence[str],
+    i: int,
+    eds: Sequence[dict],
+    series_cfgs: Mapping[str, dict],
+) -> str:
     body = night_body(eds, series_cfgs, depth=2, date=date)
     prev_d = ordered[i - 1] if i > 0 else None
     next_d = ordered[i + 1] if i < len(ordered) - 1 else None
-    left = (
-        f'<a href="../{prev_d}/">← {esc(pretty_date(prev_d))}</a>'
-        if prev_d
-        else "<span></span>"
-    )
+    left = f'<a href="../{prev_d}/">← {esc(pretty_date(prev_d))}</a>' if prev_d else "<span></span>"
     if next_d and next_d == ordered[-1]:
         right = f'<a href="../../">{esc(pretty_date(next_d))} →</a>'
     elif next_d:
@@ -316,10 +336,9 @@ def render_build_page(site, date, *, ordered, i, eds, series_cfgs):
     return page(site, f"{pretty_date(date)} · {site['title']}", body=body, depth=2)
 
 
-def render_build_archive(site, dates):
+def render_build_archive(site: dict, dates: Sequence[str]) -> str:
     body = (
-        '<div class="nb-pagehead"><h1>All nights</h1>'
-        f'<span class="nb-pagehead-facts">{len(dates)} builds</span></div>'
+        f'<div class="nb-pagehead"><h1>All nights</h1><span class="nb-pagehead-facts">{len(dates)} builds</span></div>'
     )
     if not dates:
         body += '<div class="nb-empty"><p>No builds yet.</p></div>'
@@ -337,7 +356,7 @@ def render_build_archive(site, dates):
     return page(site, f"All nights · {site['title']}", body=body, depth=1)
 
 
-def series_status(s, cfg):
+def series_status(s: dict, cfg: dict) -> tuple[str, bool]:
     """Return (status_html, is_resting) for one series on the Sections page.
 
     Finite series read complete once every configured item is published and
@@ -360,49 +379,62 @@ def series_status(s, cfg):
     return f"{count} published", False
 
 
-def render_series_index(site, catalog, *, series_cfgs, articles):
-    latest_by_series = {}
+def _latest_by_series(
+    articles: Mapping[tuple[str, str], dict],
+) -> dict[str, dict]:
+    latest: dict[str, dict] = {}
     for ed in articles.values():
-        cur = latest_by_series.get(ed["series"])
+        cur = latest.get(ed["series"])
         if cur is None or ed["meta"].get("date", "") > cur["meta"].get("date", ""):
-            latest_by_series[ed["series"]] = ed
+            latest[ed["series"]] = ed
+    return latest
 
-    groups, resting, nseries = {}, [], 0
+
+def _series_row(s: dict, *, status: str, rests: bool, latest: dict | None) -> str:
+    latest_line = ""
+    if latest:
+        latest_line = (
+            f'<span class="nb-series-latest">'
+            f"{esc(str(latest['meta'].get('title', '')))} · "
+            f"{esc(pretty_date(latest['meta'].get('date', '')))}"
+            "</span>"
+        )
+    return (
+        f'<a class="nb-series{" nb-series-done" if rests else ""}" '
+        f'href="{esc(s["id"])}/">'
+        f'<span class="nb-series-name">{esc(s.get("name", s["id"]))}</span>'
+        f"{latest_line}"
+        f'<span class="nb-series-status">{status}</span></a>'
+    )
+
+
+def render_series_index(
+    site: dict,
+    catalog: dict,
+    *,
+    series_cfgs: Mapping[str, dict],
+    articles: Mapping[tuple[str, str], dict],
+) -> str:
+    latest_by_series = _latest_by_series(articles)
+    groups: dict[str, list[str]] = {}
+    resting: list[str] = []
     for s in catalog["series"]:
         cfg = series_cfgs.get(s["id"], {})
         status, rests = series_status(s, cfg)
-        latest = latest_by_series.get(s["id"])
-        latest_line = ""
-        if latest:
-            latest_line = (
-                f'<span class="nb-series-latest">'
-                f"{esc(str(latest['meta'].get('title', '')))} · "
-                f"{esc(pretty_date(latest['meta'].get('date', '')))}"
-                "</span>"
-            )
-        row = (
-            f'<a class="nb-series{" nb-series-done" if rests else ""}" '
-            f'href="{esc(s["id"])}/">'
-            f'<span class="nb-series-name">{esc(s.get("name", s["id"]))}</span>'
-            f"{latest_line}"
-            f'<span class="nb-series-status">{status}</span></a>'
-        )
-        nseries += 1
+        row = _series_row(s, status=status, rests=rests, latest=latest_by_series.get(s["id"]))
         if rests:
             resting.append(row)
         else:
             groups.setdefault(cfg.get("section") or "Other", []).append(row)
 
+    nseries = len(catalog["series"])
     facts = (
         f"{max(len(groups), 1)} section{'s' if len(groups) != 1 else ''} · "
         f"{nseries} series · "
         f"{len(catalog['articles'])} article"
         f"{'s' if len(catalog['articles']) != 1 else ''}"
     )
-    body = (
-        '<div class="nb-pagehead"><h1>Sections</h1>'
-        f'<span class="nb-pagehead-facts">{facts}</span></div>'
-    )
+    body = f'<div class="nb-pagehead"><h1>Sections</h1><span class="nb-pagehead-facts">{facts}</span></div>'
     if not groups and not resting:
         body += '<div class="nb-empty"><p>No series configured.</p></div>'
     for section, rows in groups.items():
@@ -417,15 +449,11 @@ def render_series_index(site, catalog, *, series_cfgs, articles):
             f"{len(resting)} series"
             f"</summary>{''.join(resting)}</details>"
         )
-    return page(
-        site, f"Sections · {site['title']}", body=body, depth=1, active="Sections"
-    )
+    return page(site, f"Sections · {site['title']}", body=body, depth=1, active="Sections")
 
 
-def series_head_html(name, *, mode, cfg, eds):
-    tpl_label = ", ".join(
-        cfg.get("templates") or ([cfg["template"]] if cfg.get("template") else [])
-    )
+def series_head_html(name: str, *, mode: str, cfg: dict, eds: Sequence[dict]) -> str:
+    tpl_label = ", ".join(cfg.get("templates") or ([cfg["template"]] if cfg.get("template") else []))
     sub_bits = [esc(mode), esc(tpl_label), f"{len(eds)} published"]
     return (
         f'<div class="nb-serieshead"><h1>{esc(name)}</h1>'
@@ -434,7 +462,7 @@ def series_head_html(name, *, mode, cfg, eds):
     )
 
 
-def render_sequence_body(sid, *, items, published):
+def render_sequence_body(sid: str, *, items: Sequence[dict], published: Mapping[str, dict]) -> str:
     """Render the published entries of a sequence in config order.
 
     Numbering follows each item's position in the configured sequence, so
@@ -452,12 +480,8 @@ def render_sequence_body(sid, *, items, published):
     return f'<ol class="nb-seq">{"".join(rows)}</ol>'
 
 
-def render_timeline_body(*, mode, eds, series_cfgs):
-    date_of = (
-        (lambda e: e["slug"])
-        if mode == "rolling"
-        else (lambda e: e["meta"].get("date", ""))
-    )
+def render_timeline_body(*, mode: str, eds: Sequence[dict], series_cfgs: Mapping[str, dict]) -> str:
+    date_of = (lambda e: e["slug"]) if mode == "rolling" else (lambda e: e["meta"].get("date", ""))
     parts, seen_month = [], None
     for ed in sorted(eds, key=lambda e: (date_of(e), e["slug"]), reverse=True):
         month = date_of(ed)[:7]
@@ -473,21 +497,26 @@ def render_timeline_body(*, mode, eds, series_cfgs):
     )
 
 
-def render_collection_body(*, items, published, eds, series_cfgs):
-    rows = [
-        story_item(published[it["slug"]], series_cfgs, depth=2)
-        for it in items
-        if it.get("slug") in published
-    ]
-    rows += [
-        story_item(e, series_cfgs, depth=2)
-        for e in eds
-        if not any(it.get("slug") == e["slug"] for it in items)
-    ]
+def render_collection_body(
+    *,
+    items: Sequence[dict],
+    published: Mapping[str, dict],
+    eds: Sequence[dict],
+    series_cfgs: Mapping[str, dict],
+) -> str:
+    rows = [story_item(published[it["slug"]], series_cfgs, depth=2) for it in items if it.get("slug") in published]
+    rows += [story_item(e, series_cfgs, depth=2) for e in eds if not any(it.get("slug") == e["slug"] for it in items)]
     return f'<div class="nb-list">{"".join(rows)}</div>'
 
 
-def render_series_page(site, sid, *, cfg, eds, series_cfgs):
+def render_series_page(
+    site: dict,
+    sid: str,
+    *,
+    cfg: dict,
+    eds: Sequence[dict],
+    series_cfgs: Mapping[str, dict],
+) -> str:
     name = cfg.get("name", sid)
     mode = cfg.get("mode", "collection")
     eds = sorted(eds, key=lambda e: e["position"])
@@ -500,24 +529,17 @@ def render_series_page(site, sid, *, cfg, eds, series_cfgs):
     elif mode in ("rolling", "open"):
         body = head + render_timeline_body(mode=mode, eds=eds, series_cfgs=series_cfgs)
     else:  # collection, in config order
-        body = head + render_collection_body(
-            items=items, published=published, eds=eds, series_cfgs=series_cfgs
-        )
+        body = head + render_collection_body(items=items, published=published, eds=eds, series_cfgs=series_cfgs)
 
-    return page(
-        site, f"{name} · {site['title']}", body=body, depth=2, active="Sections"
-    )
+    return page(site, f"{name} · {site['title']}", body=body, depth=2, active="Sections")
 
 
-def render_tags_index(site, catalog):
+def render_tags_index(site: dict, catalog: dict) -> str:
     body = '<div class="nb-pagehead"><h1>Tags</h1></div>'
     if catalog["tags"]:
         body += (
             '<div class="nb-chips" style="flex-wrap:wrap">'
-            + "".join(
-                f'<a href="{esc(t)}/">#{esc(t)} · {len(v)}</a>'
-                for t, v in catalog["tags"].items()
-            )
+            + "".join(f'<a href="{esc(t)}/">#{esc(t)} · {len(v)}</a>' for t, v in catalog["tags"].items())
             + "</div>"
         )
     else:
@@ -525,15 +547,23 @@ def render_tags_index(site, catalog):
     return page(site, f"Tags · {site['title']}", body=body, depth=1)
 
 
-def render_tag_page(site, tag, *, refs, articles, series_cfgs):
+def render_tag_page(
+    site: dict,
+    tag: str,
+    *,
+    refs: Sequence[str],
+    articles: Mapping[tuple[str, str], dict],
+    series_cfgs: Mapping[str, dict],
+) -> str:
     depth = 1 + len(tag.split("/"))
     # A plain tag sits at depth 2 (tags/ + tag); a nested a/b is one deeper per
     # segment, so links resolve either way.
-    eds = [
-        articles[tuple(r.split("/", 1))]
-        for r in refs
-        if tuple(r.split("/", 1)) in articles
-    ]
+    eds = []
+    for ref in refs:
+        series, _, slug = ref.partition("/")
+        key = (series, slug)
+        if key in articles:
+            eds.append(articles[key])
     body = (
         f'<div class="nb-pagehead"><h1>#{esc(tag)}</h1>'
         f'<span class="nb-pagehead-facts">{len(eds)} article'
@@ -550,7 +580,7 @@ def render_tag_page(site, tag, *, refs, articles, series_cfgs):
     return page(site, f"#{tag} · {site['title']}", body=body, depth=depth)
 
 
-def render_search_page(site):
+def render_search_page(site: dict) -> str:
     body = (
         '<div class="nb-pagehead"><h1>Search</h1></div>'
         '<div class="nb-searchbox"><input id="nb-q" type="search" '
@@ -562,7 +592,7 @@ def render_search_page(site):
     return page(site, f"Search · {site['title']}", body=body, depth=1, active="Search")
 
 
-def build_search_index(articles, series_cfgs):
+def build_search_index(articles: Mapping[tuple[str, str], dict], series_cfgs: Mapping[str, dict]) -> list[dict]:
     out = []
     for ed in sorted(
         articles.values(),

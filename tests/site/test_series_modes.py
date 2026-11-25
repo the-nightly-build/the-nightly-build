@@ -28,17 +28,13 @@ items:
 def sequence_site(clone_testrepo: Callable[..., str], tmp_path: pathlib.Path) -> Site:
     repo = clone_testrepo("press", "templates", "engine")
     series_yaml = pathlib.Path(repo, "press", "series", "semiconductors", "series.yaml")
-    series_yaml.write_text(
-        series_yaml.read_text().replace("mode: collection", "mode: sequence")
-    )
+    series_yaml.write_text(series_yaml.read_text().replace("mode: collection", "mode: sequence"))
     library = str(tmp_path / "library-root")
     write_article(
         library,
         "semiconductors",
         slug="micron",
-        html=article().replace(
-            '"mode": "collection", "order": null', '"mode": "sequence", "order": 1'
-        ),
+        html=article().replace('"mode": "collection", "order": null', '"mode": "sequence", "order": 1'),
     )
     return build_press(repo, library)
 
@@ -121,9 +117,7 @@ def test_a_rolling_series_on_a_day_list_shows_its_days(
 ) -> None:
     repo = clone_testrepo("press", "templates", "engine")
     series_yaml = pathlib.Path(repo, "press", "series", "ai-briefs", "series.yaml")
-    series_yaml.write_text(
-        series_yaml.read_text().replace("cadence: daily", "cadence: [mon, thu]")
-    )
+    series_yaml.write_text(series_yaml.read_text().replace("cadence: daily", "cadence: [mon, thu]"))
     library = tmp_path / "library-root"
     (library / "library").mkdir(parents=True)
     site = build_press(repo, str(library))

@@ -44,12 +44,8 @@ def test_a_series_feed_is_scoped_to_its_series(full_site: Site) -> None:
 
 
 def test_two_papers_on_one_host_get_distinct_feed_ids() -> None:
-    feed_a = build_site.atom_feed(
-        "https://alice.github.io/paper-a", "feed.xml", title="A", eds=[], generated=NOW
-    )
-    feed_b = build_site.atom_feed(
-        "https://alice.github.io/paper-b", "feed.xml", title="B", eds=[], generated=NOW
-    )
+    feed_a = build_site.atom_feed("https://alice.github.io/paper-a", "feed.xml", title="A", eds=[], generated=NOW)
+    feed_b = build_site.atom_feed("https://alice.github.io/paper-b", "feed.xml", title="B", eds=[], generated=NOW)
 
     id_a = find_text(ET.fromstring(feed_a), f"{NS}id")
     id_b = find_text(ET.fromstring(feed_b), f"{NS}id")
@@ -59,9 +55,7 @@ def test_two_papers_on_one_host_get_distinct_feed_ids() -> None:
 
 
 def test_a_feed_carries_an_author_name_from_the_site_title() -> None:
-    feed = build_site.atom_feed(
-        "https://alice.github.io/paper-a", "feed.xml", title="A", eds=[], generated=NOW
-    )
+    feed = build_site.atom_feed("https://alice.github.io/paper-a", "feed.xml", title="A", eds=[], generated=NOW)
 
     assert find_text(ET.fromstring(feed), f"{NS}author/{NS}name") == "A"
 
@@ -114,9 +108,7 @@ def test_a_revision_merge_moves_updated_but_not_the_entry_id(
     revised = collect_articles({}, lib)[("semiconductors", "micron")]
 
     def entry(ed: dict) -> ET.Element:
-        feed = build_site.atom_feed(
-            "https://a.example", "feed.xml", title="A", eds=[ed], generated=NOW
-        )
+        feed = build_site.atom_feed("https://a.example", "feed.xml", title="A", eds=[ed], generated=NOW)
         return entries(feed)[0]
 
     before, after = entry(published), entry(revised)

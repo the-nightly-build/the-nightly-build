@@ -5,20 +5,24 @@ grammar of repository-relative required documents. Network failures remain
 advisory unless the destination is definitively absent.
 """
 
+from __future__ import annotations
+
 import concurrent.futures
 import re
 import socket
 import urllib.error
+import urllib.parse
 import urllib.request
-from typing import Literal
+from typing import TYPE_CHECKING, Literal
 
+if TYPE_CHECKING:
+    from collections.abc import Sequence
+
+ALLOWED_SCHEMES = frozenset({"http", "https"})
 DEAD_STATUSES = frozenset((404, 410))
 LINK_TIMEOUT_S = 6
 LINK_WORKERS = 8
-LINK_UA = (
-    "Mozilla/5.0 (compatible; NightlyBuild-proof/1.1; "
-    "+https://github.com/RyanSaxe/the-nightly-build)"
-)
+LINK_UA = "Mozilla/5.0 (compatible; NightlyBuild-proof/1.1; +https://github.com/RyanSaxe/the-nightly-build)"
 
 __all__ = ("classify_link", "dead_source_links", "is_repo_relative_source")
 
@@ -37,7 +41,7 @@ def is_repo_relative_source(href: str | None) -> bool:
     return not is_off_origin and not normalized.startswith("/")
 
 
-def classify_link(status, error) -> Literal["dead", "ok", "unverified"]:
+def classify_link(status: int | None, error: str | None) -> Literal["dead", "ok", "unverified"]:
     """Decide whether a source link is provably dead.
 
     Only a definitive 'this does not exist' counts: a 404/410 response, or a
@@ -76,10 +80,10 @@ def classify_link(status, error) -> Literal["dead", "ok", "unverified"]:
     return "unverified"  # timeout, refused, offline — cannot say
 
 
-def _probe_link(href):
-    req = urllib.request.Request(
-        href, headers={"User-Agent": LINK_UA, "Range": "bytes=0-0"}
-    )
+def _probe_link(href: str) -> Literal["dead", "ok", "unverified"]:
+    if urllib.parse.urlparse(href).scheme.lower() not in ALLOWED_SCHEMES:
+        return classify_link(None, "net")
+    req = urllib.request.Request(href, headers={"User-Agent": LINK_UA, "Range": "bytes=0-0"})
     try:
         # A one-byte Range GET, not HEAD: some servers 404/405 a HEAD they would
         # serve, and a browser-like UA keeps casual bot filters from lying to us.
@@ -88,18 +92,14 @@ def _probe_link(href):
     except urllib.error.HTTPError as e:
         return classify_link(e.code, None)
     except urllib.error.URLError as e:
-        return classify_link(
-            None, "dns" if isinstance(e.reason, socket.gaierror) else "net"
-        )
+        return classify_link(None, "dns" if isinstance(e.reason, socket.gaierror) else "net")
     except (TimeoutError, ValueError, OSError):
         return classify_link(None, "net")
 
 
-def dead_source_links(hrefs):
+def dead_source_links(hrefs: Sequence[str]) -> list[str]:
     if not hrefs:
         return []
     with concurrent.futures.ThreadPoolExecutor(max_workers=LINK_WORKERS) as pool:
         verdicts = list(pool.map(_probe_link, hrefs))
-    return [
-        href for href, verdict in zip(hrefs, verdicts, strict=True) if verdict == "dead"
-    ]
+    return [href for href, verdict in zip(hrefs, verdicts, strict=True) if verdict == "dead"]

@@ -23,10 +23,7 @@ SHIPPED_IDS = {p.name for p in (REPO / "templates").iterdir() if p.is_dir()}
 EXAMPLE_TEMPLATES = REPO / "examples" / "templates"
 EXAMPLE_IDS = sorted(p.name for p in EXAMPLE_TEMPLATES.iterdir() if p.is_dir())
 
-SOURCES = "".join(
-    f'<li id="s{i}"><a data-nb-source href="https://example.org/u{i}">x</a></li>'
-    for i in range(1, 6)
-)
+SOURCES = "".join(f'<li id="s{i}"><a data-nb-source href="https://example.org/u{i}">x</a></li>' for i in range(1, 6))
 
 MEMO = f"""<!DOCTYPE html>
 <html lang="en"><head><meta charset="utf-8"><title>First Memo</title>
@@ -45,22 +42,22 @@ MEMO = f"""<!DOCTYPE html>
 
 USER_TEMPLATES = {
     "memo": (
-        "class: shortread\nbands:\n  words: [200, 3000]\n"
-        "sections: [note, sources]\ncite_rule: per-section\n",
+        "class: shortread\nbands:\n  words: [200, 3000]\nsections: [note, sources]\ncite_rule: per-section\n",
         ("note", "sources"),
     ),
     "fieldnotes": (
-        "class: shortread\nbands:\n  words: [200, 3000]\n"
-        "  flex_sections: [2, 3]\n"
-        "sections: [sources]\n"
-        "cite_rule: per-section\ncite_exempt: [context]\n",
+        (
+            "class: shortread\nbands:\n  words: [200, 3000]\n"
+            "  flex_sections: [2, 3]\n"
+            "sections: [sources]\n"
+            "cite_rule: per-section\ncite_exempt: [context]\n"
+        ),
         ("YOUR-LABEL", "sources"),
     ),
     # a per-item template NOT named 'brief', to prove the per-item cite rule is
     # manifest-driven rather than hardcoded to the shipped brief template
     "digest": (
-        "class: shortread\nbands:\n  items: [2, 4]\n"
-        "sections: [entries, sources]\ncite_rule: per-item\n",
+        "class: shortread\nbands:\n  items: [2, 4]\nsections: [entries, sources]\ncite_rule: per-item\n",
         ("entries", "sources"),
     ),
 }
@@ -107,9 +104,7 @@ def template_repo() -> str:
     series = repo / "press" / "series" / "histories"
     series.mkdir(parents=True)
     (series / "series.yaml").write_text(
-        "name: histories\nmode: collection\ntemplate: article\n"
-        "strict: false\n"
-        "items:\n  - {slug: unix, title: Unix}\n"
+        "name: histories\nmode: collection\ntemplate: article\nstrict: false\nitems:\n  - {slug: unix, title: Unix}\n"
     )
     debates = repo / "press" / "series" / "debates"
     debates.mkdir(parents=True)
@@ -173,9 +168,7 @@ def test_chronicle_shaped_article_is_block_clean_and_warn_free(
         assert code not in result.codes
 
 
-def test_series_flex_band_replaces_the_template_band(
-    run_local: Callable[..., Findings], template_repo: str
-) -> None:
+def test_series_flex_band_replaces_the_template_band(run_local: Callable[..., Findings], template_repo: str) -> None:
     y = pathlib.Path(template_repo) / "press" / "series" / "histories" / "series.yaml"
     y.write_text(y.read_text() + "bands:\n  flex_sections: [6, 6]\n")
     extra = "".join(
@@ -215,19 +208,13 @@ OPINION = f"""<!DOCTYPE html>
 </body></html>"""
 
 
-def test_opinion_position_and_answered_counter_pass(
-    run_local: Callable[..., Findings], template_repo: str
-) -> None:
+def test_opinion_position_and_answered_counter_pass(run_local: Callable[..., Findings], template_repo: str) -> None:
     result = run_local(OPINION, "columns", slug="tariffs", repo=template_repo)
     assert not result.blocks
 
 
-def test_opinion_blocks_without_the_counter(
-    run_local: Callable[..., Findings], template_repo: str
-) -> None:
-    skipped = OPINION.replace(
-        'data-nb-section="counter"', 'data-nb-section="more-argument"'
-    )
+def test_opinion_blocks_without_the_counter(run_local: Callable[..., Findings], template_repo: str) -> None:
+    skipped = OPINION.replace('data-nb-section="counter"', 'data-nb-section="more-argument"')
     result = run_local(skipped, "columns", slug="tariffs", repo=template_repo)
     assert "B-HTML" in result.blocks
 
@@ -243,20 +230,15 @@ def test_opinion_blocks_when_the_position_note_is_reworded(
     assert "B-CHROME" in result.blocks
 
 
-def test_unbiased_two_fully_furnished_sides_pass(
-    run_local: Callable[..., Findings], template_repo: str
-) -> None:
+def test_unbiased_two_fully_furnished_sides_pass(run_local: Callable[..., Findings], template_repo: str) -> None:
     result = run_local(UNBIASED, "debates", slug="carbon", repo=template_repo)
     assert not result.blocks
 
 
-def test_unbiased_blocks_a_third_side(
-    run_local: Callable[..., Findings], template_repo: str
-) -> None:
+def test_unbiased_blocks_a_third_side(run_local: Callable[..., Findings], template_repo: str) -> None:
     third = UNBIASED.replace(
         '<section data-nb-section="sources">',
-        '<section data-nb-section="the-case-for-both"><p>extra</p></section>'
-        '<section data-nb-section="sources">',
+        '<section data-nb-section="the-case-for-both"><p>extra</p></section><section data-nb-section="sources">',
     )
     result = run_local(third, "debates", slug="carbon", repo=template_repo)
     assert "B-HTML" in result.blocks
@@ -270,10 +252,10 @@ def test_unbiased_blocks_when_the_divide_chrome_is_reworded(
     assert "B-CHROME" in result.blocks
 
 
-@pytest.mark.parametrize("side", ("left", "right"))
+@pytest.mark.parametrize("side", ["left", "right"])
 @pytest.mark.parametrize(
     "component",
-    ("nb-side-camp", "nb-side-thesis", "nb-side-argument", "nb-side-champion"),
+    ["nb-side-camp", "nb-side-thesis", "nb-side-argument", "nb-side-champion"],
 )
 def test_unbiased_blocks_when_either_side_loses_required_furniture(
     *,
@@ -299,8 +281,7 @@ def test_unbiased_blocks_duplicate_furniture_within_one_side(
 ) -> None:
     duplicated = UNBIASED.replace(
         '<h3 class="nb-side-camp">Camp left</h3>',
-        '<h3 class="nb-side-camp">Camp left</h3>'
-        '<h3 class="nb-side-camp">Another label</h3>',
+        '<h3 class="nb-side-camp">Camp left</h3><h3 class="nb-side-camp">Another label</h3>',
     )
 
     result = run_local(duplicated, "debates", slug="carbon", repo=template_repo)
@@ -308,9 +289,7 @@ def test_unbiased_blocks_duplicate_furniture_within_one_side(
     assert "B-FURNITURE" in result.blocks
 
 
-def assert_skeleton_is_structurally_sound(
-    repo: str, registry: dict, template_id: str
-) -> None:
+def assert_skeleton_is_structurally_sound(repo: str, registry: dict, *, template_id: str) -> None:
     treg = registry[template_id]
     tpl_path = check.find_template(repo, template_id)
     assert tpl_path is not None, "no skeleton.html in templates/ or press/templates/"
@@ -322,48 +301,36 @@ def assert_skeleton_is_structurally_sound(
     assert all(tpl.sections.count(s) == 1 for s in treg.get("sections") or [])
     assert json.loads(tpl.meta_raw or "")
     assert all(
-        (a.get("type") or "").strip().lower() == "application/json"
-        or check.ENGINE_SCRIPT_RE.match(a.get("src", ""))
+        (a.get("type") or "").strip().lower() == "application/json" or check.ENGINE_SCRIPT_RE.match(a.get("src", ""))
         for a in tpl.script_tags
     )
     assert not tpl.forbidden_tags
     assert not tpl.bad_event_attrs
     assert not tpl.bad_js_urls
     assert tpl.sources
-    for section in (
-        name for name in tpl.sections if name not in (treg.get("sections") or [])
-    ):
+    for section in (name for name in tpl.sections if name not in (treg.get("sections") or [])):
         counts = tpl.section_class_counts.get(section, {})
-        assert all(
-            counts.get(component) == 1
-            for component in (treg.get("flex_components") or [])
-        )
+        assert all(counts.get(component) == 1 for component in (treg.get("flex_components") or []))
 
 
 @pytest.mark.parametrize("template_id", sorted(REGISTRY))
 def test_shipped_skeleton_is_structurally_sound(template_id: str) -> None:
-    assert_skeleton_is_structurally_sound(str(REPO), REGISTRY, template_id)
+    assert_skeleton_is_structurally_sound(str(REPO), REGISTRY, template_id=template_id)
 
 
 @pytest.mark.parametrize("template_id", EXAMPLE_IDS)
-def test_example_package_is_structurally_sound_as_a_press_template(
-    template_id: str, template_repo: str
-) -> None:
+def test_example_package_is_structurally_sound_as_a_press_template(template_id: str, template_repo: str) -> None:
     registry = check.load_registry(template_repo)
     assert template_id not in SHIPPED_IDS, "example packages are not shipped"
-    assert_skeleton_is_structurally_sound(template_repo, registry, template_id)
+    assert_skeleton_is_structurally_sound(template_repo, registry, template_id=template_id)
 
 
-def test_article_from_a_user_defined_template_passes(
-    run_local: Callable[..., Findings], user_repo: str
-) -> None:
+def test_article_from_a_user_defined_template_passes(run_local: Callable[..., Findings], user_repo: str) -> None:
     result = run_local(MEMO, "memos", slug="first", repo=user_repo)
     assert not result.blocks
 
 
-def test_user_template_enforces_its_own_sections(
-    run_local: Callable[..., Findings], user_repo: str
-) -> None:
+def test_user_template_enforces_its_own_sections(run_local: Callable[..., Findings], user_repo: str) -> None:
     result = run_local(
         MEMO.replace('data-nb-section="note"', 'data-nb-section="body"'),
         "memos",
@@ -373,31 +340,21 @@ def test_user_template_enforces_its_own_sections(
     assert "B-HTML" in result.blocks
 
 
-def test_undeclared_extra_section_blocks_on_a_fixed_outline(
-    run_local: Callable[..., Findings], user_repo: str
-) -> None:
+def test_undeclared_extra_section_blocks_on_a_fixed_outline(run_local: Callable[..., Findings], user_repo: str) -> None:
     rogue = MEMO.replace(
         '<section data-nb-section="sources">',
-        '<section data-nb-section="rogue"><p>extra</p></section>'
-        '<section data-nb-section="sources">',
+        '<section data-nb-section="rogue"><p>extra</p></section><section data-nb-section="sources">',
     )
     result = run_local(rogue, "memos", slug="first", repo=user_repo)
     assert "B-HTML" in result.blocks
 
 
-def test_validate_config_accepts_the_overlay_registry(
-    vc_rc: Callable[[str], int], user_repo: str
-) -> None:
+def test_validate_config_accepts_the_overlay_registry(vc_rc: Callable[[str], int], user_repo: str) -> None:
     assert vc_rc(user_repo) == 0
 
 
-def test_validate_config_accepts_series_bands(
-    vc_rc: Callable[[str], int], patched_repo: Callable[[str], str]
-) -> None:
-    assert (
-        vc_rc(patched_repo("bands:\n  words: [1000, 5000]\n  flex_sections: [1, 4]\n"))
-        == 0
-    )
+def test_validate_config_accepts_series_bands(vc_rc: Callable[[str], int], patched_repo: Callable[[str], str]) -> None:
+    assert vc_rc(patched_repo("bands:\n  words: [1000, 5000]\n  flex_sections: [1, 4]\n")) == 0
 
 
 def test_the_merged_registry_keeps_shipped_and_adds_press_templates(

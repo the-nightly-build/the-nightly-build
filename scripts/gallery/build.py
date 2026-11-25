@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """Build the furniture gallery: every catalog piece on one reviewable page.
 
 The gallery is a dev tool, not a publishable page. It renders each furniture
@@ -17,6 +16,7 @@ Usage:
 
 import os
 import re
+import sys
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -39,9 +39,7 @@ def slugify(heading: str) -> str:
     return re.sub(r"[^a-z0-9]+", "-", bare).strip("-")
 
 
-def parse_catalog(
-    text: str, scope: str, *, engine_owned: bool, sample_dir: Path
-) -> list[Piece]:
+def parse_catalog(text: str, scope: str, *, engine_owned: bool, sample_dir: Path) -> list[Piece]:
     pieces = []
     for match in re.finditer(r"^## (.+)$", text, re.MULTILINE):
         name = re.sub(r"\s*\(`[^`]*`\)\s*$", "", match.group(1)).strip()
@@ -49,9 +47,7 @@ def parse_catalog(
         paragraph = re.split(r"\n\s*\n", rest.strip(), maxsplit=1)[0]
         blurb = re.sub(r"`([^`]+)`", r"<code>\1</code>", " ".join(paragraph.split()))
         slug = slugify(name)
-        pieces.append(
-            Piece(name, slug, scope, blurb, engine_owned, sample_dir / f"{slug}.html")
-        )
+        pieces.append(Piece(name, slug, scope, blurb, engine_owned, sample_dir / f"{slug}.html"))
     return pieces
 
 
@@ -62,9 +58,7 @@ def discover_pieces(repo: Path) -> list[Piece]:
     ]
     press_catalog = repo / "press" / "furniture" / "catalog.md"
     if press_catalog.is_file():
-        catalogs.append(
-            (press_catalog, "press shared", False, press_catalog.parent / "samples")
-        )
+        catalogs.append((press_catalog, "press shared", False, press_catalog.parent / "samples"))
     for root in (repo / "templates", repo / "press" / "templates"):
         engine_owned = root == repo / "templates"
         if not root.is_dir():
@@ -95,7 +89,7 @@ def discover_pieces(repo: Path) -> list[Piece]:
 
 
 def theme_path(repo: Path) -> Path:
-    """The theme the press actually reads, defaulting to the shipped one.
+    """Return the theme the press actually reads, defaulting to the shipped one.
 
     Mirrors the engine's resolution (site.yaml ``theme:`` over the default)
     without importing engine modules: the gallery only links stylesheets, and
@@ -103,16 +97,18 @@ def theme_path(repo: Path) -> Path:
     """
     site_yaml = repo / "press" / "site.yaml"
     if site_yaml.is_file():
-        match = re.search(
-            r"^theme:\s*(\S+)", site_yaml.read_text(encoding="utf-8"), re.MULTILINE
-        )
+        match = re.search(r"^theme:\s*(\S+)", site_yaml.read_text(encoding="utf-8"), re.MULTILINE)
         if match:
             return repo / match.group(1).strip("\"'")
     return repo / "engine" / "assets" / "themes" / "newspaper.css"
 
 
 def stylesheet_links(repo: Path, out: Path) -> str:
-    sheets = [repo / "engine" / "assets" / "nb.css", theme_path(repo)]
+    css_dir = repo / "engine" / "assets" / "css"
+    sheets = [
+        *(css_dir / name for name in ("site.css", "article.css", "templates.css", "media.css")),
+        theme_path(repo),
+    ]
     sheets.append(repo / "press" / "furniture" / "styles.css")
     for root in (repo / "templates", repo / "press" / "templates"):
         if root.is_dir():
@@ -147,7 +143,8 @@ def build(repo: Path = REPO, out: Path = DEFAULT_OUT) -> Path:
     missing = [p for p in pieces if p.engine_owned and not p.sample_path.is_file()]
     if missing:
         names = ", ".join(f"{p.scope}: {p.name} ({p.slug}.html)" for p in missing)
-        raise SystemExit(f"gallery samples missing for: {names}")
+        message = f"gallery samples missing for: {names}"
+        raise SystemExit(message)
 
     def sample_of(piece: Piece) -> str:
         if piece.sample_path.is_file():
@@ -204,9 +201,21 @@ def build(repo: Path = REPO, out: Path = DEFAULT_OUT) -> Path:
       <div class="gallery-sources">
         Sources used in these examples:
         <ol>
-          <li id="s1"><a data-nb-source data-nb-kind="primary" href="https://arxiv.org/abs/1904.09751">Holtzman et al. · The Curious Case of Neural Text Degeneration</a></li>
-          <li id="s2"><a data-nb-source data-nb-kind="primary" href="https://arxiv.org/abs/2310.01693">Finlayson et al. · Closing the Curious Case of Neural Text Degeneration</a></li>
-          <li id="s3"><a data-nb-source data-nb-kind="primary" href="https://arxiv.org/abs/1706.03762">Vaswani et al. · Attention Is All You Need</a></li>
+          <li id="s1">
+            <a data-nb-source data-nb-kind="primary" href="https://arxiv.org/abs/1904.09751">
+              Holtzman et al. · The Curious Case of Neural Text Degeneration
+            </a>
+          </li>
+          <li id="s2">
+            <a data-nb-source data-nb-kind="primary" href="https://arxiv.org/abs/2310.01693">
+              Finlayson et al. · Closing the Curious Case of Neural Text Degeneration
+            </a>
+          </li>
+          <li id="s3">
+            <a data-nb-source data-nb-kind="primary" href="https://arxiv.org/abs/1706.03762">
+              Vaswani et al. · Attention Is All You Need
+            </a>
+          </li>
         </ol>
       </div>
     </main>
@@ -245,4 +254,4 @@ def build(repo: Path = REPO, out: Path = DEFAULT_OUT) -> Path:
 
 
 if __name__ == "__main__":
-    print(build())
+    sys.stdout.write(f"{build()}\n")

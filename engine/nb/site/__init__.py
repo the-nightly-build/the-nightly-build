@@ -5,9 +5,11 @@ catalog, render every page and feed, copy the assets and the articles. The
 modules beside it each own one of those steps; build_site.py is the door.
 """
 
+from __future__ import annotations
+
 import datetime as dt
 import json
-import os
+import pathlib
 
 from nb.site.assets import asset_stamp, copy_articles, copy_assets, css_owners, write
 from nb.site.catalog import UPSTREAM_REPOSITORY, build_catalog, derive_self_repository
@@ -37,14 +39,14 @@ __all__ = ("build",)
 
 
 def build(
-    repo,
-    library_root,
+    repo: str | pathlib.Path,
+    library_root: str | pathlib.Path,
     *,
-    out,
-    preview_root=None,
-    base_url="",
-    repository=None,
-    now=None,
+    out: str | pathlib.Path,
+    preview_root: str | pathlib.Path | None = None,
+    base_url: str = "",
+    repository: str | None = None,
+    now: dt.datetime | None = None,
 ) -> dict:
     now = now or dt.datetime.now(dt.timezone.utc)
     site_cfg = load_site_config(repo)
@@ -53,7 +55,8 @@ def build(
     repository = derive_self_repository(repository, base_url)
     # One pass groups the library both ways; every per-night and per-series
     # consumer below reuses these instead of rescanning all articles per key.
-    by_series, by_night = {}, {}
+    by_series: dict[str, list[dict]] = {}
+    by_night: dict[str, list[dict]] = {}
     for ed in articles.values():
         by_series.setdefault(ed["series"], []).append(ed)
         by_night.setdefault(night_date(ed["meta"]), []).append(ed)
@@ -74,29 +77,24 @@ def build(
         "footer": site_cfg.get("footer"),
         "repository": repository,
         "upstream": UPSTREAM_REPOSITORY,
-        "body_class": (
-            ' class="nb-front-comfortable"'
-            if site_cfg.get("front") == "comfortable"
-            else ""
-        ),
+        "body_class": (' class="nb-front-comfortable"' if site_cfg.get("front") == "comfortable" else ""),
     }
 
-    os.makedirs(out, exist_ok=True)
-    write(os.path.join(out, "catalog.json"), json.dumps(catalog, indent=2) + "\n")
+    out_dir = pathlib.Path(out)
+    out_dir.mkdir(parents=True, exist_ok=True)
+    write(out_dir / "catalog.json", json.dumps(catalog, indent=2) + "\n")
     write(
-        os.path.join(out, "index.html"),
-        render_newsstand(
-            site, catalog, series_cfgs=series_cfgs, articles=articles, by_night=by_night
-        ),
+        out_dir / "index.html",
+        render_newsstand(site, catalog, series_cfgs=series_cfgs, articles=articles, by_night=by_night),
     )
     write(
-        os.path.join(out, "builds", "index.html"),
+        out_dir / "builds" / "index.html",
         render_build_archive(site, list(catalog["builds"])),
     )
     ordered = sorted(catalog["builds"], key=date_sort_key)
     for i, date in enumerate(ordered):
         write(
-            os.path.join(out, "builds", date, "index.html"),
+            out_dir / "builds" / date / "index.html",
             render_build_page(
                 site,
                 date,
@@ -107,13 +105,13 @@ def build(
             ),
         )
     write(
-        os.path.join(out, "series", "index.html"),
+        out_dir / "series" / "index.html",
         render_series_index(site, catalog, series_cfgs=series_cfgs, articles=articles),
     )
     for s in catalog["series"]:
         sid = s["id"]
         write(
-            os.path.join(out, "series", sid, "index.html"),
+            out_dir / "series" / sid / "index.html",
             render_series_page(
                 site,
                 sid,
@@ -122,18 +120,16 @@ def build(
                 series_cfgs=series_cfgs,
             ),
         )
-    write(os.path.join(out, "search", "index.html"), render_search_page(site))
+    write(out_dir / "search" / "index.html", render_search_page(site))
     write(
-        os.path.join(out, "search-index.json"),
+        out_dir / "search-index.json",
         json.dumps(build_search_index(articles, series_cfgs)) + "\n",
     )
-    write(os.path.join(out, "tags", "index.html"), render_tags_index(site, catalog))
+    write(out_dir / "tags" / "index.html", render_tags_index(site, catalog))
     for tag, refs in catalog["tags"].items():
         write(
-            os.path.join(out, "tags", tag, "index.html"),
-            render_tag_page(
-                site, tag, refs=refs, articles=articles, series_cfgs=series_cfgs
-            ),
+            out_dir / "tags" / tag / "index.html",
+            render_tag_page(site, tag, refs=refs, articles=articles, series_cfgs=series_cfgs),
         )
 
     all_sorted = sorted(
@@ -142,7 +138,7 @@ def build(
         reverse=True,
     )
     write(
-        os.path.join(out, "feed.xml"),
+        out_dir / "feed.xml",
         atom_feed(
             base_url,
             "feed.xml",
@@ -160,7 +156,7 @@ def build(
             reverse=True,
         )
         write(
-            os.path.join(out, "series", sid, "feed.xml"),
+            out_dir / "series" / sid / "feed.xml",
             atom_feed(
                 base_url,
                 f"series/{sid}/feed.xml",
@@ -171,6 +167,6 @@ def build(
             ),
         )
 
-    copy_assets(repo, site_cfg, out=out)
-    copy_articles(articles, out, site=site)
+    copy_assets(repo, site_cfg, out=out_dir)
+    copy_articles(articles, out_dir, site=site)
     return catalog

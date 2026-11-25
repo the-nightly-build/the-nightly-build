@@ -41,7 +41,7 @@ class ResolvedProductionPolicy(TypedDict):
 
 
 _PROFILE_PRESETS: dict[str, dict[str, tuple[str, str]]] = {
-    "inherit": {stage: ("inherit", "inherit") for stage in STAGES},
+    "inherit": dict.fromkeys(STAGES, ("inherit", "inherit")),
     "economy": {
         "writing-coach": ("efficient", "low"),
         "researcher": ("capable", "medium"),
@@ -63,9 +63,7 @@ _PROFILE_PRESETS: dict[str, dict[str, tuple[str, str]]] = {
 }
 
 
-def _profile_name(
-    press: ProductionPolicy | None, series: ProductionPolicy | None
-) -> str:
+def _profile_name(press: ProductionPolicy | None, series: ProductionPolicy | None) -> str:
     for policy in (series, press):
         if policy is None:
             continue
@@ -75,9 +73,7 @@ def _profile_name(
     return "balanced"
 
 
-def _apply_stage_fields(
-    resolved: dict[str, ResolvedStagePolicy], policy: ProductionPolicy | None
-) -> None:
+def _apply_stage_fields(resolved: dict[str, ResolvedStagePolicy], policy: ProductionPolicy | None) -> None:
     if policy is None:
         return
     stages = policy.get("stages", {})
@@ -93,9 +89,7 @@ def _apply_stage_fields(
             resolved[stage]["effort"] = effort.strip()
 
 
-def _apply_required(
-    resolved: dict[str, ResolvedStagePolicy], policy: ProductionPolicy | None
-) -> None:
+def _apply_required(resolved: dict[str, ResolvedStagePolicy], policy: ProductionPolicy | None) -> None:
     if policy is None:
         return
     required = policy.get("required")

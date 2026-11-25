@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """Capture a bounded source asset into an article bundle.
 
 Run this tool through ``uv run --group figure-capture`` after bootstrapping the
@@ -11,6 +10,7 @@ import argparse
 import asyncio
 import io
 import pathlib
+import urllib.parse
 import urllib.request
 
 import fitz
@@ -24,9 +24,8 @@ FORMATS = {".jpg": "JPEG", ".jpeg": "JPEG", ".png": "PNG", ".webp": "WEBP"}
 def output_path(value: str) -> pathlib.Path:
     path = pathlib.Path(value)
     if path.suffix.lower() not in FORMATS:
-        raise argparse.ArgumentTypeError(
-            "output must end in .png, .jpg, .jpeg, or .webp"
-        )
+        message = "output must end in .png, .jpg, .jpeg, or .webp"
+        raise argparse.ArgumentTypeError(message)
     return path
 
 
@@ -39,6 +38,9 @@ def normalize(image: Image.Image, output: pathlib.Path) -> None:
 
 
 def capture_image(url: str, output: pathlib.Path) -> None:
+    if urllib.parse.urlparse(url).scheme not in {"http", "https"}:
+        message = f"unsupported image URL scheme: {url}"
+        raise ValueError(message)
     with urllib.request.urlopen(url) as response:
         raw = response.read()
     with Image.open(io.BytesIO(raw)) as image:
@@ -49,15 +51,15 @@ def parse_clip(value: str) -> fitz.Rect:
     try:
         x, y, width, height = (float(part) for part in value.split(","))
     except ValueError as exc:
-        raise argparse.ArgumentTypeError("clip must be x,y,width,height") from exc
+        message = "clip must be x,y,width,height"
+        raise argparse.ArgumentTypeError(message) from exc
     if width <= 0 or height <= 0:
-        raise argparse.ArgumentTypeError("clip width and height must be positive")
+        message = "clip width and height must be positive"
+        raise argparse.ArgumentTypeError(message)
     return fitz.Rect(x, y, x + width, y + height)
 
 
-def capture_pdf(
-    pdf: pathlib.Path, *, page_number: int, clip: fitz.Rect, output: pathlib.Path
-) -> None:
+def capture_pdf(pdf: pathlib.Path, *, page_number: int, clip: fitz.Rect, output: pathlib.Path) -> None:
     with fitz.open(pdf) as document:
         page = document[page_number - 1]
         pixmap = page.get_pixmap(matrix=fitz.Matrix(2, 2), clip=clip, alpha=False)
@@ -89,29 +91,19 @@ def main() -> int:
     pdf = commands.add_parser("pdf", help="rasterize a precise region of a PDF page")
     pdf.add_argument("file", type=pathlib.Path)
     pdf.add_argument("output", type=output_path)
-    pdf.add_argument(
-        "--page", type=int, required=True, help="one-based PDF page number"
-    )
-    pdf.add_argument(
-        "--clip", type=parse_clip, required=True, help="x,y,width,height in PDF points"
-    )
+    pdf.add_argument("--page", type=int, required=True, help="one-based PDF page number")
+    pdf.add_argument("--clip", type=parse_clip, required=True, help="x,y,width,height in PDF points")
 
-    web = commands.add_parser(
-        "web", help="screenshot one source-page element or canvas"
-    )
+    web = commands.add_parser("web", help="screenshot one source-page element or canvas")
     web.add_argument("url")
     web.add_argument("output", type=output_path)
-    web.add_argument(
-        "--selector", required=True, help="CSS selector for the exact figure"
-    )
+    web.add_argument("--selector", required=True, help="CSS selector for the exact figure")
 
     args = parser.parse_args()
     if args.command == "image":
         capture_image(args.url, args.output)
     elif args.command == "pdf":
-        capture_pdf(
-            args.file, page_number=args.page, clip=args.clip, output=args.output
-        )
+        capture_pdf(args.file, page_number=args.page, clip=args.clip, output=args.output)
     else:
         asyncio.run(capture_web(args.url, selector=args.selector, output=args.output))
     return 0

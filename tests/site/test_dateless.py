@@ -43,6 +43,4 @@ def test_a_real_date_wins_latest_over_the_dateless_bucket(dateless_site: Site) -
 def test_the_dateless_article_still_gets_its_own_build_page(
     dateless_site: Site,
 ) -> None:
-    assert "TSMC (undated draft)" in dateless_site.read(
-        "builds", "unknown", "index.html"
-    )
+    assert "TSMC (undated draft)" in dateless_site.read("builds", "unknown", "index.html")

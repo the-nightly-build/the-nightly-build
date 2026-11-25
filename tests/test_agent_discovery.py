@@ -59,6 +59,4 @@ def test_claude_user_assistant_adapter_resolves_the_canonical_skill() -> None:
     adapter = REPO / ".claude" / "skills" / "nb-user-assistant" / "SKILL.md"
 
     assert skill_metadata(adapter) == skill_metadata(canonical)
-    assert "../../../.agents/skills/nb-user-assistant/SKILL.md" in adapter.read_text(
-        encoding="utf-8"
-    )
+    assert "../../../.agents/skills/nb-user-assistant/SKILL.md" in adapter.read_text(encoding="utf-8")

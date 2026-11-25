@@ -6,6 +6,7 @@ byte with its canonical library source.
 """
 
 import dataclasses
+import datetime as dt
 import pathlib
 import re
 import tempfile
@@ -17,7 +18,7 @@ from press import NOW
 # be the canonical article byte for byte, which is what the proof validates.
 CHROME_RE = re.compile(
     r'\n<header class="nb-bar">.*?</header>|<footer class="nb-footer">.*?</footer>\n',
-    re.S,
+    re.DOTALL,
 )
 SITE_ICON_RE = re.compile(
     r'<link rel="(?:icon|apple-touch-icon)"[^>]* '
@@ -56,10 +57,25 @@ class Site:
         return asset_stamp_of(index_html)
 
 
-def build_press(repo: str, library: str, **kwargs) -> Site:
+def build_press(
+    repo: str,
+    library: str,
+    *,
+    preview_root: pathlib.Path | str | None = None,
+    base_url: str = "",
+    repository: str | None = None,
+    now: dt.datetime | None = None,
+) -> Site:
     out = tempfile.mkdtemp()
-    kwargs.setdefault("now", NOW)
-    catalog = build_site.build(repo, library, out=out, **kwargs)
+    catalog = build_site.build(
+        repo,
+        library,
+        out=out,
+        preview_root=preview_root,
+        base_url=base_url,
+        repository=repository,
+        now=NOW if now is None else now,
+    )
     return Site(catalog=catalog, out=out, library=library)
 
 

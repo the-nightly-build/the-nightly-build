@@ -18,11 +18,9 @@ from collections.abc import Callable
 
 import pytest
 
-from press import OPEN_YAML, REPO, TODAY, article, git
+from press import OPEN_YAML, REPO, TODAY, article, git, git_executable
 
-QUEUE_YAML = (
-    OPEN_YAML + "items:\n  - {slug: commissioned-piece, title: On Commission}\n"
-)
+QUEUE_YAML = OPEN_YAML + "items:\n  - {slug: commissioned-piece, title: On Commission}\n"
 COLLECTION_MISSING_SLUG = (
     "name: Test\nmode: collection\ntemplate: article\n"
     "items:\n  - {slug: alpha}\n  - {title: no-slug-here}\n  - {slug: beta}\n"
@@ -56,10 +54,7 @@ def test_rolling_already_published_on_the_selected_date_is_idle(
 ) -> None:
     report = duty(testrepo, make_library({"ai-briefs": [TODAY]}))
 
-    assert (
-        duty_of(report, "ai-briefs")["reason"]
-        == "already published on selected UTC date"
-    )
+    assert duty_of(report, "ai-briefs")["reason"] == "already published on selected UTC date"
 
 
 def test_collection_in_order_offers_exactly_the_next_item(
@@ -89,9 +84,7 @@ def test_collection_random_offers_every_unpublished_item(
     ]
 
 
-def test_paused_series_is_idle(
-    *, duty: Callable[..., dict], patched_repo: Callable[..., str], empty_lib: str
-) -> None:
+def test_paused_series_is_idle(*, duty: Callable[..., dict], patched_repo: Callable[..., str], empty_lib: str) -> None:
     report = duty(patched_repo("paused: true\n"), empty_lib)
 
     assert duty_of(report, "semiconductors")["reason"] == "paused"
@@ -146,24 +139,17 @@ def test_an_article_published_on_the_selected_date_idles_its_series(
     *, duty: Callable[..., dict], testrepo: str, make_library: Callable[..., str]
 ) -> None:
     library = make_library({"semiconductors": []})
-    pathlib.Path(library, "library", "semiconductors", "micron.html").write_text(
-        article()
-    )  # nb-meta date == TODAY
+    pathlib.Path(library, "library", "semiconductors", "micron.html").write_text(article())  # nb-meta date == TODAY
 
     report = duty(testrepo, library)
 
-    assert (
-        duty_of(report, "semiconductors")["reason"]
-        == "already published on selected UTC date"
-    )
+    assert duty_of(report, "semiconductors")["reason"] == "already published on selected UTC date"
 
 
 def test_complete_collection_is_idle(
     *, duty: Callable[..., dict], testrepo: str, make_library: Callable[..., str]
 ) -> None:
-    everything = make_library(
-        {"semiconductors": ["micron", "tsmc", "asml", "sk-hynix", "nvidia"]}
-    )
+    everything = make_library({"semiconductors": ["micron", "tsmc", "asml", "sk-hynix", "nvidia"]})
 
     report = duty(testrepo, everything)
 
@@ -176,9 +162,7 @@ def test_a_dict_item_without_a_slug_is_dropped_not_crashed_on(
     overwrite_series: Callable[..., str],
     make_library: Callable[..., str],
 ) -> None:
-    report = duty(
-        overwrite_series(COLLECTION_MISSING_SLUG), make_library({"ai-briefs": []})
-    )
+    report = duty(overwrite_series(COLLECTION_MISSING_SLUG), make_library({"ai-briefs": []}))
 
     assert duty_of(report, "ai-briefs")["candidates"] == ["alpha"]
 
@@ -404,7 +388,7 @@ def test_duty_keeps_its_own_library_checkout_by_default(
     git("add", "-A", cwd=str(seed))
     git("commit", "-qm", "library", cwd=str(seed))
     origin = tmp_path / "origin.git"
-    subprocess.run(["git", "clone", "-q", "--bare", str(seed), str(origin)], check=True)
+    subprocess.run([git_executable(), "clone", "-q", "--bare", str(seed), str(origin)], check=True)
     root = clone_testrepo("press", "templates", "engine")
     git("init", "-q", "-b", "main", cwd=root)
     git("remote", "add", "origin", str(origin), cwd=root)
@@ -420,6 +404,7 @@ def test_duty_keeps_its_own_library_checkout_by_default(
         capture_output=True,
         text=True,
         env={**os.environ, "PYTHONPATH": str(REPO / "engine")},
+        check=False,
     )
 
     assert result.returncode == 0, result.stderr

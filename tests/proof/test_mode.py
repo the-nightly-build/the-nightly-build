@@ -30,9 +30,7 @@ OPEN = (
     .replace('"mode": "collection"', '"mode": "open"')
     .replace(' data-nb-required="mu-10k-2025"', "")
 )
-QUEUE_YAML = (
-    OPEN_YAML + "items:\n  - {slug: commissioned-piece, title: On Commission}\n"
-)
+QUEUE_YAML = OPEN_YAML + "items:\n  - {slug: commissioned-piece, title: On Commission}\n"
 
 
 def test_unknown_series_blocks(run_local: Callable[..., Findings]) -> None:
@@ -42,9 +40,7 @@ def test_unknown_series_blocks(run_local: Callable[..., Findings]) -> None:
 
 
 def test_unconfigured_slug_blocks(run_local: Callable[..., Findings]) -> None:
-    result = run_local(
-        mut('"slug": "micron"', '"slug": "intel"'), "semiconductors", slug="intel"
-    )
+    result = run_local(mut('"slug": "micron"', '"slug": "intel"'), "semiconductors", slug="intel")
 
     assert "B-SLUG" in result.blocks
 
@@ -52,17 +48,13 @@ def test_unconfigured_slug_blocks(run_local: Callable[..., Findings]) -> None:
 def test_collection_already_published_blocks(
     run_local: Callable[..., Findings], make_library: Callable[..., str]
 ) -> None:
-    result = run_local(
-        VALID, "semiconductors", library=make_library({"semiconductors": ["micron"]})
-    )
+    result = run_local(VALID, "semiconductors", library=make_library({"semiconductors": ["micron"]}))
 
     assert "B-MODE" in result.blocks
 
 
 @pytest.mark.parametrize("slug", ["2027-01-01", "2026-13-99"])
-def test_rolling_slug_must_be_a_real_date_not_in_the_future(
-    run_local: Callable[..., Findings], slug: str
-) -> None:
+def test_rolling_slug_must_be_a_real_date_not_in_the_future(run_local: Callable[..., Findings], slug: str) -> None:
     result = run_local(VALID_BRIEF.replace(TODAY, slug), "ai-briefs", slug=slug)
 
     assert "B-SLUG" in result.blocks
@@ -96,14 +88,13 @@ def test_the_current_utc_rolling_slug_passes_west_of_utc(testrepo: str) -> None:
         capture_output=True,
         text=True,
         env={**os.environ, "TZ": "Pacific/Honolulu"},
+        check=False,
     )
 
     assert "B-SLUG" not in run.stdout
 
 
-def test_rolling_already_published_blocks(
-    run_local: Callable[..., Findings], make_library: Callable[..., str]
-) -> None:
+def test_rolling_already_published_blocks(run_local: Callable[..., Findings], make_library: Callable[..., str]) -> None:
     result = run_local(
         VALID_BRIEF,
         "ai-briefs",
@@ -162,9 +153,7 @@ def test_sequence_wrong_order_number_blocks(
     assert "B-MODE" in result.blocks
 
 
-def test_paused_series_blocks_publication(
-    run_local: Callable[..., Findings], patched_repo: Callable[..., str]
-) -> None:
+def test_paused_series_blocks_publication(run_local: Callable[..., Findings], patched_repo: Callable[..., str]) -> None:
     result = run_local(VALID, "semiconductors", repo=patched_repo("paused: true\n"))
 
     assert "B-SERIES" in result.blocks
@@ -237,9 +226,7 @@ def test_open_template_outside_the_choice_list_blocks(
         OPEN,
         "wildcard",
         slug="the-cuda-moat",
-        repo=open_press(
-            OPEN_YAML.replace("templates: [article, brief]", "templates: [brief]")
-        ),
+        repo=open_press(OPEN_YAML.replace("templates: [article, brief]", "templates: [brief]")),
         library=make_library({"wildcard": []}),
     )
 
@@ -423,9 +410,7 @@ def test_rolling_series_can_select_from_a_template_list(
 ) -> None:
     repo = clone_testrepo("press", "templates", "engine")
     series = pathlib.Path(repo) / "press" / "series" / "ai-briefs" / "series.yaml"
-    series.write_text(
-        series.read_text().replace("template: brief", "templates: [brief, article]")
-    )
+    series.write_text(series.read_text().replace("template: brief", "templates: [brief, article]"))
 
     result = run_local(VALID_BRIEF, "ai-briefs", slug=TODAY, repo=repo)
 
@@ -439,9 +424,7 @@ def test_templates_on_a_non_open_series_is_allowed(
 ) -> None:
     repo = clone_testrepo("press", "templates", "engine")
     series = pathlib.Path(repo) / "press" / "series" / "semiconductors" / "series.yaml"
-    series.write_text(
-        series.read_text().replace("template: article", "templates: [article, brief]")
-    )
+    series.write_text(series.read_text().replace("template: article", "templates: [article, brief]"))
 
     assert vc_rc(repo) == 0
 

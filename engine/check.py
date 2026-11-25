@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 # /// script
 # requires-python = ">=3.10"
 # dependencies = ["pyyaml", "tinycss2"]
@@ -27,10 +26,13 @@ the orphan library branch carries no engine.
 The checks themselves live in nb/proof/; this file is the door they open by.
 """
 
+from __future__ import annotations
+
 import argparse
-import datetime as _dt
+import datetime as dt
 import pathlib
 import sys
+from typing import TYPE_CHECKING
 
 from nb.article import Article
 from nb.config import find_template, load_registry, load_series
@@ -46,6 +48,9 @@ from nb.proof.structure import (
     check_deprecated,
 )
 from nb.report import Finding, Report, emit
+
+if TYPE_CHECKING:
+    from collections.abc import Sequence
 
 # `import check` is how the suite, validate_config.py, and any press tooling
 # reach the proof. These names are that surface; the code behind them is in nb/.
@@ -70,15 +75,14 @@ __all__ = [
 ]
 
 
-def main(argv=None):
+def main(argv: Sequence[str] | None = None) -> int:
     p = argparse.ArgumentParser(description="The Nightly Build proof")
     p.add_argument("file", nargs="?", help="article HTML file (local mode)")
     p.add_argument("--series", help="series id (local mode)")
     p.add_argument(
         "--repo",
         default=".",
-        help="repo root (local mode: main checkout; PR mode: any checkout, "
-        "the article resolves from --head)",
+        help="repo root (local mode: main checkout; PR mode: any checkout, the article resolves from --head)",
     )
     p.add_argument(
         "--main",
@@ -138,7 +142,7 @@ def main(argv=None):
         if not args.file or not args.series:
             p.error("local mode requires FILE and --series")
         series, _ = load_series(args.repo, args.series)
-        rep.strict = bool(series and series.get("strict"))
+        rep.strict = bool(isinstance(series, dict) and series.get("strict"))
         library_dir = args.library
         if library_dir is None:
             # the checkout nb duty, nb history, and nb prepare-pr keep; an
@@ -153,7 +157,7 @@ def main(argv=None):
             repo=args.repo,
             library_dir=library_dir,
             rep=rep,
-            today=args.today and _dt.date.fromisoformat(args.today),
+            today=dt.date.fromisoformat(args.today) if args.today else None,
             check_links=args.check_links,
             revision=args.revision,
         )

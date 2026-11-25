@@ -192,9 +192,7 @@ def test_revision_can_change_metadata_allowed_by_normal_proof(
 ) -> None:
     head = prepare_revision(pr_repo)
     revised = pathlib.Path(pr_repo.path, "library/semiconductors/micron.html")
-    revised.write_text(
-        revised.read_text().replace('"date": "2026-07-06"', '"date": "2026-07-05"')
-    )
+    revised.write_text(revised.read_text().replace('"date": "2026-07-06"', '"date": "2026-07-05"'))
     pr_repo.commit("correct publication date")
 
     result = pr_repo.run_pr(head=head)
@@ -275,9 +273,7 @@ def test_revision_rejects_a_symlinked_asset(pr_repo: PressRepo) -> None:
     pr_repo.write("library/semiconductors/micron/real.png", "pixels")
     pr_repo.commit("publish micron with an asset")
     pr_repo.checkout("owner/symlink-asset", new=True)
-    pathlib.Path(pr_repo.path, "library/semiconductors/micron/loot.png").symlink_to(
-        "real.png"
-    )
+    pathlib.Path(pr_repo.path, "library/semiconductors/micron/loot.png").symlink_to("real.png")
     pr_repo.write(
         "agent-artifacts/semiconductors/micron/revisions/01.md",
         "# Asset revision\n\nAdd a figure.\n",
@@ -449,9 +445,7 @@ def test_workflow_sync_rejects_a_noncanonical_blob(pr_repo: PressRepo) -> None:
     assert "B-WORKFLOW-SYNC" in result.blocks
 
 
-def retract_on_a_curation_branch(
-    pr_repo: PressRepo, *, leave_record: bool = False
-) -> None:
+def retract_on_a_curation_branch(pr_repo: PressRepo, *, leave_record: bool = False) -> None:
     pr_repo.checkout("library")
     pr_repo.write("library/semiconductors/tsmc.html", article())
     pr_repo.write("library/semiconductors/tsmc/fab-map.png", "png bytes\n")

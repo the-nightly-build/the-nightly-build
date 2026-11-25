@@ -10,6 +10,34 @@ security boundary — an article PR merges untrusted, so anything an attacker
 could smuggle through markup must be ruled out here, not reviewed later.
 """
 
+from __future__ import annotations
+
+import base64
+import binascii
+import hashlib
+import hmac
+import itertools
+import pathlib
+import re
+import struct
+import urllib.error
+import urllib.parse
+import urllib.request
+from typing import TYPE_CHECKING
+
+import tinycss2
+import tinycss2.ast
+
+from nb.site.assets import css_owners, nb_css_sources
+from nb.site.library import load_site_config
+
+if TYPE_CHECKING:
+    from collections.abc import Mapping, Sequence
+    from io import BufferedReader
+
+    from nb.article import Article, ImageEntry
+    from nb.report import Report
+
 __all__ = (
     "check_chrome",
     "check_cites",
@@ -23,23 +51,6 @@ __all__ = (
     "external_ref_allowed",
     "image_dimensions",
 )
-
-import base64
-import binascii
-import hashlib
-import hmac
-import os
-import re
-import struct
-import urllib.error
-import urllib.request
-
-import tinycss2
-import tinycss2.ast
-
-from nb.report import Report
-from nb.site.assets import css_owners
-from nb.site.library import load_site_config
 
 # Off-origin stylesheet references may load only from Google Fonts over https.
 # Matched by exact host after browser-style normalization, never by string
@@ -60,14 +71,31 @@ CLASS_ALLOW_PREFIXES = ("language-", "token")
 DEPRECATED_RE = re.compile(r"@deprecated\s+([\w-]+)\s*->\s*([\w-]+|none)")
 EXTERNAL_CSS_MAX_BYTES = 4 * 1024 * 1024
 EXTERNAL_CSS_TIMEOUT = 10
-NESTED_RULE_AT_RULES = frozenset(
-    {"container", "document", "keyframes", "layer", "media", "scope", "supports"}
-)
+NESTED_RULE_AT_RULES = frozenset({"container", "document", "keyframes", "layer", "media", "scope", "supports"})
 _EXTERNAL_CSS_CACHE: dict[tuple[str, str], tuple[frozenset[str], bool, str | None]] = {}
 
+MAX_FIGURE_BYTES = 2 * 1024 * 1024
+MAX_FIGURE_EDGE = 2400
+PNG_MIN_HEADER = 24
+WEBP_MIN_HEADER = 30
+VP8L_MIN_HEADER = 25
+VP8L_SIGNATURE = 0x2F
+JPEG_MARKER_PREFIX = 0xFF
+JPEG_MARKER_LEN = 2
+JPEG_SOF_PREFIX_LEN = 3
+JPEG_SOF_MARKERS = frozenset(
+    (
+        *range(0xC0, 0xC4),
+        *range(0xC5, 0xC8),
+        *range(0xC9, 0xCC),
+        *range(0xCD, 0xD0),
+    )
+)
+FLEX_BAND_LEN = 2
 
-def external_ref_allowed(normalized_url):
-    """True when an off-origin link/img reference may load.
+
+def external_ref_allowed(normalized_url: str) -> bool:
+    """Return whether an off-origin link/img reference may load.
 
     `normalized_url` is browser-normalized (whitespace stripped, backslashes
     folded to slashes). Requires an https scheme and a host in the font
@@ -83,8 +111,46 @@ def external_ref_allowed(normalized_url):
     return host.lower() in ALLOWED_EXTERNAL_HOSTS
 
 
-def check_required_sections(ed, treg, *, rep):
-    required_sections = treg.get("sections") or []
+def _flex_band(treg: Mapping[str, object]) -> tuple[int, int]:
+    raw_bands = treg.get("bands")
+    if isinstance(raw_bands, dict):
+        flex = raw_bands.get("flex_sections")
+        if (
+            isinstance(flex, list)
+            and len(flex) == FLEX_BAND_LEN
+            and isinstance(flex[0], int)
+            and isinstance(flex[1], int)
+        ):
+            return flex[0], flex[1]
+    return 0, 0
+
+
+def _check_flex_components(
+    ed: Article,
+    *,
+    extras: Sequence[str],
+    treg: Mapping[str, object],
+    rep: Report,
+) -> None:
+    raw_components = treg.get("flex_components")
+    if not isinstance(raw_components, list):
+        return
+    components = [str(item) for item in raw_components]
+    for section in extras:
+        counts = ed.section_class_counts.get(section, {})
+        for component in components:
+            count = counts.get(component, 0)
+            if count != 1:
+                rep.block(
+                    "B-FURNITURE",
+                    f"flexible section '{section}' contains {count} elements with "
+                    f"class '{component}'; it must contain exactly one",
+                )
+
+
+def check_required_sections(ed: Article, treg: Mapping[str, object], *, rep: Report) -> None:
+    raw_sections = treg.get("sections")
+    required_sections = [str(s) for s in raw_sections] if isinstance(raw_sections, list) else []
     counts = {s: ed.sections.count(s) for s in required_sections}
     for s in required_sections:
         if counts[s] == 0:
@@ -97,60 +163,43 @@ def check_required_sections(ed, treg, *, rep):
     # Absent bands.flex_sections means a fully fixed outline: no section beyond
     # the anchors is allowed (V6c). Present it as [0, 0] so extras BLOCK rather
     # than slip through unchecked.
-    flex_band = (treg.get("bands") or {}).get("flex_sections") or [0, 0]
+    low, high = _flex_band(treg)
     extras = [s for s in ed.sections if s not in required_sections]
     dupes = sorted({s for s in extras if extras.count(s) > 1})
     if dupes:
         rep.block("B-HTML", f"duplicate section labels: {dupes}")
-    low, high = flex_band
     if not (low <= len(extras) <= high):
         rep.block(
             "B-HTML",
-            f"{len(extras)} sections beyond the anchors; this template "
-            f"expects between {low} and {high}",
+            f"{len(extras)} sections beyond the anchors; this template expects between {low} and {high}",
         )
-    for section in extras:
-        counts = ed.section_class_counts.get(section, {})
-        for component in treg.get("flex_components") or []:
-            count = counts.get(component, 0)
-            if count != 1:
-                rep.block(
-                    "B-FURNITURE",
-                    f"flexible section '{section}' contains {count} elements with "
-                    f"class '{component}'; it must contain exactly one",
-                )
+    _check_flex_components(ed, extras=extras, treg=treg, rep=rep)
 
 
-def check_sandbox(ed, rep):
-    for a in ed.script_tags:
-        stype = (a.get("type") or "").strip().lower()
-        src = a.get("src", "")
-        if src and ENGINE_SCRIPT_RE.match(src) and stype in ("", "text/javascript"):
-            continue  # the engine-owned runtime (assets/nb.js) is the one allowed load
-        if stype != "application/json":
-            rep.block(
-                "B-SANDBOX",
-                f"articles may not contain executable <script> (type={stype or 'none'})",
-            )
-        elif "data-nb-chart" in a:
-            rep.block(
-                "B-SANDBOX",
-                "declarative data-nb-chart charts are retired; render a PNG "
-                "with engine/render_chart.py and embed it as a figure "
-                "(spec/charts.md)",
-            )
-        elif a.get("id") != "nb-meta":
-            rep.block("B-SANDBOX", "JSON <script> blocks must be #nb-meta")
-        if src:
-            rep.block("B-SANDBOX", "articles may not load external scripts")
-    if ed.forbidden_tags:
+def _check_script_tag(attrs: Mapping[str, str], rep: Report) -> None:
+    stype = (attrs.get("type") or "").strip().lower()
+    src = attrs.get("src", "")
+    if src and ENGINE_SCRIPT_RE.match(src) and stype in ("", "text/javascript"):
+        return  # the engine-owned runtime (assets/nb.js) is the one allowed load
+    if stype != "application/json":
         rep.block(
-            "B-SANDBOX", f"forbidden tags present: {sorted(set(ed.forbidden_tags))}"
+            "B-SANDBOX",
+            f"articles may not contain executable <script> (type={stype or 'none'})",
         )
-    for tag, attr in ed.bad_event_attrs:
-        rep.block("B-SANDBOX", f"inline event handler {attr}= on <{tag}>")
-    for tag, _url in ed.bad_js_urls:
-        rep.block("B-SANDBOX", f"javascript: URL on <{tag}>")
+    elif "data-nb-chart" in attrs:
+        rep.block(
+            "B-SANDBOX",
+            "declarative data-nb-chart charts are retired; render a PNG "
+            "with engine/render_chart.py and embed it as a figure "
+            "(spec/charts.md)",
+        )
+    elif attrs.get("id") != "nb-meta":
+        rep.block("B-SANDBOX", "JSON <script> blocks must be #nb-meta")
+    if src:
+        rep.block("B-SANDBOX", "articles may not load external scripts")
+
+
+def _check_external_refs(ed: Article, rep: Report) -> None:
     for kind, url in ed.external_refs:
         if kind == "script":
             continue  # already blocked above
@@ -164,74 +213,143 @@ def check_sandbox(ed, rep):
             rep.block("B-SANDBOX", f"external {kind} reference not on allowlist: {url}")
 
 
-MAX_FIGURE_BYTES = 2 * 1024 * 1024
-MAX_FIGURE_EDGE = 2400
+def check_sandbox(ed: Article, rep: Report) -> None:
+    for a in ed.script_tags:
+        _check_script_tag(a, rep)
+    if ed.forbidden_tags:
+        rep.block("B-SANDBOX", f"forbidden tags present: {sorted(set(ed.forbidden_tags))}")
+    for tag, attr in ed.bad_event_attrs:
+        rep.block("B-SANDBOX", f"inline event handler {attr}= on <{tag}>")
+    for tag, _url in ed.bad_js_urls:
+        rep.block("B-SANDBOX", f"javascript: URL on <{tag}>")
+    _check_external_refs(ed, rep)
 
 
-def image_dimensions(path):
-    with open(path, "rb") as fh:
-        raw = fh.read(32)
-        if raw.startswith(b"\x89PNG\r\n\x1a\n") and len(raw) >= 24:
-            return struct.unpack(">II", raw[16:24])
-        if raw.startswith(b"RIFF") and raw[8:12] == b"WEBP" and len(raw) >= 30:
-            kind = raw[12:16]
-            if kind == b"VP8X":
-                return (
-                    1 + int.from_bytes(raw[24:27], "little"),
-                    1 + int.from_bytes(raw[27:30], "little"),
-                )
-            if kind == b"VP8 " and len(raw) >= 30:
-                return struct.unpack("<HH", raw[26:30])
-            if kind == b"VP8L" and len(raw) >= 25 and raw[20] == 0x2F:
-                return (
-                    1 + (raw[21] | ((raw[22] & 0x3F) << 8)),
-                    1
-                    + (
-                        (raw[23] << 2)
-                        | ((raw[22] & 0xC0) >> 6)
-                        | ((raw[24] & 0x0F) << 10)
-                    ),
-                )
-        if raw.startswith(b"\xff\xd8"):
-            fh.seek(2)
-            while marker := fh.read(2):
-                if len(marker) != 2 or marker[0] != 0xFF:
-                    return None
-                while marker[1] == 0xFF:
-                    next_byte = fh.read(1)
-                    if not next_byte:
-                        return None
-                    marker = marker[:1] + next_byte
-                if (
-                    marker[1] in range(0xC0, 0xC4)
-                    or marker[1] in range(0xC5, 0xC8)
-                    or marker[1] in range(0xC9, 0xCC)
-                    or marker[1] in range(0xCD, 0xD0)
-                ):
-                    length = fh.read(3)
-                    if len(length) != 3:
-                        return None
-                    height, width = struct.unpack(">HH", fh.read(4))
-                    return width, height
-                length = fh.read(2)
-                if len(length) != 2:
-                    return None
-                fh.seek(struct.unpack(">H", length)[0] - 2, 1)
+def _webp_dimensions(raw: bytes) -> tuple[int, int] | None:
+    kind = raw[12:16]
+    if kind == b"VP8X" and len(raw) >= WEBP_MIN_HEADER:
+        return (
+            1 + int.from_bytes(raw[24:27], "little"),
+            1 + int.from_bytes(raw[27:30], "little"),
+        )
+    if kind == b"VP8 " and len(raw) >= WEBP_MIN_HEADER:
+        width, height = struct.unpack("<HH", raw[26:30])
+        return width, height
+    if kind == b"VP8L" and len(raw) >= VP8L_MIN_HEADER and raw[20] == VP8L_SIGNATURE:
+        return (
+            1 + (raw[21] | ((raw[22] & 0x3F) << 8)),
+            1 + ((raw[23] << 2) | ((raw[22] & 0xC0) >> 6) | ((raw[24] & 0x0F) << 10)),
+        )
     return None
 
 
-def check_figures(ed, *, html_path, rep):
-    slug = os.path.splitext(os.path.basename(html_path))[0]
-    parent = os.path.dirname(html_path)
-    expected = re.compile(
-        rf"^{re.escape(slug)}/[a-z0-9][a-z0-9._-]*\.(?:png|jpe?g|webp)$"
-    )
+def _next_jpeg_marker(fh: BufferedReader) -> int | None:
+    marker = fh.read(JPEG_MARKER_LEN)
+    if len(marker) != JPEG_MARKER_LEN or marker[0] != JPEG_MARKER_PREFIX:
+        return None
+    code = marker[1]
+    while code == JPEG_MARKER_PREFIX:
+        next_byte = fh.read(1)
+        if not next_byte:
+            return None
+        code = next_byte[0]
+    return code
+
+
+def _jpeg_dimensions(fh: BufferedReader) -> tuple[int, int] | None:
+    fh.seek(JPEG_MARKER_LEN)
+    while (code := _next_jpeg_marker(fh)) is not None:
+        if code in JPEG_SOF_MARKERS:
+            if len(fh.read(JPEG_SOF_PREFIX_LEN)) != JPEG_SOF_PREFIX_LEN:
+                return None
+            height, width = struct.unpack(">HH", fh.read(4))
+            return width, height
+        length = fh.read(JPEG_MARKER_LEN)
+        if len(length) != JPEG_MARKER_LEN:
+            return None
+        fh.seek(struct.unpack(">H", length)[0] - JPEG_MARKER_LEN, 1)
+    return None
+
+
+def image_dimensions(path: str | pathlib.Path) -> tuple[int, int] | None:
+    with pathlib.Path(path).open("rb") as fh:
+        raw = fh.read(32)
+        if raw.startswith(b"\x89PNG\r\n\x1a\n") and len(raw) >= PNG_MIN_HEADER:
+            width, height = struct.unpack(">II", raw[16:24])
+            return width, height
+        if raw.startswith(b"RIFF") and raw[8:12] == b"WEBP":
+            return _webp_dimensions(raw)
+        if raw.startswith(b"\xff\xd8"):
+            return _jpeg_dimensions(fh)
+    return None
+
+
+def _check_figure_src(
+    src: str,
+    *,
+    is_chart: bool,
+    slug: str,
+    parent: pathlib.Path,
+    expected: re.Pattern[str],
+    chart_expected: re.Pattern[str],
+    rep: Report,
+) -> bool:
+    if is_chart:
+        chart_name = chart_expected.fullmatch(src)
+        if not chart_name:
+            rep.block(
+                "B-CHART",
+                f"a chart image must be '{slug}/chart-N.png': {src!r}",
+            )
+            return False
+        sibling = parent / slug / f"{chart_name.group(1)}.py"
+        if not sibling.is_file():
+            rep.block(
+                "B-CHART",
+                f"chart {src!r} must ship its generating script '{slug}/{chart_name.group(1)}.py' in the bundle",
+            )
+        return True
+    if not expected.fullmatch(src):
+        rep.block("B-FIGURE", f"figure image must be local to '{slug}/': {src!r}")
+        return False
+    return True
+
+
+def _check_figure_file(image: ImageEntry, *, parent: pathlib.Path, rep: Report) -> None:
+    src = image["src"]
+    if not image["alt"].strip():
+        rep.block("B-FIGURE", f"figure image needs nonempty alt text: {src!r}")
+    path = parent / src
+    if not path.is_file():
+        rep.block("B-FIGURE", f"figure asset is missing: {src!r}")
+        return
+    if path.stat().st_size > MAX_FIGURE_BYTES:
+        rep.block(
+            "B-FIGURE",
+            f"figure asset exceeds {MAX_FIGURE_BYTES // 1024 // 1024} MiB: {src!r}",
+        )
+        return
+    dimensions = image_dimensions(path)
+    if dimensions is None:
+        rep.block("B-FIGURE", f"figure asset has an unreadable image header: {src!r}")
+    elif max(dimensions) > MAX_FIGURE_EDGE:
+        rep.block(
+            "B-FIGURE",
+            f"figure asset exceeds {MAX_FIGURE_EDGE}px on one edge: {src!r}",
+        )
+
+
+def check_figures(ed: Article, *, html_path: str | pathlib.Path, rep: Report) -> None:
+    article_path = pathlib.Path(html_path)
+    slug = article_path.stem
+    parent = article_path.parent
+    expected = re.compile(rf"^{re.escape(slug)}/[a-z0-9][a-z0-9._-]*\.(?:png|jpe?g|webp)$")
     # One figure component; the filename carries the contract. chart-N.* is
     # the reserved name for a generated chart, which must ship its committed
     # script; any other name is a captured source asset.
     chart_expected = re.compile(rf"^{re.escape(slug)}/(chart-\d+)\.png$")
     chart_named = re.compile(rf"^{re.escape(slug)}/chart-")
-    seen = set()
+    seen: set[int] = set()
     for image in ed.images:
         figure = image["figure"]
         if figure is None:
@@ -249,54 +367,23 @@ def check_figures(ed, *, html_path, rep):
                     if is_chart
                     else "each figure needs a caption citation to a source entry",
                 )
-        if is_chart:
-            chart_name = chart_expected.fullmatch(src)
-            if not chart_name:
-                rep.block(
-                    "B-CHART",
-                    f"a chart image must be '{slug}/chart-N.png': {src!r}",
-                )
-                continue
-            sibling = os.path.join(parent, slug, f"{chart_name.group(1)}.py")
-            if not os.path.isfile(sibling):
-                rep.block(
-                    "B-CHART",
-                    f"chart {src!r} must ship its generating script "
-                    f"'{slug}/{chart_name.group(1)}.py' in the bundle",
-                )
-        elif not expected.fullmatch(src):
-            rep.block("B-FIGURE", f"figure image must be local to '{slug}/': {src!r}")
+        if not _check_figure_src(
+            src,
+            is_chart=is_chart,
+            slug=slug,
+            parent=parent,
+            expected=expected,
+            chart_expected=chart_expected,
+            rep=rep,
+        ):
             continue
-        if not image["alt"].strip():
-            rep.block("B-FIGURE", f"figure image needs nonempty alt text: {src!r}")
-        path = os.path.join(parent, src)
-        if not os.path.isfile(path):
-            rep.block("B-FIGURE", f"figure asset is missing: {src!r}")
-            continue
-        if os.path.getsize(path) > MAX_FIGURE_BYTES:
-            rep.block(
-                "B-FIGURE",
-                f"figure asset exceeds {MAX_FIGURE_BYTES // 1024 // 1024} MiB: {src!r}",
-            )
-            continue
-        dimensions = image_dimensions(path)
-        if dimensions is None:
-            rep.block(
-                "B-FIGURE", f"figure asset has an unreadable image header: {src!r}"
-            )
-        elif max(dimensions) > MAX_FIGURE_EDGE:
-            rep.block(
-                "B-FIGURE",
-                f"figure asset exceeds {MAX_FIGURE_EDGE}px on one edge: {src!r}",
-            )
+        _check_figure_file(image, parent=parent, rep=rep)
 
 
-def check_cites(ed, rep):
+def check_cites(ed: Article, rep: Report) -> None:
     for target in ed.cite_hrefs:
         if target not in ed.ids:
-            rep.block(
-                "B-CITES-RESOLVE", f"inline citation '#{target}' resolves to nothing"
-            )
+            rep.block("B-CITES-RESOLVE", f"inline citation '#{target}' resolves to nothing")
         elif target not in ed.source_container_ids:
             rep.block(
                 "B-CITES-RESOLVE",
@@ -304,33 +391,35 @@ def check_cites(ed, rep):
             )
 
 
-def _class_names_from_tokens(tokens):
-    names = set()
+def _class_names_from_tokens(tokens: Sequence[object]) -> set[str]:
+    names: set[str] = set()
 
-    def visit(values):
-        for previous, current in zip(values, values[1:], strict=False):
+    def visit(values: Sequence[object]) -> None:
+        for previous, current in itertools.pairwise(values):
             if (
                 getattr(previous, "type", None) == "literal"
                 and getattr(previous, "value", None) == "."
                 and getattr(current, "type", None) == "ident"
             ):
-                names.add(current.value)
+                ident = getattr(current, "value", None)
+                if isinstance(ident, str):
+                    names.add(ident)
         for value in values:
             content = getattr(value, "content", None)
             if content is None:
                 content = getattr(value, "arguments", None)
-            if content is not None:
+            if isinstance(content, list):
                 visit(content)
 
     visit(tokens)
     return names
 
 
-def _parse_css_classes(raw):
-    names = set()
+def _parse_css_classes(raw: str) -> tuple[set[str], bool]:
+    names: set[str] = set()
     complete = True
 
-    def visit(rules):
+    def visit(rules: Sequence[object]) -> None:
         nonlocal complete
         for rule in rules:
             if isinstance(rule, tinycss2.ast.ParseError):
@@ -348,7 +437,7 @@ def _parse_css_classes(raw):
     return names, complete
 
 
-def _integrity_matches(raw, integrity):
+def _integrity_matches(raw: bytes, integrity: str) -> bool:
     match = re.fullmatch(r"(sha256|sha384|sha512)-([A-Za-z0-9+/]+={0,2})", integrity)
     if not match:
         return False
@@ -360,18 +449,32 @@ def _integrity_matches(raw, integrity):
     return hmac.compare_digest(digest, expected)
 
 
-def _external_css_classes(url, integrity):
+def _fetch_stylesheet_bytes(url: str) -> bytes:
+    parsed = urllib.parse.urlparse(url)
+    scheme = parsed.scheme.lower()
+    if scheme == "file":
+        with pathlib.Path(urllib.request.url2pathname(parsed.path)).open("rb") as fh:
+            return fh.read(EXTERNAL_CSS_MAX_BYTES + 1)
+    if scheme != "https":
+        msg = "external stylesheet URL must use https"
+        raise ValueError(msg)
+    request = urllib.request.Request(url, headers={"User-Agent": "nightly-build-proof"})
+    with urllib.request.urlopen(request, timeout=EXTERNAL_CSS_TIMEOUT) as response:
+        return response.read(EXTERNAL_CSS_MAX_BYTES + 1)
+
+
+def _external_css_classes(url: str, integrity: str) -> tuple[frozenset[str], bool, str | None]:
     key = (url, integrity)
     if key in _EXTERNAL_CSS_CACHE:
         return _EXTERNAL_CSS_CACHE[key]
     try:
-        request = urllib.request.Request(
-            url, headers={"User-Agent": "nightly-build-proof"}
-        )
-        with urllib.request.urlopen(request, timeout=EXTERNAL_CSS_TIMEOUT) as response:
-            raw = response.read(EXTERNAL_CSS_MAX_BYTES + 1)
+        raw = _fetch_stylesheet_bytes(url)
         if len(raw) > EXTERNAL_CSS_MAX_BYTES:
-            result = frozenset(), False, "stylesheet exceeds the proof size limit"
+            result: tuple[frozenset[str], bool, str | None] = (
+                frozenset(),
+                False,
+                "stylesheet exceeds the proof size limit",
+            )
         elif not _integrity_matches(raw, integrity):
             result = frozenset(), False, "SRI verification failed"
         else:
@@ -379,11 +482,7 @@ def _external_css_classes(url, integrity):
             result = (
                 frozenset(names),
                 complete,
-                (
-                    "stylesheet contains an import or CSS parse error"
-                    if not complete
-                    else None
-                ),
+                ("stylesheet contains an import or CSS parse error" if not complete else None),
             )
     except (OSError, UnicodeError, ValueError, urllib.error.URLError) as exc:
         result = frozenset(), False, f"could not fetch or parse stylesheet ({exc})"
@@ -391,7 +490,7 @@ def _external_css_classes(url, integrity):
     return result
 
 
-def css_class_names(repo: str, *, rep: Report | None = None) -> tuple[set[str], bool]:
+def css_class_names(repo: str | pathlib.Path, *, rep: Report | None = None) -> tuple[set[str], bool]:
     """Return CSS class names and whether the inventory is complete.
 
     Local press stylesheets are parsed directly. Stylesheets in the site's
@@ -400,19 +499,20 @@ def css_class_names(repo: str, *, rep: Report | None = None) -> tuple[set[str], 
     bad hash, import, or parse error marks the inventory incomplete so the
     caller can avoid claiming a class is dead when the evidence is partial.
     """
-    sheets = [os.path.join(repo, "engine", "assets", "nb.css")]
+    repo_str = str(repo)
+    sheets = list(nb_css_sources(repo_str))
     # The page loads exactly nb.css plus theme.css, and nb/site owns what
     # concatenates into theme.css; asking it keeps this list from drifting.
-    sheets += css_owners(repo, load_site_config(repo))
-    names = set()
+    sheets += css_owners(repo_str, load_site_config(repo_str))
+    names: set[str] = set()
     complete = True
-    for path in sheets:
-        if os.path.isfile(path):
-            with open(path, encoding="utf-8") as fh:
-                local_names, local_complete = _parse_css_classes(fh.read())
+    for raw_path in sheets:
+        path = pathlib.Path(raw_path)
+        if path.is_file():
+            local_names, local_complete = _parse_css_classes(path.read_text(encoding="utf-8"))
             names.update(local_names)
             complete = complete and local_complete
-    site = load_site_config(repo)
+    site = load_site_config(repo_str)
     assets = site.get("assets") or {}
     if not isinstance(assets, dict):
         return names, False
@@ -422,9 +522,7 @@ def css_class_names(repo: str, *, rep: Report | None = None) -> tuple[set[str], 
         if not isinstance(url, str) or not isinstance(integrity, str):
             complete = False
             continue
-        external_names, external_complete, problem = _external_css_classes(
-            url, integrity
-        )
+        external_names, external_complete, problem = _external_css_classes(url, integrity)
         names.update(external_names)
         complete = complete and external_complete
         if problem and rep is not None:
@@ -434,45 +532,41 @@ def css_class_names(repo: str, *, rep: Report | None = None) -> tuple[set[str], 
     return names, complete
 
 
-def check_classes(raw, *, repo, rep):
+def check_classes(raw: str, *, repo: str | pathlib.Path, rep: Report) -> None:
     defined, complete = css_class_names(repo, rep=rep)
-    if not defined:
+    if not defined or not complete:
         return
-    if not complete:
-        return
-    used = set()
+    used: set[str] = set()
     for attr in re.findall(r'class="([^"]+)"', raw):
         used.update(attr.split())
-    dead = sorted(
-        c for c in used if c not in defined and not c.startswith(CLASS_ALLOW_PREFIXES)
-    )
+    dead = sorted(c for c in used if c not in defined and not c.startswith(CLASS_ALLOW_PREFIXES))
     if dead:
         rep.warn(
             "W-DEAD-CLASS",
-            f"classes matching no stylesheet rule: {dead}; a typo here "
-            "renders the element unstyled",
+            f"classes matching no stylesheet rule: {dead}; a typo here renders the element unstyled",
         )
 
 
-def deprecated_classes(repo):
+def deprecated_classes(repo: str | pathlib.Path) -> dict[str, str | None]:
     """Map each retired class root to its replacement (or None).
 
     Parsed from the @deprecated markers in the same sheets check_classes reads
     (nb.css plus every css_owner), so the retired set never drifts from the CSS
     that still ships.
     """
-    sheets = [os.path.join(repo, "engine", "assets", "nb.css")]
-    sheets += css_owners(repo, load_site_config(repo))
-    marks = {}
-    for path in sheets:
-        if os.path.isfile(path):
-            with open(path, encoding="utf-8") as fh:
-                for root, repl in DEPRECATED_RE.findall(fh.read()):
-                    marks[root] = None if repl == "none" else repl
+    repo_str = str(repo)
+    sheets = list(nb_css_sources(repo_str))
+    sheets += css_owners(repo_str, load_site_config(repo_str))
+    marks: dict[str, str | None] = {}
+    for raw_path in sheets:
+        path = pathlib.Path(raw_path)
+        if path.is_file():
+            for root, repl in DEPRECATED_RE.findall(path.read_text(encoding="utf-8")):
+                marks[root] = None if repl == "none" else repl
     return marks
 
 
-def check_deprecated(raw, *, repo, rep):
+def check_deprecated(raw: str, *, repo: str | pathlib.Path, rep: Report) -> None:
     """Block a new article from using a retired component.
 
     The component's CSS still renders the frozen back-catalog, but the proof
@@ -483,7 +577,7 @@ def check_deprecated(raw, *, repo, rep):
     marks = deprecated_classes(repo)
     if not marks:
         return
-    used = set()
+    used: set[str] = set()
     for attr in re.findall(r'class="([^"]+)"', raw):
         used.update(attr.split())
     for cls in sorted(used):
@@ -499,9 +593,12 @@ def check_deprecated(raw, *, repo, rep):
         )
 
 
-def check_chrome(raw, *, treg, rep):
-    for piece in treg.get("chrome") or []:
-        if piece not in raw:
+def check_chrome(raw: str, *, treg: Mapping[str, object], rep: Report) -> None:
+    chrome = treg.get("chrome")
+    if not isinstance(chrome, list):
+        return
+    for piece in chrome:
+        if isinstance(piece, str) and piece not in raw:
             rep.block(
                 "B-CHROME",
                 f"fixed chrome missing or altered: {piece!r}. The skeleton's "

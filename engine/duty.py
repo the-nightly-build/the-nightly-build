@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 # /// script
 # requires-python = ">=3.10"
 # dependencies = ["pyyaml"]
@@ -32,10 +31,10 @@ offline work; nothing skips the missing-press check).
 from __future__ import annotations
 
 import argparse
-import datetime as _dt
+import datetime as dt
 import json
-import os
 import pathlib
+import shutil
 import subprocess
 import sys
 
@@ -53,55 +52,54 @@ DAY_NAMES = ("mon", "tue", "wed", "thu", "fri", "sat", "sun")
 CADENCE_WORDS = ("daily", "weekdays", "weekends", "manual")
 
 
-def cadence_is_valid(cadence) -> bool:
-    """The strict author-time twin of cadence_includes: validate_config asks
-    this, while the fail-open evaluation below never skips work over a value
-    validation would have flagged. Keeping both here means the vocabulary
-    cannot drift between the validator and the scheduler."""
+def cadence_is_valid(cadence: object) -> bool:
+    """Validate an author-time cadence value strictly.
+
+    This is the strict author-time twin of cadence_includes: validate_config
+    asks this, while the fail-open evaluation below never skips work over a
+    value validation would have flagged. Keeping both here means the vocabulary
+    cannot drift between the validator and the scheduler.
+    """
     if isinstance(cadence, str):
         return cadence in CADENCE_WORDS
-    return (
-        isinstance(cadence, list)
-        and len(cadence) > 0
-        and all(d in DAY_NAMES for d in cadence)
-    )
+    return isinstance(cadence, list) and len(cadence) > 0 and all(d in DAY_NAMES for d in cadence)
 
 
-def cadence_includes(cadence, day: str) -> bool:
+def cadence_includes(cadence: object, day: str) -> bool:
     if cadence in (None, "daily"):
         return True
-    if cadence == "weekdays":
-        return day not in ("sat", "sun")
-    if cadence == "weekends":
-        return day in ("sat", "sun")
-    if cadence == "manual":
-        return False
+    scalar_rules = {
+        "weekdays": day not in ("sat", "sun"),
+        "weekends": day in ("sat", "sun"),
+        "manual": False,
+    }
+    if isinstance(cadence, str) and cadence in scalar_rules:
+        return scalar_rules[cadence]
     if isinstance(cadence, list):
         days = [str(d).lower() for d in cadence]
         if "manual" in days:
             return False  # a stated manual must never fail open into daily work
-        if not any(d in DAY_NAMES for d in days):
-            return True  # no recognized day name: fail open, like an unknown scalar
-        return day in days
+        return day in days if any(d in DAY_NAMES for d in days) else True
     return True  # unknown value: validate_config flags it; never skip work here
 
 
-def published_state(library: str, series_id: str) -> tuple[set[str], set[str]]:
+def published_state(library: str | pathlib.Path, series_id: str) -> tuple[set[str], set[str]]:
     """Return (published slugs, published nb-meta dates) for one series.
 
     Slugs drive dedupe and completion checks. The nb-meta dates exist for rerun
     safety: an article published on the current UTC date idles its series even
     when its slug is topical rather than dated.
     """
-    base = nb_meta.series_dir(library, series_id)
+    base = nb_meta.series_dir(str(library), series_id)
     if base is None:
         return set(), set()
-    slugs, dates = set(), set()
-    for fname in os.listdir(base):
-        if not fname.endswith(".html"):
+    slugs: set[str] = set()
+    dates: set[str] = set()
+    for path in pathlib.Path(base).iterdir():
+        if path.suffix != ".html":
             continue
-        slugs.add(fname[:-5])
-        meta = nb_meta.read_meta(os.path.join(base, fname))
+        slugs.add(path.stem)
+        meta = nb_meta.read_meta(str(path))
         date = meta.get("date") if meta else None
         if isinstance(date, str):
             dates.add(date)
@@ -123,13 +121,82 @@ def config_items(cfg: dict[str, object]) -> list[dict[str, object]]:
     return [it for it in items if isinstance(it.get("slug"), str)]
 
 
+def _rolling_duty(entry: dict[str, object], *, pub: set[str], date: dt.date) -> tuple[bool, dict[str, object]]:
+    slug = date.isoformat()
+    if slug in pub:
+        return False, {**entry, "reason": "already published on selected UTC date"}
+    return True, {**entry, "slug": slug, "reason": "selected UTC date is unpublished"}
+
+
+def _sequence_duty(
+    entry: dict[str, object],
+    *,
+    items: list[dict[str, object]],
+    unpublished: list[object],
+) -> tuple[bool, dict[str, object]]:
+    if not unpublished:
+        return False, {**entry, "reason": "complete"}
+    nxt = unpublished[0]
+    order = next(i for i, it in enumerate(items, 1) if it.get("slug") == nxt)
+    return True, {
+        **entry,
+        "slug": nxt,
+        "order": order,
+        "reason": f"{len(items) - len(unpublished)} of {len(items)} published; '{nxt}' is next",
+    }
+
+
+def _collection_duty(
+    entry: dict[str, object],
+    *,
+    cfg: dict[str, object],
+    items: list[dict[str, object]],
+    unpublished: list[object],
+) -> tuple[bool, dict[str, object]]:
+    if not unpublished:
+        return False, {**entry, "reason": "complete"}
+    selection = cfg.get("selection", "in-order")
+    candidates = unpublished if selection == "random" else unpublished[:1]
+    return True, {
+        **entry,
+        "candidates": candidates,
+        "selection": selection,
+        "reason": f"{len(unpublished)} of {len(items)} items unpublished",
+    }
+
+
+def _open_duty(entry: dict[str, object], *, unpublished: list[object]) -> tuple[bool, dict[str, object]]:
+    if unpublished:
+        return True, {
+            **entry,
+            "commissions": unpublished,
+            "reason": "commissioned items pending — publish one of these before an open pick",
+        }
+    return True, {
+        **entry,
+        "commissions": [],
+        "reason": "open section — choose a topic within the beat; do not repeat a published slug",
+    }
+
+
+def _gate_reason(cfg: dict[str, object], *, pub_dates: set[str], date: dt.date, day: str) -> str | None:
+    if cfg.get("paused"):
+        return "paused"
+    cadence = cfg.get("cadence")
+    if not cadence_includes(cadence, day):
+        return f"cadence {cadence} excludes the selected UTC date"
+    if date.isoformat() in pub_dates:
+        return "already published on selected UTC date"
+    return None
+
+
 def series_duty(
     sid: str,
     cfg: dict[str, object],
     *,
     pub: set[str],
     pub_dates: set[str],
-    date: _dt.date,
+    date: dt.date,
     day: str,
 ) -> tuple[bool, dict[str, object]]:
     """Decide whether one series publishes on the selected UTC date, and why.
@@ -144,85 +211,44 @@ def series_duty(
     excuse.
     """
     mode = cfg.get("mode")
-    entry = {"series": sid, "mode": mode}
+    entry: dict[str, object] = {"series": sid, "mode": mode}
 
-    if cfg.get("paused"):
-        return False, {**entry, "reason": "paused"}
-    cadence = cfg.get("cadence")
-    if not cadence_includes(cadence, day):
-        return False, {
-            **entry,
-            "reason": f"cadence {cadence} excludes the selected UTC date",
-        }
-    if date.isoformat() in pub_dates:
-        return False, {**entry, "reason": "already published on selected UTC date"}
+    reason = _gate_reason(cfg, pub_dates=pub_dates, date=date, day=day)
+    if reason is not None:
+        return False, {**entry, "reason": reason}
 
     items = config_items(cfg)
     unpublished = [it["slug"] for it in items if it.get("slug") not in pub]
 
     if mode == "rolling":
-        slug = date.isoformat()
-        if slug in pub:
-            return False, {
-                **entry,
-                "reason": "already published on selected UTC date",
-            }
-        return True, {
-            **entry,
-            "slug": slug,
-            "reason": "selected UTC date is unpublished",
-        }
+        return _rolling_duty(entry, pub=pub, date=date)
     if mode == "sequence":
-        if not unpublished:
-            return False, {**entry, "reason": "complete"}
-        nxt = unpublished[0]
-        order = next(i for i, it in enumerate(items, 1) if it.get("slug") == nxt)
-        return True, {
-            **entry,
-            "slug": nxt,
-            "order": order,
-            "reason": f"{len(items) - len(unpublished)} of {len(items)} "
-            f"published; '{nxt}' is next",
-        }
+        return _sequence_duty(entry, items=items, unpublished=unpublished)
     if mode == "collection":
-        if not unpublished:
-            return False, {**entry, "reason": "complete"}
-        selection = cfg.get("selection", "in-order")
-        candidates = unpublished if selection == "random" else unpublished[:1]
-        return True, {
-            **entry,
-            "candidates": candidates,
-            "selection": selection,
-            "reason": f"{len(unpublished)} of {len(items)} items unpublished",
-        }
+        return _collection_duty(entry, cfg=cfg, items=items, unpublished=unpublished)
     if mode == "open":
-        if unpublished:
-            return True, {
-                **entry,
-                "commissions": unpublished,
-                "reason": "commissioned items pending — publish "
-                "one of these before an open pick",
-            }
-        return True, {
-            **entry,
-            "commissions": [],
-            "reason": "open section — choose a topic within the beat; "
-            "do not repeat a published slug",
-        }
+        return _open_duty(entry, unpublished=unpublished)
     return False, {**entry, "reason": f"unknown mode {mode!r}"}
 
 
-def git(repo, *args) -> str | None:
+def git(repo: str | pathlib.Path, *args: str) -> str | None:
+    git_bin = shutil.which("git")
+    if git_bin is None:
+        return None
     try:
         done = subprocess.run(
-            ["git", "-C", repo, *args], capture_output=True, text=True, timeout=60
+            [git_bin, "-C", str(repo), *args],
+            capture_output=True,
+            text=True,
+            timeout=60,
+            check=False,
         )
     except (OSError, subprocess.SubprocessError):
         return None
     return done.stdout.strip() if done.returncode == 0 else None
 
 
-def stale_checkout(repo) -> str | None:
+def stale_checkout(repo: str | pathlib.Path) -> str | None:
     """Say how the tree is behind origin/main, or None when it is not.
 
     Only a strict ancestor of origin/main is stale: a branch with local work
@@ -251,7 +277,7 @@ def stale_checkout(repo) -> str | None:
     )
 
 
-def missing_press(repo) -> str | None:
+def missing_press(repo: str | pathlib.Path) -> str | None:
     """Say why this tree holds no press, or None when it holds one.
 
     A paper whose series are all idle for the selected UTC date has no scheduled
@@ -259,8 +285,8 @@ def missing_press(repo) -> str | None:
     at all is the wrong directory, and an empty answer could invite the
     scheduled agent to find configuration somewhere else.
     """
-    root = os.path.join(repo, "press", "series")
-    if os.path.isdir(root) and nb_meta.series_ids(repo):
+    root = pathlib.Path(repo) / "press" / "series"
+    if root.is_dir() and nb_meta.series_ids(str(repo)):
         return None
     return (
         f"no press at {repo!r}: {root} holds no configured series. This is not "
@@ -272,7 +298,35 @@ def missing_press(repo) -> str | None:
     )
 
 
-def main(argv=None) -> int:
+def _load_series_config(series_file: pathlib.Path) -> dict[str, object] | None:
+    try:
+        with series_file.open(encoding="utf-8") as fh:
+            cfg = yaml.safe_load(fh)
+    except yaml.YAMLError:
+        return None
+    return cfg if isinstance(cfg, dict) else None
+
+
+def _collect_schedule(
+    repo: str, library: str, *, date: dt.date, day: str
+) -> tuple[list[dict[str, object]], list[dict[str, object]]]:
+    due: list[dict[str, object]] = []
+    idle: list[dict[str, object]] = []
+    root = pathlib.Path(repo) / "press" / "series"
+    for sid in nb_meta.series_ids(repo):
+        cfg = _load_series_config(root / sid / "series.yaml")
+        if cfg is None:
+            # A bare string/list or unparseable series.yaml idles one series
+            # with a reason; the run still exits 0 for every other series.
+            idle.append({"series": sid, "mode": None, "reason": "series.yaml is not a mapping"})
+            continue
+        pub, pub_dates = published_state(library, sid)
+        is_due, entry = series_duty(sid, cfg, pub=pub, pub_dates=pub_dates, date=date, day=day)
+        (due if is_due else idle).append(entry)
+    return due, idle
+
+
+def main(argv: list[str] | None = None) -> int:
     p = argparse.ArgumentParser(description="Deterministic scheduled work list")
     p.add_argument("--repo", default=".", help="repo root (main checkout)")
     p.add_argument(
@@ -305,40 +359,14 @@ def main(argv=None) -> int:
         except GitHandoffError as error:
             return error.emit()
 
-    date = (
-        _dt.date.fromisoformat(args.date)
-        if args.date
-        else _dt.datetime.now(_dt.timezone.utc).date()
-    )
+    date = dt.date.fromisoformat(args.date) if args.date else dt.datetime.now(dt.timezone.utc).date()
     day = DAY_NAMES[date.weekday()]
-
-    due, idle = [], []
-    root = os.path.join(args.repo, "press", "series")
-    for sid in nb_meta.series_ids(args.repo):
-        try:
-            with open(os.path.join(root, sid, "series.yaml"), encoding="utf-8") as fh:
-                cfg = yaml.safe_load(fh)
-        except yaml.YAMLError:
-            cfg = None
-        if not isinstance(cfg, dict):
-            # A bare string/list or unparseable series.yaml idles one series
-            # with a reason; the run still exits 0 for every other series.
-            idle.append(
-                {"series": sid, "mode": None, "reason": "series.yaml is not a mapping"}
-            )
-            continue
-        pub, pub_dates = published_state(library, sid)
-        is_due, entry = series_duty(
-            sid, cfg, pub=pub, pub_dates=pub_dates, date=date, day=day
-        )
-        (due if is_due else idle).append(entry)
-
-    print(
-        json.dumps(
-            {"date": date.isoformat(), "weekday": day, "due": due, "idle": idle},
-            indent=2,
-        )
+    due, idle = _collect_schedule(args.repo, library, date=date, day=day)
+    payload = json.dumps(
+        {"date": date.isoformat(), "weekday": day, "due": due, "idle": idle},
+        indent=2,
     )
+    sys.stdout.write(f"{payload}\n")
     return 0
 
 

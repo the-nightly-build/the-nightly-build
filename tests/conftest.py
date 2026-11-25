@@ -48,8 +48,7 @@ def _clean_git_environment() -> None:
 
 @pytest.fixture(scope="session")
 def testrepo() -> str:
-    repo = make_press()
-    return repo
+    return make_press()
 
 
 @pytest.fixture
@@ -103,7 +102,7 @@ def run_local(testrepo: str) -> Callable[..., Findings]:
             asset_path.write_bytes(content)
         rep = check.Report()
         cfg, _ = check.load_series(repo, series)
-        rep.strict = bool(cfg and cfg.get("strict"))
+        rep.strict = bool(isinstance(cfg, dict) and cfg.get("strict"))
         check.check_article(
             str(article_path),
             series,
@@ -179,7 +178,7 @@ def open_press(clone_testrepo: Callable[..., str]) -> Callable[..., str]:
 def vc_output() -> Callable[[str], subprocess.CompletedProcess[str]]:
     def run(repo: str) -> subprocess.CompletedProcess[str]:
         command = [*VALIDATE_CONFIG, "--repo", str(repo)]
-        return subprocess.run(command, capture_output=True, text=True)
+        return subprocess.run(command, capture_output=True, text=True, check=False)
 
     return run
 
@@ -198,7 +197,7 @@ def vc_rc(
 def run_duty() -> Callable[..., subprocess.CompletedProcess[str]]:
     def run(*args: str) -> subprocess.CompletedProcess[str]:
         command = [*DUTY, *args]
-        return subprocess.run(command, capture_output=True, text=True)
+        return subprocess.run(command, capture_output=True, text=True, check=False)
 
     return run
 
@@ -239,6 +238,7 @@ def ci_helper() -> Callable[[str, str], str]:
             cwd=repo,
             capture_output=True,
             text=True,
+            check=False,
         ).stdout.strip()
 
     return helper
@@ -322,8 +322,7 @@ def pr_repo(clone_testrepo: Callable[..., str]) -> PressRepo:
 
 @pytest.fixture
 def full_library() -> str:
-    library = make_full_library()
-    return library
+    return make_full_library()
 
 
 @pytest.fixture

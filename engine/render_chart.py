@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """Render an article chart: a plotly script in, a normalized PNG out.
 
 Run through ``uv run --group charts`` after bootstrapping the optional chart
@@ -18,6 +17,7 @@ import argparse
 import pathlib
 import re
 import runpy
+import sys
 
 import plotly.graph_objects as go
 import plotly.io as pio
@@ -49,9 +49,7 @@ EXPORT_SCALE = 2
 def theme_palette(repo: str) -> list[str]:
     owners = css_owners(repo, load_site_config(repo))
     if owners:
-        base_block = re.split(
-            r"@media|\[data-mode", pathlib.Path(owners[0]).read_text(encoding="utf-8")
-        )[0]
+        base_block = re.split(r"@media|\[data-mode", pathlib.Path(owners[0]).read_text(encoding="utf-8"))[0]
         tokens = dict(re.findall(r"--chart-(\d+)\s*:\s*(#[0-9a-fA-F]{6})", base_block))
         if tokens:
             return [tokens[n] for n in sorted(tokens, key=int)]
@@ -89,9 +87,7 @@ def nb_template(palette: list[str]) -> go.layout.Template:
         }
     )
     template.data.scatter = [
-        go.Scatter(
-            line={"dash": dash, "width": 2.5}, marker={"symbol": symbol, "size": 7}
-        )
+        go.Scatter(line={"dash": dash, "width": 2.5}, marker={"symbol": symbol, "size": 7})
         for dash, symbol in zip(DASHES, MARKERS, strict=True)
     ]
     return template
@@ -104,47 +100,38 @@ def render(script: pathlib.Path, *, out: pathlib.Path, repo: str) -> pathlib.Pat
     module = runpy.run_path(str(script))
     fig = module.get("fig")
     if not isinstance(fig, go.Figure):
-        raise SystemExit(f"{script} must bind a plotly Figure to a module-level `fig`")
+        message = f"{script} must bind a plotly Figure to a module-level `fig`"
+        raise SystemExit(message)
 
     out.parent.mkdir(parents=True, exist_ok=True)
-    fig.write_image(
-        str(out), width=EXPORT_WIDTH, height=EXPORT_HEIGHT, scale=EXPORT_SCALE
-    )
+    fig.write_image(str(out), width=EXPORT_WIDTH, height=EXPORT_HEIGHT, scale=EXPORT_SCALE)
 
     size = out.stat().st_size
     if size > MAX_FIGURE_BYTES:
-        raise SystemExit(
-            f"{out} is {size} bytes; the proof caps figures at {MAX_FIGURE_BYTES}"
-        )
+        message = f"{out} is {size} bytes; the proof caps figures at {MAX_FIGURE_BYTES}"
+        raise SystemExit(message)
     dimensions = image_dimensions(str(out))
     if dimensions is None or max(dimensions) > MAX_FIGURE_EDGE:
-        raise SystemExit(
-            f"{out} exceeds the proof's {MAX_FIGURE_EDGE}px edge cap: {dimensions}"
-        )
+        message = f"{out} exceeds the proof's {MAX_FIGURE_EDGE}px edge cap: {dimensions}"
+        raise SystemExit(message)
     return out
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(
-        description="Render an article chart: a plotly script in, a normalized PNG out."
-    )
-    parser.add_argument(
-        "script", type=pathlib.Path, help="chart-N.py binding a module-level `fig`"
-    )
+    parser = argparse.ArgumentParser(description="Render an article chart: a plotly script in, a normalized PNG out.")
+    parser.add_argument("script", type=pathlib.Path, help="chart-N.py binding a module-level `fig`")
     parser.add_argument(
         "--out",
         type=pathlib.Path,
         help="output PNG (default: the script's stem + .png)",
     )
-    parser.add_argument(
-        "--repo", default=".", help="repo root whose theme supplies the palette"
-    )
+    parser.add_argument("--repo", default=".", help="repo root whose theme supplies the palette")
     args = parser.parse_args()
 
     out = args.out or args.script.with_suffix(".png")
     if out.suffix.lower() != ".png":
         parser.error("output must end in .png")
-    print(render(args.script, out=out, repo=args.repo))
+    sys.stdout.write(f"{render(args.script, out=out, repo=args.repo)}\n")
 
 
 if __name__ == "__main__":

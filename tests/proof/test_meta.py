@@ -80,7 +80,7 @@ def test_collection_with_library_state_and_an_unpublished_slug_is_clean(
 
 
 @pytest.mark.parametrize(
-    "_name,html",
+    ("_name", "html"),
     [
         ("missing nb-meta block", mut('id="nb-meta"', 'id="not-meta"')),
         ("invalid json", mut('"protocol": "1.0",', '"protocol": "1.0"')),
@@ -94,9 +94,7 @@ def test_collection_with_library_state_and_an_unpublished_slug_is_clean(
         ("wrong protocol major", mut('"protocol": "1.0"', '"protocol": "2.0"')),
     ],
 )
-def test_unreadable_meta_blocks(
-    run_local: Callable[..., Findings], *, _name: str, html: str
-) -> None:
+def test_unreadable_meta_blocks(run_local: Callable[..., Findings], *, _name: str, html: str) -> None:
     result = run_local(html, "semiconductors")
 
     assert "B-META-PARSE" in result.blocks
@@ -109,15 +107,13 @@ def test_path_and_meta_slug_must_match(run_local: Callable[..., Findings]) -> No
 
 
 @pytest.mark.parametrize(
-    "_name,html",
+    ("_name", "html"),
     [
         ("mode", mut('"mode": "collection"', '"mode": "rolling"')),
         ("template", mut('"template": "article"', '"template": "brief"')),
     ],
 )
-def test_meta_disagreeing_with_the_series_blocks(
-    run_local: Callable[..., Findings], *, _name: str, html: str
-) -> None:
+def test_meta_disagreeing_with_the_series_blocks(run_local: Callable[..., Findings], *, _name: str, html: str) -> None:
     result = run_local(html, "semiconductors")
 
     assert "B-META-MATCH" in result.blocks
@@ -173,16 +169,14 @@ def test_nested_tag_is_accepted(run_local: Callable[..., Findings]) -> None:
 
 
 @pytest.mark.parametrize(
-    "_name,tags",
+    ("_name", "tags"),
     [
         ("uppercase", '"tags": ["Equity"]'),
         ("path traversal", '"tags": ["../../../escape"]'),
         ("not a list", '"tags": "equity"'),
     ],
 )
-def test_tags_that_are_not_slugs_block(
-    run_local: Callable[..., Findings], *, _name: str, tags: str
-) -> None:
+def test_tags_that_are_not_slugs_block(run_local: Callable[..., Findings], *, _name: str, tags: str) -> None:
     result = run_local(mut('"tags": ["equity"]', tags), "semiconductors")
 
     assert "B-META-PARSE" in result.blocks
@@ -193,18 +187,14 @@ CHROME = {"chrome": ['<body class="nb-article">', "<h2>Sources</h2>"]}
 
 def test_intact_chrome_passes() -> None:
     rep = check.Report()
-    check.check_chrome(
-        '<body class="nb-article"><h2>Sources</h2></body>', treg=CHROME, rep=rep
-    )
+    check.check_chrome('<body class="nb-article"><h2>Sources</h2></body>', treg=CHROME, rep=rep)
 
     assert not Findings(rep).blocks
 
 
 def test_mutated_chrome_blocks() -> None:
     rep = check.Report()
-    check.check_chrome(
-        '<body class="nb-page"><h2>Sources →</h2></body>', treg=CHROME, rep=rep
-    )
+    check.check_chrome('<body class="nb-page"><h2>Sources →</h2></body>', treg=CHROME, rep=rep)
 
     assert "B-CHROME" in Findings(rep).blocks
 
@@ -219,8 +209,7 @@ def test_a_template_declaring_no_chrome_is_not_checked() -> None:
 def test_a_typod_class_warns_as_dead() -> None:
     rep = check.Report()
     check.check_classes(
-        '<body class="nb-article"><p class="nb-callout">x</p>'
-        '<p class="nb-callot">y</p></body>',
+        '<body class="nb-article"><p class="nb-callout">x</p><p class="nb-callot">y</p></body>',
         repo=str(REPO),
         rep=rep,
     )
@@ -231,8 +220,7 @@ def test_a_typod_class_warns_as_dead() -> None:
 def test_defined_and_builtin_classes_pass() -> None:
     rep = check.Report()
     check.check_classes(
-        '<body class="nb-article"><p class="nb-callout">x</p>'
-        '<code class="language-python">y</code></body>',
+        '<body class="nb-article"><p class="nb-callout">x</p><code class="language-python">y</code></body>',
         repo=str(REPO),
         rep=rep,
     )
@@ -252,8 +240,7 @@ def test_sri_pinned_stylesheet_classes_join_the_inventory(
     stylesheet = repo / "theme.css"
     stylesheet.write_bytes(raw_css)
     (repo / "press" / "site.yaml").write_text(
-        "assets:\n  styles:\n"
-        f"    - url: {stylesheet.as_uri()}\n      integrity: sha384-{digest}\n"
+        f"assets:\n  styles:\n    - url: {stylesheet.as_uri()}\n      integrity: sha384-{digest}\n"
     )
 
     external = check.Report()
@@ -261,9 +248,7 @@ def test_sri_pinned_stylesheet_classes_join_the_inventory(
     assert "W-DEAD-CLASS" not in Findings(external).codes
 
     unknown = check.Report()
-    check.check_classes(
-        '<p class="hallucinated-chip">x</p>', repo=str(repo), rep=unknown
-    )
+    check.check_classes('<p class="hallucinated-chip">x</p>', repo=str(repo), rep=unknown)
     assert "W-DEAD-CLASS" in Findings(unknown).warns
 
 
@@ -275,8 +260,7 @@ def test_incomplete_external_stylesheet_suppresses_dead_class_warning(
     stylesheet = repo / "theme.css"
     stylesheet.write_bytes(b".valid { }")
     (repo / "press" / "site.yaml").write_text(
-        "assets:\n  styles:\n"
-        f"    - url: {stylesheet.as_uri()}\n      integrity: sha384-invalid\n"
+        f"assets:\n  styles:\n    - url: {stylesheet.as_uri()}\n      integrity: sha384-invalid\n"
     )
 
     rep = check.Report()

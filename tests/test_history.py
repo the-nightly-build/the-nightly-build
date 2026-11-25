@@ -12,12 +12,15 @@ from __future__ import annotations
 
 import json
 import os
-import pathlib
 import subprocess
 import sys
+from typing import TYPE_CHECKING
 
 from nb.history import EXCERPT_LENGTH, HistoryEntry, excerpt, format_results, search
-from press import REPO
+from press import REPO, git_executable
+
+if TYPE_CHECKING:
+    import pathlib
 
 
 def test_search_requires_every_term_and_ranks_titles_first() -> None:
@@ -119,9 +122,7 @@ def test_excerpt_uses_the_tightest_relevant_passage() -> None:
     assert "unrelated introduction" not in match
 
 
-def write_article(
-    library: pathlib.Path, *, series: str, slug: str, title: str, text: str
-) -> None:
+def write_article(library: pathlib.Path, *, series: str, slug: str, title: str, text: str) -> None:
     target = library / "library" / series / f"{slug}.html"
     target.parent.mkdir(parents=True, exist_ok=True)
     target.write_text(
@@ -162,6 +163,7 @@ def test_nb_history_reads_the_library_without_returning_html(
         cwd=REPO,
         capture_output=True,
         text=True,
+        check=False,
     )
 
     assert result.returncode == 0, result.stderr
@@ -197,6 +199,7 @@ def test_nb_history_show_returns_readable_blocks_for_grep(
         cwd=REPO,
         capture_output=True,
         text=True,
+        check=False,
     )
 
     assert result.returncode == 0, result.stderr
@@ -247,6 +250,7 @@ def test_nb_history_structure_outlines_headings_and_furniture(
         cwd=REPO,
         capture_output=True,
         text=True,
+        check=False,
     )
 
     assert result.returncode == 0, result.stderr
@@ -277,6 +281,7 @@ def test_nb_history_structure_rejects_an_unknown_reference(
         cwd=REPO,
         capture_output=True,
         text=True,
+        check=False,
     )
 
     assert result.returncode != 0
@@ -297,6 +302,7 @@ def test_nb_history_show_rejects_search_arguments(tmp_path: pathlib.Path) -> Non
         cwd=REPO,
         capture_output=True,
         text=True,
+        check=False,
     )
 
     assert result.returncode == 2
@@ -307,6 +313,7 @@ def test_nb_history_keeps_its_own_library_checkout_by_default(
     tmp_path: pathlib.Path,
 ) -> None:
     # no --library and no NB_LIBRARY: the engine fetches origin/library itself
+    git_bin = git_executable()
     seed = tmp_path / "seed"
     write_article(
         seed,
@@ -315,15 +322,15 @@ def test_nb_history_keeps_its_own_library_checkout_by_default(
         title="A searchable title",
         text="The unmistakable needle belongs to this article.",
     )
-    subprocess.run(["git", "init", "-q", "-b", "library"], cwd=seed, check=True)
+    subprocess.run([git_bin, "init", "-q", "-b", "library"], cwd=seed, check=True)
     subprocess.run(
-        ["git", "-c", "user.name=t", "-c", "user.email=t@example.com", "add", "-A"],
+        [git_bin, "-c", "user.name=t", "-c", "user.email=t@example.com", "add", "-A"],
         cwd=seed,
         check=True,
     )
     subprocess.run(
         [
-            "git",
+            git_bin,
             "-c",
             "user.name=t",
             "-c",
@@ -336,16 +343,12 @@ def test_nb_history_keeps_its_own_library_checkout_by_default(
         check=True,
     )
     origin = tmp_path / "origin.git"
-    subprocess.run(["git", "clone", "-q", "--bare", str(seed), str(origin)], check=True)
+    subprocess.run([git_bin, "clone", "-q", "--bare", str(seed), str(origin)], check=True)
     root = tmp_path / "root"
     root.mkdir()
-    subprocess.run(["git", "init", "-q", "-b", "main"], cwd=root, check=True)
-    subprocess.run(
-        ["git", "remote", "add", "origin", str(origin)], cwd=root, check=True
-    )
-    environment = {
-        key: value for key, value in os.environ.items() if key != "NB_LIBRARY"
-    }
+    subprocess.run([git_bin, "init", "-q", "-b", "main"], cwd=root, check=True)
+    subprocess.run([git_bin, "remote", "add", "origin", str(origin)], cwd=root, check=True)
+    environment = {key: value for key, value in os.environ.items() if key != "NB_LIBRARY"}
     environment.update({"NB_ROOT": str(root), "PYTHONPATH": str(REPO / "engine")})
 
     result = subprocess.run(
@@ -354,6 +357,7 @@ def test_nb_history_keeps_its_own_library_checkout_by_default(
         capture_output=True,
         text=True,
         env=environment,
+        check=False,
     )
 
     assert result.returncode == 0, result.stderr

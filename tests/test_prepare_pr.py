@@ -15,10 +15,18 @@ import sys
 
 import pytest
 
-from press import article, git, make_press, refuse_git_remote, write_agent_artifacts
+from press import (
+    article,
+    git,
+    git_executable,
+    make_press,
+    refuse_git_remote,
+    write_agent_artifacts,
+)
 
 
 def make_library(tmp_path: pathlib.Path) -> tuple[pathlib.Path, pathlib.Path]:
+    git_bin = git_executable()
     seed = tmp_path / "seed"
     origin = tmp_path / "origin.git"
     checkout = tmp_path / "library-checkout"
@@ -30,8 +38,8 @@ def make_library(tmp_path: pathlib.Path) -> tuple[pathlib.Path, pathlib.Path]:
     (seed / "library" / ".gitkeep").write_text("")
     git("add", "-A", cwd=str(seed))
     git("commit", "-qm", "library", cwd=str(seed))
-    subprocess.run(["git", "clone", "-q", "--bare", str(seed), str(origin)], check=True)
-    subprocess.run(["git", "clone", "-q", str(origin), str(checkout)], check=True)
+    subprocess.run([git_bin, "clone", "-q", "--bare", str(seed), str(origin)], check=True)
+    subprocess.run([git_bin, "clone", "-q", str(origin), str(checkout)], check=True)
     return checkout, origin
 
 
@@ -93,6 +101,7 @@ def run_prepare(
         capture_output=True,
         text=True,
         env=environment,
+        check=False,
     )
 
 
@@ -133,13 +142,11 @@ def test_prepare_pr_pushes_exact_bundle_and_opens_pr(tmp_path: pathlib.Path) -> 
     )
 
     assert result.returncode == 0, result.stderr
-    assert result.stdout.rstrip().endswith(
-        "https://github.com/example/nightly-build/pull/42"
-    )
+    assert result.stdout.rstrip().endswith("https://github.com/example/nightly-build/pull/42")
     branch = "refs/heads/nb/article/semiconductors/micron"
     changed = subprocess.run(
         [
-            "git",
+            git_executable(),
             f"--git-dir={origin}",
             "diff",
             "--name-only",
@@ -152,9 +159,7 @@ def test_prepare_pr_pushes_exact_bundle_and_opens_pr(tmp_path: pathlib.Path) -> 
     ).stdout.splitlines()
     assert "library/semiconductors/micron.html" in changed
     assert "agent-artifacts/semiconductors/micron/editorial-direction.md" in changed
-    assert (
-        "agent-artifacts/semiconductors/micron/editor/01/editorial-review.md" in changed
-    )
+    assert "agent-artifacts/semiconductors/micron/editor/01/editorial-review.md" in changed
     assert not any(path.startswith(".nb-context/") for path in changed)
     assert "pr create" in log.read_text()
 
@@ -274,8 +279,9 @@ def test_prepare_pr_safely_replaces_its_own_generated_branch(
         gh_log=log,
     )
     branch = "refs/heads/nb/article/semiconductors/micron"
+    git_bin = git_executable()
     first_commit = subprocess.run(
-        ["git", f"--git-dir={origin}", "rev-parse", branch],
+        [git_bin, f"--git-dir={origin}", "rev-parse", branch],
         capture_output=True,
         text=True,
         check=True,
@@ -290,13 +296,13 @@ def test_prepare_pr_safely_replaces_its_own_generated_branch(
         gh_log=log,
     )
     second_commit = subprocess.run(
-        ["git", f"--git-dir={origin}", "rev-parse", branch],
+        [git_bin, f"--git-dir={origin}", "rev-parse", branch],
         capture_output=True,
         text=True,
         check=True,
     ).stdout.strip()
     count = subprocess.run(
-        ["git", f"--git-dir={origin}", "rev-list", "--count", f"library..{branch}"],
+        [git_bin, f"--git-dir={origin}", "rev-list", "--count", f"library..{branch}"],
         capture_output=True,
         text=True,
         check=True,
@@ -322,8 +328,9 @@ def test_prepare_pr_preserves_an_unrecognized_remote_branch(
     git("config", "user.email", "test@example.com", cwd=str(library))
     git("commit", "-qm", "manual branch", cwd=str(library))
     git("push", "-q", "origin", branch, cwd=str(library))
+    git_bin = git_executable()
     before = subprocess.run(
-        ["git", f"--git-dir={origin}", "rev-parse", f"refs/heads/{branch}"],
+        [git_bin, f"--git-dir={origin}", "rev-parse", f"refs/heads/{branch}"],
         capture_output=True,
         text=True,
         check=True,
@@ -337,7 +344,7 @@ def test_prepare_pr_preserves_an_unrecognized_remote_branch(
         path=os.environ["PATH"],
     )
     after = subprocess.run(
-        ["git", f"--git-dir={origin}", "rev-parse", f"refs/heads/{branch}"],
+        [git_bin, f"--git-dir={origin}", "rev-parse", f"refs/heads/{branch}"],
         capture_output=True,
         text=True,
         check=True,
@@ -367,7 +374,7 @@ def test_normal_prepare_pr_rejects_an_already_published_article(
 
 
 @pytest.mark.parametrize("managed", [False, True])
-def test_prepare_pr_hands_off_when_git_is_missing(tmp_path, *, managed) -> None:
+def test_prepare_pr_hands_off_when_git_is_missing(tmp_path: pathlib.Path, *, managed: bool) -> None:
     library, _origin = make_library(tmp_path)
     article_path = make_workspace(tmp_path)
     empty_bin = tmp_path / "empty-bin"
@@ -388,7 +395,7 @@ def test_prepare_pr_hands_off_when_git_is_missing(tmp_path, *, managed) -> None:
 
 
 @pytest.mark.parametrize("operation", ["fetch", "ls-remote", "push"])
-def test_prepare_pr_hands_off_failed_remote_operations(tmp_path, operation) -> None:
+def test_prepare_pr_hands_off_failed_remote_operations(tmp_path: pathlib.Path, operation: str) -> None:
     library, _origin = make_library(tmp_path)
     article_path = make_workspace(tmp_path)
     fake_bin = tmp_path / "bin"

@@ -41,10 +41,7 @@ def test_missing_configuration_uses_the_cost_aware_default() -> None:
 def test_inherit_is_an_explicit_profile() -> None:
     policy = resolve({"profile": "inherit"})
 
-    assert policy["stages"] == {
-        stage: {"model": "inherit", "effort": "inherit", "required": False}
-        for stage in STAGES
-    }
+    assert policy["stages"] == {stage: {"model": "inherit", "effort": "inherit", "required": False} for stage in STAGES}
 
 
 @pytest.mark.parametrize(
@@ -133,10 +130,7 @@ def test_cli_reads_press_and_series_policy(
         "profile: balanced\nstages:\n  writer:\n    model: provider/writer\n"
     )
     series = repo / "press" / "series" / "semiconductors" / "series.yaml"
-    series.write_text(
-        series.read_text()
-        + "\nproduction:\n  stages:\n    writer:\n      effort: max\n"
-    )
+    series.write_text(series.read_text() + "\nproduction:\n  stages:\n    writer:\n      effort: max\n")
 
     result = subprocess.run(
         [

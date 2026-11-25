@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 # /// script
 # requires-python = ">=3.10"
 # dependencies = ["pyyaml"]
@@ -10,15 +9,27 @@ output is safe to resolve into each exact role brief without reconstructing
 configuration precedence in a model prompt.
 """
 
+from __future__ import annotations
+
 import argparse
 import json
-import os
+import pathlib
+import sys
+from typing import TYPE_CHECKING, NoReturn
 
 from nb.config import load_series, load_yaml
 from nb.production_policy import ProductionPolicy, StagePolicy, resolve
 
+if TYPE_CHECKING:
+    from collections.abc import Mapping
 
-def _stage_policy(value: dict) -> StagePolicy:
+
+def _die(message: str) -> NoReturn:
+    sys.stderr.write(f"{message}\n")
+    raise SystemExit(1)
+
+
+def _stage_policy(value: Mapping[str, object]) -> StagePolicy:
     policy: StagePolicy = {}
     model = value.get("model")
     effort = value.get("effort")
@@ -32,20 +43,21 @@ def _stage_policy(value: dict) -> StagePolicy:
     return policy
 
 
-def _production_policy(value: dict | None) -> ProductionPolicy | None:
+def _production_policy(value: object) -> ProductionPolicy | None:
     if not isinstance(value, dict):
         return None
+    raw = {str(key): item for key, item in value.items()}
     policy: ProductionPolicy = {}
-    profile = value.get("profile")
-    required = value.get("required")
-    stages = value.get("stages")
+    profile = raw.get("profile")
+    required = raw.get("required")
+    stages = raw.get("stages")
     if isinstance(profile, str):
         policy["profile"] = profile
     if isinstance(required, bool):
         policy["required"] = required
     if isinstance(stages, dict):
         policy["stages"] = {
-            stage: _stage_policy(stage_policy)
+            stage: _stage_policy({str(k): v for k, v in stage_policy.items()})
             for stage, stage_policy in stages.items()
             if isinstance(stage, str) and isinstance(stage_policy, dict)
         }
@@ -60,15 +72,15 @@ def main() -> None:
 
     series, series_path = load_series(args.repo, args.series)
     if not isinstance(series, dict):
-        raise SystemExit(f"configured series not found: {series_path}")
+        _die(f"configured series not found: {series_path}")
 
-    press_path = os.path.join(args.repo, "press", "production.yaml")
-    press = load_yaml(press_path) if os.path.isfile(press_path) else None
+    press_path = pathlib.Path(args.repo) / "press" / "production.yaml"
+    press = load_yaml(press_path) if press_path.is_file() else None
     result = resolve(
         _production_policy(press),
         _production_policy(series.get("production")),
     )
-    print(json.dumps(result, sort_keys=True))
+    sys.stdout.write(f"{json.dumps(result, sort_keys=True)}\n")
 
 
 if __name__ == "__main__":
