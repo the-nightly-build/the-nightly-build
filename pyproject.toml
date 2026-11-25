@@ -3,29 +3,12 @@ name = "nightly-build-engine"
 version = "0.1.0"
 description = "The Nightly Build protocol engine (the proof and site builder)"
 requires-python = ">=3.10"
-dependencies = [
-    "pyyaml>=6.0",
-    "tinycss2>=1.4.0",
-]
+dependencies = ["pyyaml>=6.0", "tinycss2>=1.4.0"]
 
 [dependency-groups]
-dev = [
-    "ruff>=0.14",
-    "ty>=0.0.1a1",
-    "pre-commit>=4.0",
-    "websocket-client>=1.9.0",
-    "pytest>=9.1.1",
-]
-figure-capture = [
-    "pillow>=12.3.0",
-    "playwright>=1.61.0",
-    "pymupdf>=1.28.0",
-]
-charts = [
-    "kaleido>=1.1.0",
-    "pandas>=2.0.0",
-    "plotly>=6.3.0",
-]
+dev = ["ruff>=0.14", "ty>=0.0.1a1", "websocket-client>=1.9.0", "pytest>=9.1.1"]
+figure-capture = ["pillow>=12.3.0", "playwright>=1.61.0", "pymupdf>=1.28.0"]
+charts = ["kaleido>=1.1.0", "pandas>=2.0.0", "plotly>=6.3.0"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
@@ -46,6 +29,7 @@ extra-paths = ["engine", "tests", "scripts"]
 
 [tool.ruff]
 target-version = "py310"
+line-length = 120
 # The same roots the suite sees at runtime (pytest puts engine/ and each test
 # directory on sys.path), so import sorting classifies local modules as
 # first-party. Without this, `from press import ...` (tests/press.py) flips
@@ -54,6 +38,69 @@ target-version = "py310"
 src = [".", "engine", "tests", "tests/site"]
 
 [tool.ruff.lint]
-# Formatter owns line length, so E501 is off; the rest catch real defects.
-select = ["E", "F", "I", "UP", "B", "SIM"]
-ignore = ["E501"]
+select = ["ALL"]
+unfixable = [
+    # A fix leaves an unused import for review instead of deleting it, since
+    # removing one can change what the package exports.
+    "F401",
+]
+ignore = [
+    # The license file covers the project, so no file carries a copyright notice.
+    "CPY001",
+    # Scripts and test folders aren't packages, so they have no __init__.py.
+    "INP001",
+    # Every source module has a docstring, and a class or function has one only
+    # where it says what the names and types don't.
+    "D101",
+    "D102",
+    "D103",
+    "D105",
+    "D106",
+    "D107",
+    # These contradict D211 and D212, which stay on.
+    "D203",
+    "D213",
+    # ruff format owns trailing commas, and this conflicts with it.
+    "COM812",
+    # A long signature is fine when the parameters after the first two are
+    # keyword-only, which PLR0917 enforces below.
+    "PLR0913",
+]
+
+[tool.ruff.lint.mccabe]
+# 6 is the human-ideal complexity ceiling and >10 is poor; 8 is the
+# agent-assisted benchmark. Ruff's C901 ignores boolean `and`/`or`, so 8
+# matches JS/TS `complexity <= 10` and Go `cyclop <= 10`.
+max-complexity = 8
+
+[tool.ruff.lint.pylint]
+# PLR0917 caps positional arguments at two; pass any further parameters as
+# keyword-only arguments after `*`.
+max-positional-args = 2
+# PLR0912 and PLR1702 cap branching and nesting alongside C901 above.
+max-branches = 10
+max-nested-blocks = 4
+
+[tool.ruff.lint.flake8-tidy-imports]
+ban-relative-imports = "all"
+
+[tool.ruff.lint.flake8-tidy-imports.banned-api]
+"typing.cast".msg = "Narrow or fix the types instead of casting."
+"typing_extensions.cast".msg = "Narrow or fix the types instead of casting."
+"unittest".msg = "Use pytest and plain fakes instead of unittest."
+"unittest.mock".msg = "Inject small dependencies and test with fakes instead of mocks."
+"importlib.import_module".msg = "Use explicit static imports instead of dynamic loading."
+"importlib.util".msg = "Use explicit static imports instead of dynamic loading."
+"importlib.machinery".msg = "Use explicit static imports instead of dynamic loading."
+"importlib.reload".msg = "Avoid module reloading; structure state explicitly instead."
+"importlib.abc".msg = "Use explicit static imports instead of custom import hooks."
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**/*.py" = [
+    # pytest checks with plain asserts.
+    "S101",
+    # A test's literal values are the behavior it documents.
+    "PLR2004",
+    # Module docstrings are for source modules, not test files.
+    "D100",
+]

@@ -1,0 +1,18 @@
+{
+  "$schema": "./node_modules/oxfmt/configuration_schema.json",
+  "printWidth": 80,
+  // rumdl formats Markdown; press/ is reader-owned; lockfiles and tool dirs stay untouched.
+  "ignorePatterns": [
+    "**/*.md",
+    "press/**",
+    "press-check/**",
+    "docs/agent-only/**",
+    ".venv/**",
+    ".pytest_cache/**",
+    "node_modules/**",
+    "uv.lock",
+    "package-lock.json",
+    ".byor/**",
+    "assets/**"
+  ]
+}

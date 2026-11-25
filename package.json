@@ -1,27 +1,22 @@
 {
   "name": "nightly-build-web-toolchain",
   "version": "0.1.0",
-  "description": "Dev-only formatters and linters for the engine's web assets, docs, and templates.",
   "private": true,
+  "description": "Dev-only formatters and linters for the engine's web assets, docs, and templates.",
   "type": "module",
   "scripts": {
-    "format": "prettier --write .",
-    "lint:format": "prettier --check .",
-    "lint:js": "eslint .",
+    "format": "oxfmt",
+    "lint:format": "oxfmt --check",
+    "lint:js": "oxlint --deny-warnings",
     "lint:css": "stylelint \"engine/assets/**/*.css\" \"templates/**/*.css\"",
-    "lint:md": "markdownlint-cli2",
-    "lint": "npm run lint:format && npm run lint:js && npm run lint:css && npm run lint:md",
+    "lint": "npm run lint:format && npm run lint:js && npm run lint:css",
     "test:js": "node --test \"tests/js/**/*.test.js\"",
-    "lint:sg": "ast-grep scan --rule scripts/ast-grep/nbjs-innerhtml-escape.yml"
+    "test": "npm run test:js"
   },
   "devDependencies": {
-    "@ast-grep/cli": "^0.44.1",
-    "@eslint/js": "^9.0.0",
-    "eslint": "^9.0.0",
-    "globals": "^15.0.0",
     "jsdom": "^29.1.1",
-    "markdownlint-cli2": "^0.14.0",
-    "prettier": "^3.0.0",
+    "oxfmt": "0.80.0",
+    "oxlint": "1.95.0",
     "stylelint": "^16.0.0",
     "stylelint-config-standard": "^36.0.0"
   }
