@@ -1,0 +1,384 @@
+/* math: the writer authors LaTeX as the element's text and the runtime
+   typesets it with KaTeX (nb.js, pinned, loaded only when a page carries
+   the furniture). No JS, the raw TeX shows — honest and copyable. The
+   annotated form colors terms via \htmlClass spans (.nb-mc*) from the
+   chart tokens, so the palette holds in both schemes.
+
+   Three tiers. Inline rides the prose line. A bare display equation sits
+   open on the page, journal-style: the prose around it carries the
+   citation. The moment text is grouped with the equation — a caption, a
+   legend — the whole thing becomes a data-block card (the same card the
+   code listing and the table wear), so the attached text reads as the
+   block's own and never as a stray paragraph. */
+.nb-math {
+  margin: 26px 0;
+}
+
+.nb-math-eq {
+  overflow: auto hidden;
+  padding: 6px 3px;
+  text-align: center;
+  font-size: 17px;
+  color: var(--ink);
+}
+
+.nb-math-eq .katex {
+  font-size: 1.16em;
+}
+
+.nb-math-in .katex {
+  font-size: 1.02em;
+
+  /* inline math must ride the line: let it wrap at KaTeX's top-level
+     operator boundaries instead of forcing the page wide on a phone */
+  white-space: normal;
+}
+
+/* attached text promotes the figure to the card */
+.nb-math:has(figcaption),
+.nb-math:has(.nb-math-legend) {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 17px 18px 0;
+}
+
+.nb-math:has(figcaption) .nb-math-eq,
+.nb-math:has(.nb-math-legend) .nb-math-eq {
+  padding: 5px 0 12px;
+}
+
+.nb-math figcaption {
+  border-top: 1px solid var(--hair);
+  margin: 0 -18px;
+  padding: 9px 18px 11px;
+  font-family: var(--sans);
+  font-size: 12.5px;
+  line-height: 1.55;
+  color: var(--ink-soft);
+}
+
+/* legend without a caption still closes the card cleanly */
+.nb-math:has(.nb-math-legend):not(:has(figcaption)) {
+  padding-bottom: 14px;
+}
+
+.nb-math-legend {
+  list-style: none;
+  margin: 0;
+  padding: 11px 0 0;
+  border-top: 1px solid var(--hair);
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: 7px 13px;
+  font-family: var(--sans);
+  font-size: 13.5px;
+  line-height: 1.5;
+  color: var(--ink-soft);
+}
+
+.nb-math-legend li {
+  display: contents;
+}
+
+.nb-math-legend .nb-math-term {
+  font-size: 13px;
+  white-space: nowrap;
+  justify-self: end;
+  padding-top: 1px;
+}
+
+/* a legend above the caption supplies the closing hairline itself */
+.nb-math-legend + figcaption {
+  margin-top: 13px;
+}
+
+.nb-math .nb-mc1 {
+  color: var(--chart-2);
+}
+
+.nb-math .nb-mc2 {
+  color: var(--chart-3);
+}
+
+.nb-math .nb-mc3 {
+  color: var(--chart-1);
+}
+
+.nb-math .nb-mc4 {
+  color: var(--chart-4);
+}
+
+.nb-math .nb-mc5 {
+  color: var(--chart-5);
+}
+
+/* phones: display math steps down a size before it resorts to scrolling */
+@media (width <= 480px) {
+  .nb-math-eq {
+    font-size: 15px;
+  }
+
+  .nb-math-eq .katex {
+    font-size: 1.05em;
+  }
+}
+
+/* Code remains plain text until Shiki replaces the authored pre. */
+.nb-code {
+  margin: 24px 0;
+  overflow: hidden;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+}
+
+.nb-code-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 8px 14px;
+  border-bottom: 1px solid var(--hair);
+  background: var(--wash);
+  font-family: var(--sans);
+  font-size: 12px;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  color: var(--faint);
+}
+
+.nb-code-file {
+  color: var(--ink-soft);
+  font-weight: 600;
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+.nb-code pre {
+  margin: 0;
+  padding: 14px 16px;
+  overflow-x: auto;
+  font-family: var(--mono);
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--ink);
+}
+
+.nb-code pre code {
+  font-family: inherit;
+}
+
+.nb-code-cap {
+  display: block;
+  padding: 9px 14px;
+  border-top: 1px solid var(--hair);
+  font-family: var(--sans);
+  font-size: 12.5px;
+  color: var(--ink-soft);
+}
+
+/* Shiki supplies colors for both themes in CSS variables. */
+.nb-code .shiki,
+.nb-code .shiki span {
+  color: var(--shiki-light) !important;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-mode="light"]) .nb-code .shiki,
+  :root:not([data-mode="light"]) .nb-code .shiki span {
+    color: var(--shiki-dark) !important;
+  }
+}
+
+:root[data-mode="dark"] .nb-code .shiki,
+:root[data-mode="dark"] .nb-code .shiki span {
+  color: var(--shiki-dark) !important;
+}
+
+.nb-code .shiki {
+  background: var(--panel) !important;
+}
+
+/* The shared Reading card follows the lesson bookend's visual structure. */
+.nb-reading-card {
+  margin: 26px 0;
+  padding: 14px 18px 0;
+  overflow: hidden;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+}
+
+.nb-article .nb-reading-card .nb-reading-name {
+  margin: 0 0 2px;
+  font-family: var(--serif);
+  font-size: 21px;
+  font-style: italic;
+  font-weight: 550;
+  color: var(--ink);
+}
+
+.nb-reading-rule {
+  height: 4px;
+  margin: 6px 0 10px;
+  border-top: 1px solid var(--accent);
+  border-bottom: 1px solid var(--accent);
+}
+
+.nb-reading-summary {
+  margin: 0;
+  color: var(--ink);
+}
+
+.nb-reading-band {
+  margin: 16px -18px 0;
+  padding: 6px 18px;
+  background: var(--panel);
+  border-top: 1px solid var(--hair);
+  border-bottom: 1px solid var(--hair);
+}
+
+.nb-reading-label {
+  font-family: var(--sans);
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+.nb-reading-list {
+  display: grid;
+  grid-template-columns: max-content minmax(0, 1fr);
+  gap: 8px 16px;
+  margin: 13px 0 0;
+  padding-bottom: 14px;
+  font-family: var(--sans);
+  font-size: 13.5px;
+  line-height: 1.55;
+  color: var(--ink-soft);
+}
+
+.nb-reading-list dt {
+  padding-top: 2px;
+  font-family: var(--mono);
+  font-size: 11.5px;
+  color: var(--accent);
+}
+
+.nb-reading-list dd {
+  margin: 0;
+}
+
+.nb-reading-list a {
+  color: var(--accent-2);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.nb-reading-list a:hover,
+.nb-reading-list a:focus-visible {
+  color: var(--accent);
+  text-decoration: underline;
+}
+
+/* A quote uses the article's serif type inside a quiet, complete card. */
+.nb-quote-card {
+  margin: 26px 0;
+  padding: 20px 22px 18px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+}
+
+.nb-quote-mark {
+  display: block;
+  height: 42px;
+  font-family: var(--serif);
+  font-size: 68px;
+  line-height: 0.9;
+  color: var(--accent);
+}
+
+.nb-article .nb-quote-card blockquote {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  color: var(--ink);
+  font-style: normal;
+}
+
+.nb-article .nb-quote-card blockquote p {
+  margin: 0;
+  font-family: var(--serif);
+  font-size: clamp(19px, 2.4vw, 24px);
+  font-style: italic;
+  line-height: 1.4;
+  letter-spacing: -0.01em;
+}
+
+.nb-quote-card figcaption {
+  margin-top: 18px;
+  padding-top: 12px;
+  border-top: 1px solid var(--hair);
+  font-family: var(--sans);
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--ink-soft);
+}
+
+.nb-quote-card figcaption a {
+  color: var(--accent-2);
+}
+
+/* @deprecated nb-grade -> nb-rubric: retained for published articles. */
+.nb-grade {
+  display: flex;
+  gap: 12px;
+  align-items: baseline;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--hair);
+}
+
+.nb-grade:last-child {
+  border-bottom: 0;
+}
+
+.nb-grade .nb-grade-verdict {
+  font-family: var(--sans);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  flex: 0 0 52px;
+}
+
+.nb-grade.hit .nb-grade-verdict {
+  color: var(--ok);
+}
+
+.nb-grade.miss .nb-grade-verdict {
+  color: var(--bad);
+}
+
+.nb-grade.open .nb-grade-verdict {
+  color: var(--warn);
+}
+
+.nb-grade p {
+  margin: 0;
+  font-family: var(--sans);
+  font-size: 14.5px;
+  color: var(--ink-soft);
+}
+
+@media print {
+  .nb-bar,
+  .nb-menu,
+  .nb-footer,
+  .nb-toc,
+  .nb-endnav,
+  .nb-nightnav {
+    display: none !important;
+  }
+}

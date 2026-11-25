@@ -23,8 +23,8 @@ and what to update.
 
 Connect GitHub in ChatGPT Work for the fork's owner account or organization,
 granting permission to push branches and open pull requests. Before asking for
-an article, enable workflows in the fork's **Actions** tab and set **Settings →
-Pages → Source** to **GitHub Actions**.
+an article, enable workflows in the fork's **Actions** tab and set
+**Settings → Pages → Source** to **GitHub Actions**.
 
 Without `gh`, `./nb setup` creates and pushes the git branches and config but
 cannot read or change repository settings. It lists Pages and Actions under
@@ -39,8 +39,8 @@ Protecting `library` behind the `validate` check is recommended.
 `./nb setup` requires `git`, `uv`, and Python 3.10+. Do not paste a GitHub token
 into chat.
 
-The default press includes **Dispatches** (on-demand requests) plus **News
-Brief** and **Feature** (scheduled runs). Your site goes live once Pages is
-enabled and the first article merges. Next:
+The default press includes **Dispatches** (on-demand requests) plus
+**News Brief** and **Feature** (scheduled runs). Your site goes live once Pages
+is enabled and the first article merges. Next:
 [Your first article](./first-article.md) or
 [Schedule publication](../guides/operate/schedule.md).

@@ -12,10 +12,10 @@ GitHub Pages. Add a schedule for a fresh edition every morning.
 **No backend and no new accounts. Your paper, config, and archive live in your
 fork.**
 
-<!-- prettier-ignore -->
 > [!NOTE]
-> Public papers appear at [the-nightly-build.github.io](https://the-nightly-build.github.io/).
-> Opt out in `press/site.yaml` with `directory: { publish: false }`.
+> Public papers appear at
+> [the-nightly-build.github.io](https://the-nightly-build.github.io/). Opt out
+> in `press/site.yaml` with `directory: { publish: false }`.
 
 ## Get started
 
@@ -25,8 +25,8 @@ agent:
 - **Terminal (`gh`):** sign in with `gh` as the fork owner, clone your fork, and
   open it in Claude Code or Codex.
 - **ChatGPT Work (no terminal):** connect GitHub with branch/PR access to your
-  fork, enable **Actions**, and set **Settings → Pages → Source** to **GitHub
-  Actions**.
+  fork, enable **Actions**, and set **Settings → Pages → Source** to
+  **GitHub Actions**.
 
 Ask the assistant:
 
@@ -60,8 +60,6 @@ See the [full documentation index](docs/README.md) or
 [troubleshooting](docs/troubleshooting/setup-and-scheduling.md).
 
 ## FAQ
-
-<!-- markdownlint-disable MD033 -->
 
 <details>
 <summary><strong>Why build this?</strong></summary>
@@ -120,5 +118,3 @@ changes under `press/` for conflict-free engine updates. Editing engine files
 directly means owning future merge conflicts.
 
 </details>
-
-<!-- markdownlint-enable MD033 -->

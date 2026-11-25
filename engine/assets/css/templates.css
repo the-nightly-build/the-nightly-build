@@ -1,0 +1,596 @@
+/* lesson furniture */
+
+/* @deprecated nb-objectives -> nb-note: retired from the catalog (the nb-note
+   primitive carries this move); kept so the published shelf renders */
+.nb-objectives {
+  background: var(--wash);
+  border: 1px solid var(--hair);
+  border-radius: var(--radius);
+  padding: 16px 18px;
+  margin: 0 0 8px;
+}
+
+.nb-objectives .nb-objectives-label {
+  font-family: var(--sans);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 8px;
+}
+
+.nb-objectives ul {
+  margin: 0;
+  padding-left: 20px;
+  font-family: var(--sans);
+  font-size: 14.5px;
+}
+
+.nb-objectives li {
+  margin: 4px 0;
+}
+
+/* @deprecated nb-callout -> nb-note: retired from the catalog (the nb-note
+   primitive carries this move); kept so the published shelf renders */
+.nb-callout {
+  border-left: 3px solid var(--accent);
+  background: var(--wash);
+  border-radius: 0 var(--radius) var(--radius) 0;
+  padding: 12px 16px;
+  margin: 18px 0;
+}
+
+.nb-callout .nb-callout-term {
+  font-family: var(--sans);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--accent);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  display: block;
+  margin-bottom: 4px;
+}
+
+/* @deprecated nb-check-box -> nb-note: retired from the catalog (the nb-note
+   primitive carries this move); kept so the published shelf renders */
+.nb-check-box {
+  border-top: 1px dashed var(--line);
+  border-bottom: 1px dashed var(--line);
+  padding: 6px 0 14px;
+  margin: 10px 0;
+}
+
+.nb-check-box ol {
+  font-family: var(--sans);
+  font-size: 15px;
+}
+
+.nb-check-box li {
+  margin: 10px 0;
+}
+
+/* @deprecated nb-bridge -> nb-note: retired from the catalog (the nb-note
+   primitive carries this move); kept so the published shelf renders */
+.nb-bridge {
+  border-left: 3px solid var(--accent-2);
+  background: var(--wash);
+  border-radius: 0 var(--radius) var(--radius) 0;
+  padding: 14px 16px;
+  margin: 14px 0;
+}
+
+.nb-bridge .nb-bridge-label {
+  font-family: var(--sans);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--accent-2);
+  display: block;
+  margin-bottom: 4px;
+}
+
+/* brief furniture */
+.nb-brief-item {
+  display: block;
+  padding: 18px 0;
+  border-bottom: 1px solid var(--hair);
+}
+
+.nb-brief-item:last-child {
+  border-bottom: 0;
+}
+
+.nb-brief-tag {
+  font-family: var(--sans);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--accent);
+  display: block;
+  margin-bottom: 6px;
+}
+
+.nb-brief-item h3 {
+  font-family: var(--serif);
+  font-size: 19px;
+  line-height: 1.3;
+  letter-spacing: -0.01em;
+  margin: 0 0 8px;
+}
+
+.nb-brief-item h3 > a {
+  color: inherit;
+}
+
+.nb-brief-item h3 > a[href]::after {
+  content: "\2197";
+  font-family: var(--sans);
+  font-size: 12px;
+  color: var(--accent);
+  margin-left: 6px;
+  vertical-align: 2px;
+}
+
+.nb-brief-item p {
+  font-family: var(--sans);
+  font-size: 15px;
+  color: var(--ink-soft);
+  margin: 0 0 8px;
+}
+
+@media (width >= 640px) {
+  .nb-brief-item {
+    display: grid;
+    grid-template-columns: 110px 1fr;
+    gap: 0 18px;
+  }
+
+  /* The tag owns the gutter and everything else owns the text column. Naming
+     only the prose left any furniture the item carries unassigned, and grid
+     auto-placement dropped it into the 110px gutter. */
+  .nb-brief-item > * {
+    grid-column: 2;
+  }
+
+  .nb-brief-item > .nb-brief-tag {
+    grid-column: 1;
+    margin-top: 4px;
+  }
+}
+
+/* paper furniture */
+
+/* @deprecated nb-abstract -> nb-note: retired from the catalog (the nb-note
+   primitive carries this move); kept so the published shelf renders */
+.nb-abstract {
+  background: var(--wash);
+  border: 1px solid var(--hair);
+  border-radius: var(--radius);
+  padding: 16px 18px;
+  margin: 0 0 8px;
+}
+
+.nb-abstract .nb-abstract-label {
+  font-family: var(--sans);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 8px;
+}
+
+/* @deprecated nb-holdsup -> nb-note: retained for published articles. */
+.nb-holdsup {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+  margin: 18px 0;
+}
+
+@media (width >= 640px) {
+  .nb-holdsup {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.nb-holdsup > div {
+  border: 1px solid var(--hair);
+  border-radius: var(--radius);
+  padding: 14px 16px;
+  background: var(--panel);
+}
+
+.nb-holdsup .nb-holdsup-label {
+  font-family: var(--sans);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  display: block;
+  margin-bottom: 8px;
+}
+
+.nb-holdsup > div.good .nb-holdsup-label {
+  color: var(--ok);
+}
+
+.nb-holdsup > div.careful .nb-holdsup-label {
+  color: var(--warn);
+}
+
+.nb-holdsup ul {
+  margin: 0;
+  padding-left: 18px;
+  font-family: var(--sans);
+  font-size: 14.5px;
+}
+
+.nb-holdsup li {
+  margin: 6px 0;
+}
+
+/* @deprecated nb-verdict -> nb-note: retired from the catalog (the nb-note
+   primitive carries this move); kept so the published shelf renders */
+.nb-verdict {
+  border-left: 3px solid var(--accent-2);
+  background: var(--wash);
+  border-radius: 0 var(--radius) var(--radius) 0;
+  padding: 14px 16px;
+  margin: 14px 0;
+}
+
+.nb-verdict .nb-verdict-label {
+  font-family: var(--sans);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--accent-2);
+  display: block;
+  margin-bottom: 4px;
+}
+
+/* chronicle furniture */
+.nb-timeline {
+  list-style: none;
+  margin: 16px 0;
+  padding: 0 0 0 22px;
+  border-left: 2px solid var(--line);
+  position: relative;
+}
+
+.nb-tl-event {
+  position: relative;
+  margin: 0 0 22px;
+}
+
+.nb-tl-event::before {
+  content: "";
+  position: absolute;
+  left: -28px;
+  top: 6px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--bg);
+  border: 2px solid var(--accent);
+}
+
+.nb-tl-event.major::before {
+  background: var(--accent);
+}
+
+.nb-tl-date {
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--accent);
+  letter-spacing: 0.04em;
+  display: block;
+  margin-bottom: 2px;
+}
+
+.nb-tl-event h3 {
+  font-family: var(--serif);
+  font-size: 18px;
+  margin: 0 0 6px;
+  line-height: 1.3;
+}
+
+.nb-tl-event p {
+  margin: 0;
+  color: var(--ink-soft);
+  font-size: 15.5px;
+}
+
+.nb-tl-interlude {
+  margin: 26px 0;
+}
+
+.nb-tl-interlude p {
+  font-style: italic;
+}
+
+/* shared furniture: prose ornaments */
+.nb-pull {
+  margin: 26px 0;
+  padding: 18px 0;
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+  text-align: center;
+}
+
+.nb-pull p {
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: 22px;
+  line-height: 1.4;
+  letter-spacing: -0.01em;
+  margin: 0;
+  color: var(--ink);
+}
+
+/* @deprecated nb-epigraph -> nb-note: retired from the catalog (the nb-note
+   primitive carries this move); kept so the published shelf renders */
+.nb-epigraph {
+  margin: 0 0 26px;
+  padding: 0 24px;
+  text-align: center;
+}
+
+.nb-epigraph p {
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: 17px;
+  line-height: 1.5;
+  margin: 0 0 6px;
+  color: var(--ink-soft);
+}
+
+.nb-epigraph .nb-epigraph-who {
+  font-family: var(--sans);
+  font-size: 11.5px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--faint);
+}
+
+/* @deprecated nb-aside -> nb-note: retired from the catalog (the nb-note
+   primitive carries this move); kept so the published shelf renders */
+.nb-aside {
+  background: var(--wash);
+  border: 1px solid var(--hair);
+  border-radius: var(--radius);
+  padding: 12px 14px;
+  margin: 18px 0;
+  font-family: var(--sans);
+  font-size: 13.5px;
+  color: var(--ink-soft);
+}
+
+@media (width >= 640px) {
+  .nb-aside {
+    float: right;
+    width: 220px;
+    margin: 4px 0 12px 20px;
+  }
+}
+
+/* shared furniture: structured blocks */
+.nb-steps {
+  list-style: none;
+  margin: 18px 0;
+  padding: 0;
+  counter-reset: nb-step;
+}
+
+.nb-steps > li {
+  position: relative;
+  padding: 0 0 18px 44px;
+  counter-increment: nb-step;
+}
+
+.nb-steps > li::before {
+  content: counter(nb-step, decimal-leading-zero);
+  position: absolute;
+  left: 0;
+  top: 2px;
+  font-family: var(--mono);
+  font-size: 15px;
+  color: var(--accent);
+}
+
+.nb-steps > li:not(:last-child)::after {
+  content: "";
+  position: absolute;
+  left: 11px;
+  top: 26px;
+  bottom: 4px;
+  width: 1px;
+  background: var(--line);
+}
+
+.nb-steps h3 {
+  font-family: var(--serif);
+  font-size: 17.5px;
+  margin: 0 0 4px;
+  line-height: 1.3;
+}
+
+.nb-steps p {
+  margin: 0;
+  font-size: 15px;
+  color: var(--ink-soft);
+}
+
+/* @deprecated nb-cast -> nb-note: retired from the catalog (the nb-note
+   primitive carries this move); kept so the published shelf renders */
+.nb-cast {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 10px;
+  margin: 20px 0;
+}
+
+.nb-cast > div {
+  background: var(--panel);
+  padding: 12px 14px;
+  border: 1px solid var(--hair);
+  border-radius: var(--radius);
+}
+
+.nb-cast .nb-cast-name {
+  font-family: var(--serif);
+  font-size: 16px;
+  display: block;
+  margin-bottom: 2px;
+}
+
+.nb-cast .nb-cast-role {
+  font-family: var(--sans);
+  font-size: 12.5px;
+  color: var(--ink-soft);
+}
+
+/* @deprecated nb-position -> nb-note: retained for published articles. */
+.nb-position {
+  margin: 18px 0;
+  padding: 14px 16px;
+  background: var(--wash);
+  border-left: 3px solid var(--accent-2);
+  border-radius: 0 var(--radius) var(--radius) 0;
+}
+
+.nb-position-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+  margin-bottom: 6px;
+}
+
+.nb-position-who {
+  font-family: var(--sans);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--accent-2);
+}
+
+.nb-position-pill {
+  font-family: var(--mono);
+  font-size: 10.5px;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--faint);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 2px 9px;
+  white-space: nowrap;
+}
+
+.nb-position-statement {
+  font-family: var(--serif);
+  font-weight: 600;
+  font-size: 1.18rem;
+  line-height: 1.4;
+  margin: 0 0 8px;
+  color: var(--ink);
+}
+
+.nb-position-summary {
+  font-family: var(--sans);
+  font-size: 0.85rem;
+  line-height: 1.5;
+  color: var(--ink-soft);
+  border-top: 1px solid var(--line);
+  padding-top: 8px;
+  margin: 0;
+}
+
+/* The published shelf still contains claim cards with resolution states. */
+
+/* @deprecated nb-claim -> nb-note: retained for published articles. */
+.nb-claim {
+  border: 1px solid var(--line);
+  border-left: 3px solid var(--accent);
+  border-radius: 0 var(--radius) var(--radius) 0;
+  background: var(--panel);
+  padding: 14px 16px;
+  margin: 14px 0;
+}
+
+.nb-claim[data-nb-resolution="hit"] {
+  border-left-color: var(--ok);
+}
+
+.nb-claim[data-nb-resolution="miss"] {
+  border-left-color: var(--bad);
+}
+
+.nb-claim-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+}
+
+.nb-claim-state {
+  font-family: var(--mono);
+  font-size: 10.5px;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  padding: 2px 9px;
+  border-radius: 999px;
+  border: 1px solid currentcolor;
+  white-space: nowrap;
+  color: var(--warn);
+}
+
+.nb-claim[data-nb-resolution="hit"] .nb-claim-state {
+  color: var(--ok);
+}
+
+.nb-claim[data-nb-resolution="miss"] .nb-claim-state {
+  color: var(--bad);
+}
+
+.nb-claim-outcome {
+  margin: 8px 0 2px;
+  font-size: 15px;
+  color: var(--ink);
+}
+
+.nb-claim h3 {
+  font-family: var(--serif);
+  font-size: 17.5px;
+  margin: 0 0 8px;
+  line-height: 1.3;
+}
+
+.nb-claim p {
+  margin: 0 0 10px;
+  font-size: 14.5px;
+  color: var(--ink-soft);
+}
+
+.nb-claim-meta {
+  display: flex;
+  gap: 14px;
+  flex-wrap: wrap;
+  border-top: 1px solid var(--hair);
+  padding-top: 8px;
+}
+
+.nb-claim-meta span {
+  font-family: var(--mono);
+  font-size: 11.5px;
+  color: var(--accent);
+  border: 1px solid var(--hair);
+  border-radius: 999px;
+  padding: 2px 10px;
+}

@@ -10,6 +10,8 @@ repos:
       - id: check-added-large-files
         # CI's checkout stages nothing, so check every file it is given.
         args: [--enforce-all]
+        # Existing committed README banner image (2.68 MB).
+        exclude: ^assets/the-nightly-build-banner\.png$
 
   - repo: https://github.com/rvben/rumdl-pre-commit
     rev: v0.3.6

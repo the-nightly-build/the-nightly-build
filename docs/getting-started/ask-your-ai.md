@@ -13,8 +13,8 @@ Fork this repository on GitHub with **Copy the main branch only** checked.
 - **Terminal:** sign in with `gh` (fork owner account), clone your fork, and
   open it in Claude Code or Codex.
 - **ChatGPT Work:** connect GitHub with access to push branches and open PRs on
-  your fork. Enable workflows in **Actions** if disabled, and set **Settings →
-  Pages → Source** to **GitHub Actions**.
+  your fork. Enable workflows in **Actions** if disabled, and set
+  **Settings → Pages → Source** to **GitHub Actions**.
 
 ## 3. Ask for an article
 
