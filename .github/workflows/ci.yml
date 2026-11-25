@@ -17,48 +17,46 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  python:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: astral-sh/setup-uv@v10.4.0
+      - uses: actions/cache@v6
+        with:
+          path: ~/.cache/prek
+          key: prek-${{ runner.os }}-${{ hashFiles('.pre-commit-config.yaml') }}
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 26
+          cache: npm
+      - run: npm ci
+
+      - uses: taiki-e/install-action@v2
+        with:
+          tool: shfmt@3.11.0
+      - name: Install shellcheck
+        run: sudo apt-get update && sudo apt-get install -y shellcheck
+
+      - run: uvx prek@0.5.11 run --all-files --show-diff-on-failure
+
+  test:
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
         python-version: ["3.10", "3.13"]
     steps:
-      - uses: actions/checkout@v4
-      - uses: astral-sh/setup-uv@v5
+      - uses: actions/checkout@v7
+      - uses: astral-sh/setup-uv@v10.4.0
         with:
-          enable-cache: true
           python-version: ${{ matrix.python-version }}
-      - run: uv sync --group figure-capture --group charts
-      - run: uv run ruff check .
-      - run: uv run ruff format --check .
-      - run: uv run ty check
-      - run: uv run pytest
+      - run: uv run --locked --group figure-capture --group charts pytest
 
-  web:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         with:
-          node-version: "22"
+          node-version: 26
           cache: npm
       - run: npm ci
-      - run: npx prettier --check .
-      - run: npx eslint .
-      - run: npx stylelint "engine/assets/**/*.css" "templates/**/*.css"
-      - run: npx markdownlint-cli2
-      - run: npm run lint:sg
-      - run: npm run test:js
-
-  shell:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - name: shellcheck (preinstalled on ubuntu runners)
-        run: shellcheck scripts/setup.sh scripts/sync.sh
-      - name: shfmt
-        run: |
-          curl -fsSL https://github.com/mvdan/sh/releases/download/v3.10.0/shfmt_v3.10.0_linux_amd64 -o /tmp/shfmt
-          chmod +x /tmp/shfmt
-          /tmp/shfmt -d scripts/setup.sh scripts/sync.sh
+      - run: npm test
