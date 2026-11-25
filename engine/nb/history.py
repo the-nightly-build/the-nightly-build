@@ -14,14 +14,18 @@ import argparse
 import os
 import pathlib
 import re
-from collections.abc import Sequence
+import sys
 from dataclasses import dataclass, field
 from html.parser import HTMLParser
+from typing import TYPE_CHECKING
 
 from nb import meta as nb_meta
 from nb.git_handoff import GitHandoffError
 from nb.library_checkout import LibraryCheckoutError, ensure_library
 from nb.site.library import article_body_html, article_text, read_meta, scan_library
+
+if TYPE_CHECKING:
+    from collections.abc import Sequence
 
 __all__ = (
     "HistoryEntry",
@@ -132,10 +136,7 @@ class _ReadableTextParser(HTMLParser):
             self.parts.append(data)
 
     def text(self) -> str:
-        lines = (
-            re.sub(r"\s+", " ", line).strip()
-            for line in "".join(self.parts).splitlines()
-        )
+        lines = (re.sub(r"\s+", " ", line).strip() for line in "".join(self.parts).splitlines())
         return "\n".join(line for line in lines if line)
 
 
@@ -170,9 +171,7 @@ class _StructureParser(HTMLParser):
             self._heading = []
         elif tag in COMPONENT_TAGS:
             classes = (attributes.get("class") or "").split()
-            section.furniture.update(
-                name for name in classes if "-" in name and name not in CHROME_CLASSES
-            )
+            section.furniture.update(name for name in classes if "-" in name and name not in CHROME_CLASSES)
 
     def handle_endtag(self, tag: str) -> None:
         if tag == "sup":
@@ -246,19 +245,14 @@ def readable_text(path: pathlib.Path) -> str:
 
 
 def _occurrences(text: str, terms: Sequence[str]) -> list[list[tuple[int, int]]]:
-    return [
-        [(match.start(), match.end()) for match in re.finditer(re.escape(term), text)]
-        for term in terms
-    ]
+    return [[(match.start(), match.end()) for match in re.finditer(re.escape(term), text)] for term in terms]
 
 
 def _tightest_span(
     occurrences: Sequence[Sequence[tuple[int, int]]],
 ) -> tuple[int, int] | None:
     points = sorted(
-        (start, end, term_index)
-        for term_index, matches in enumerate(occurrences)
-        for start, end in matches
+        (start, end, term_index) for term_index, matches in enumerate(occurrences) for start, end in matches
     )
     if not points or any(not matches for matches in occurrences):
         return None
@@ -297,9 +291,7 @@ def excerpt(text: str, terms: Sequence[str]) -> str | None:
 
     span_start, span_end = span
     if span_end - span_start > EXCERPT_LENGTH:
-        rarest = min(
-            (values for values in matches if values), key=lambda values: len(values)
-        )
+        rarest = min((values for values in matches if values), key=len)
         span_start, span_end = rarest[0]
     spare = max(0, EXCERPT_LENGTH - (span_end - span_start))
     start = max(0, span_start - spare // 3)
@@ -318,7 +310,7 @@ def _matching_score(entry: HistoryEntry, terms: Sequence[str]) -> int | None:
     tags = " ".join(entry.tags).casefold()
     text = entry.text.casefold()
     reference = entry.reference.casefold()
-    searchable = "\n".join((reference, title, dek, tags, text))
+    searchable = f"{reference}\n{title}\n{dek}\n{tags}\n{text}"
     if not all(term in searchable for term in terms):
         return None
     return sum(
@@ -382,14 +374,13 @@ def format_results(results: Sequence[HistoryResult]) -> str:
 def _limit(value: str) -> int:
     parsed = int(value)
     if not 1 <= parsed <= MAX_LIMIT:
-        raise argparse.ArgumentTypeError(f"limit must be between 1 and {MAX_LIMIT}")
+        message = f"limit must be between 1 and {MAX_LIMIT}"
+        raise argparse.ArgumentTypeError(message)
     return parsed
 
 
 def parser() -> argparse.ArgumentParser:
-    command = argparse.ArgumentParser(
-        description="Search bounded, plain-text records of published coverage"
-    )
+    command = argparse.ArgumentParser(description="Search bounded, plain-text records of published coverage")
     command.add_argument(
         "query",
         nargs="*",
@@ -398,8 +389,7 @@ def parser() -> argparse.ArgumentParser:
     command.add_argument(
         "--library",
         type=pathlib.Path,
-        help="library checkout (defaults to $NB_LIBRARY, else one kept under "
-        ".nb-work/ at origin/library)",
+        help="library checkout (defaults to $NB_LIBRARY, else one kept under .nb-work/ at origin/library)",
     )
     command.add_argument("--series", help="restrict results to one series")
     command.add_argument("--limit", type=_limit, default=DEFAULT_LIMIT)
@@ -411,8 +401,7 @@ def parser() -> argparse.ArgumentParser:
     command.add_argument(
         "--structure",
         metavar="SERIES/SLUG",
-        help="print one article's outline: title, dek, headings, and the "
-        "furniture each section uses",
+        help="print one article's outline: title, dek, headings, and the furniture each section uses",
     )
     return command
 
@@ -425,7 +414,8 @@ def _shown_article(library: pathlib.Path, reference: str) -> pathlib.Path | None
         or nb_meta.SERIES_RE.fullmatch(series) is None
         or nb_meta.SLUG_RE.fullmatch(slug) is None
     ):
-        raise ValueError("expected SERIES/SLUG")
+        message = "expected SERIES/SLUG"
+        raise ValueError(message)
     directory = nb_meta.series_dir(str(library), series)
     if directory is None:
         return None
@@ -433,50 +423,53 @@ def _shown_article(library: pathlib.Path, reference: str) -> pathlib.Path | None
     return article if article.is_file() else None
 
 
+def _resolve_library(configured_arg: pathlib.Path | None) -> pathlib.Path:
+    if configured_arg is not None:
+        return configured_arg
+    configured = os.getenv("NB_LIBRARY")
+    try:
+        return pathlib.Path(configured) if configured else ensure_library()
+    except LibraryCheckoutError as error:
+        message = f"nb history: {error}"
+        raise SystemExit(message) from error
+    except GitHandoffError as error:
+        raise SystemExit(error.emit()) from error
+
+
+def _require_article(command: argparse.ArgumentParser, library: pathlib.Path, *, reference: str) -> pathlib.Path:
+    try:
+        article = _shown_article(library, reference)
+    except ValueError as error:
+        command.error(str(error))
+    if article is None:
+        message = f"published article not found: {reference}"
+        raise SystemExit(message)
+    return article
+
+
 def main(arguments: list[str] | None = None) -> None:
     command = parser()
     options = command.parse_args(arguments)
-    if options.library is None:
-        configured = os.getenv("NB_LIBRARY")
-        try:
-            options.library = (
-                pathlib.Path(configured) if configured else ensure_library()
-            )
-        except LibraryCheckoutError as error:
-            raise SystemExit(f"nb history: {error}") from error
-        except GitHandoffError as error:
-            raise SystemExit(error.emit()) from error
+    library = _resolve_library(options.library)
     if options.structure:
         if options.query or options.series or options.show:
-            command.error(
-                "--structure cannot be combined with a query, --series, or --show"
-            )
-        try:
-            article = _shown_article(options.library, options.structure)
-        except ValueError as error:
-            command.error(str(error))
-        if article is None:
-            raise SystemExit(f"published article not found: {options.structure}")
-        print(structure_outline(article), end="")
+            command.error("--structure cannot be combined with a query, --series, or --show")
+        article = _require_article(command, library, reference=options.structure)
+        sys.stdout.write(structure_outline(article))
         return
     if options.show:
         if options.query or options.series:
             command.error("--show cannot be combined with a query or --series")
-        try:
-            article = _shown_article(options.library, options.show)
-        except ValueError as error:
-            command.error(str(error))
-        if article is None:
-            raise SystemExit(f"published article not found: {options.show}")
-        print(readable_text(article))
+        article = _require_article(command, library, reference=options.show)
+        sys.stdout.write(f"{readable_text(article)}\n")
         return
     results = search(
-        load_entries(options.library),
+        load_entries(library),
         options.query,
         series=options.series,
         limit=options.limit,
     )
-    print(format_results(results))
+    sys.stdout.write(f"{format_results(results)}\n")
 
 
 if __name__ == "__main__":

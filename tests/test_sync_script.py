@@ -14,7 +14,7 @@ import subprocess
 from dataclasses import dataclass
 from typing import Literal
 
-from press import REPO
+from press import REPO, git_executable, refuse_git_remote
 
 SYNC_BRANCH = "nb/sync-library-workflows"
 WORKFLOWS = (
@@ -24,7 +24,7 @@ WORKFLOWS = (
 
 
 def git(cwd: pathlib.Path, *args: str) -> str:
-    command = ["git", *args]
+    command = [git_executable(), *args]
     return subprocess.run(
         command,
         cwd=cwd,
@@ -47,16 +47,11 @@ class SyncRepo:
     gh_log: pathlib.Path
     fake_bin: pathlib.Path
 
-    # Variadic command arguments are positional; both execution controls below
-    # are already keyword-only because they follow *args.
-    # ast-grep-ignore: keyword-only-args
     def run(
         self,
         *args: str,
         check_failure: bool = False,
-        gh_mode: Literal[
-            "available", "unauthenticated", "repo-unavailable", "protection-unavailable"
-        ] = "available",
+        gh_mode: Literal["available", "unauthenticated", "repo-unavailable", "protection-unavailable"] = "available",
     ) -> subprocess.CompletedProcess[str]:
         env = os.environ.copy()
         env.update(
@@ -78,10 +73,11 @@ class SyncRepo:
             env=env,
             capture_output=True,
             text=True,
+            check=False,
         )
 
     def remote_ref(self, ref: str) -> str:
-        command = ["git", f"--git-dir={self.origin}", "rev-parse", ref]
+        command = [git_executable(), f"--git-dir={self.origin}", "rev-parse", ref]
         return subprocess.run(
             command,
             capture_output=True,
@@ -91,14 +87,20 @@ class SyncRepo:
 
     def remote_blob(self, ref: str, path: str) -> str:
         return subprocess.run(
-            ["git", f"--git-dir={self.origin}", "show", f"{ref}:{path}"],
+            [git_executable(), f"--git-dir={self.origin}", "show", f"{ref}:{path}"],
             capture_output=True,
             text=True,
             check=True,
         ).stdout
 
     def update_remote_ref(self, ref: str, target: str) -> None:
-        command = ["git", f"--git-dir={self.origin}", "update-ref", ref, target]
+        command = [
+            git_executable(),
+            f"--git-dir={self.origin}",
+            "update-ref",
+            ref,
+            target,
+        ]
         subprocess.run(
             command,
             check=True,
@@ -140,15 +142,7 @@ esac
     script.chmod(0o755)
 
 
-def make_sync_repo(
-    tmp_path: pathlib.Path, *, drift: Literal["none", "both", "check"]
-) -> SyncRepo:
-    source = tmp_path / "source"
-    origin = tmp_path / "origin.git"
-    upstream = tmp_path / "upstream.git"
-    maintainer = tmp_path / "maintainer"
-    upstream_work = tmp_path / "upstream-work"
-    checkout = tmp_path / "checkout"
+def _seed_source_repo(source: pathlib.Path) -> None:
     source.mkdir()
     (source / "scripts").mkdir()
     (source / ".github" / "workflows").mkdir(parents=True)
@@ -158,36 +152,15 @@ def make_sync_repo(
     shutil.copy2(REPO / "scripts" / "sync.sh", source / "scripts" / "sync.sh")
     shutil.copytree(REPO / "engine", source / "engine")
     for path in WORKFLOWS:
-        target = source / path
-        target.write_text((REPO / path).read_text())
+        (source / path).write_text((REPO / path).read_text())
     (source / "shared.txt").write_text("base\n")
     git(source, "init", "-q", "-b", "main")
     configure_author(source)
     git(source, "add", "-A")
     git(source, "commit", "-qm", "base engine")
-    subprocess.run(
-        ["git", "clone", "-q", "--bare", str(source), str(origin)], check=True
-    )
-    subprocess.run(
-        ["git", "clone", "-q", "--bare", str(source), str(upstream)], check=True
-    )
 
-    subprocess.run(["git", "clone", "-q", str(origin), str(maintainer)], check=True)
-    configure_author(maintainer)
-    (maintainer / "shared.txt").write_text("fork\n")
-    git(maintainer, "add", "shared.txt")
-    git(maintainer, "commit", "-qm", "fork change")
-    git(maintainer, "push", "-q", "origin", "main")
 
-    subprocess.run(
-        ["git", "clone", "-q", str(upstream), str(upstream_work)], check=True
-    )
-    configure_author(upstream_work)
-    (upstream_work / "shared.txt").write_text("upstream\n")
-    git(upstream_work, "add", "shared.txt")
-    git(upstream_work, "commit", "-qm", "upstream change")
-    git(upstream_work, "push", "-q", "origin", "main")
-
+def _seed_library_branch(maintainer: pathlib.Path, *, drift: Literal["none", "both", "check"]) -> None:
     git(maintainer, "checkout", "-q", "--orphan", "library")
     for entry in maintainer.iterdir():
         if entry.name != ".git":
@@ -199,16 +172,43 @@ def make_sync_repo(
     (maintainer / "library").mkdir()
     (maintainer / "library" / ".gitkeep").write_text("")
     for path in WORKFLOWS:
-        stale = drift == "both" or (
-            drift == "check" and path == ".github/workflows/check.yml"
-        )
+        stale = drift == "both" or (drift == "check" and path == ".github/workflows/check.yml")
         content = "name: stale\n" if stale else (REPO / path).read_text()
         (maintainer / path).write_text(content)
     git(maintainer, "add", "-A")
     git(maintainer, "commit", "-qm", "library")
     git(maintainer, "push", "-q", "origin", "library")
 
-    subprocess.run(["git", "clone", "-q", str(origin), str(checkout)], check=True)
+
+def make_sync_repo(tmp_path: pathlib.Path, *, drift: Literal["none", "both", "check"]) -> SyncRepo:
+    git_bin = git_executable()
+    source = tmp_path / "source"
+    origin = tmp_path / "origin.git"
+    upstream = tmp_path / "upstream.git"
+    maintainer = tmp_path / "maintainer"
+    upstream_work = tmp_path / "upstream-work"
+    checkout = tmp_path / "checkout"
+    _seed_source_repo(source)
+    subprocess.run([git_bin, "clone", "-q", "--bare", str(source), str(origin)], check=True)
+    subprocess.run([git_bin, "clone", "-q", "--bare", str(source), str(upstream)], check=True)
+
+    subprocess.run([git_bin, "clone", "-q", str(origin), str(maintainer)], check=True)
+    configure_author(maintainer)
+    (maintainer / "shared.txt").write_text("fork\n")
+    git(maintainer, "add", "shared.txt")
+    git(maintainer, "commit", "-qm", "fork change")
+    git(maintainer, "push", "-q", "origin", "main")
+
+    subprocess.run([git_bin, "clone", "-q", str(upstream), str(upstream_work)], check=True)
+    configure_author(upstream_work)
+    (upstream_work / "shared.txt").write_text("upstream\n")
+    git(upstream_work, "add", "shared.txt")
+    git(upstream_work, "commit", "-qm", "upstream change")
+    git(upstream_work, "push", "-q", "origin", "main")
+
+    _seed_library_branch(maintainer, drift=drift)
+
+    subprocess.run([git_bin, "clone", "-q", str(origin), str(checkout)], check=True)
     configure_author(checkout)
     git(checkout, "remote", "add", "upstream", str(upstream))
     fake_bin = tmp_path / "bin"
@@ -239,8 +239,7 @@ def test_sync_surfaces_a_config_migration_error(tmp_path: pathlib.Path) -> None:
     series.mkdir(parents=True)
     (repo.checkout / "press" / "site.yaml").write_text('title: "Test Paper"\n')
     (series / "series.yaml").write_text(
-        "name: Daily\nmode: rolling\ntemplate: brief\nprompt: prompt.md\n"
-        "autopublish: false\n"
+        "name: Daily\nmode: rolling\ntemplate: brief\nprompt: prompt.md\nautopublish: false\n"
     )
     (series / "prompt.md").write_text("A daily brief.\n")
 
@@ -380,14 +379,10 @@ def test_failed_sync_reports_the_check_and_repair_path(tmp_path: pathlib.Path) -
 
     assert result.returncode != 0
     assert "validate: https://example.test/check" in result.stderr
-    assert repo.remote_blob("library", WORKFLOWS[0]) != repo.remote_blob(
-        "main", WORKFLOWS[0]
-    )
+    assert repo.remote_blob("library", WORKFLOWS[0]) != repo.remote_blob("main", WORKFLOWS[0])
 
 
-def test_sync_failed_push_emits_handoff(tmp_path) -> None:
-    from press import refuse_git_remote
-
+def test_sync_failed_push_emits_handoff(tmp_path: pathlib.Path) -> None:
     repo = make_sync_repo(tmp_path, drift="both")
     before = repo.remote_ref("refs/heads/library")
     refuse_git_remote(repo.fake_bin, operation="push")
@@ -401,9 +396,9 @@ def test_sync_failed_push_emits_handoff(tmp_path) -> None:
     assert "pr create" not in repo.gh_log.read_text()
 
 
-def test_sync_failed_branch_query_stops_before_preparation(tmp_path) -> None:
-    from press import refuse_git_remote
-
+def test_sync_failed_branch_query_stops_before_preparation(
+    tmp_path: pathlib.Path,
+) -> None:
     repo = make_sync_repo(tmp_path, drift="both")
     refuse_git_remote(repo.fake_bin, operation="ls-remote")
 

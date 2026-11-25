@@ -23,14 +23,9 @@ from press import REPO, make_full_library
 
 THEME_CSS = (REPO / "engine" / "assets" / "themes" / "newspaper.css").read_text()
 PALETTE_BLOCK_BODIES = [
-    body
-    for _, body in re.findall(
-        r"(:root[^{]*|@media[^{]*\{\s*:root[^{]*)\{([^}]*)\}", THEME_CSS
-    )
+    body for _, body in re.findall(r"(:root[^{]*|@media[^{]*\{\s*:root[^{]*)\{([^}]*)\}", THEME_CSS)
 ]
-PALETTE_BLOCKS = [
-    set(re.findall(r"--([a-z0-9-]+)\s*:", body)) for body in PALETTE_BLOCK_BODIES
-]
+PALETTE_BLOCKS = [set(re.findall(r"--([a-z0-9-]+)\s*:", body)) for body in PALETTE_BLOCK_BODIES]
 NON_COLOR = {"serif", "sans", "mono", "radius"}
 BASE_COLORS = PALETTE_BLOCKS[0] - NON_COLOR
 
@@ -56,10 +51,7 @@ def test_the_theme_defines_the_data_color_tokens() -> None:
 def wcag_contrast(hex_a: str, hex_b: str) -> float:
     def luminance(hex_color: str) -> float:
         channels = [int(hex_color[i : i + 2], 16) / 255 for i in (1, 3, 5)]
-        linear = [
-            c / 12.92 if c <= 0.04045 else ((c + 0.055) / 1.055) ** 2.4
-            for c in channels
-        ]
+        linear = [c / 12.92 if c <= 0.04045 else ((c + 0.055) / 1.055) ** 2.4 for c in channels]
         return 0.2126 * linear[0] + 0.7152 * linear[1] + 0.0722 * linear[2]
 
     high, low = sorted((luminance(hex_a), luminance(hex_b)), reverse=True)
@@ -71,11 +63,7 @@ def wcag_contrast(hex_a: str, hex_b: str) -> float:
 # they carry the 4.5:1 text bar. Checked per block so no mode can regress.
 @pytest.mark.parametrize("index", range(len(PALETTE_BLOCK_BODIES)))
 def test_data_colors_keep_contrast_on_their_surfaces(index: int) -> None:
-    hexes = dict(
-        re.findall(
-            r"--([a-z0-9-]+)\s*:\s*(#[0-9a-fA-F]{6})", PALETTE_BLOCK_BODIES[index]
-        )
-    )
+    hexes = dict(re.findall(r"--([a-z0-9-]+)\s*:\s*(#[0-9a-fA-F]{6})", PALETTE_BLOCK_BODIES[index]))
     surfaces = [hexes["bg"], hexes["panel"]]
 
     for token in sorted(CHART_TOKENS):

@@ -1,0 +1,64 @@
+[global]
+# Formatting fixes only layout: wrapping, indents, blank lines, spacing,
+# tables and markers. Other fixes would change what a file says, such as a
+# heading's level or a code block's language, so the lint only reports them.
+fixable = [
+  "MD004",
+  "MD005",
+  "MD007",
+  "MD009",
+  "MD010",
+  "MD012",
+  "MD013",
+  "MD019",
+  "MD020",
+  "MD021",
+  "MD022",
+  "MD023",
+  "MD027",
+  "MD030",
+  "MD031",
+  "MD032",
+  "MD035",
+  "MD047",
+  "MD048",
+  "MD049",
+  "MD050",
+  "MD055",
+  "MD058",
+  "MD060",
+  "MD064",
+  "MD065",
+  "MD071",
+  "MD076",
+  "MD077",
+  "MD085",
+]
+# press/ is the reader's own config; CLAUDE.md and GEMINI.md are exact
+# provider-native import directives; .claude contains the native adapter.
+exclude = [
+  "node_modules",
+  "press",
+  "press-check",
+  ".venv",
+  ".byor",
+  "docs/agent-only",
+  ".claude",
+  "CLAUDE.md",
+  "GEMINI.md",
+]
+
+[MD013]
+line-length = 80
+reflow = true
+# Rewrap every paragraph. The default mode only breaks lines that are too
+# long, so a shortened line never closes up.
+reflow-mode = "normalize"
+# A command or a line of code can't wrap.
+code-blocks = false
+# Quoted article titles in headings can't wrap without mangling the title.
+headings = false
+
+# README embeds <picture> diagrams and collapsible FAQ <details>/<summary> blocks.
+[MD033]
+allowed-elements = ["picture", "source", "img", "details", "summary", "strong"]

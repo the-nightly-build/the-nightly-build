@@ -19,9 +19,7 @@ DECLARED = 'src="https://cdn.example/hi.js"'
 def test_an_asset_without_integrity_is_rejected() -> None:
     errors: list[str] = []
 
-    validate_config.check_site_assets(
-        {"scripts": [{"url": "https://cdn.example/x.js"}]}, errors=errors
-    )
+    validate_config.check_site_assets({"scripts": [{"url": "https://cdn.example/x.js"}]}, errors=errors)
 
     assert any("integrity" in e for e in errors)
 
@@ -58,9 +56,7 @@ def test_pinned_and_hashed_assets_validate() -> None:
 
 
 def test_a_rendered_asset_carries_integrity_and_crossorigin() -> None:
-    html = build_site.render_assets_html(
-        {"scripts": [{"url": "https://cdn.example/x.js", "integrity": "sha384-A"}]}
-    )
+    html = build_site.render_assets_html({"scripts": [{"url": "https://cdn.example/x.js", "integrity": "sha384-A"}]})
 
     assert 'integrity="sha384-A"' in html
     assert 'crossorigin="anonymous"' in html

@@ -88,12 +88,12 @@ function articlePage(
 
 /* A payload that is inert escaped text in article source (so the proof's text
  * sandbox passes it) but decodes to live markup once innerHTML re-parses it. */
-const ESCAPED_IMG = "&lt;img src=x onerror=window.__pwned=1&gt;";
-const DECODED_IMG = "<img src=x onerror=window.__pwned=1>";
+const ESCAPED_IMG = "&lt;img src=x onerror=window.nbPwned=1&gt;";
+const DECODED_IMG = "<img src=x onerror=window.nbPwned=1>";
 
 test("buildToc renders a hostile heading and a hostile section id as inert text", async () => {
   const sections =
-    '<section data-nb-section="a" id="&#34;&gt;&lt;img src=x onerror=window.__pwned=1&gt;"><h2>Intro</h2></section>' +
+    '<section data-nb-section="a" id="&#34;&gt;&lt;img src=x onerror=window.nbPwned=1&gt;"><h2>Intro</h2></section>' +
     `<section data-nb-section="b"><h2>Body ${ESCAPED_IMG}</h2></section>` +
     '<section data-nb-section="c"><h2>End</h2></section>';
   const html = articlePage(
@@ -110,7 +110,7 @@ test("buildToc renders a hostile heading and a hostile section id as inert text"
     0,
     "no live <img> materializes from heading or id",
   );
-  assert.equal(w.__pwned, undefined, "onerror handler never fires");
+  assert.equal(w.nbPwned, undefined, "onerror handler never fires");
   const labels = [...toc.querySelectorAll("li a")].map((a) => a.textContent);
   assert.equal(labels.length, 3);
   assert.ok(
@@ -187,7 +187,7 @@ test("series nav renders a hostile catalog neighbor title as inert text", async 
     0,
     "no live <img> from a hostile title",
   );
-  assert.equal(w.__pwned, undefined);
+  assert.equal(w.nbPwned, undefined);
   assert.ok(
     nav.textContent.includes("onerror"),
     "payload survives as visible text",
@@ -197,6 +197,15 @@ test("series nav renders a hostile catalog neighbor title as inert text", async 
   );
   assert.deepEqual(labels, ["← Previous", "Next →"]);
 });
+
+function rollingSeriesPage(slug) {
+  return articlePage("<article><h1>t</h1></article>", {
+    series: slug === "only" ? "lone" : "r",
+    mode: "rolling",
+    slug,
+    date: "2026-07-12",
+  });
+}
 
 test("a rolling series walks its dates; edges and lone articles stay quiet", async () => {
   const catalog = {
@@ -239,15 +248,10 @@ test("a rolling series walks its dates; edges and lone articles stay quiet", asy
       },
     ],
   };
-  const page = (slug) =>
-    articlePage("<article><h1>t</h1></article>", {
-      series: slug === "only" ? "lone" : "r",
-      mode: "rolling",
-      slug,
-      date: "2026-07-12",
-    });
 
-  const mid = await loadNb(page("b"), { fetch: fetchRouter({ catalog }) });
+  const mid = await loadNb(rollingSeriesPage("b"), {
+    fetch: fetchRouter({ catalog }),
+  });
   const titles = [...mid.document.querySelectorAll(".nb-endnav-title")].map(
     (el) => el.textContent,
   );
@@ -257,13 +261,17 @@ test("a rolling series walks its dates; edges and lone articles stay quiet", asy
     "date neighbors, same series only",
   );
 
-  const newest = await loadNb(page("c"), { fetch: fetchRouter({ catalog }) });
+  const newest = await loadNb(rollingSeriesPage("c"), {
+    fetch: fetchRouter({ catalog }),
+  });
   const links = newest.document.querySelectorAll(".nb-endnav a");
   assert.equal(links.length, 1, "the newest article gets previous only");
   assert.match(links[0].textContent, /Middle/);
   assert.equal(links[0].classList.contains("next"), false);
 
-  const only = await loadNb(page("only"), { fetch: fetchRouter({ catalog }) });
+  const only = await loadNb(rollingSeriesPage("only"), {
+    fetch: fetchRouter({ catalog }),
+  });
   assert.equal(
     only.document.querySelector("nav.nb-endnav"),
     null,
@@ -462,9 +470,9 @@ const MATH_FIGURE =
 
 /* A KaTeX stub the page ships inline, standing in for window.katex. */
 const KATEX_STUB =
-  "<script>window.__mathCalls = [];" +
+  "<script>window.nbMathCalls = [];" +
   "window.katex = { render: function (tex, el, opts) {" +
-  "  window.__mathCalls.push({ tex: tex, display: opts.displayMode, trust: opts.trust });" +
+  "  window.nbMathCalls.push({ tex: tex, display: opts.displayMode, trust: opts.trust });" +
   "  el.innerHTML = '<span class=\"katex\"></span>';" +
   "} };</script>";
 
@@ -473,7 +481,7 @@ test("math typesets display and inline TeX, trusting only \\htmlClass", async ()
     articlePage(KATEX_STUB + "<article>" + MATH_FIGURE + "</article>"),
   );
 
-  const calls = w.__mathCalls;
+  const calls = w.nbMathCalls;
   assert.equal(calls.length, 2);
   assert.equal(calls[0].tex, "\\varphi(x) = ax + bx^{3}");
   assert.equal(calls[0].display, true, "nb-math-eq renders in display mode");
@@ -522,15 +530,15 @@ test("a press-pinned KaTeX outranks the engine's and typesets once it lands", as
   );
 
   /* the deferred press script executes after nb.js: stub it, then land it */
-  w.__mathCalls = [];
+  w.nbMathCalls = [];
   w.katex = {
     render: (tex, el, opts) =>
-      w.__mathCalls.push({ tex, display: opts.displayMode }),
+      w.nbMathCalls.push({ tex, display: opts.displayMode }),
   };
   const press = w.document.querySelector('script[src*="cdn.example"]');
   press.dispatchEvent(new w.Event("load"));
   await settle(w);
-  assert.equal(w.__mathCalls.length, 2, "typeset ran against the press copy");
+  assert.equal(w.nbMathCalls.length, 2, "typeset ran against the press copy");
 });
 
 const CODE_FIGURE =

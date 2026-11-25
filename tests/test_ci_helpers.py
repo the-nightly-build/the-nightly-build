@@ -14,7 +14,7 @@ from collections.abc import Callable
 
 import yaml
 
-from press import REPO
+from press import REPO, git
 
 
 def test_new_articles_are_always_classified_for_auto_merge(
@@ -37,18 +37,18 @@ def revision_ci_helper(tmp_path: pathlib.Path, command: str) -> str:
     article_path.parent.mkdir(parents=True)
     (series / "series.yaml").write_text("mode: rolling\n")
     article_path.write_text("<html>published</html>\n")
-    subprocess.run(["git", "init", "-q", "-b", "library"], cwd=repo, check=True)
-    subprocess.run(["git", "config", "user.email", "t@t"], cwd=repo, check=True)
-    subprocess.run(["git", "config", "user.name", "t"], cwd=repo, check=True)
-    subprocess.run(["git", "add", "-A"], cwd=repo, check=True)
-    subprocess.run(["git", "commit", "-qm", "published"], cwd=repo, check=True)
-    subprocess.run(["git", "checkout", "-qb", "revision"], cwd=repo, check=True)
+    git("init", "-q", "-b", "library", cwd=str(repo))
+    git("config", "user.email", "t@t", cwd=str(repo))
+    git("config", "user.name", "t", cwd=str(repo))
+    git("add", "-A", cwd=str(repo))
+    git("commit", "-qm", "published", cwd=str(repo))
+    git("checkout", "-qb", "revision", cwd=str(repo))
     article_path.write_text("<html>revised</html>\n")
     revisions = repo / "agent-artifacts" / "foo" / "story" / "revisions"
     revisions.mkdir(parents=True)
     (revisions / "01.md").write_text("# Revision\n\nCorrect the article.\n")
-    subprocess.run(["git", "add", "-A"], cwd=repo, check=True)
-    subprocess.run(["git", "commit", "-qm", "revision"], cwd=repo, check=True)
+    git("add", "-A", cwd=str(repo))
+    git("commit", "-qm", "revision", cwd=str(repo))
     return subprocess.run(
         [
             sys.executable,
@@ -93,13 +93,13 @@ def run_sync_helper(
         target.parent.mkdir(parents=True, exist_ok=True)
         target.write_text(content)
 
-    subprocess.run(["git", "init", "-q", "-b", "library"], cwd=checkout, check=True)
-    subprocess.run(["git", "config", "user.email", "t@t"], cwd=checkout, check=True)
-    subprocess.run(["git", "config", "user.name", "t"], cwd=checkout, check=True)
+    git("init", "-q", "-b", "library", cwd=str(checkout))
+    git("config", "user.email", "t@t", cwd=str(checkout))
+    git("config", "user.name", "t", cwd=str(checkout))
     (checkout / ".gitkeep").write_text("")
-    subprocess.run(["git", "add", "-A"], cwd=checkout, check=True)
-    subprocess.run(["git", "commit", "-qm", "library"], cwd=checkout, check=True)
-    subprocess.run(["git", "checkout", "-qb", "sync"], cwd=checkout, check=True)
+    git("add", "-A", cwd=str(checkout))
+    git("commit", "-qm", "library", cwd=str(checkout))
+    git("checkout", "-qb", "sync", cwd=str(checkout))
     proposed = {".github/workflows/check.yml": workflows[".github/workflows/check.yml"]}
     if not only_check:
         proposed = workflows
@@ -109,8 +109,8 @@ def run_sync_helper(
         target.write_text(content)
     if extra_file:
         (checkout / "unexpected.txt").write_text("extra\n")
-    subprocess.run(["git", "add", "-A"], cwd=checkout, check=True)
-    subprocess.run(["git", "commit", "-qm", "sync"], cwd=checkout, check=True)
+    git("add", "-A", cwd=str(checkout))
+    git("commit", "-qm", "sync", cwd=str(checkout))
 
     return subprocess.run(
         [
@@ -142,9 +142,7 @@ def test_sync_accepts_one_stale_canonical_workflow(tmp_path: pathlib.Path) -> No
 
 
 def check_yml_triggers() -> set[str]:
-    workflow = yaml.safe_load(
-        (REPO / ".github" / "workflows" / "check.yml").read_text()
-    )
+    workflow = yaml.safe_load((REPO / ".github" / "workflows" / "check.yml").read_text())
     # PyYAML parses the bare key `on` as the boolean True (YAML 1.1); accept either.
     triggers = workflow.get("on", workflow.get(True)) or {}
     return set(triggers) if isinstance(triggers, dict) else {triggers}
@@ -159,9 +157,7 @@ def test_check_yml_never_uses_pull_request_target() -> None:
 
 
 def test_check_yml_routes_exact_syncs_to_the_protected_merge_job() -> None:
-    workflow = yaml.safe_load(
-        (REPO / ".github" / "workflows" / "check.yml").read_text()
-    )
+    workflow = yaml.safe_load((REPO / ".github" / "workflows" / "check.yml").read_text())
     validate = workflow["jobs"]["validate"]
     automerge = workflow["jobs"]["automerge"]
 
@@ -170,9 +166,7 @@ def test_check_yml_routes_exact_syncs_to_the_protected_merge_job() -> None:
 
 
 def test_check_yml_automerges_every_valid_new_article() -> None:
-    workflow = yaml.safe_load(
-        (REPO / ".github" / "workflows" / "check.yml").read_text()
-    )
+    workflow = yaml.safe_load((REPO / ".github" / "workflows" / "check.yml").read_text())
     validate = workflow["jobs"]["validate"]
     automerge = workflow["jobs"]["automerge"]
 

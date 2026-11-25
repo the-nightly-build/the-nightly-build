@@ -17,10 +17,7 @@ import pytest
 from findings import Findings
 from press import LOREM
 
-SOURCES = "".join(
-    f'<li id="s{i}"><a data-nb-source href="https://example.org/u{i}">x</a></li>'
-    for i in range(1, 6)
-)
+SOURCES = "".join(f'<li id="s{i}"><a data-nb-source href="https://example.org/u{i}">x</a></li>' for i in range(1, 6))
 
 ROWS = """
 <div class="nb-rubric-row" data-nb-criterion="speed" data-score="5">
@@ -59,8 +56,7 @@ def review(rows: str = ROWS) -> str:
 
 
 SCORED_MANIFEST = (
-    "class: shortread\nbands:\n  words: [200, 3000]\n"
-    "sections: [rubric, sources]\ncite_rule: per-section\n"
+    "class: shortread\nbands:\n  words: [200, 3000]\nsections: [rubric, sources]\ncite_rule: per-section\n"
 )
 
 SCORED_SKELETON = """<!DOCTYPE html><html><body>
@@ -99,32 +95,24 @@ def rubric_repo(clone_testrepo: Callable[..., str]) -> str:
     return repo
 
 
-def test_pinned_criteria_plus_an_extension_row_pass(
-    run_local: Callable[..., Findings], rubric_repo: str
-) -> None:
+def test_pinned_criteria_plus_an_extension_row_pass(run_local: Callable[..., Findings], rubric_repo: str) -> None:
     result = run_local(review(), "bench", slug="some-tool", repo=rubric_repo)
     assert not result.blocks
     assert "W-RUBRIC" not in result.codes
 
 
-def test_a_dropped_pinned_criterion_blocks(
-    run_local: Callable[..., Findings], rubric_repo: str
-) -> None:
+def test_a_dropped_pinned_criterion_blocks(run_local: Callable[..., Findings], rubric_repo: str) -> None:
     rows = ROWS.replace('data-nb-criterion="evidence"', 'data-nb-criterion="extras"')
     result = run_local(review(rows), "bench", slug="some-tool", repo=rubric_repo)
     assert "B-RUBRIC" in result.blocks
 
 
-def test_zero_rows_under_a_pinning_series_blocks(
-    run_local: Callable[..., Findings], rubric_repo: str
-) -> None:
+def test_zero_rows_under_a_pinning_series_blocks(run_local: Callable[..., Findings], rubric_repo: str) -> None:
     result = run_local(review(rows=""), "bench", slug="some-tool", repo=rubric_repo)
     assert "B-RUBRIC" in result.blocks
 
 
-def test_a_duplicate_criterion_blocks(
-    run_local: Callable[..., Findings], rubric_repo: str
-) -> None:
+def test_a_duplicate_criterion_blocks(run_local: Callable[..., Findings], rubric_repo: str) -> None:
     rows = ROWS.replace('data-nb-criterion="battery-life"', 'data-nb-criterion="speed"')
     result = run_local(review(rows), "bench", slug="some-tool", repo=rubric_repo)
     assert "B-RUBRIC" in result.blocks
@@ -142,9 +130,7 @@ def test_a_score_outside_the_scale_blocks(
     assert "B-RUBRIC" in result.blocks
 
 
-def test_rendered_score_text_must_match_the_attribute(
-    run_local: Callable[..., Findings], rubric_repo: str
-) -> None:
+def test_rendered_score_text_must_match_the_attribute(run_local: Callable[..., Findings], rubric_repo: str) -> None:
     rows = ROWS.replace(
         '<span class="nb-rubric-score">5/5</span>',
         '<span class="nb-rubric-score">4/5</span>',
@@ -153,30 +139,20 @@ def test_rendered_score_text_must_match_the_attribute(
     assert "B-RUBRIC" in result.blocks
 
 
-def test_a_malformed_criterion_slug_blocks(
-    run_local: Callable[..., Findings], rubric_repo: str
-) -> None:
-    rows = ROWS.replace(
-        'data-nb-criterion="battery-life"', 'data-nb-criterion="Battery Life!"'
-    )
+def test_a_malformed_criterion_slug_blocks(run_local: Callable[..., Findings], rubric_repo: str) -> None:
+    rows = ROWS.replace('data-nb-criterion="battery-life"', 'data-nb-criterion="Battery Life!"')
     result = run_local(review(rows), "bench", slug="some-tool", repo=rubric_repo)
     assert "B-RUBRIC" in result.blocks
 
 
-def test_an_uncited_row_warns_and_strict_escalates(
-    run_local: Callable[..., Findings], rubric_repo: str
-) -> None:
-    rows = ROWS.replace(
-        'Short.<sup class="nb-cite"><a href="#s3">3</a></sup>', "Short."
-    )
+def test_an_uncited_row_warns_and_strict_escalates(run_local: Callable[..., Findings], rubric_repo: str) -> None:
+    rows = ROWS.replace('Short.<sup class="nb-cite"><a href="#s3">3</a></sup>', "Short.")
     result = run_local(review(rows), "bench", slug="some-tool", repo=rubric_repo)
     assert "W-RUBRIC" in result.codes
     assert "W-RUBRIC" not in result.blocks
 
     series_yaml = pathlib.Path(rubric_repo, "press", "series", "bench", "series.yaml")
-    series_yaml.write_text(
-        series_yaml.read_text().replace("strict: false", "strict: true")
-    )
+    series_yaml.write_text(series_yaml.read_text().replace("strict: false", "strict: true"))
     strict_result = run_local(review(rows), "bench", slug="some-tool", repo=rubric_repo)
     assert "W-RUBRIC" in strict_result.blocks
 
@@ -186,37 +162,24 @@ def test_rows_in_a_series_without_a_rubric_are_still_integrity_checked(
 ) -> None:
     series_yaml = pathlib.Path(rubric_repo, "press", "series", "bench", "series.yaml")
     series_yaml.write_text(
-        "name: The Bench\nmode: collection\ntemplate: scored\n"
-        "items:\n  - {slug: some-tool, title: Some Tool}\n"
+        "name: The Bench\nmode: collection\ntemplate: scored\nitems:\n  - {slug: some-tool, title: Some Tool}\n"
     )
     rows = ROWS.replace('data-score="5"', 'data-score="9"', 1)
     result = run_local(review(rows), "bench", slug="some-tool", repo=rubric_repo)
     assert "B-RUBRIC" in result.blocks
 
 
-def test_validate_config_accepts_a_pinning_series(
-    vc_rc: Callable[[str], int], rubric_repo: str
-) -> None:
+def test_validate_config_accepts_a_pinning_series(vc_rc: Callable[[str], int], rubric_repo: str) -> None:
     assert vc_rc(rubric_repo) == 0
 
 
-def test_validate_config_rejects_a_malformed_rubric(
-    vc_rc: Callable[[str], int], rubric_repo: str
-) -> None:
+def test_validate_config_rejects_a_malformed_rubric(vc_rc: Callable[[str], int], rubric_repo: str) -> None:
     series_yaml = pathlib.Path(rubric_repo, "press", "series", "bench", "series.yaml")
-    series_yaml.write_text(
-        series_yaml.read_text().replace(
-            "  - id: speed\n    name: Speed\n", "  - id: speed\n"
-        )
-    )
+    series_yaml.write_text(series_yaml.read_text().replace("  - id: speed\n    name: Speed\n", "  - id: speed\n"))
     assert vc_rc(rubric_repo) == 1
 
 
-def test_a_pinned_rubric_on_the_article_template_validates(
-    vc_rc: Callable[[str], int], rubric_repo: str
-) -> None:
+def test_a_pinned_rubric_on_the_article_template_validates(vc_rc: Callable[[str], int], rubric_repo: str) -> None:
     series_yaml = pathlib.Path(rubric_repo, "press", "series", "bench", "series.yaml")
-    series_yaml.write_text(
-        series_yaml.read_text().replace("template: scored", "template: article")
-    )
+    series_yaml.write_text(series_yaml.read_text().replace("template: scored", "template: article"))
     assert vc_rc(rubric_repo) == 0

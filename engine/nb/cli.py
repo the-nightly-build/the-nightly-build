@@ -33,18 +33,10 @@ class Command:
 
 
 COMMANDS = {
-    "setup": Command(
-        "scripts/setup.sh", "Set up a press and its publishing boundary", "human"
-    ),
-    "sync": Command(
-        "scripts/sync.sh", "Synchronize protected publishing workflows", "orchestrator"
-    ),
-    "duty": Command(
-        "engine/duty.py", "Resolve articles due for a UTC date", "orchestrator"
-    ),
-    "validate": Command(
-        "engine/validate_config.py", "Validate press configuration", "human"
-    ),
+    "setup": Command("scripts/setup.sh", "Set up a press and its publishing boundary", "human"),
+    "sync": Command("scripts/sync.sh", "Synchronize protected publishing workflows", "orchestrator"),
+    "duty": Command("engine/duty.py", "Resolve articles due for a UTC date", "orchestrator"),
+    "validate": Command("engine/validate_config.py", "Validate press configuration", "human"),
     "source-policy": Command(
         "engine/source_policy.py",
         "Resolve an article's source obligations",
@@ -55,9 +47,7 @@ COMMANDS = {
         "Resolve role model and effort guidance",
         "orchestrator",
     ),
-    "check": Command(
-        "engine/check.py", "Check an article or Article PR", "writer, editor, CI"
-    ),
+    "check": Command("engine/check.py", "Check an article or Article PR", "writer, editor, CI"),
     "stamp": Command(
         "engine/stamp.py",
         "Write the UTC publication date, article counts, and reading time",
@@ -69,15 +59,9 @@ COMMANDS = {
         "writer, editor, human",
     ),
     "build": Command("engine/build_site.py", "Build the published static site", "CI"),
-    "asset": Command(
-        "engine/capture_asset.py", "Capture a bounded source asset", "writer"
-    ),
-    "chart": Command(
-        "engine/render_chart.py", "Render a chart with the press theme", "writer"
-    ),
-    "render-check": Command(
-        "engine/render_check.py", "Probe a rendered article in Chrome", "CI"
-    ),
+    "asset": Command("engine/capture_asset.py", "Capture a bounded source asset", "writer"),
+    "chart": Command("engine/render_chart.py", "Render a chart with the press theme", "writer"),
+    "render-check": Command("engine/render_check.py", "Probe a rendered article in Chrome", "CI"),
     "ci": Command("engine/ci_helpers.py", "Resolve deterministic workflow facts", "CI"),
     "history": Command(
         "engine/nb/history.py",
@@ -99,11 +83,7 @@ COMMANDS = {
 
 def checkout_root() -> pathlib.Path:
     configured = os.environ.get("NB_ROOT")
-    return (
-        pathlib.Path(configured).resolve()
-        if configured
-        else pathlib.Path(__file__).resolve().parents[2]
-    )
+    return pathlib.Path(configured).resolve() if configured else pathlib.Path(__file__).resolve().parents[2]
 
 
 def parser() -> argparse.ArgumentParser:
@@ -136,13 +116,12 @@ def help_text() -> str:
 def executable(command: Command, *, root: pathlib.Path | None = None) -> pathlib.Path:
     target = (root or checkout_root()) / command.path
     if not target.is_file():
-        raise SystemExit(f"nb installation is incomplete: missing {target}")
+        message = f"nb installation is incomplete: missing {target}"
+        raise SystemExit(message)
     return target
 
 
-def command_arguments(
-    name: str, arguments: list[str], *, root: pathlib.Path | None = None
-) -> list[str]:
+def command_arguments(name: str, arguments: list[str], *, root: pathlib.Path | None = None) -> list[str]:
     command = COMMANDS[name]
     target = executable(command, root=root)
     if target.suffix == ".sh":
@@ -153,10 +132,11 @@ def command_arguments(
 def main(arguments: list[str] | None = None) -> None:
     parsed = parser().parse_args(arguments)
     if parsed.help or parsed.command is None:
-        print(help_text())
+        sys.stdout.write(f"{help_text()}\n")
         return
     if parsed.command not in COMMANDS:
-        raise SystemExit(f"unknown command: {parsed.command}\n\n{help_text()}")
+        message = f"unknown command: {parsed.command}\n\n{help_text()}"
+        raise SystemExit(message)
 
     invocation = command_arguments(parsed.command, parsed.arguments)
     os.execv(invocation[0], invocation)

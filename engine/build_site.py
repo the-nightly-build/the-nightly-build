@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 # /// script
 # requires-python = ">=3.10"
 # dependencies = ["pyyaml"]
@@ -40,6 +39,8 @@ max(1, round(words / 230)); appearance persists under the localStorage key
 The build itself lives in nb/site/; this file is the door it opens by.
 """
 
+from __future__ import annotations
+
 import argparse
 import datetime as dt
 import os
@@ -76,16 +77,14 @@ __all__ = [
 ]
 
 
-def main(argv=None):
+def main(argv: list[str] | None = None) -> int:
     p = argparse.ArgumentParser(description="The Nightly Build site builder")
     p.add_argument(
         "--repo",
         default=".",
         help="main checkout (engine, templates, series, site.yaml)",
     )
-    p.add_argument(
-        "--library", default=".", help="library checkout (published articles)"
-    )
+    p.add_argument("--library", default=".", help="library checkout (published articles)")
     p.add_argument("--out", default="site", help="output directory")
     p.add_argument(
         "--preview",
@@ -121,12 +120,9 @@ def main(argv=None):
         now=now,
     )
     n = len(catalog["articles"])
-    print(
-        f"site built: {args.out} ({n} article{'s' if n != 1 else ''}, "
-        f"{len(catalog['builds'])} builds)"
-    )
+    sys.stdout.write(f"site built: {args.out} ({n} article{'s' if n != 1 else ''}, {len(catalog['builds'])} builds)\n")
     if args.preview:
-        print(f"press check preview — serve with: python3 -m http.server -d {args.out}")
+        sys.stdout.write(f"press check preview — serve with: python3 -m http.server -d {args.out}\n")
     return 0
 
 

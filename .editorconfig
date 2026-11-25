@@ -1,0 +1,28 @@
+# Editors read this file. Its settings mirror the formatters' own config
+# files, so a change to one needs the same change to the other.
+root = true
+
+[*]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+indent_style = space
+indent_size = 2
+
+# Python: ruff, in pyproject.toml, which uv writes with 4-space indents.
+[{*.py,pyproject.toml}]
+indent_size = 4
+max_line_length = 120
+
+# Web: oxfmt, in .oxfmtrc.json
+[*.{css,html,js,cjs,mjs,jsx,ts,cts,mts,tsx,json,yaml,yml,toml}]
+max_line_length = 80
+
+# rumdl, in .rumdl.toml
+[*.md]
+max_line_length = 80
+
+# Shell: shfmt -i 2
+[*.{sh,bash,zsh}]
+indent_size = 2

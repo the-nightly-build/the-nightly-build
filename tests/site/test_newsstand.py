@@ -50,9 +50,7 @@ def test_the_menu_marks_the_root_as_current(full_site: Site) -> None:
 
 
 def test_the_default_imprint_credits_the_canonical_repo(full_site: Site) -> None:
-    imprint = (
-        f'class="nb-imprint" href="https://github.com/{build_site.UPSTREAM_REPOSITORY}"'
-    )
+    imprint = f'class="nb-imprint" href="https://github.com/{build_site.UPSTREAM_REPOSITORY}"'
 
     assert imprint in full_site.index
 
@@ -65,10 +63,7 @@ def test_the_menu_links_to_the_canonical_repo(full_site: Site) -> None:
 
 
 def test_the_hamburger_links_the_directory(full_site: Site) -> None:
-    assert (
-        f'href="{build_site.DIRECTORY_URL}" target="_blank" '
-        'rel="noopener noreferrer">' in menu_eco(full_site.index)
-    )
+    assert f'href="{build_site.DIRECTORY_URL}" target="_blank" rel="noopener noreferrer">' in menu_eco(full_site.index)
 
 
 def test_the_menu_omits_a_press_link_when_the_repository_is_unknown(
@@ -86,8 +81,5 @@ def test_the_star_link_targets_this_press_when_the_repository_is_known(
 ) -> None:
     eco = menu_eco(net_site.index)
 
-    assert (
-        'href="https://github.com/alice/my-press" target="_blank" '
-        'rel="noopener noreferrer">' in eco
-    )
+    assert 'href="https://github.com/alice/my-press" target="_blank" rel="noopener noreferrer">' in eco
     assert eco.count("<a ") == 3

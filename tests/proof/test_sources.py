@@ -20,9 +20,7 @@ from press import TODAY, article, mut
 ARXIV = "https://arxiv.org/abs/2601.00001"
 CONFORMING_ITEM = [(ARXIV, "primary"), ("https://reuters.com/a", "secondary")]
 
-ALL_PRIMARY = article().replace(
-    "<a data-nb-source", '<a data-nb-source data-nb-kind="primary"'
-)
+ALL_PRIMARY = article().replace("<a data-nb-source", '<a data-nb-source data-nb-kind="primary"')
 MIXED = ALL_PRIMARY.replace(
     'data-nb-kind="primary" href="https://example.org/src7"',
     'data-nb-kind="secondary" href="https://example.org/src7"',
@@ -34,8 +32,7 @@ MIXED = ALL_PRIMARY.replace(
 # rests on, not what its list advertises.
 LISTED_NOT_CITED = MIXED.replace(
     "</ol>",
-    '<li id="s9"><a data-nb-source data-nb-kind="secondary" '
-    'href="https://apnews.com/x">src</a></li></ol>',
+    '<li id="s9"><a data-nb-source data-nb-kind="secondary" href="https://apnews.com/x">src</a></li></ol>',
     1,
 )
 PER_ITEM_PATCH = "per_item_sources:\n  primary: [1, 1]\n  secondary: [1, 2]\n"
@@ -50,9 +47,7 @@ BY_KIND_PATCH = "sources_by_kind:\n  primary: [4, null]\n  secondary: [2, null]\
 def test_an_article_with_no_sources_at_all_blocks(
     run_local: Callable[..., Findings],
 ) -> None:
-    result = run_local(
-        article().replace("data-nb-source", "data-nb-src"), "semiconductors"
-    )
+    result = run_local(article().replace("data-nb-source", "data-nb-src"), "semiconductors")
 
     assert "B-SOURCES-FORM" in result.blocks
 
@@ -128,25 +123,20 @@ def exclusive_repo(clone_testrepo: Callable[..., str]) -> str:
     y.write_text(
         y.read_text().replace(
             "consult:\n  - https://www.sec.gov/",
-            "sources_exclusive: true\nconsult:\n  - https://www.sec.gov/\n"
-            "  - https://example.org/",
+            "sources_exclusive: true\nconsult:\n  - https://www.sec.gov/\n  - https://example.org/",
         )
     )
     return tmp
 
 
-def test_exclusive_all_sources_in_the_declared_set(
-    run_local: Callable[..., Findings], exclusive_repo: str
-) -> None:
+def test_exclusive_all_sources_in_the_declared_set(run_local: Callable[..., Findings], exclusive_repo: str) -> None:
     result = run_local(article(), "semiconductors", repo=exclusive_repo)
 
     assert "B-SOURCES-EXCLUSIVE" not in result.codes
     assert not result.blocks
 
 
-def test_exclusive_an_outside_source_blocks(
-    run_local: Callable[..., Findings], exclusive_repo: str
-) -> None:
+def test_exclusive_an_outside_source_blocks(run_local: Callable[..., Findings], exclusive_repo: str) -> None:
     result = run_local(
         mut('href="https://example.org/src4"', 'href="https://other.example/x"'),
         "semiconductors",
@@ -195,9 +185,7 @@ def kinded_brief(items: list[list[tuple[str, str]]]) -> str:
         f'<div data-nb-item><span class="tag">topic{i}</span>'
         f"<h4>Development number {i} happened today"
         + "".join(
-            f'<sup class="nb-cite"><a href="#s{numbered[href][0]}">'
-            f"{numbered[href][0]}</a></sup>"
-            for href, _ in item
+            f'<sup class="nb-cite"><a href="#s{numbered[href][0]}">{numbered[href][0]}</a></sup>' for href, _ in item
         )
         + "</h4><p>What happened, and the immediate context around it.</p></div>"
         for i, item in enumerate(items, 1)
@@ -246,33 +234,25 @@ def brief_with(first_item: list[tuple[str, str]]) -> str:
 
 @pytest.fixture
 def per_item_briefs(patched_repo: Callable[..., str]) -> str:
-    repo = patched_repo(PER_ITEM_PATCH, series="ai-briefs")
-    return repo
+    return patched_repo(PER_ITEM_PATCH, series="ai-briefs")
 
 
 @pytest.fixture
 def by_kind_semis(patched_repo: Callable[..., str]) -> str:
-    repo = patched_repo(BY_KIND_PATCH)
-    return repo
+    return patched_repo(BY_KIND_PATCH)
 
 
 def test_a_brief_pairing_every_primary_with_an_independent_read_passes(
     run_local: Callable[..., Findings], per_item_briefs: str
 ) -> None:
-    result = run_local(
-        brief_with(CONFORMING_ITEM), "ai-briefs", slug=TODAY, repo=per_item_briefs
-    )
+    result = run_local(brief_with(CONFORMING_ITEM), "ai-briefs", slug=TODAY, repo=per_item_briefs)
 
     assert not result.blocks
 
 
-def test_an_item_with_no_primary_blocks(
-    run_local: Callable[..., Findings], per_item_briefs: str
-) -> None:
+def test_an_item_with_no_primary_blocks(run_local: Callable[..., Findings], per_item_briefs: str) -> None:
     result = run_local(
-        brief_with(
-            [("https://reuters.com/a", "secondary"), ("https://ft.com/z", "secondary")]
-        ),
+        brief_with([("https://reuters.com/a", "secondary"), ("https://ft.com/z", "secondary")]),
         "ai-briefs",
         slug=TODAY,
         repo=per_item_briefs,
@@ -281,9 +261,7 @@ def test_an_item_with_no_primary_blocks(
     assert "B-SOURCE-KIND" in result.blocks
 
 
-def test_an_item_over_the_secondary_ceiling_blocks(
-    run_local: Callable[..., Findings], per_item_briefs: str
-) -> None:
+def test_an_item_over_the_secondary_ceiling_blocks(run_local: Callable[..., Findings], per_item_briefs: str) -> None:
     result = run_local(
         brief_with(
             [
@@ -317,9 +295,7 @@ def test_a_kind_the_protocol_does_not_define_blocks_with_no_composition_declared
     run_local: Callable[..., Findings],
 ) -> None:
     result = run_local(
-        brief_with(CONFORMING_ITEM).replace(
-            'data-nb-kind="secondary"', 'data-nb-kind="tertiary"', 1
-        ),
+        brief_with(CONFORMING_ITEM).replace('data-nb-kind="secondary"', 'data-nb-kind="tertiary"', 1),
         "ai-briefs",
         slug=TODAY,
     )
@@ -407,9 +383,7 @@ def test_by_kind_counts_the_sources_the_article_cites_not_the_ones_it_lists(
 def test_a_band_the_config_botched_is_a_finding_not_a_traceback(
     run_local: Callable[..., Findings], patched_repo: Callable[..., str]
 ) -> None:
-    result = run_local(
-        MIXED, "semiconductors", repo=patched_repo("sources_by_kind:\n  primary: 4\n")
-    )
+    result = run_local(MIXED, "semiconductors", repo=patched_repo("sources_by_kind:\n  primary: 4\n"))
 
     assert "B-SERIES" in result.blocks
 
@@ -419,9 +393,7 @@ def test_a_band_the_config_botched_is_a_finding_not_a_traceback(
 # --------------------------------------------------------------------------- #
 
 
-def open_briefs_repo(
-    clone_testrepo: Callable[..., str], templates: list[str], *, patch: str = ""
-) -> str:
+def open_briefs_repo(clone_testrepo: Callable[..., str], templates: list[str], *, patch: str = "") -> str:
     tmp = clone_testrepo("press", "templates", "engine")
     y = pathlib.Path(tmp) / "press" / "series" / "ai-briefs" / "series.yaml"
     y.write_text(
@@ -438,9 +410,7 @@ def unkinded_template_repo(patched_repo: Callable[..., str]) -> str:
     return tmp
 
 
-def test_per_item_sources_validates_on_a_per_item_template(
-    vc_rc: Callable[[str], int], per_item_briefs: str
-) -> None:
+def test_per_item_sources_validates_on_a_per_item_template(vc_rc: Callable[[str], int], per_item_briefs: str) -> None:
     assert vc_rc(per_item_briefs) == 0
 
 
@@ -459,17 +429,10 @@ def test_per_item_sources_validates_when_every_template_choice_cites_per_item(
 def test_per_item_sources_a_template_choice_could_dodge_is_a_config_error(
     vc_rc: Callable[[str], int], clone_testrepo: Callable[..., str]
 ) -> None:
-    assert (
-        vc_rc(
-            open_briefs_repo(clone_testrepo, ["brief", "article"], patch=PER_ITEM_PATCH)
-        )
-        == 1
-    )
+    assert vc_rc(open_briefs_repo(clone_testrepo, ["brief", "article"], patch=PER_ITEM_PATCH)) == 1
 
 
-def test_sources_by_kind_with_a_null_ceiling_validates(
-    vc_rc: Callable[[str], int], by_kind_semis: str
-) -> None:
+def test_sources_by_kind_with_a_null_ceiling_validates(vc_rc: Callable[[str], int], by_kind_semis: str) -> None:
     assert vc_rc(by_kind_semis) == 0
 
 
@@ -516,9 +479,7 @@ def test_a_composition_on_a_template_that_omits_data_nb_kind_is_a_config_error(
         ("a timeout", None, "net", "unverified"),
     ],
 )
-def test_classify_link(
-    *, _name: str, status: int | None, error: str | None, verdict: str
-) -> None:
+def test_classify_link(*, _name: str, status: int | None, error: str | None, verdict: str) -> None:
     assert check.classify_link(status, error) == verdict
 
 

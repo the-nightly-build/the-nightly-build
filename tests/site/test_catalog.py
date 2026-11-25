@@ -38,10 +38,7 @@ def test_rolling_series_counts_published_with_no_total(full_site: Site) -> None:
 
 
 def test_articles_carry_path_position_and_reading_time(full_site: Site) -> None:
-    assert all(
-        "path" in e and "position" in e and "reading_minutes" in e
-        for e in full_site.catalog["articles"]
-    )
+    assert all("path" in e and "position" in e and "reading_minutes" in e for e in full_site.catalog["articles"])
 
 
 def test_articles_are_newest_first(full_site: Site) -> None:
@@ -81,9 +78,7 @@ def test_a_press_is_listed_by_default(full_site: Site) -> None:
     ],
     ids=["derived from a Pages URL", "explicit wins", "underivable"],
 )
-def test_self_repository_derivation(
-    *, explicit: str | None, base_url: str, expected: str | None
-) -> None:
+def test_self_repository_derivation(*, explicit: str | None, base_url: str, expected: str | None) -> None:
     assert build_site.derive_self_repository(explicit, base_url) == expected
 
 
@@ -106,9 +101,7 @@ def test_opting_out_emits_only_publish_false(
     clone_testrepo: Callable[..., str],
 ) -> None:
     repo = clone_testrepo("press", "templates", "engine")
-    pathlib.Path(repo, "press", "site.yaml").write_text(
-        "directory:\n  publish: false\n"
-    )
+    pathlib.Path(repo, "press", "site.yaml").write_text("directory:\n  publish: false\n")
 
     site = build_press(repo, make_full_library(), base_url="https://x.github.io/y")
 

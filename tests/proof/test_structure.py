@@ -15,21 +15,14 @@ from findings import Findings
 from press import LOREM, article, mut
 
 FONT_LINK = "https://fonts.googleapis.com/css2?family=Newsreader&amp;display=swap"
-PNG = (
-    b"\x89PNG\r\n\x1a\n"
-    + b"\0\0\0\rIHDR"
-    + (640).to_bytes(4, "big")
-    + (480).to_bytes(4, "big")
-)
+PNG = b"\x89PNG\r\n\x1a\n\0\0\0\rIHDR" + (640).to_bytes(4, "big") + (480).to_bytes(4, "big")
 
 
-def source_figure(
-    *, src: str = "micron/figure-1.png", alt: str = "Memory demand by year"
-) -> str:
-    return f'''<figure class="nb-figure">
+def source_figure(*, src: str = "micron/figure-1.png", alt: str = "Memory demand by year") -> str:
+    return f"""<figure class="nb-figure">
   <img src="{src}" alt="{alt}" />
   <figcaption>Fig. 1 · Demand.<sup class="nb-cite"><a href="#s1">1</a></sup></figcaption>
-</figure>'''
+</figure>"""
 
 
 def test_a_cited_local_figure_passes(
@@ -48,9 +41,7 @@ def test_a_cited_local_figure_passes(
 @pytest.mark.parametrize(
     ("figure", "assets"),
     [
-        pytest.param(
-            source_figure(alt=""), {"micron/figure-1.png": PNG}, id="missing-alt"
-        ),
+        pytest.param(source_figure(alt=""), {"micron/figure-1.png": PNG}, id="missing-alt"),
         pytest.param(source_figure(src="other/figure-1.png"), {}, id="wrong-directory"),
         pytest.param(
             source_figure(src="https://example.org/figure.png"),
@@ -60,21 +51,17 @@ def test_a_cited_local_figure_passes(
         pytest.param(source_figure(), {}, id="missing-file"),
     ],
 )
-def test_invalid_figures_block(
-    run_local: Callable[..., Findings], *, figure: str, assets: dict[str, bytes]
-) -> None:
-    result = run_local(
-        mut("</article>", f"{figure}</article>"), "semiconductors", assets=assets
-    )
+def test_invalid_figures_block(run_local: Callable[..., Findings], *, figure: str, assets: dict[str, bytes]) -> None:
+    result = run_local(mut("</article>", f"{figure}</article>"), "semiconductors", assets=assets)
 
     assert "B-FIGURE" in result.blocks
 
 
 def chart_figure(*, src: str = "micron/chart-1.png") -> str:
-    return f'''<figure class="nb-figure">
+    return f"""<figure class="nb-figure">
   <img src="{src}" alt="Demand rising by year" />
   <figcaption>Fig. 1 · Demand.<sup class="nb-cite"><a href="#s1">1</a></sup></figcaption>
-</figure>'''
+</figure>"""
 
 
 CHART_BUNDLE = {
@@ -110,9 +97,7 @@ def test_a_generated_chart_with_its_script_passes(
             id="chart-named-asset-that-is-not-a-png",
         ),
         pytest.param(
-            chart_figure().replace(
-                '<sup class="nb-cite"><a href="#s1">1</a></sup>', ""
-            ),
+            chart_figure().replace('<sup class="nb-cite"><a href="#s1">1</a></sup>', ""),
             dict(CHART_BUNDLE),
             id="uncited-data-source",
         ),
@@ -121,9 +106,7 @@ def test_a_generated_chart_with_its_script_passes(
 def test_invalid_generated_charts_block(
     run_local: Callable[..., Findings], *, figure: str, assets: dict[str, bytes]
 ) -> None:
-    result = run_local(
-        mut("</article>", f"{figure}</article>"), "semiconductors", assets=assets
-    )
+    result = run_local(mut("</article>", f"{figure}</article>"), "semiconductors", assets=assets)
 
     assert "B-CHART" in result.blocks
 
@@ -158,8 +141,7 @@ def test_duplicated_section_blocks(run_local: Callable[..., Findings]) -> None:
         pytest.param(
             mut(
                 "</article>",
-                '<script type="application/json" data-nb-chart '
-                'src="https://evil.example/x.js"></script></article>',
+                '<script type="application/json" data-nb-chart src="https://evil.example/x.js"></script></article>',
             ),
             id="external-script-src",
         ),
@@ -167,9 +149,7 @@ def test_duplicated_section_blocks(run_local: Callable[..., Findings]) -> None:
             mut("</article>", '<iframe src="https://x.example"></iframe></article>'),
             id="iframe",
         ),
-        pytest.param(
-            mut("<article>", '<article onclick="x()">'), id="inline-event-handler"
-        ),
+        pytest.param(mut("<article>", '<article onclick="x()">'), id="inline-event-handler"),
         pytest.param(
             mut('href="https://example.org/src3"', 'href="javascript:alert(1)"'),
             id="javascript:-url",
@@ -276,10 +256,7 @@ FIELDNOTES_MANIFEST = (
 )
 # a per-item template NOT named 'brief', to prove the per-item cite rule is
 # manifest-driven rather than hardcoded to the shipped brief template
-DIGEST_MANIFEST = (
-    "class: shortread\nbands:\n  items: [2, 4]\n"
-    "sections: [entries, sources]\ncite_rule: per-item\n"
-)
+DIGEST_MANIFEST = "class: shortread\nbands:\n  items: [2, 4]\nsections: [entries, sources]\ncite_rule: per-item\n"
 
 
 def skeleton_of(*sections: str) -> str:
@@ -298,9 +275,11 @@ def overlay_repo(clone_testrepo: Callable[..., str]) -> str:
         (
             "fieldnotes",
             FIELDNOTES_MANIFEST,
-            '<!DOCTYPE html><html><body><section data-nb-section="YOUR-LABEL">'
-            '<aside class="nb-note"></aside></section>'
-            '<section data-nb-section="sources"></section></body></html>',
+            (
+                '<!DOCTYPE html><html><body><section data-nb-section="YOUR-LABEL">'
+                '<aside class="nb-note"></aside></section>'
+                '<section data-nb-section="sources"></section></body></html>'
+            ),
         ),
         ("digest", DIGEST_MANIFEST, skeleton_of("entries", "sources")),
     ]:
@@ -316,8 +295,7 @@ def overlay_repo(clone_testrepo: Callable[..., str]) -> str:
     )
     (series / "digests").mkdir()
     (series / "digests" / "series.yaml").write_text(
-        "name: Digests\nmode: collection\ntemplate: digest\n"
-        "items:\n  - {slug: first-digest, title: First Digest}\n"
+        "name: Digests\nmode: collection\ntemplate: digest\nitems:\n  - {slug: first-digest, title: First Digest}\n"
     )
     return repo
 
@@ -328,16 +306,13 @@ def cite(n: int) -> str:
 
 def sources(n: int, prefix: str) -> str:
     return "".join(
-        f'<li id="s{i}"><a data-nb-source '
-        f'href="https://example.org/{prefix}{i}">x</a></li>'
-        for i in range(1, n + 1)
+        f'<li id="s{i}"><a data-nb-source href="https://example.org/{prefix}{i}">x</a></li>' for i in range(1, n + 1)
     )
 
 
 def flex_article(sections: list[tuple[str, str]]) -> str:
     body = "".join(
-        f'<section data-nb-section="{name}"><aside class="nb-note">'
-        f"<p>{LOREM * 7}{cited}</p></aside></section>"
+        f'<section data-nb-section="{name}"><aside class="nb-note"><p>{LOREM * 7}{cited}</p></aside></section>'
         for name, cited in sections
     )
     return f"""<!DOCTYPE html>
@@ -376,7 +351,7 @@ def test_flex_template_passes_with_agent_named_sections_in_band(
     assert not result.blocks
 
 
-@pytest.mark.parametrize("count", (0, 2))
+@pytest.mark.parametrize("count", [0, 2])
 def test_manifest_furniture_is_required_once_in_every_flexible_section(
     *, run_local: Callable[..., Findings], overlay_repo: str, count: int
 ) -> None:
@@ -417,9 +392,7 @@ def test_a_flex_outline_out_of_band_blocks(
     assert "B-HTML" in result.blocks
 
 
-def test_uncited_flex_section_warns_on_cite_density(
-    run_local: Callable[..., Findings], overlay_repo: str
-) -> None:
+def test_uncited_flex_section_warns_on_cite_density(run_local: Callable[..., Findings], overlay_repo: str) -> None:
     result = run_notes(
         run_local,
         overlay_repo,
@@ -430,9 +403,7 @@ def test_uncited_flex_section_warns_on_cite_density(
     assert not result.blocks
 
 
-def test_cite_exempt_exempts_a_registry_declared_section(
-    run_local: Callable[..., Findings], overlay_repo: str
-) -> None:
+def test_cite_exempt_exempts_a_registry_declared_section(run_local: Callable[..., Findings], overlay_repo: str) -> None:
     result = run_notes(
         run_local,
         overlay_repo,
@@ -456,9 +427,7 @@ def test_sources_cited_out_of_first_appearance_order_warns(
     assert not result.blocks
 
 
-def test_in_order_citations_do_not_warn(
-    run_local: Callable[..., Findings], overlay_repo: str
-) -> None:
+def test_in_order_citations_do_not_warn(run_local: Callable[..., Findings], overlay_repo: str) -> None:
     result = run_notes(
         run_local,
         overlay_repo,
@@ -472,9 +441,7 @@ def test_in_order_citations_do_not_warn(
 def digest_article(*, withhold_cite: bool) -> str:
     items = "".join(
         f"<div data-nb-item><span>t{i}</span>"
-        f"<h3>Item {i}"
-        + ("" if (withhold_cite and i == 1) else cite(i))
-        + f"</h3><p>{LOREM}</p></div>"
+        f"<h3>Item {i}" + ("" if (withhold_cite and i == 1) else cite(i)) + f"</h3><p>{LOREM}</p></div>"
         for i in (1, 2)
     )
     return f"""<!DOCTYPE html>
@@ -492,9 +459,7 @@ def digest_article(*, withhold_cite: bool) -> str:
 </body></html>"""
 
 
-def test_a_fully_cited_digest_passes(
-    run_local: Callable[..., Findings], overlay_repo: str
-) -> None:
+def test_a_fully_cited_digest_passes(run_local: Callable[..., Findings], overlay_repo: str) -> None:
     result = run_local(
         digest_article(withhold_cite=False),
         "digests",

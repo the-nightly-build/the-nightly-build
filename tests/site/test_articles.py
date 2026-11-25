@@ -81,10 +81,7 @@ def test_generated_pages_and_articles_use_the_site_icons(
 ) -> None:
     stamp = asset_stamp_of(micron_copy)
 
-    root_tag = (
-        f'<link rel="{relation}"{type_attr} sizes="{size}" '
-        f'href="assets/{filename}?v={stamp}">'
-    )
+    root_tag = f'<link rel="{relation}"{type_attr} sizes="{size}" href="assets/{filename}?v={stamp}">'
     article_tag = root_tag.replace('href="assets/', 'href="../../assets/')
 
     assert root_tag in full_site.index
@@ -134,10 +131,7 @@ def test_dressing_a_dressed_article_does_not_double_the_bar(micron_copy: str) ->
 
 
 def test_a_required_document_links_to_the_forks_main_file() -> None:
-    raw = (
-        '<a data-nb-required="brief" '
-        'href="press/series/markets/sources/board%20minutes.pdf">minutes</a>'
-    )
+    raw = '<a data-nb-required="brief" href="press/series/markets/sources/board%20minutes.pdf">minutes</a>'
 
     rewritten, unresolved = rewrite_required_doc_links(raw, "alice/morning-paper")
 

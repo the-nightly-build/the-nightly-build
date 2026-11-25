@@ -15,18 +15,28 @@ deterministic suite.
 
 import dataclasses
 import datetime as dt
+import io
 import json
 import pathlib
 import shutil
 import subprocess
 import sys
+import tarfile
 import tempfile
 import xml.etree.ElementTree as ET
 
 import pytest
 
 import build_site
-from press import REPO, article, brief, git, make_press, write_agent_artifacts
+from press import (
+    REPO,
+    article,
+    brief,
+    git,
+    git_executable,
+    make_press,
+    write_agent_artifacts,
+)
 
 pytestmark = pytest.mark.slow
 
@@ -71,13 +81,25 @@ class Press:
         self._archive("main", self.maindir)
 
     def _archive(self, ref: str, into: pathlib.Path) -> None:
-        command = f"git archive {ref} | tar -x -C {into}"
-        subprocess.run(
-            command,
-            shell=True,
+        archive = subprocess.run(
+            [git_executable(), "archive", ref],
             cwd=self.root,
+            capture_output=True,
             check=True,
         )
+        root = into.resolve()
+        with tarfile.open(fileobj=io.BytesIO(archive.stdout)) as tar:
+            for member in tar.getmembers():
+                target = (root / member.name).resolve()
+                assert target.is_relative_to(root), member.name
+                if member.isdir():
+                    target.mkdir(parents=True, exist_ok=True)
+                elif member.isfile():
+                    target.parent.mkdir(parents=True, exist_ok=True)
+                    source = tar.extractfile(member)
+                    if source is not None:
+                        target.write_bytes(source.read())
+                        target.chmod(member.mode)
 
     def library_state(self) -> str:
         for child in self.libdir.iterdir():
@@ -86,10 +108,8 @@ class Press:
         return str(self.libdir)
 
     def rev(self, ref: str) -> str:
-        command = ["git", "rev-parse", ref]
-        completed = subprocess.run(
-            command, cwd=self.root, capture_output=True, text=True
-        )
+        command = [git_executable(), "rev-parse", ref]
+        completed = subprocess.run(command, cwd=self.root, capture_output=True, text=True, check=True)
         return completed.stdout.strip()
 
     def propose_article(
@@ -145,6 +165,7 @@ class Press:
             cwd=self.root,
             capture_output=True,
             text=True,
+            check=False,
         ).stdout
 
     def merge(self, branch: str) -> None:
@@ -215,9 +236,7 @@ def publication() -> PublicationScenario:
         "nb/first-duplicate",
         "ai-briefs",
         slug="2026-07-05",
-        html=brief("2026-07-05").replace(
-            "Daily brief for 2026-07-05", "Rival brief for 2026-07-05"
-        ),
+        html=brief("2026-07-05").replace("Daily brief for 2026-07-05", "Rival brief for 2026-07-05"),
         today="2026-07-05",
         from_ref=pre_merge_ref,
     )
@@ -255,9 +274,7 @@ def entry_count(feed_xml: str) -> int:
 
 
 def test_the_article_pr_validates_block_clean(publication: PublicationScenario) -> None:
-    assert publication.article_findings["block_count"] == 0, (
-        publication.article_findings["findings"]
-    )
+    assert publication.article_findings["block_count"] == 0, publication.article_findings["findings"]
 
 
 def test_the_new_article_gate_says_true(publication: PublicationScenario) -> None:
@@ -265,9 +282,7 @@ def test_the_new_article_gate_says_true(publication: PublicationScenario) -> Non
 
 
 def test_the_brief_pr_validates_block_clean(publication: PublicationScenario) -> None:
-    assert publication.brief_findings["block_count"] == 0, publication.brief_findings[
-        "findings"
-    ]
+    assert publication.brief_findings["block_count"] == 0, publication.brief_findings["findings"]
 
 
 def test_first_date_renders_a_multi_article_front_page(
@@ -300,9 +315,7 @@ def test_a_losing_race_for_the_same_article_is_blocked(
 def test_the_second_date_brief_validates_block_clean(
     publication: PublicationScenario,
 ) -> None:
-    assert publication.second_findings["block_count"] == 0, publication.second_findings[
-        "findings"
-    ]
+    assert publication.second_findings["block_count"] == 0, publication.second_findings["findings"]
 
 
 def test_the_front_page_rolls_over_to_the_second_date(
@@ -316,9 +329,7 @@ def test_both_dates_are_preserved_in_the_archive(
     publication: PublicationScenario,
 ) -> None:
     assert list(publication.second_catalog["builds"]) == ["2026-07-06", "2026-07-05"]
-    assert pathlib.Path(
-        publication.press.sitedir, "builds", "2026-07-05", "index.html"
-    ).is_file()
+    assert pathlib.Path(publication.press.sitedir, "builds", "2026-07-05", "index.html").is_file()
 
 
 def test_build_pages_link_across_dates(publication: PublicationScenario) -> None:
@@ -331,9 +342,7 @@ def test_the_feeds_update_after_the_second_date(
     publication: PublicationScenario,
 ) -> None:
     assert entry_count(publication.press.site_text("feed.xml")) == 3
-    assert (
-        entry_count(publication.press.site_text("series", "ai-briefs", "feed.xml")) == 2
-    )
+    assert entry_count(publication.press.site_text("series", "ai-briefs", "feed.xml")) == 2
 
 
 def test_the_sections_page_counts_published_not_progress(

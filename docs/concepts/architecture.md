@@ -2,10 +2,10 @@
 
 ![The Nightly Build production flow](../../assets/architecture.svg)
 
-The Nightly Build splits responsibility in two: **agents make editorial
-judgments**, and **repository-owned code enforces the publication boundary**.
-The diagram starts once authorized work is selected and ends when GitHub Pages
-deploys the site.
+The Nightly Build splits responsibility in two:
+**agents make editorial judgments**, and
+**repository-owned code enforces the publication boundary**. The diagram starts
+once authorized work is selected and ends when GitHub Pages deploys the site.
 
 ## Authorizing work
 

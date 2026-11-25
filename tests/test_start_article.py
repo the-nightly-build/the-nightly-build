@@ -8,6 +8,7 @@ Together they document the complete deterministic side of article setup.
 from __future__ import annotations
 
 import pathlib
+from typing import TYPE_CHECKING
 
 import pytest
 import yaml
@@ -15,9 +16,12 @@ import yaml
 from nb.artifacts import validate_artifacts
 from nb.start_article import StartArticleError, initialize, main
 
+if TYPE_CHECKING:
+    from collections.abc import Callable
+
 
 def test_configured_item_starts_from_exact_template_and_direction(
-    clone_testrepo,
+    clone_testrepo: Callable[..., str],
     tmp_path: pathlib.Path,
 ) -> None:
     repo = pathlib.Path(clone_testrepo("press", "templates", "spec"))
@@ -33,17 +37,11 @@ def test_configured_item_starts_from_exact_template_and_direction(
         template_id="article",
     )
 
-    assert (
-        article.read_bytes() == (repo / "templates/article/skeleton.html").read_bytes()
-    )
-    contract = yaml.safe_load(
-        (workspace / ".nb-context/template-contract.yaml").read_text()
-    )
+    assert article.read_bytes() == (repo / "templates/article/skeleton.html").read_bytes()
+    contract = yaml.safe_load((workspace / ".nb-context/template-contract.yaml").read_text())
     assert contract["template"] == "article"
     assert contract["bands"]["words"] == [1200, 2400]
-    direction = (
-        workspace / "agent-artifacts/semiconductors/micron/editorial-direction.md"
-    ).read_text()
+    direction = (workspace / "agent-artifacts/semiconductors/micron/editorial-direction.md").read_text()
     ordered = [
         direction.index("## 1. House editorial standard"),
         direction.index("## 2. Slop standard"),
@@ -61,13 +59,11 @@ def test_configured_item_starts_from_exact_template_and_direction(
         repo / "templates/FURNITURE.md"
     ).read_bytes()
     assert not (workspace / ".nb-context/furniture/press.md").exists()
-    assert yaml.safe_load(
-        (workspace / ".nb-context/runtime-assets.yaml").read_text()
-    ) == {"assets": {}}
+    assert yaml.safe_load((workspace / ".nb-context/runtime-assets.yaml").read_text()) == {"assets": {}}
 
 
 def test_press_template_and_authoring_extensions_resolve_without_parsing(
-    clone_testrepo,
+    clone_testrepo: Callable[..., str],
     tmp_path: pathlib.Path,
 ) -> None:
     repo = pathlib.Path(clone_testrepo("press", "templates", "spec"))
@@ -101,27 +97,17 @@ def test_press_template_and_authoring_extensions_resolve_without_parsing(
     )
 
     assert article.read_text() == "<html>PRESS SKELETON</html>\n"
-    assert (
-        (workspace / ".nb-context/furniture/press.md")
-        .read_text()
-        .startswith("# Shared tool")
-    )
-    assert (
-        (workspace / ".nb-context/furniture/template.md")
-        .read_text()
-        .startswith("# Template tool")
-    )
+    assert (workspace / ".nb-context/furniture/press.md").read_text().startswith("# Shared tool")
+    assert (workspace / ".nb-context/furniture/template.md").read_text().startswith("# Template tool")
     assert not tuple((workspace / ".nb-context").rglob("*.css"))
-    direction = (
-        workspace / "agent-artifacts/semiconductors/micron/editorial-direction.md"
-    ).read_text()
+    direction = (workspace / "agent-artifacts/semiconductors/micron/editorial-direction.md").read_text()
     assert "# Press identity" in direction
     assets = yaml.safe_load((workspace / ".nb-context/runtime-assets.yaml").read_text())
     assert assets["assets"]["scripts"][0]["url"] == "https://example.org/tool.js"
 
 
 def test_open_article_keeps_requested_tag_order(
-    clone_testrepo,
+    clone_testrepo: Callable[..., str],
     tmp_path: pathlib.Path,
 ) -> None:
     repo = pathlib.Path(clone_testrepo("press", "templates", "spec"))
@@ -145,15 +131,13 @@ def test_open_article_keeps_requested_tag_order(
         tags=("second", "first"),
     )
 
-    direction = (
-        tmp_path / "article/agent-artifacts/wildcard/new-subject/editorial-direction.md"
-    ).read_text()
+    direction = (tmp_path / "article/agent-artifacts/wildcard/new-subject/editorial-direction.md").read_text()
     assert direction.index("Tag: second") < direction.index("Tag: first")
     assert "Selected item" not in direction
 
 
 def test_manual_open_article_admits_any_slug(
-    clone_testrepo,
+    clone_testrepo: Callable[..., str],
     tmp_path: pathlib.Path,
 ) -> None:
     # a manual series only publishes what a person asked for, so an unlisted
@@ -162,8 +146,7 @@ def test_manual_open_article_admits_any_slug(
     series = repo / "press/series/wildcard"
     series.mkdir()
     (series / "series.yaml").write_text(
-        "name: Wildcard\nmode: open\ncadence: manual\ntemplate: article\n"
-        "prompt: prompt.md\n"
+        "name: Wildcard\nmode: open\ncadence: manual\ntemplate: article\nprompt: prompt.md\n"
     )
     (series / "prompt.md").write_text("Choose a new subject.\n")
 
@@ -179,7 +162,7 @@ def test_manual_open_article_admits_any_slug(
 
 
 def test_manual_open_article_accepts_a_configured_commission(
-    clone_testrepo,
+    clone_testrepo: Callable[..., str],
     tmp_path: pathlib.Path,
 ) -> None:
     repo = pathlib.Path(clone_testrepo("press", "templates", "spec"))
@@ -200,16 +183,11 @@ def test_manual_open_article_accepts_a_configured_commission(
     )
 
     assert article.exists()
-    assert (
-        "Cover birds."
-        in (
-            tmp_path / "article/agent-artifacts/wildcard/birds/editorial-direction.md"
-        ).read_text()
-    )
+    assert "Cover birds." in (tmp_path / "article/agent-artifacts/wildcard/birds/editorial-direction.md").read_text()
 
 
 def test_invalid_request_leaves_no_partial_article(
-    clone_testrepo,
+    clone_testrepo: Callable[..., str],
     tmp_path: pathlib.Path,
 ) -> None:
     repo = pathlib.Path(clone_testrepo("press", "templates", "spec"))
@@ -229,14 +207,14 @@ def test_invalid_request_leaves_no_partial_article(
 
 
 def test_invalid_runtime_context_leaves_no_partial_article(
-    clone_testrepo,
+    clone_testrepo: Callable[..., str],
     tmp_path: pathlib.Path,
 ) -> None:
     repo = pathlib.Path(clone_testrepo("press", "templates", "spec"))
     (repo / "press/site.yaml").write_text("[invalid]\n")
     workspace = tmp_path / "article"
 
-    with pytest.raises(StartArticleError, match="press/site.yaml must be a mapping"):
+    with pytest.raises(StartArticleError, match=r"press/site\.yaml must be a mapping"):
         initialize(
             repo=repo,
             workspace=workspace,
@@ -249,7 +227,7 @@ def test_invalid_runtime_context_leaves_no_partial_article(
 
 
 def test_existing_workspace_is_never_overwritten(
-    clone_testrepo,
+    clone_testrepo: Callable[..., str],
     tmp_path: pathlib.Path,
 ) -> None:
     repo = pathlib.Path(clone_testrepo("press", "templates", "spec"))
@@ -270,7 +248,7 @@ def test_existing_workspace_is_never_overwritten(
     assert marker.read_text() == "mine\n"
 
 
-def pin_voice_guide(repo: pathlib.Path, series_id: str, guide: str) -> pathlib.Path:
+def pin_voice_guide(repo: pathlib.Path, series_id: str, *, guide: str) -> pathlib.Path:
     series = repo / "press/series" / series_id / "series.yaml"
     series.write_text(series.read_text() + "\nvoice_guide: voice-guide.md\n")
     path = series.parent / "voice-guide.md"
@@ -279,12 +257,12 @@ def pin_voice_guide(repo: pathlib.Path, series_id: str, guide: str) -> pathlib.P
 
 
 def test_pinned_voice_guide_stands_in_for_the_coach(
-    clone_testrepo,
+    clone_testrepo: Callable[..., str],
     tmp_path: pathlib.Path,
 ) -> None:
     repo = pathlib.Path(clone_testrepo("press", "templates", "spec"))
     guide = "# Voice guide\n\nWrite plainly.\n"
-    pin_voice_guide(repo, "semiconductors", guide)
+    pin_voice_guide(repo, "semiconductors", guide=guide)
     workspace = tmp_path / "article"
 
     initialize(
@@ -306,7 +284,7 @@ def test_pinned_voice_guide_stands_in_for_the_coach(
 
 
 def test_a_series_without_a_pinned_guide_still_expects_the_coach(
-    clone_testrepo,
+    clone_testrepo: Callable[..., str],
     tmp_path: pathlib.Path,
 ) -> None:
     repo = pathlib.Path(clone_testrepo("press", "templates", "spec"))
@@ -326,7 +304,7 @@ def test_a_series_without_a_pinned_guide_still_expects_the_coach(
 
 
 def test_a_missing_pinned_guide_leaves_no_partial_article(
-    clone_testrepo,
+    clone_testrepo: Callable[..., str],
     tmp_path: pathlib.Path,
 ) -> None:
     repo = pathlib.Path(clone_testrepo("press", "templates", "spec"))
@@ -347,9 +325,10 @@ def test_a_missing_pinned_guide_leaves_no_partial_article(
 
 
 def test_main_prints_the_article_path_and_its_proof_command(
-    clone_testrepo,
+    clone_testrepo: Callable[..., str],
     tmp_path: pathlib.Path,
-    capsys,
+    *,
+    capsys: pytest.CaptureFixture[str],
 ) -> None:
     repo = pathlib.Path(clone_testrepo("press", "templates", "spec"))
     workspace = tmp_path / "article"
@@ -371,6 +350,5 @@ def test_main_prints_the_article_path_and_its_proof_command(
     article = workspace / "library" / "semiconductors" / "micron.html"
     assert pathlib.Path(first) == article
     assert proof == (
-        f"proof: {repo.resolve() / 'nb'} check {article.resolve()}"
-        f" --series semiconductors --repo {repo.resolve()}"
+        f"proof: {repo.resolve() / 'nb'} check {article.resolve()} --series semiconductors --repo {repo.resolve()}"
     )

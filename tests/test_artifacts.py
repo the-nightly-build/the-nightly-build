@@ -8,7 +8,7 @@ the editorial language itself to evolve freely.
 
 from __future__ import annotations
 
-import pathlib
+from typing import TYPE_CHECKING
 
 from nb.artifacts import (
     ROLE_FILES,
@@ -17,13 +17,14 @@ from nb.artifacts import (
     validate_revision_note,
 )
 
+if TYPE_CHECKING:
+    import pathlib
+
 
 def complete_tree(root: pathlib.Path) -> pathlib.Path:
     artifacts = artifact_root(root, series="the-wire", slug="example")
     artifacts.mkdir(parents=True)
-    (artifacts / "editorial-direction.md").write_text(
-        "# Editorial direction\n\nWrite clearly.\n"
-    )
+    (artifacts / "editorial-direction.md").write_text("# Editorial direction\n\nWrite clearly.\n")
     (artifacts / "commission.md").write_text("# Commission\n\nInvestigate this.\n")
     for role, filenames in ROLE_FILES.items():
         invocation = artifacts / role / "01"
@@ -88,11 +89,7 @@ def test_extra_or_empty_artifacts_fail(tmp_path: pathlib.Path) -> None:
 def test_revision_note_requires_content_but_not_a_prose_schema(
     tmp_path: pathlib.Path,
 ) -> None:
-    note = (
-        artifact_root(tmp_path, series="the-wire", slug="example")
-        / "revisions"
-        / "02.md"
-    )
+    note = artifact_root(tmp_path, series="the-wire", slug="example") / "revisions" / "02.md"
     note.parent.mkdir(parents=True)
     note.write_text("The figure mislabeled the comparison, so it was regenerated.\n")
 
@@ -112,11 +109,7 @@ def test_revision_note_requires_content_but_not_a_prose_schema(
 
 
 def test_revision_note_must_be_utf8_markdown(tmp_path: pathlib.Path) -> None:
-    note = (
-        artifact_root(tmp_path, series="the-wire", slug="example")
-        / "revisions"
-        / "01.md"
-    )
+    note = artifact_root(tmp_path, series="the-wire", slug="example") / "revisions" / "01.md"
     note.parent.mkdir(parents=True)
     note.write_bytes(b"\xff\xfe")
 

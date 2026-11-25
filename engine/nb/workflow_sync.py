@@ -5,6 +5,9 @@ author. It is valid only when the PR changes one or both publishing workflows,
 changes nothing else, and copies their exact blobs from the fork's ``main``.
 """
 
+from __future__ import annotations
+
+import shutil
 import subprocess
 from dataclasses import dataclass
 from pathlib import Path
@@ -26,9 +29,17 @@ class WorkflowSync:
     reason: str | None = None
 
 
+def _git_executable() -> str:
+    git = shutil.which("git")
+    if git is None:
+        msg = "git executable not found on PATH"
+        raise FileNotFoundError(msg)
+    return git
+
+
 def classify_workflow_sync(
-    repo: str,
-    main: str,
+    repo: str | Path,
+    main: str | Path,
     *,
     head: str,
     changes: list[tuple[str, str]],
@@ -53,12 +64,13 @@ def classify_workflow_sync(
             reason="a workflow sync may only add or update the publishing workflows",
         )
 
+    git = _git_executable()
     for path in sorted(changed_paths):
         canonical_path = Path(main, path)
         try:
             canonical = canonical_path.read_bytes()
             proposed = subprocess.run(
-                ["git", "-C", repo, "show", f"{head}:{path}"],
+                [git, "-C", str(repo), "show", f"{head}:{path}"],
                 capture_output=True,
                 check=True,
             ).stdout

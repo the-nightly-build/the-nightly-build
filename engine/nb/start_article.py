@@ -12,6 +12,7 @@ import os
 import pathlib
 import shutil
 import subprocess
+import sys
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 
@@ -36,7 +37,8 @@ class _Layer:
 
 def _mapping(value: object, *, label: str) -> dict[str, object]:
     if not isinstance(value, Mapping):
-        raise StartArticleError(f"{label} must be a mapping")
+        message = f"{label} must be a mapping"
+        raise StartArticleError(message)
     return {str(key): item for key, item in value.items()}
 
 
@@ -45,7 +47,8 @@ def _selected_item(series: Mapping[str, object], slug: str) -> dict[str, object]
     if items is None:
         return None
     if not isinstance(items, list):
-        raise StartArticleError("series items must be a list")
+        message = "series items must be a list"
+        raise StartArticleError(message)
     for value in items:
         if isinstance(value, Mapping) and value.get("slug") == slug:
             return {str(key): item for key, item in value.items()}
@@ -57,12 +60,15 @@ def _item_tags(item: Mapping[str, object] | None) -> tuple[str, ...]:
         return ()
     value = item["tags"]
     if not isinstance(value, list):
-        raise StartArticleError("selected item tags must be a list of tag names")
+        message = "selected item tags must be a list of tag names"
+        raise StartArticleError(message)
     tags = tuple(tag for tag in value if isinstance(tag, str))
     if len(tags) != len(value):
-        raise StartArticleError("selected item tags must be a list of tag names")
+        message = "selected item tags must be a list of tag names"
+        raise StartArticleError(message)
     if len(tags) != len(set(tags)):
-        raise StartArticleError("selected item tags must not repeat")
+        message = "selected item tags must not repeat"
+        raise StartArticleError(message)
     return tags
 
 
@@ -74,15 +80,16 @@ def _resolve_tags(
     configured = _item_tags(item)
     requested_tags = tuple(requested)
     if item is not None and requested_tags and requested_tags != configured:
-        raise StartArticleError(
-            "--tag values conflict with the selected item's declared tag order"
-        )
+        message = "--tag values conflict with the selected item's declared tag order"
+        raise StartArticleError(message)
     tags = configured if item is not None else requested_tags
     if len(tags) != len(set(tags)):
-        raise StartArticleError("--tag values must not repeat")
+        message = "--tag values must not repeat"
+        raise StartArticleError(message)
     for tag in tags:
         if not nb_meta.is_safe_tag(tag):
-            raise StartArticleError(f"invalid tag: {tag!r}")
+            message = f"invalid tag: {tag!r}"
+            raise StartArticleError(message)
     return tags
 
 
@@ -94,17 +101,22 @@ def _relative(path: pathlib.Path, repo: pathlib.Path) -> str:
 
 
 def _checkout_revision(repo: pathlib.Path) -> str:
+    git_bin = shutil.which("git")
+    if git_bin is None:
+        return "unavailable"
     result = subprocess.run(
-        ["git", "-C", str(repo), "rev-parse", "HEAD"],
+        [git_bin, "-C", str(repo), "rev-parse", "HEAD"],
         capture_output=True,
         text=True,
+        check=False,
     )
     return result.stdout.strip() if result.returncode == 0 else "unavailable"
 
 
 def _read(path: pathlib.Path, *, label: str) -> str:
     if not path.is_file() or path.is_symlink():
-        raise StartArticleError(f"missing {label}: {path}")
+        message = f"missing {label}: {path}"
+        raise StartArticleError(message)
     return path.read_text(encoding="utf-8")
 
 
@@ -126,7 +138,8 @@ def _tag_layers(
     for tag in tags:
         fragment = mappings.get(tag)
         if not isinstance(fragment, str) or not fragment:
-            raise StartArticleError(f"tag {tag!r} has no configured prompt fragment")
+            message = f"tag {tag!r} has no configured prompt fragment"
+            raise StartArticleError(message)
         path = (series_root / fragment).resolve()
         _read(path, label=f"tag fragment for {tag}")
         layers.append(_Layer(f"Tag: {tag}", path))
@@ -158,15 +171,18 @@ def _editorial_direction(
     prompt = series.get("prompt")
     if prompt is not None:
         if not isinstance(prompt, str) or not prompt:
-            raise StartArticleError("series prompt must be a path string")
+            message = "series prompt must be a path string"
+            raise StartArticleError(message)
         layers.append(_Layer("Series direction", series_root / prompt))
     layers.extend(_tag_layers(repo, series_id=series_id, series=series, tags=tags))
 
     chunks = [
         "# Editorial direction\n",
-        "These are the exact standing directions for this article. Later "
-        "sections specialize earlier ones; the orchestrator's commission "
-        "adds article-specific decisions without rewriting them.\n\n",
+        (
+            "These are the exact standing directions for this article. Later "
+            "sections specialize earlier ones; the orchestrator's commission "
+            "adds article-specific decisions without rewriting them.\n\n"
+        ),
         f"Checkout revision: `{revision}`\n",
     ]
     for index, layer in enumerate(layers, start=1):
@@ -211,7 +227,8 @@ def _pinned_voice_guide(
     if configured is None:
         return None
     if not isinstance(configured, str) or not configured:
-        raise StartArticleError("series voice_guide must be a path string")
+        message = "series voice_guide must be a path string"
+        raise StartArticleError(message)
     path = repo / "press" / "series" / series_id / configured
     return path, _read(path, label=f"pinned voice guide for {series_id}")
 
@@ -281,6 +298,50 @@ def _write_context(
             shutil.copyfile(source, target)
 
 
+def _validate_target(*, workspace: pathlib.Path, series_id: str, slug: str) -> None:
+    if nb_meta.SERIES_RE.fullmatch(series_id) is None:
+        message = f"invalid series: {series_id!r}"
+        raise StartArticleError(message)
+    if nb_meta.SLUG_RE.fullmatch(slug) is None:
+        message = f"invalid slug: {slug!r}"
+        raise StartArticleError(message)
+    if workspace.is_symlink() or (workspace.exists() and not workspace.is_dir()):
+        message = f"workspace must be a directory: {workspace}"
+        raise StartArticleError(message)
+    if workspace.exists() and any(workspace.iterdir()):
+        message = f"workspace is not empty: {workspace}"
+        raise StartArticleError(message)
+
+
+def _resolve_template(
+    repo: pathlib.Path, *, series_id: str, template_id: str
+) -> tuple[dict[str, object], dict[str, object], pathlib.Path, pathlib.Path]:
+    loaded, series_path = load_series(str(repo), series_id)
+    if loaded is None:
+        message = f"unknown series: {series_path}"
+        raise StartArticleError(message)
+    series = _mapping(loaded, label=f"series {series_id}")
+    if template_id not in template_choices(series):
+        message = f"template {template_id!r} is not allowed for series {series_id!r}"
+        raise StartArticleError(message)
+
+    registry = load_registry(str(repo))
+    raw_template = registry.get(template_id)
+    if not isinstance(raw_template, Mapping):
+        message = f"unknown template: {template_id}"
+        raise StartArticleError(message)
+    template = _mapping(raw_template, label=f"template {template_id}")
+    folders = template_dirs(str(repo))
+    template_folder_value = folders.get(template_id)
+    if template_folder_value is None:
+        message = f"template package is missing: {template_id}"
+        raise StartArticleError(message)
+    template_folder = pathlib.Path(template_folder_value)
+    skeleton = template_folder / "skeleton.html"
+    _read(skeleton, label=f"template skeleton for {template_id}")
+    return series, template, template_folder, skeleton
+
+
 def initialize(
     *,
     repo: pathlib.Path,
@@ -292,40 +353,14 @@ def initialize(
 ) -> pathlib.Path:
     repo = repo.resolve()
     workspace = workspace.resolve()
-    if nb_meta.SERIES_RE.fullmatch(series_id) is None:
-        raise StartArticleError(f"invalid series: {series_id!r}")
-    if nb_meta.SLUG_RE.fullmatch(slug) is None:
-        raise StartArticleError(f"invalid slug: {slug!r}")
-    if workspace.is_symlink() or (workspace.exists() and not workspace.is_dir()):
-        raise StartArticleError(f"workspace must be a directory: {workspace}")
-    if workspace.exists() and any(workspace.iterdir()):
-        raise StartArticleError(f"workspace is not empty: {workspace}")
-
-    loaded, series_path = load_series(str(repo), series_id)
-    if loaded is None:
-        raise StartArticleError(f"unknown series: {series_path}")
-    series = _mapping(loaded, label=f"series {series_id}")
-    if template_id not in template_choices(series):
-        raise StartArticleError(
-            f"template {template_id!r} is not allowed for series {series_id!r}"
-        )
-
-    registry = load_registry(str(repo))
-    template = registry.get(template_id)
-    if not isinstance(template, Mapping):
-        raise StartArticleError(f"unknown template: {template_id}")
-    folders = template_dirs(str(repo))
-    template_folder_value = folders.get(template_id)
-    if template_folder_value is None:
-        raise StartArticleError(f"template package is missing: {template_id}")
-    template_folder = pathlib.Path(template_folder_value)
-    skeleton = template_folder / "skeleton.html"
-    _read(skeleton, label=f"template skeleton for {template_id}")
+    _validate_target(workspace=workspace, series_id=series_id, slug=slug)
+    series, template, template_folder, skeleton = _resolve_template(repo, series_id=series_id, template_id=template_id)
 
     item = _selected_item(series, slug)
     requires_item = series.get("mode") in ("collection", "sequence")
     if item is None and requires_item:
-        raise StartArticleError(f"series {series_id!r} has no item {slug!r}")
+        message = f"series {series_id!r} has no item {slug!r}"
+        raise StartArticleError(message)
     resolved_tags = _resolve_tags(item=item, requested=tags)
     pinned = _pinned_voice_guide(repo, series_id=series_id, series=series)
     revision = _checkout_revision(repo)
@@ -369,9 +404,7 @@ def initialize(
 
 
 def parser() -> argparse.ArgumentParser:
-    command = argparse.ArgumentParser(
-        description="Initialize one article with its exact authoring context"
-    )
+    command = argparse.ArgumentParser(description="Initialize one article with its exact authoring context")
     command.add_argument("series", help="configured series ID")
     command.add_argument("slug", help="article slug")
     command.add_argument("--template", required=True, help="selected template ID")
@@ -398,12 +431,11 @@ def main(arguments: list[str] | None = None) -> None:
             tags=options.tag,
         )
     except StartArticleError as error:
-        raise SystemExit(f"cannot initialize article: {error}") from error
-    print(article)
+        message = f"cannot initialize article: {error}"
+        raise SystemExit(message) from error
     root = options.repo.resolve()
-    print(
-        f"proof: {root / 'nb'} check {article.resolve()}"
-        f" --series {options.series} --repo {root}"
+    sys.stdout.write(
+        f"{article}\nproof: {root / 'nb'} check {article.resolve()} --series {options.series} --repo {root}\n"
     )
 
 

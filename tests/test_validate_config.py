@@ -17,21 +17,10 @@ import validate_config
 from press import REPO
 
 REQ_DOCS_NOT_LIST = "name: X\nmode: rolling\ntemplate: brief\nrequired_docs: nope\n"
-REQ_DOC_NOT_MAP = (
-    "name: X\nmode: collection\ntemplate: article\n"
-    "items:\n  - {slug: alpha, required_docs: [oops]}\n"
-)
-TWO_SLUGLESS = (
-    "name: X\nmode: collection\ntemplate: article\n"
-    "items:\n  - {title: one}\n  - {title: two}\n"
-)
-DUP_SLUG = (
-    "name: X\nmode: collection\ntemplate: article\n"
-    "items:\n  - {slug: alpha}\n  - {slug: alpha}\n"
-)
-MISSING_VOICE_GUIDE = (
-    "name: X\nmode: rolling\ntemplate: brief\nvoice_guide: voice-guide.md\n"
-)
+REQ_DOC_NOT_MAP = "name: X\nmode: collection\ntemplate: article\nitems:\n  - {slug: alpha, required_docs: [oops]}\n"
+TWO_SLUGLESS = "name: X\nmode: collection\ntemplate: article\nitems:\n  - {title: one}\n  - {title: two}\n"
+DUP_SLUG = "name: X\nmode: collection\ntemplate: article\nitems:\n  - {slug: alpha}\n  - {slug: alpha}\n"
+MISSING_VOICE_GUIDE = "name: X\nmode: rolling\ntemplate: brief\nvoice_guide: voice-guide.md\n"
 
 
 def site_errors(yaml_text: str) -> list[str]:
@@ -51,9 +40,7 @@ def directory_errors(directory: dict) -> list[str]:
 
 def production_errors(policy: dict | None) -> list[str]:
     errors: list[str] = []
-    validate_config.check_production_policy(
-        policy, where="press/production.yaml", errors=errors
-    )
+    validate_config.check_production_policy(policy, where="press/production.yaml", errors=errors)
     return errors
 
 
@@ -99,20 +86,14 @@ def test_a_series_on_an_example_package_is_told_where_to_copy_it_from(
     vc_output: Callable[[str], subprocess.CompletedProcess[str]],
 ) -> None:
     repo = clone_testrepo("press", "templates", "engine")
-    shutil.copytree(
-        REPO / "examples" / "templates", pathlib.Path(repo) / "examples" / "templates"
-    )
+    shutil.copytree(REPO / "examples" / "templates", pathlib.Path(repo) / "examples" / "templates")
     series = pathlib.Path(repo, "press", "series", "semiconductors", "series.yaml")
-    series.write_text(
-        series.read_text().replace("template: article", "template: lesson")
-    )
+    series.write_text(series.read_text().replace("template: article", "template: lesson"))
 
     result = vc_output(repo)
 
     assert result.returncode == 1
-    assert "copy examples/templates/lesson to press/templates/lesson" in (
-        result.stdout + result.stderr
-    )
+    assert "copy examples/templates/lesson to press/templates/lesson" in (result.stdout + result.stderr)
 
 
 def test_a_template_choice_list_is_valid_for_every_scheduling_mode(
@@ -135,7 +116,7 @@ def test_a_template_choice_list_is_valid_for_every_scheduling_mode(
         pytest.param('title: "x"\nfooter: ""\n', False, id="empty-string"),
     ],
 )
-def test_the_footer_imprint_is_a_short_line(site_yaml: str, valid: bool) -> None:
+def test_the_footer_imprint_is_a_short_line(site_yaml: str, *, valid: bool) -> None:
     assert (site_errors(site_yaml) == []) is valid
 
 
@@ -151,9 +132,7 @@ def test_the_footer_imprint_is_a_short_line(site_yaml: str, valid: bool) -> None
             False,
             id="redundant-url-key",
         ),
-        pytest.param(
-            {"publish": "yes", "description": "hi"}, False, id="non-bool-publish"
-        ),
+        pytest.param({"publish": "yes", "description": "hi"}, False, id="non-bool-publish"),
         pytest.param(
             {"publish": True, "description": "a" * 281},
             False,
@@ -161,9 +140,7 @@ def test_the_footer_imprint_is_a_short_line(site_yaml: str, valid: bool) -> None
         ),
     ],
 )
-def test_the_directory_block_states_a_choice_and_a_description(
-    directory: dict, valid: bool
-) -> None:
+def test_the_directory_block_states_a_choice_and_a_description(directory: dict, *, valid: bool) -> None:
     assert (directory_errors(directory) == []) is valid
 
 
@@ -206,9 +183,7 @@ def test_the_directory_block_states_a_choice_and_a_description(
         ),
     ],
 )
-def test_production_policy_has_a_small_portable_schema(
-    policy: dict | None, valid: bool
-) -> None:
+def test_production_policy_has_a_small_portable_schema(policy: dict | None, *, valid: bool) -> None:
     assert (production_errors(policy) == []) is valid
 
 
@@ -272,9 +247,7 @@ def test_a_non_dict_series_yaml_is_a_readable_error_not_a_traceback(
 @pytest.mark.parametrize(
     ("series_yaml", "message"),
     [
-        pytest.param(
-            REQ_DOCS_NOT_LIST, "'required_docs' must be a list", id="required_docs-list"
-        ),
+        pytest.param(REQ_DOCS_NOT_LIST, "'required_docs' must be a list", id="required_docs-list"),
         pytest.param(
             REQ_DOC_NOT_MAP,
             "required_docs entry must be a mapping",
@@ -333,12 +306,12 @@ def test_declared_chrome_must_appear_in_the_template_skeleton(
 
 @pytest.mark.parametrize(
     "patch",
-    (
+    [
         "flex_components: component\n",
         "flex_components: []\n",
         "flex_components: [nb-card, nb-card]\n",
         "flex_components: ['not a class']\n",
-    ),
+    ],
 )
 def test_flexible_component_contract_is_a_unique_css_class_list(
     *,
@@ -357,7 +330,7 @@ def test_flexible_components_require_a_flexible_outline(
     assert vc_rc(repo) == 1
 
 
-@pytest.mark.parametrize("component_count", (0, 2))
+@pytest.mark.parametrize("component_count", [0, 2])
 def test_every_skeleton_flex_section_contains_each_component_once(
     *,
     manifest_patched_repo: Callable[..., str],

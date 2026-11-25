@@ -15,9 +15,7 @@ import pytest
 
 from nb.proof.structure import MAX_FIGURE_EDGE, image_dimensions
 
-render_chart = pytest.importorskip(
-    "render_chart", reason="the optional charts group is not installed"
-)
+render_chart = pytest.importorskip("render_chart", reason="the optional charts group is not installed")
 
 REPO = pathlib.Path(__file__).resolve().parents[1]
 
@@ -57,8 +55,7 @@ def test_render_produces_a_proof_sized_png(tmp_path: pathlib.Path) -> None:
     kaleido = pytest.importorskip("kaleido")
     script = tmp_path / "chart-1.py"
     script.write_text(
-        "import plotly.graph_objects as go\n"
-        'fig = go.Figure(go.Scatter(name="Series", x=[1, 2, 3], y=[2, 1, 3]))\n'
+        'import plotly.graph_objects as go\nfig = go.Figure(go.Scatter(name="Series", x=[1, 2, 3], y=[2, 1, 3]))\n'
     )
 
     try:

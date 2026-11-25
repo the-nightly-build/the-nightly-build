@@ -53,7 +53,7 @@ jobs:
           ref: main
           path: _main
 
-      - uses: astral-sh/setup-uv@v5
+      - uses: astral-sh/setup-uv@v10.4.0
         with:
           enable-cache: true
           python-version: "3.12"

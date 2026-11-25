@@ -1,4 +1,4 @@
-"""This module tests the proof's prose findings.
+"""Tests for the proof's prose findings.
 
 The fixtures deliberately alter real repository-backed articles and series
 configurations, because prose findings depend on both the rendered structure
@@ -43,9 +43,7 @@ PUNCTUATION_DENSE_SENTENCE = (
     "different fields."
 )
 CITE_RE = re.compile(r'<sup class="nb-cite">.*?</sup>')
-DEBATE_RE = re.compile(
-    r'(<section data-nb-section="bull-versus-bear">.*?</section>)', re.S
-)
+DEBATE_RE = re.compile(r'(<section data-nb-section="bull-versus-bear">.*?</section>)', re.DOTALL)
 
 
 def _short_article() -> str:
@@ -80,7 +78,7 @@ def _uncited_debate() -> str:
 
 def _thin_brief() -> str:
     return (
-        re.sub(r"<div data-nb-item>.*?</div>", "", brief(), count=2, flags=re.S)
+        re.sub(r"<div data-nb-item>.*?</div>", "", brief(), count=2, flags=re.DOTALL)
         .replace('<sup class="nb-cite"><a href="#s1">1</a></sup>', "")
         .replace('<sup class="nb-cite"><a href="#s2">2</a></sup>', "")
     )
@@ -191,9 +189,7 @@ def test_split_sentences_stay_clean(
         "<pre><code>{}</code></pre>",
     ],
 )
-def test_code_and_quoted_text_do_not_trigger_sentence_density(
-    run_local: Callable[..., Findings], wrapped: str
-) -> None:
+def test_code_and_quoted_text_do_not_trigger_sentence_density(run_local: Callable[..., Findings], wrapped: str) -> None:
     result = run_local(
         mut(HEADING, f"{HEADING}{wrapped.format(DENSE_SENTENCE)}"),
         "semiconductors",
@@ -235,9 +231,7 @@ def test_open_series_item_band_applies_after_template_selection(
     repo = clone_testrepo("press", "templates")
     series = pathlib.Path(repo) / "press" / "series" / "wildcard"
     series.mkdir()
-    (series / "series.yaml").write_text(
-        "name: Wildcard\nmode: open\ntemplate: brief\nbands:\n  items: [2, 3]\n"
-    )
+    (series / "series.yaml").write_text("name: Wildcard\nmode: open\ntemplate: brief\nbands:\n  items: [2, 3]\n")
     html = _thin_brief().replace('"series": "ai-briefs"', '"series": "wildcard"')
     html = html.replace('"mode": "rolling"', '"mode": "open"')
     html = html.replace('"slug": "2026-07-06"', '"slug": "preview"')
@@ -246,17 +240,13 @@ def test_open_series_item_band_applies_after_template_selection(
     assert not result.blocks
 
 
-def test_required_doc_satisfied_when_attribute_present(
-    run_local: Callable[..., Findings], reqdoc_repo: str
-) -> None:
+def test_required_doc_satisfied_when_attribute_present(run_local: Callable[..., Findings], reqdoc_repo: str) -> None:
     result = run_local(article(), "semiconductors", repo=reqdoc_repo)
     assert "W-REQ-DOC" not in result.codes
     assert not result.blocks
 
 
-def test_missing_required_doc_warns(
-    run_local: Callable[..., Findings], reqdoc_repo: str
-) -> None:
+def test_missing_required_doc_warns(run_local: Callable[..., Findings], reqdoc_repo: str) -> None:
     result = run_local(
         mut(' data-nb-required="mu-10k-2025"', ""),
         "semiconductors",
@@ -283,15 +273,11 @@ def test_overstated_source_count_warns(run_local: Callable[..., Findings]) -> No
     assert not result.blocks
 
 
-def test_strict_promotes_warn_to_block(
-    run_local: Callable[..., Findings], clone_testrepo: Callable[..., str]
-) -> None:
+def test_strict_promotes_warn_to_block(run_local: Callable[..., Findings], clone_testrepo: Callable[..., str]) -> None:
     repo = clone_testrepo("press", "templates")
     y = pathlib.Path(repo) / "press" / "series" / "semiconductors" / "series.yaml"
     y.write_text(y.read_text().replace("strict: false", "strict: true"))
-    result = run_local(
-        mut('"sources": 8', '"sources": 20'), "semiconductors", repo=repo
-    )
+    result = run_local(mut('"sources": 8', '"sources": 20'), "semiconductors", repo=repo)
     assert "W-SELF-COUNT" in result.blocks
     assert not result.warns
 
@@ -334,9 +320,7 @@ def test_press_override_raises_an_engine_limit(
     assert "W-BANNED-TERM" not in result.codes
 
 
-def test_press_disables_an_engine_entry(
-    run_local: Callable[..., Findings], banned_repo: Callable[..., str]
-) -> None:
+def test_press_disables_an_engine_entry(run_local: Callable[..., Findings], banned_repo: Callable[..., str]) -> None:
     result = run_local(
         mut(HEADING, "<h2>The load bearing wall</h2>"),
         "semiconductors",
@@ -345,16 +329,11 @@ def test_press_disables_an_engine_entry(
     assert "W-BANNED-TERM" not in result.codes
 
 
-def test_press_adds_its_own_ban(
-    run_local: Callable[..., Findings], banned_repo: Callable[..., str]
-) -> None:
+def test_press_adds_its_own_ban(run_local: Callable[..., Findings], banned_repo: Callable[..., str]) -> None:
     result = run_local(
         mut(HEADING, "<h2>Synergy in memory</h2>"),
         "semiconductors",
-        repo=banned_repo(
-            "- id: synergy\n  terms: [synergy]\n  max: 0\n"
-            "  suggestion: name the mechanism\n"
-        ),
+        repo=banned_repo("- id: synergy\n  terms: [synergy]\n  max: 0\n  suggestion: name the mechanism\n"),
     )
     assert "W-BANNED-TERM" in result.warns
 
@@ -416,9 +395,7 @@ def test_lifted_skeleton_placeholder_warns_and_never_blocks(
         ("a lone skeleton placeholder word", "TITLE goes here."),
     ],
 )
-def test_caps_runs_are_read_as_leftovers(
-    *, run_local: Callable[..., Findings], name: str, paragraph: str
-) -> None:
+def test_caps_runs_are_read_as_leftovers(*, run_local: Callable[..., Findings], name: str, paragraph: str) -> None:
     result = run_local(mut(HEADING, f"{HEADING}<p>{paragraph}</p>"), "semiconductors")
     assert "W-PLACEHOLDER" in result.warns, name
 

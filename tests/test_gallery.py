@@ -55,9 +55,7 @@ def test_the_built_page_shows_every_piece(tmp_path: pathlib.Path) -> None:
 def test_the_build_fails_loudly_on_a_missing_sample(tmp_path: pathlib.Path) -> None:
     repo = tmp_path / "repo"
     (repo / "templates").mkdir(parents=True)
-    (repo / "templates" / "FURNITURE.md").write_text(
-        "# Furniture\n\n## Imaginary piece\n\nA piece with no sample.\n"
-    )
+    (repo / "templates" / "FURNITURE.md").write_text("# Furniture\n\n## Imaginary piece\n\nA piece with no sample.\n")
 
     with pytest.raises(SystemExit, match="imaginary-piece"):
         build(repo, tmp_path / "out" / "index.html")
@@ -71,9 +69,7 @@ def test_press_furniture_without_a_sample_renders_a_placeholder(
     (repo / "templates" / "FURNITURE.md").write_text("# Furniture\n")
     press = repo / "press" / "furniture"
     press.mkdir(parents=True)
-    (press / "catalog.md").write_text(
-        "# Mine\n\n## House special\n\nA press-only piece.\n"
-    )
+    (press / "catalog.md").write_text("# Mine\n\n## House special\n\nA press-only piece.\n")
 
     page = build(repo, tmp_path / "out" / "index.html").read_text(encoding="utf-8")
 
@@ -88,12 +84,8 @@ def test_shared_press_furniture_uses_its_own_sample(tmp_path: pathlib.Path) -> N
     (repo / "templates" / "FURNITURE.md").write_text("# Furniture\n")
     furniture = repo / "press" / "furniture"
     (furniture / "samples").mkdir(parents=True)
-    (furniture / "catalog.md").write_text(
-        "# Mine\n\n## House special\n\nA press-only piece.\n"
-    )
-    (furniture / "samples" / "house-special.html").write_text(
-        '<div class="house-sample">local shared sample</div>\n'
-    )
+    (furniture / "catalog.md").write_text("# Mine\n\n## House special\n\nA press-only piece.\n")
+    (furniture / "samples" / "house-special.html").write_text('<div class="house-sample">local shared sample</div>\n')
 
     page = build(repo, tmp_path / "out" / "index.html").read_text(encoding="utf-8")
 
@@ -107,12 +99,8 @@ def test_press_template_uses_its_own_sample_directory(tmp_path: pathlib.Path) ->
     (repo / "templates" / "FURNITURE.md").write_text("# Furniture\n")
     template = repo / "press" / "templates" / "feature"
     (template / "samples").mkdir(parents=True)
-    (template / "furniture.md").write_text(
-        "# Feature furniture\n\n## Story rail\n\nA template-only piece.\n"
-    )
-    (template / "samples" / "story-rail.html").write_text(
-        '<div class="story-sample">local template sample</div>\n'
-    )
+    (template / "furniture.md").write_text("# Feature furniture\n\n## Story rail\n\nA template-only piece.\n")
+    (template / "samples" / "story-rail.html").write_text('<div class="story-sample">local template sample</div>\n')
 
     page = build(repo, tmp_path / "out" / "index.html").read_text(encoding="utf-8")
 
@@ -122,8 +110,6 @@ def test_press_template_uses_its_own_sample_directory(tmp_path: pathlib.Path) ->
 
 
 def test_engine_template_samples_remain_in_the_engine_gallery_directory() -> None:
-    piece = next(
-        p for p in discover_pieces(REPO) if p.engine_owned and p.scope != "engine base"
-    )
+    piece = next(p for p in discover_pieces(REPO) if p.engine_owned and p.scope != "engine base")
 
     assert piece.sample_path.parent == REPO / "scripts" / "gallery" / "samples"

@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """Write the UTC publication date and computable nb-meta counts.
 
 words, reading_minutes, and sources are properties of the article text, not
@@ -16,6 +15,7 @@ from __future__ import annotations
 
 import argparse
 import datetime as dt
+import pathlib
 import re
 import sys
 
@@ -23,17 +23,11 @@ from nb import meta as nb_meta
 from nb.article import Article
 from nb.site.library import WORDS_PER_MINUTE
 
-COUNT_KEY_RE = {
-    key: re.compile(rf'("{key}"\s*:\s*)(-?\d+)') for key in ("words", "sources")
-}
+COUNT_KEY_RE = {key: re.compile(rf'("{key}"\s*:\s*)(-?\d+)') for key in ("words", "sources")}
 DATE_KEY_RE = re.compile(r'("date"\s*:\s*)"(?:\\.|[^"\\])*"')
 READING_KEY_RE = re.compile(r'("reading_minutes"\s*:\s*)(-?\d+)')
-BYLINE_READING_RE = re.compile(
-    r'(<div class="nb-byline">\s*<span>)(?:N|\d+) min read(</span>)'
-)
-BYLINE_DATE_RE = re.compile(
-    r'(<div class="nb-byline">\s*<span>[^<]*</span>\s*<span>)[^<]*(</span>)'
-)
+BYLINE_READING_RE = re.compile(r'(<div class="nb-byline">\s*<span>)(?:N|\d+) min read(</span>)')
+BYLINE_DATE_RE = re.compile(r'(<div class="nb-byline">\s*<span>[^<]*</span>\s*<span>)[^<]*(</span>)')
 
 
 def computed_counts(source: str) -> dict[str, int]:
@@ -55,17 +49,21 @@ def stamp_source(source: str, *, revision: bool = False) -> tuple[str, dict[str,
     """
     m = nb_meta.META_RE.search(source)
     if m is None or nb_meta.parse_meta(source) is None:
-        raise ValueError("no readable nb-meta block; add the template's block first")
+        message = "no readable nb-meta block; add the template's block first"
+        raise ValueError(message)
 
     if not revision:
         date = dt.datetime.now(dt.timezone.utc).date().isoformat()
         block, n = DATE_KEY_RE.subn(rf'\g<1>"{date}"', m.group(1), count=1)
         if not n:
-            raise ValueError("nb-meta lacks a string date key")
+            message = "nb-meta lacks a string date key"
+            raise ValueError(message)
         source = source[: m.start(1)] + block + source[m.end(1) :]
         source = BYLINE_DATE_RE.sub(rf"\g<1>{date}\g<2>", source, count=1)
         m = nb_meta.META_RE.search(source)
-        assert m is not None
+        if m is None:
+            message = "no readable nb-meta block after stamping date"
+            raise ValueError(message)
 
     counts = computed_counts(source)
     block = source[m.start(1) : m.end(1)]
@@ -75,26 +73,21 @@ def stamp_source(source: str, *, revision: bool = False) -> tuple[str, dict[str,
         if n == 0:
             missing.append(key)
     if missing:
-        raise ValueError(f"nb-meta lacks count keys: {', '.join(sorted(missing))}")
+        message = f"nb-meta lacks count keys: {', '.join(sorted(missing))}"
+        raise ValueError(message)
     stamped = source[: m.start(1)] + block + source[m.end(1) :]
-    stamped = BYLINE_READING_RE.sub(
-        rf"\g<1>{counts['reading_minutes']} min read\g<2>", stamped, count=1
-    )
+    stamped = BYLINE_READING_RE.sub(rf"\g<1>{counts['reading_minutes']} min read\g<2>", stamped, count=1)
     return stamped, counts
 
 
 def main(argv: list[str] | None = None) -> int:
-    p = argparse.ArgumentParser(
-        description="Write the UTC publication date, article counts, and reading time."
-    )
+    p = argparse.ArgumentParser(description="Write the UTC publication date, article counts, and reading time.")
     p.add_argument("file", help="article HTML file to stamp in place")
-    p.add_argument(
-        "--revision", action="store_true", help="preserve the original publication date"
-    )
+    p.add_argument("--revision", action="store_true", help="preserve the original publication date")
     args = p.parse_args(argv)
 
-    with open(args.file, encoding="utf-8") as fh:
-        source = fh.read()
+    article_path = pathlib.Path(args.file)
+    source = article_path.read_text(encoding="utf-8")
     try:
         stamped, counts = stamp_source(source, revision=args.revision)
     except ValueError as err:
@@ -102,10 +95,10 @@ def main(argv: list[str] | None = None) -> int:
         return 2
 
     if stamped != source:
-        with open(args.file, "w", encoding="utf-8") as fh:
-            fh.write(stamped)
+        article_path.write_text(stamped, encoding="utf-8")
     state = "stamped" if stamped != source else "already stamped"
-    print(" ".join([state] + [f"{k}={v}" for k, v in counts.items()]))
+    summary = " ".join([state, *(f"{k}={v}" for k, v in counts.items())])
+    sys.stdout.write(f"{summary}\n")
     return 0
 
 

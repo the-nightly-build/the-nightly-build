@@ -14,7 +14,7 @@ import shutil
 import subprocess
 from dataclasses import dataclass
 
-from press import REPO
+from press import REPO, git_executable, refuse_git_remote
 from test_sync_script import WORKFLOWS, configure_author, git, write_fake_gh
 
 
@@ -42,11 +42,19 @@ class SetupRepo:
             env=env,
             capture_output=True,
             text=True,
+            check=False,
         )
 
     def main_files(self) -> set[str]:
         listing = subprocess.run(
-            ["git", f"--git-dir={self.origin}", "ls-tree", "-r", "--name-only", "main"],
+            [
+                git_executable(),
+                f"--git-dir={self.origin}",
+                "ls-tree",
+                "-r",
+                "--name-only",
+                "main",
+            ],
             capture_output=True,
             text=True,
             check=True,
@@ -56,7 +64,7 @@ class SetupRepo:
     def library_files(self) -> set[str]:
         listing = subprocess.run(
             [
-                "git",
+                git_executable(),
                 f"--git-dir={self.origin}",
                 "ls-tree",
                 "-r",
@@ -71,6 +79,7 @@ class SetupRepo:
 
 
 def make_setup_repo(tmp_path: pathlib.Path) -> SetupRepo:
+    git_bin = git_executable()
     source = tmp_path / "source"
     origin = tmp_path / "origin.git"
     checkout = tmp_path / "checkout"
@@ -88,10 +97,8 @@ def make_setup_repo(tmp_path: pathlib.Path) -> SetupRepo:
     configure_author(source)
     git(source, "add", "-A")
     git(source, "commit", "-qm", "engine")
-    subprocess.run(
-        ["git", "clone", "-q", "--bare", str(source), str(origin)], check=True
-    )
-    subprocess.run(["git", "clone", "-q", str(origin), str(checkout)], check=True)
+    subprocess.run([git_bin, "clone", "-q", "--bare", str(source), str(origin)], check=True)
+    subprocess.run([git_bin, "clone", "-q", str(origin), str(checkout)], check=True)
     configure_author(checkout)
     fake_bin = tmp_path / "bin"
     gh_log = tmp_path / "gh.log"
@@ -128,15 +135,15 @@ def test_setup_scaffolds_the_default_paper(tmp_path: pathlib.Path) -> None:
     series = repo.checkout / "press" / "series"
     assert "cadence: manual" in (series / "dispatches" / "series.yaml").read_text()
     news_brief = (series / "news-brief" / "series.yaml").read_text()
-    assert "mode: rolling" in news_brief and "cadence: daily" in news_brief
+    assert "mode: rolling" in news_brief
+    assert "cadence: daily" in news_brief
     feature = (series / "feature" / "series.yaml").read_text()
-    assert "templates: [article, paper]" in feature and "cadence: daily" in feature
+    assert "templates: [article, paper]" in feature
+    assert "cadence: daily" in feature
     for name in ("dispatches", "news-brief", "feature"):
         assert (series / name / "prompt.md").read_text().strip()
         assert f"press/series/{name}/prompt.md" in repo.main_files()
-    assert (
-        "Ask your agent" not in (repo.checkout / "press" / "editorial.md").read_text()
-    )
+    assert "Ask your agent" not in (repo.checkout / "press" / "editorial.md").read_text()
     assert "Ask for an article" in result.stdout
     assert "pushed to main" in result.stdout
 
@@ -153,6 +160,7 @@ def test_scaffolded_paper_has_daily_work_and_dispatches_never_does(
         capture_output=True,
         text=True,
         env={**os.environ, "UV_PROJECT_ENVIRONMENT": str(REPO / ".venv")},
+        check=False,
     )
 
     assert duty.returncode == 0, duty.stderr + duty.stdout
@@ -165,7 +173,7 @@ def test_setup_hands_off_a_refused_scaffold_push(tmp_path: pathlib.Path) -> None
     # origin's main moves on before setup pushes, so the push is not a fast-forward
     repo = make_setup_repo(tmp_path)
     other = tmp_path / "other"
-    subprocess.run(["git", "clone", "-q", str(repo.origin), str(other)], check=True)
+    subprocess.run([git_executable(), "clone", "-q", str(repo.origin), str(other)], check=True)
     configure_author(other)
     (other / "note.txt").write_text("someone else pushed first\n")
     git(other, "add", "note.txt")
@@ -211,9 +219,9 @@ def test_setup_is_idempotent_over_a_healthy_fork(tmp_path: pathlib.Path) -> None
     assert "library branch already exists" in second.stdout
 
 
-def test_setup_failed_branch_query_never_creates_library(tmp_path) -> None:
-    from press import refuse_git_remote
-
+def test_setup_failed_branch_query_never_creates_library(
+    tmp_path: pathlib.Path,
+) -> None:
     repo = make_setup_repo(tmp_path)
     refuse_git_remote(repo.fake_bin, operation="ls-remote")
 
@@ -225,13 +233,14 @@ def test_setup_failed_branch_query_never_creates_library(tmp_path) -> None:
     assert (
         subprocess.run(
             [
-                "git",
+                git_executable(),
                 f"--git-dir={repo.origin}",
                 "show-ref",
                 "--verify",
                 "refs/heads/library",
             ],
             capture_output=True,
+            check=False,
         ).returncode
         != 0
     )

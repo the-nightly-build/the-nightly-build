@@ -126,25 +126,14 @@ def article() -> str:
         for _ in range(paras):
             n = (ci % 8) + 1
             ci += 1
-            ps.append(
-                f'<p>{LOREM * 6}<sup class="nb-cite"><a href="#s{n}">{n}</a></sup></p>'
-            )
-        body.append(
-            f'<section data-nb-section="{sid}"><h2>{title}</h2>{"".join(ps)}</section>'
-        )
+            ps.append(f'<p>{LOREM * 6}<sup class="nb-cite"><a href="#s{n}">{n}</a></sup></p>')
+        body.append(f'<section data-nb-section="{sid}"><h2>{title}</h2>{"".join(ps)}</section>')
 
     src = []
     for i in range(1, 9):
         req = ' data-nb-required="mu-10k-2025"' if i == 1 else ""
-        href = (
-            "https://www.sec.gov/filings/mu-10k"
-            if i == 2
-            else f"https://example.org/src{i}"
-        )
-        src.append(
-            f'<li id="s{i}"><span>Source {i}</span> '
-            f'<a data-nb-source{req} href="{href}">link</a></li>'
-        )
+        href = "https://www.sec.gov/filings/mu-10k" if i == 2 else f"https://example.org/src{i}"
+        src.append(f'<li id="s{i}"><span>Source {i}</span> <a data-nb-source{req} href="{href}">link</a></li>')
 
     # the dekline renders wrapped, entity-escaped and broken by a tag; nb-meta's
     # dek is one JSON string, and the proof must still see the two as one sentence
@@ -187,19 +176,17 @@ def article() -> str:
 
 
 def brief(date: str = TODAY) -> str:
-    items = []
-    for i in range(1, 6):
-        items.append(
-            f'<div data-nb-item><span class="tag">topic{i}</span>'
-            f"<h4>Development number {i} happened today"
-            f'<sup class="nb-cite"><a href="#s{i}">{i}</a></sup></h4>'
-            f"<p>Two sentences of what happened and the immediate context around it. "
-            f"The specifics are grounded in the cited source.</p>"
-            f"</div>"
-        )
-    src = "".join(
-        f'<li id="s{i}"><a data-nb-source href="https://example.org/news{i}">src</a></li>'
+    items = [
+        f'<div data-nb-item><span class="tag">topic{i}</span>'
+        f"<h4>Development number {i} happened today"
+        f'<sup class="nb-cite"><a href="#s{i}">{i}</a></sup></h4>'
+        f"<p>Two sentences of what happened and the immediate context around it. "
+        f"The specifics are grounded in the cited source.</p>"
+        f"</div>"
         for i in range(1, 6)
+    ]
+    src = "".join(
+        f'<li id="s{i}"><a data-nb-source href="https://example.org/news{i}">src</a></li>' for i in range(1, 6)
     )
     meta = f"""{{
   "protocol": "1.0", "series": "ai-briefs", "slug": "{date}",
@@ -265,9 +252,7 @@ def _sources(n: int) -> str:
     return (
         '<section class="nb-sources" data-nb-section="sources"><h2>Sources</h2><ol>'
         + "".join(
-            f'<li id="s{i}"><a data-nb-source '
-            f'href="https://example.org/src{i}">link</a></li>'
-            for i in range(1, n + 1)
+            f'<li id="s{i}"><a data-nb-source href="https://example.org/src{i}">link</a></li>' for i in range(1, n + 1)
         )
         + "</ol></section>"
     )
@@ -277,9 +262,7 @@ def _cited_paras(count: int, n_sources: int, *, start: int = 0) -> str:
     ps = []
     for k in range(count):
         n = ((start + k) % n_sources) + 1
-        ps.append(
-            f'<p>{LOREM * 6}<sup class="nb-cite"><a href="#s{n}">{n}</a></sup></p>'
-        )
+        ps.append(f'<p>{LOREM * 6}<sup class="nb-cite"><a href="#s{n}">{n}</a></sup></p>')
     return "".join(ps)
 
 
@@ -332,19 +315,14 @@ def write_agent_artifacts(root: str, series: str, *, slug: str) -> None:
     (artifacts / "editorial-direction.md").write_text(
         f"# Editorial direction\n\nFixture direction for {series}/{slug}.\n"
     )
-    (artifacts / "commission.md").write_text(
-        f"# Commission\n\nPublish {series}/{slug} for the fixture press.\n"
-    )
+    (artifacts / "commission.md").write_text(f"# Commission\n\nPublish {series}/{slug} for the fixture press.\n")
     for role, filenames in ROLE_FILES.items():
         invocation = artifacts / role / "01"
         invocation.mkdir(parents=True)
         for filename in filenames:
             content = f"# {role}\n\nFixture {filename} for {series}/{slug}.\n"
             if filename == "voice-guide.md":
-                content += "\n".join(
-                    f"Source: https://example.org/exemplar-{number}"
-                    for number in range(1, 4)
-                )
+                content += "\n".join(f"Source: https://example.org/exemplar-{number}" for number in range(1, 4))
             (invocation / filename).write_text(content)
 
 
@@ -356,17 +334,37 @@ def make_full_library() -> str:
     return lib
 
 
+class GitUnavailableError(RuntimeError):
+    def __init__(self) -> None:
+        super().__init__("git executable not found in PATH")
+
+
+class GitCommandError(RuntimeError):
+    def __init__(self, args: tuple[str, ...], *, cwd: str, stderr: str) -> None:
+        super().__init__(f"git {' '.join(args)} failed in {cwd}: {stderr}")
+
+
+def git_executable() -> str:
+    executable = shutil.which("git")
+    if executable is None:
+        raise GitUnavailableError
+    return executable
+
+
 def git(*args: str, cwd: str) -> None:
-    run = subprocess.run(["git", *args], cwd=cwd, capture_output=True, text=True)
+    run = subprocess.run(
+        [git_executable(), *args],
+        cwd=cwd,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
     if run.returncode:
-        raise RuntimeError(
-            f"git {' '.join(args)} failed in {cwd}: {run.stderr.strip()}"
-        )
+        raise GitCommandError(args, cwd=cwd, stderr=run.stderr.strip())
 
 
 def refuse_git_remote(fake_bin: pathlib.Path, *, operation: str) -> None:
-    executable = shutil.which("git")
-    assert executable is not None
+    executable = git_executable()
     fake_bin.mkdir(exist_ok=True)
     wrapper = fake_bin / "git"
     wrapper.write_text(

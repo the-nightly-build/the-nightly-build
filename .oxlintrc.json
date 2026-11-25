@@ -1,0 +1,54 @@
+{
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
+  // Pure JS repo (no TypeScript or React files).
+  "plugins": ["unicorn", "oxc", "import"],
+  "categories": {
+    "correctness": "error",
+    "suspicious": "error",
+    "perf": "error"
+  },
+  "ignorePatterns": [
+    "node_modules/**",
+    "press/**",
+    "press-check/**",
+    ".venv/**",
+    ".byor/**"
+  ],
+  "rules": {
+    // oxlint counts `&&`, `||`, `??` and `?:`, so 10 matches Python C901 <= 8.
+    "complexity": ["error", 10],
+    "max-depth": ["error", 4],
+    "max-nested-callbacks": ["error", 3],
+    // Pass an options object when a function needs more than three inputs.
+    "max-params": ["error", 3],
+    "curly": ["error", "multi-line"],
+    "import/no-cycle": "error",
+    "eqeqeq": ["error", "always"],
+    "no-var": "error",
+    "prefer-const": "error",
+    "no-param-reassign": "error",
+    "no-nested-ternary": "error",
+    "no-else-return": "error",
+    "no-lonely-if": "error",
+    "unicorn/no-negated-condition": "error"
+  },
+  "overrides": [
+    {
+      // nb.js is an engine-owned browser IIFE; Chart.js is loaded from a CDN.
+      "files": ["engine/assets/**/*.js"],
+      "env": {
+        "browser": true
+      },
+      "globals": {
+        "Chart": "readonly"
+      }
+    },
+    {
+      // Node ESM behavior tests for the browser runtime.
+      "files": ["tests/js/**/*.js"],
+      "env": {
+        "node": true
+      }
+    }
+  ]
+}

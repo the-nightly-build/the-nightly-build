@@ -1,6 +1,7 @@
 """Git-dependent commands report connector work without claiming success."""
 
 import os
+import pathlib
 import shutil
 import subprocess
 import sys
@@ -11,7 +12,7 @@ from press import REPO, make_press
 
 
 @pytest.mark.parametrize("command", ["duty.py", "nb/history.py"])
-def test_managed_library_read_without_git_emits_handoff(tmp_path, command) -> None:
+def test_managed_library_read_without_git_emits_handoff(tmp_path: pathlib.Path, command: str) -> None:
     empty_bin = tmp_path / "empty-bin"
     empty_bin.mkdir()
     repo = make_press()
@@ -27,6 +28,7 @@ def test_managed_library_read_without_git_emits_handoff(tmp_path, command) -> No
         },
         capture_output=True,
         text=True,
+        check=False,
     )
 
     assert result.returncode == 3
@@ -36,7 +38,7 @@ def test_managed_library_read_without_git_emits_handoff(tmp_path, command) -> No
 
 
 @pytest.mark.parametrize("command", ["setup", "sync"])
-def test_shell_command_without_git_emits_handoff(tmp_path, command) -> None:
+def test_shell_command_without_git_emits_handoff(tmp_path: pathlib.Path, command: str) -> None:
     minimal_bin = tmp_path / "bin"
     minimal_bin.mkdir()
     for name in ("dirname", "cat"):
@@ -48,6 +50,7 @@ def test_shell_command_without_git_emits_handoff(tmp_path, command) -> None:
         env={**os.environ, "PATH": str(minimal_bin)},
         capture_output=True,
         text=True,
+        check=False,
     )
 
     assert result.returncode == 3

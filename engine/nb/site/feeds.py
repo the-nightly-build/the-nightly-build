@@ -6,10 +6,18 @@ subscribes gets the piece and not a teaser. Stable tag IDs include the paper's
 host and path, which prevents otherwise identical feeds from colliding.
 """
 
+from __future__ import annotations
+
 import html
 import re
+from typing import TYPE_CHECKING
 
 from nb.site.library import article_body_html
+
+if TYPE_CHECKING:
+    import datetime as dt
+    import pathlib
+    from collections.abc import Mapping, Sequence
 
 __all__ = (
     "absolutize_url",
@@ -24,16 +32,17 @@ esc = html.escape
 FEED_LIMIT = 50
 FEED_CONTENT_LIMIT = 10  # newest N entries carry full content
 FEED_CONTENT_MAX = 150_000  # per-entry cap after stripping, bytes
+ISO_YEAR_LENGTH = 4
 
-FEED_STRIP_RE = re.compile(r"<script[\s\S]*?</script>|<style[\s\S]*?</style>", re.I)
-HREF_RE = re.compile(r'((?:href|src)=")([^"]+)(")', re.I)
+FEED_STRIP_RE = re.compile(r"<script[\s\S]*?</script>|<style[\s\S]*?</style>", re.IGNORECASE)
+HREF_RE = re.compile(r'((?:href|src)=")([^"]+)(")', re.IGNORECASE)
 
 
-def absolutize_url(base_url, path):
+def absolutize_url(base_url: str, path: str) -> str:
     return f"{base_url}{path}" if base_url else path
 
 
-def feed_content_html(path, base_url):
+def feed_content_html(path: str | pathlib.Path, base_url: str) -> str:
     """Return the article body as a feed-safe HTML fragment.
 
     Scripts, styles, and comments are stripped so feed readers get
@@ -43,7 +52,7 @@ def feed_content_html(path, base_url):
     """
     body = FEED_STRIP_RE.sub(" ", article_body_html(path))
 
-    def absolutize(match):
+    def absolutize(match: re.Match[str]) -> str:
         pre, url, post = match.groups()
         if base_url and url.startswith("../"):
             return f"{pre}{base_url}/{url.replace('../', '')}{post}"
@@ -55,8 +64,8 @@ def feed_content_html(path, base_url):
     return body if len(body) <= FEED_CONTENT_MAX else ""
 
 
-def feed_tag_id(base_url, resource, *, year):
-    """A globally-unique, stable Atom id for a feed or entry.
+def feed_tag_id(base_url: str, resource: str, *, year: str) -> str:
+    """Return a globally-unique, stable Atom id for a feed or entry.
 
     When the paper has a base_url its id is an RFC 4151 tag: IRI whose
     authority is the paper's own domain and whose specific part is the
@@ -75,24 +84,29 @@ def feed_tag_id(base_url, resource, *, year):
     return f"tag:{host},{year}:{specific}"
 
 
-def entry_year(meta, generated):
+def entry_year(meta: Mapping[str, object], generated: dt.datetime) -> str:
     date = meta.get("date")
-    if isinstance(date, str) and len(date) >= 4 and date[:4].isdigit():
-        return date[:4]
+    if isinstance(date, str) and len(date) >= ISO_YEAR_LENGTH and date[:ISO_YEAR_LENGTH].isdigit():
+        return date[:ISO_YEAR_LENGTH]
     return generated.strftime("%Y")
 
 
-def atom_feed(base_url, feed_path, *, title, eds, generated, author=None):
+def atom_feed(
+    base_url: str,
+    feed_path: str,
+    *,
+    title: str,
+    eds: Sequence[dict],
+    generated: dt.datetime,
+    author: str | None = None,
+) -> str:
     author = author or title
 
     entries = []
     for i, ed in enumerate(eds[:FEED_LIMIT]):
         meta = ed["meta"]
         link = absolutize_url(base_url, f"/library/{ed['series']}/{ed['slug']}.html")
-        updated = (
-            ed.get("revised")
-            or f"{meta.get('date', generated.date().isoformat())}T00:00:00Z"
-        )
+        updated = ed.get("revised") or f"{meta.get('date', generated.date().isoformat())}T00:00:00Z"
         entry_id = feed_tag_id(
             base_url,
             f"library/{ed['series']}/{ed['slug']}",

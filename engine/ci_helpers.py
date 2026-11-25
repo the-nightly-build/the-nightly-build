@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 # /// script
 # requires-python = ">=3.10"
 # dependencies = []
@@ -11,7 +10,9 @@ free of workflow concerns and the path grammar in one reviewed module.
 """
 
 import argparse
+import shutil
 import subprocess
+import sys
 
 from nb import meta as nb_meta
 from nb.workflow_sync import classify_workflow_sync
@@ -20,9 +21,13 @@ __all__ = ("changed_files",)
 
 
 def changed_files(diff_base: str) -> list[tuple[str, str]]:
+    git = shutil.which("git")
+    if git is None:
+        message = "git executable not found"
+        raise FileNotFoundError(message)
     out = (
         subprocess.run(
-            ["git", "diff", "--name-status", "--no-renames", f"{diff_base}...HEAD"],
+            [git, "diff", "--name-status", "--no-renames", f"{diff_base}...HEAD"],
             capture_output=True,
             text=True,
             check=True,
@@ -45,17 +50,12 @@ if __name__ == "__main__":
     p.add_argument("--diff-base", required=True)
     a = p.parse_args()
     if a.cmd == "new-article":
-        print(
-            "true"
-            if nb_meta.article_bundle_path(changed_files(a.diff_base)) is not None
-            else "false"
-        )
+        flag = "true" if nb_meta.article_bundle_path(changed_files(a.diff_base)) is not None else "false"
+        sys.stdout.write(f"{flag}\n")
     elif a.cmd == "article-path":
         changes = changed_files(a.diff_base)
-        path = nb_meta.article_bundle_path(changes) or nb_meta.revision_bundle_path(
-            changes
-        )
-        print(path or "")
+        path = nb_meta.article_bundle_path(changes) or nb_meta.revision_bundle_path(changes)
+        sys.stdout.write(f"{path or ''}\n")
     else:
         sync = classify_workflow_sync(
             ".",
@@ -63,4 +63,4 @@ if __name__ == "__main__":
             head="HEAD",
             changes=changed_files(a.diff_base),
         )
-        print("true" if sync.valid else "false")
+        sys.stdout.write(f"{'true' if sync.valid else 'false'}\n")

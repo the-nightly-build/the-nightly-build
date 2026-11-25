@@ -6,9 +6,17 @@ manual-open exception is checked here because each manually commissioned slug
 must be explicit configuration before CI accepts it.
 """
 
-import datetime as _dt
+from __future__ import annotations
+
+import datetime as dt
+from typing import TYPE_CHECKING
 
 from nb.proof.meta import DATE_RE
+
+if TYPE_CHECKING:
+    from collections.abc import Mapping, Sequence
+
+    from nb.report import Report
 
 __all__ = (
     "check_mode",
@@ -19,36 +27,38 @@ __all__ = (
 )
 
 
-def check_sequence_slug(meta, *, items, idx, slug, pub, revision, rep):
+def check_sequence_slug(
+    meta: Mapping[str, object],
+    *,
+    items: Sequence[Mapping[str, object]],
+    idx: int,
+    slug: str,
+    pub: set[str] | None,
+    revision: bool,
+    rep: Report,
+) -> None:
     if revision:
         if meta.get("order") != idx + 1:
             rep.block(
                 "B-MODE",
-                f"sequence order must be item position {idx + 1}; "
-                f"nb-meta says {meta.get('order')}",
+                f"sequence order must be item position {idx + 1}; nb-meta says {meta.get('order')}",
             )
         return
     if pub is None:
         if meta.get("order") != idx + 1:
             rep.block(
                 "B-MODE",
-                f"sequence order must be item position {idx + 1}; "
-                f"nb-meta says {meta.get('order')}",
+                f"sequence order must be item position {idx + 1}; nb-meta says {meta.get('order')}",
             )
-        rep.notes.append(
-            "library state not provided (--library); next-expected check skipped"
-        )
+        rep.notes.append("library state not provided (--library); next-expected check skipped")
         return
-    expected = next(
-        (i for i, it in enumerate(items) if it.get("slug") not in pub), None
-    )
+    expected = next((i for i, it in enumerate(items) if it.get("slug") not in pub), None)
     if expected is None:
         rep.block("B-MODE", "sequence is complete; nothing to publish")
     elif idx != expected:
         rep.block(
             "B-MODE",
-            f"next expected sequence item is "
-            f"'{items[expected].get('slug')}' (#{expected + 1}), not '{slug}'",
+            f"next expected sequence item is '{items[expected].get('slug')}' (#{expected + 1}), not '{slug}'",
         )
     elif meta.get("order") != expected + 1:
         rep.block(
@@ -57,7 +67,17 @@ def check_sequence_slug(meta, *, items, idx, slug, pub, revision, rep):
         )
 
 
-def check_ordered_mode(meta, *, series_id, items, slug, pub, mode, revision, rep):
+def check_ordered_mode(
+    meta: Mapping[str, object],
+    *,
+    series_id: str,
+    items: Sequence[Mapping[str, object]],
+    slug: str,
+    pub: set[str] | None,
+    mode: str,
+    revision: bool,
+    rep: Report,
+) -> Mapping[str, object] | None:
     idx = next((i for i, it in enumerate(items) if it.get("slug") == slug), None)
     if idx is None:
         if revision:
@@ -84,12 +104,20 @@ def check_ordered_mode(meta, *, series_id, items, slug, pub, mode, revision, rep
     return item_cfg
 
 
-def check_rolling_mode(meta, *, slug, pub, today, revision, rep):
+def check_rolling_mode(
+    meta: Mapping[str, object],
+    *,
+    slug: str,
+    pub: set[str] | None,
+    today: dt.date,
+    revision: bool,
+    rep: Report,
+) -> None:
     if not DATE_RE.match(slug):
         rep.block("B-SLUG", f"rolling slug must be YYYY-MM-DD, got '{slug}'")
     else:
         try:
-            d = _dt.date.fromisoformat(slug)
+            d = dt.date.fromisoformat(slug)
             if d > today:
                 rep.block("B-SLUG", f"rolling slug {slug} is in the future")
         except ValueError:
@@ -102,21 +130,24 @@ def check_rolling_mode(meta, *, slug, pub, today, revision, rep):
         if not revision and pub is not None and slug in pub:
             rep.block("B-MODE", f"a brief for {slug} is already published")
     if pub is None:
-        rep.notes.append(
-            "library state not provided (--library); already-published check skipped"
-        )
+        rep.notes.append("library state not provided (--library); already-published check skipped")
 
 
-def check_open_slug(*, items, slug, pub, manual, revision, rep):
+def check_open_slug(
+    *,
+    items: Sequence[Mapping[str, object]],
+    slug: str,
+    pub: set[str] | None,
+    manual: bool,
+    revision: bool,
+    rep: Report,
+) -> Mapping[str, object] | None:
     item_cfg = next((it for it in items if it.get("slug") == slug), None)
     if revision:
         # published is a fact: revising never requires the item's config
         return item_cfg
     if pub is None:
-        rep.notes.append(
-            "library state not provided (--library); "
-            "open-mode dedupe and commission checks skipped"
-        )
+        rep.notes.append("library state not provided (--library); open-mode dedupe and commission checks skipped")
         return item_cfg
     if slug in pub:
         rep.block("B-MODE", f"'{slug}' is already published")
@@ -124,19 +155,33 @@ def check_open_slug(*, items, slug, pub, manual, revision, rep):
         # a manual series only ever publishes what a person asked for, so
         # its items are suggestions and never gate the slug
         return item_cfg
-    pending = sorted(it.get("slug") for it in items if it.get("slug") not in pub)
+    pending = sorted(item_slug for it in items if isinstance(item_slug := it.get("slug"), str) and item_slug not in pub)
     if pending and slug not in pending:
         rep.block(
             "B-MODE",
-            f"commissioned items pending: {pending} — publish a "
-            f"commission before an open pick",
+            f"commissioned items pending: {pending} — publish a commission before an open pick",
         )
     return item_cfg
 
 
-def check_mode(meta, *, series, series_id, slug, pub, today, revision=False, rep):
+def check_mode(
+    meta: Mapping[str, object],
+    *,
+    series: Mapping[str, object],
+    series_id: str,
+    slug: str,
+    pub: set[str] | None,
+    today: dt.date,
+    revision: bool = False,
+    rep: Report,
+) -> Mapping[str, object] | None:
     mode = series.get("mode")
-    items = series.get("items") or []
+    raw_items = series.get("items")
+    items: list[dict[str, object]] = (
+        [{str(key): value for key, value in it.items()} for it in raw_items if isinstance(it, dict)]
+        if isinstance(raw_items, list)
+        else []
+    )
     if mode in ("collection", "sequence"):
         return check_ordered_mode(
             meta,
@@ -144,7 +189,7 @@ def check_mode(meta, *, series, series_id, slug, pub, today, revision=False, rep
             items=items,
             slug=slug,
             pub=pub,
-            mode=mode,
+            mode=str(mode),
             revision=revision,
             rep=rep,
         )

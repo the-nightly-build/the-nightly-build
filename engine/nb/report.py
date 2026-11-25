@@ -6,35 +6,50 @@ agents treat them as revision notes and they block only when a series sets
 strict true, unless a check marks an advisory warning as non-promotable.
 """
 
+from __future__ import annotations
+
 import json
+import sys
+from typing import Literal
 
 __all__ = ("Finding", "Report", "emit")
 
+FindingLevel = Literal["BLOCK", "WARN"]
+
 
 class Finding:
-    def __init__(self, code, level, *, message, suggestion=None):
-        self.code, self.level, self.message, self.suggestion = (
-            code,
-            level,
-            message,
-            suggestion,
-        )
+    def __init__(
+        self,
+        code: str,
+        level: FindingLevel,
+        *,
+        message: str,
+        suggestion: str | None = None,
+    ) -> None:
+        self.code = code
+        self.level: FindingLevel = level
+        self.message = message
+        self.suggestion = suggestion
 
-    def as_dict(self):
-        d = {"code": self.code, "level": self.level, "message": self.message}
+    def as_dict(self) -> dict[str, str]:
+        d: dict[str, str] = {
+            "code": self.code,
+            "level": self.level,
+            "message": self.message,
+        }
         if self.suggestion:
             d["suggestion"] = self.suggestion
         return d
 
 
 class Report:
-    def __init__(self, strict=False):
-        self.findings = []
+    def __init__(self, *, strict: bool = False) -> None:
+        self.findings: list[Finding] = []
         self.strict = strict
-        self.notes = []
+        self.notes: list[str] = []
         self.outcome = "PUBLISHABLE"
 
-    def block(self, code, msg, *, suggestion=None):
+    def block(self, code: str, msg: str, *, suggestion: str | None = None) -> None:
         finding = Finding(code, "BLOCK", message=msg, suggestion=suggestion)
         self.findings.append(finding)
 
@@ -46,43 +61,42 @@ class Report:
         suggestion: str | None = None,
         promote: bool = True,
     ) -> None:
-        level = "BLOCK" if self.strict and promote else "WARN"
+        level: FindingLevel = "BLOCK" if self.strict and promote else "WARN"
         finding = Finding(code, level, message=msg, suggestion=suggestion)
         self.findings.append(finding)
 
     @property
-    def blocks(self):
+    def blocks(self) -> list[Finding]:
         return [f for f in self.findings if f.level == "BLOCK"]
 
     @property
-    def warns(self):
+    def warns(self) -> list[Finding]:
         return [f for f in self.findings if f.level == "WARN"]
 
 
-def emit(rep, as_json):
+def emit(rep: Report, as_json: object) -> int:
     blocks, warns = rep.blocks, rep.warns
     verdict = "BLOCKED" if blocks else rep.outcome
     if as_json:
-        print(
-            json.dumps(
-                {
-                    "block_count": len(blocks),
-                    "warn_count": len(warns),
-                    "verdict": verdict,
-                    "findings": [f.as_dict() for f in rep.findings],
-                    "notes": rep.notes,
-                },
-                indent=2,
-            )
+        payload = json.dumps(
+            {
+                "block_count": len(blocks),
+                "warn_count": len(warns),
+                "verdict": verdict,
+                "findings": [f.as_dict() for f in rep.findings],
+                "notes": rep.notes,
+            },
+            indent=2,
         )
+        sys.stdout.write(f"{payload}\n")
     else:
         for label, findings in (("BLOCK:", blocks), ("WARN: ", warns)):
-            print(f"{label} {len(findings)}")
+            sys.stdout.write(f"{label} {len(findings)}\n")
             for f in findings:
-                print(f"  {f.code:<18} {f.message}")
+                sys.stdout.write(f"  {f.code:<18} {f.message}\n")
                 if f.suggestion:
-                    print(f"  {'':<18} → {f.suggestion}")
+                    sys.stdout.write(f"  {'':<18} → {f.suggestion}\n")
         for n in rep.notes:
-            print(f"note: {n}")
-        print("verdict:", verdict)
+            sys.stdout.write(f"note: {n}\n")
+        sys.stdout.write(f"verdict: {verdict}\n")
     return 0 if not blocks else 1

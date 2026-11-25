@@ -45,6 +45,7 @@ def test_root_launcher_exposes_the_command_surface() -> None:
         cwd=REPO,
         capture_output=True,
         text=True,
+        check=False,
     )
 
     assert result.returncode == 0, result.stderr

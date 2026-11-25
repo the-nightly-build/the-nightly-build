@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import os
 import pathlib
+import shutil
 import subprocess
 
 from nb.git_handoff import GitHandoffError
@@ -27,22 +28,25 @@ def repo_root() -> pathlib.Path:
     return pathlib.Path(os.environ.get("NB_ROOT", pathlib.Path(__file__).parents[2]))
 
 
-# Git's argv is naturally variadic.
-# ast-grep-ignore: keyword-only-args
 def _git(cwd: pathlib.Path, *arguments: str) -> str:
+    git_bin = shutil.which("git")
+    if git_bin is None:
+        raise GitHandoffError(repo=cwd, arguments=arguments, reason="git executable not found")
     try:
         result = subprocess.run(
-            ["git", "-C", str(cwd), *arguments], capture_output=True, text=True
+            [git_bin, "-C", str(cwd), *arguments],
+            capture_output=True,
+            text=True,
+            check=False,
         )
     except OSError as error:
-        raise GitHandoffError(
-            repo=cwd, arguments=arguments, reason=str(error)
-        ) from error
+        raise GitHandoffError(repo=cwd, arguments=arguments, reason=str(error)) from error
     if result.returncode:
         detail = result.stderr.strip() or result.stdout.strip()
         if arguments[0] == "fetch":
             raise GitHandoffError(repo=cwd, arguments=arguments, reason=detail)
-        raise LibraryCheckoutError(f"git {' '.join(arguments)} failed: {detail}")
+        message = f"git {' '.join(arguments)} failed: {detail}"
+        raise LibraryCheckoutError(message)
     return result.stdout.strip()
 
 
@@ -52,9 +56,8 @@ def ensure_library(root: pathlib.Path | None = None) -> pathlib.Path:
     _git(base, "fetch", "-q", "origin", "library")
     if checkout.exists():
         if not (checkout / ".git").exists():
-            raise LibraryCheckoutError(
-                f"{checkout} exists and is not a git checkout; move it aside"
-            )
+            message = f"{checkout} exists and is not a git checkout; move it aside"
+            raise LibraryCheckoutError(message)
         _git(checkout, "checkout", "-q", "--detach", "origin/library")
         return checkout
     checkout.parent.mkdir(parents=True, exist_ok=True)

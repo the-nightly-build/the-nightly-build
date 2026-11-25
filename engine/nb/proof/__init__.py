@@ -10,8 +10,11 @@ The proof never edits and never decides taste — it counts what the article
 declares and blocks what the contract rules out.
 """
 
-import datetime as _dt
-import os
+from __future__ import annotations
+
+import datetime as dt
+import pathlib
+from typing import TYPE_CHECKING
 
 __all__ = ("check_article",)
 
@@ -38,18 +41,21 @@ from nb.proof.structure import (
     check_sandbox,
 )
 
+if TYPE_CHECKING:
+    from nb.report import Report
+
 
 def check_article(
-    html_path,
-    series_id,
+    html_path: str | pathlib.Path,
+    series_id: str,
     *,
-    repo,
-    library_dir,
-    rep,
-    today=None,
-    check_links=False,
-    revision=False,
-) -> dict | None:
+    repo: str | pathlib.Path,
+    library_dir: str | pathlib.Path | None,
+    rep: Report,
+    today: dt.date | None = None,
+    check_links: bool = False,
+    revision: bool = False,
+) -> dict[str, object] | None:
     """Run every check against one article and record the findings on rep.
 
     `today` defaults to the date in UTC, which is the clock duty.py and the
@@ -57,11 +63,9 @@ def check_article(
     UTC midnight but before local midnight, a runtime west of UTC would compute
     the prior date and reject the current UTC slug as a date in the future.
     """
-    today = today or _dt.datetime.now(_dt.timezone.utc).date()
+    today = today or dt.datetime.now(dt.timezone.utc).date()
 
-    resolved = resolve_series_and_template(
-        repo, series_id, rep=rep, allow_paused=revision
-    )
+    resolved = resolve_series_and_template(repo, series_id, rep=rep, allow_paused=revision)
     if resolved is None:
         return None
     series, registry, allowed_templates = resolved
@@ -89,9 +93,9 @@ def check_article(
         return None
     template_id, treg = bound
 
-    fname = os.path.basename(html_path)
-    slug_from_path = fname[:-5] if fname.endswith(".html") else fname
-    parent = os.path.basename(os.path.dirname(html_path))
+    article_path = pathlib.Path(html_path)
+    slug_from_path = article_path.name.removesuffix(".html")
+    parent = article_path.parent.name
     check_meta_agreement(
         meta,
         series=series,
@@ -103,7 +107,8 @@ def check_article(
         rep=rep,
     )
 
-    slug = meta.get("slug") or slug_from_path
+    raw_slug = meta.get("slug")
+    slug = raw_slug if isinstance(raw_slug, str) and raw_slug else slug_from_path
     pub = published_slugs(library_dir, series_id)
     item_cfg = check_mode(
         meta,

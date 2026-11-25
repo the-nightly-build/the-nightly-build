@@ -20,12 +20,12 @@
 (function () {
   "use strict";
 
-  var CHARTJS_URL =
+  const CHARTJS_URL =
     "https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js";
-  var APPEARANCE_KEY = "nb-appearance";
-  var MODES = ["auto", "light", "dark"];
-  var GLYPHS = { auto: "◐ auto", light: "○ light", dark: "● dark" };
-  var MONTHS = [
+  const APPEARANCE_KEY = "nb-appearance";
+  const MODES = ["auto", "light", "dark"];
+  const GLYPHS = { auto: "◐ auto", light: "○ light", dark: "● dark" };
+  const MONTHS = [
     "January",
     "February",
     "March",
@@ -41,21 +41,23 @@
   ];
 
   /* Site root, derived from this script's own URL (…/assets/nb.js → …/). */
-  var script = document.currentScript;
-  var ROOT = script ? script.src.replace(/assets\/nb\.js([?#].*)?$/, "") : "./";
+  const script = document.currentScript;
+  const ROOT = script
+    ? script.src.replace(/assets\/nb\.js([?#].*)?$/, "")
+    : "./";
 
   /* ------------------------------------------------------------ appearance */
 
   /* Verification hook: #light / #dark in the URL forces a mode. Used by the
      screenshot harness; harmless for readers (citation anchors never match). */
   function hashMode() {
-    var h = (location.hash || "").replace(/^#/, "").split("&")[0];
+    const h = (location.hash || "").replace(/^#/, "").split("&")[0];
     return h === "light" || h === "dark" ? h : null;
   }
 
   function getAppearance() {
     try {
-      var v = localStorage.getItem(APPEARANCE_KEY);
+      const v = localStorage.getItem(APPEARANCE_KEY);
       return MODES.indexOf(v) >= 0 ? v : "auto";
     } catch {
       return "auto";
@@ -63,7 +65,7 @@
   }
 
   function applyAppearance(mode) {
-    var root = document.documentElement;
+    const root = document.documentElement;
     if (mode === "auto") root.removeAttribute("data-mode");
     else root.setAttribute("data-mode", mode);
     document.querySelectorAll(".nb-appearance").forEach(function (btn) {
@@ -73,7 +75,7 @@
   }
 
   function cycleAppearance() {
-    var next = MODES[(MODES.indexOf(getAppearance()) + 1) % MODES.length];
+    const next = MODES[(MODES.indexOf(getAppearance()) + 1) % MODES.length];
     try {
       localStorage.setItem(APPEARANCE_KEY, next);
     } catch {
@@ -85,7 +87,7 @@
 
   applyAppearance(hashMode() || getAppearance());
   window.addEventListener("hashchange", function () {
-    var m = hashMode();
+    const m = hashMode();
     if (m) applyAppearance(m);
   });
 
@@ -95,7 +97,7 @@
    * published shelf keeps drawing. Chart.js loads only when a legacy
    * block exists on the page. */
 
-  var chartInstances = [];
+  let chartInstances = [];
 
   function cssVar(name) {
     return getComputedStyle(document.documentElement)
@@ -104,9 +106,9 @@
   }
 
   function chartColors() {
-    var slots = [];
-    for (var i = 1; i <= 6; i++) {
-      var c = cssVar("--chart-" + i);
+    const slots = [];
+    for (let i = 1; i <= 6; i++) {
+      const c = cssVar("--chart-" + i);
       if (c) slots.push(c);
     }
     if (slots.length) return slots;
@@ -115,11 +117,13 @@
   }
 
   function buildChart(canvas, spec) {
-    var colors = chartColors();
-    var mono = cssVar("--mono") || "monospace";
-    var scatter = spec.type === "scatter";
-    var datasets = (spec.series || []).map(function (s, i) {
-      var color = colors[i % colors.length];
+    const colors = chartColors();
+    const font = { family: cssVar("--mono") || "monospace", size: 10 };
+    const hair = cssVar("--hair");
+    const faint = cssVar("--faint");
+    const scatter = spec.type === "scatter";
+    const datasets = (spec.series || []).map(function (s, i) {
+      const color = colors[i % colors.length];
       return {
         label: s.name,
         data: scatter
@@ -134,7 +138,7 @@
         tension: 0.25,
       };
     });
-    var y = spec.y || {};
+    const y = spec.y || {};
     return new Chart(canvas, {
       type: spec.type,
       data: { labels: spec.labels, datasets: datasets },
@@ -144,35 +148,21 @@
         plugins: {
           legend: {
             display: datasets.length > 1,
-            labels: {
-              color: cssVar("--ink-soft"),
-              font: { family: mono, size: 10 },
-            },
+            labels: { color: cssVar("--ink-soft"), font: font },
           },
         },
         scales: {
           x: {
-            grid: { color: cssVar("--hair") },
-            ticks: {
-              color: cssVar("--faint"),
-              font: { family: mono, size: 10 },
-            },
+            grid: { color: hair },
+            ticks: { color: faint, font: font },
           },
           y: {
             type: y.scale === "log" ? "logarithmic" : "linear",
             title: y.label
-              ? {
-                  display: true,
-                  text: y.label,
-                  color: cssVar("--faint"),
-                  font: { family: mono, size: 10 },
-                }
+              ? { display: true, text: y.label, color: faint, font: font }
               : undefined,
-            grid: { color: cssVar("--hair") },
-            ticks: {
-              color: cssVar("--faint"),
-              font: { family: mono, size: 10 },
-            },
+            grid: { color: hair },
+            ticks: { color: faint, font: font },
           },
         },
       },
@@ -180,20 +170,20 @@
   }
 
   function renderCharts() {
-    var blocks = document.querySelectorAll("script[data-nb-chart]");
+    const blocks = document.querySelectorAll("script[data-nb-chart]");
     if (!blocks.length) return;
     loadChartJs(function () {
       blocks.forEach(function (block) {
-        var fig = block.closest("figure") || block.parentElement;
-        var canvas = fig && fig.querySelector("canvas");
+        const fig = block.closest("figure") || block.parentElement;
+        const canvas = fig && fig.querySelector("canvas");
         if (!canvas) return;
-        var spec;
+        let spec;
         try {
           spec = JSON.parse(block.textContent);
         } catch {
           return; /* the proof blocks malformed charts; never break the page */
         }
-        var wrap = canvas.parentElement;
+        let wrap = canvas.parentElement;
         if (!wrap.classList.contains("nb-chart-box")) {
           wrap = document.createElement("div");
           wrap.className = "nb-chart-box";
@@ -222,15 +212,18 @@
     renderCharts();
   }
 
-  var chartJsLoading = null;
+  let chartJsLoading = null;
   function loadChartJs(cb) {
     if (window.Chart) return cb();
     if (!chartJsLoading) {
       chartJsLoading = new Promise(function (resolve) {
-        var s = document.createElement("script");
+        const s = document.createElement("script");
         s.src = CHARTJS_URL;
-        s.onload = resolve;
-        s.onerror = resolve; /* offline: captions still readable */
+        s.addEventListener("load", resolve);
+        s.addEventListener(
+          "error",
+          resolve,
+        ); /* offline: captions still readable */
         document.head.appendChild(s);
       });
     }
@@ -245,43 +238,37 @@
   /* KaTeX rides jsdelivr, not cdnjs like the others: its webfonts load
      relative to the CSS, and cdnjs serves them as octet-stream, which
      Chrome refuses for font loads. jsdelivr serves font/woff2. */
-  var KATEX_CSS = {
+  const KATEX_CSS = {
     url: "https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css",
     integrity:
       "sha384-nB0miv6/jRmo5UMMR1wu3Gz6NLsoTkbqJghGIsx//Rlm+ZU03BU6SQNC66uf4l5+",
   };
-  var KATEX_JS = {
+  const KATEX_JS = {
     url: "https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js",
     integrity:
       "sha384-7zkQWkzuo3B5mTepMUcHkMB5jZaolc2xDwL6VFqjFALcbeS9Ggm/Yr2r3Dy4lfFg",
   };
-  var SHIKI_URL = "https://esm.sh/shiki@3.12.2";
-  var shikiTask;
+  const SHIKI_URL = "https://esm.sh/shiki@3.12.2";
+  let shikiTask;
 
-  function loadVendorStyle(spec) {
+  function loadVendorAsset(tag, spec) {
     return new Promise(function (resolve) {
-      var l = document.createElement("link");
-      l.rel = "stylesheet";
-      l.href = spec.url;
-      l.integrity = spec.integrity;
-      l.crossOrigin = "anonymous";
-      l.referrerPolicy = "no-referrer";
-      l.onload = resolve;
-      l.onerror = resolve; /* offline: the fallback text stays readable */
-      document.head.appendChild(l);
-    });
-  }
-
-  function loadVendorScript(spec) {
-    return new Promise(function (resolve) {
-      var s = document.createElement("script");
-      s.src = spec.url;
-      s.integrity = spec.integrity;
-      s.crossOrigin = "anonymous";
-      s.referrerPolicy = "no-referrer";
-      s.onload = resolve;
-      s.onerror = resolve;
-      document.head.appendChild(s);
+      const el = document.createElement(tag);
+      if (tag === "link") {
+        el.rel = "stylesheet";
+        el.href = spec.url;
+      } else {
+        el.src = spec.url;
+      }
+      el.integrity = spec.integrity;
+      el.crossOrigin = "anonymous";
+      el.referrerPolicy = "no-referrer";
+      el.addEventListener("load", resolve);
+      el.addEventListener(
+        "error",
+        resolve,
+      ); /* offline: fallback text stays readable */
+      document.head.appendChild(el);
     });
   }
 
@@ -314,12 +301,12 @@
   }
 
   function renderMath() {
-    var els = document.querySelectorAll(
+    const els = document.querySelectorAll(
       ".nb-math-eq, .nb-math-in, .nb-math-term",
     );
     if (!els.length) return;
     if (window.katex) return typesetMath(els);
-    var press = pressCopy("katex");
+    const press = pressCopy("katex");
     if (press) {
       /* deferred press scripts execute after nb.js: typeset once it lands */
       press.addEventListener("load", function () {
@@ -327,15 +314,40 @@
       });
       return;
     }
-    Promise.all([loadVendorStyle(KATEX_CSS), loadVendorScript(KATEX_JS)]).then(
-      function () {
-        if (window.katex) typesetMath(els);
-      },
-    );
+    Promise.all([
+      loadVendorAsset("link", KATEX_CSS),
+      loadVendorAsset("script", KATEX_JS),
+    ]).then(function () {
+      if (window.katex) typesetMath(els);
+    });
+  }
+
+  function highlightBlock(shiki, code) {
+    const source = code.textContent.replace(/^\n/, "").replace(/\n[ \t]*$/, "");
+    const lang =
+      code.dataset.language ||
+      (code.className.match(/(?:^|\s)language-([\w-]+)/) || [])[1] ||
+      "text";
+    shiki
+      .codeToHtml(source, {
+        lang: lang,
+        themes: { light: "github-light", dark: "github-dark" },
+        defaultColor: false,
+      })
+      .then(function (html) {
+        if (!code.isConnected) return;
+        const holder = document.createElement("div");
+        holder.innerHTML = html;
+        const rendered = holder.querySelector("pre.shiki");
+        if (rendered) code.parentElement.replaceWith(rendered);
+      })
+      .catch(function () {
+        /* Unknown grammar: keep the authored source. */
+      });
   }
 
   function highlightCode() {
-    var blocks = document.querySelectorAll(
+    const blocks = document.querySelectorAll(
       '.nb-code pre code[data-language], .nb-code pre code[class*="language-"]',
     );
     if (!blocks.length) return;
@@ -343,28 +355,7 @@
     shikiTask
       .then(function (shiki) {
         blocks.forEach(function (code) {
-          var source = code.textContent
-            .replace(/^\n/, "")
-            .replace(/\n[ \t]*$/, "");
-          shiki
-            .codeToHtml(source, {
-              lang:
-                code.dataset.language ||
-                (code.className.match(/(?:^|\s)language-([\w-]+)/) || [])[1] ||
-                "text",
-              themes: { light: "github-light", dark: "github-dark" },
-              defaultColor: false,
-            })
-            .then(function (html) {
-              if (!code.isConnected) return;
-              var holder = document.createElement("div");
-              holder.innerHTML = html;
-              var rendered = holder.querySelector("pre.shiki");
-              if (rendered) code.parentElement.replaceWith(rendered);
-            })
-            .catch(function () {
-              /* Unknown grammar: keep the authored source. */
-            });
+          highlightBlock(shiki, code);
         });
       })
       .catch(function () {
@@ -381,16 +372,16 @@
   function dressTables() {
     document.querySelectorAll("table.nb-table").forEach(function (tbl) {
       if (tbl.closest(".nb-table-card")) return; /* already dressed */
-      var card = document.createElement("figure");
+      const card = document.createElement("figure");
       card.className = "nb-table-card";
-      var scroll = document.createElement("div");
+      const scroll = document.createElement("div");
       scroll.className = "nb-table-scroll";
       tbl.parentNode.insertBefore(card, tbl);
       scroll.appendChild(tbl);
       card.appendChild(scroll);
-      var cap = tbl.caption;
+      const cap = tbl.caption;
       if (cap) {
-        var foot = document.createElement("figcaption");
+        const foot = document.createElement("figcaption");
         while (cap.firstChild) foot.appendChild(cap.firstChild);
         cap.remove();
         card.appendChild(foot);
@@ -400,7 +391,7 @@
 
   /* --------------------------------------------------------------- catalog */
 
-  var catalogPromise = null;
+  let catalogPromise = null;
   function catalog() {
     if (!catalogPromise) {
       catalogPromise = fetch(ROOT + "catalog.json")
@@ -420,10 +411,10 @@
   }
 
   function articleMeta() {
-    var el = document.getElementById("nb-meta");
+    const el = document.getElementById("nb-meta");
     if (!el) return null;
     try {
-      var meta = JSON.parse(el.textContent);
+      const meta = JSON.parse(el.textContent);
       return typeof meta === "object" && meta ? meta : null;
     } catch {
       return null;
@@ -431,7 +422,7 @@
   }
 
   function prettyDate(iso) {
-    var m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(iso || "");
+    const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(iso || "");
     if (!m) return iso;
     return (
       MONTHS[parseInt(m[2], 10) - 1] + " " + parseInt(m[3], 10) + ", " + m[1]
@@ -441,8 +432,8 @@
   /* nested <ol> from items in document order: a deeper heading level opens a
      sublist inside the shallower item above it */
   function tocList(items) {
-    var html = "";
-    var levels = [];
+    let html = "";
+    const levels = [];
     items.forEach(function (i) {
       if (!levels.length || i.level > levels[levels.length - 1]) {
         html += "<ol>";
@@ -466,9 +457,9 @@
   }
 
   function buildToc() {
-    var items = [];
+    const items = [];
     document.querySelectorAll("section[data-nb-section]").forEach(function (s) {
-      var h = s.querySelector("h1,h2,h3,h4,h5,h6");
+      const h = s.querySelector("h1,h2,h3,h4,h5,h6");
       if (!h) return;
       if (!s.id) s.id = "nb-" + s.getAttribute("data-nb-section");
       items.push({
@@ -478,17 +469,18 @@
       });
     });
     if (items.length < 3) return;
-    var d = document.createElement("details");
+    const d = document.createElement("details");
     d.className = "nb-toc";
     d.innerHTML = "<summary>Contents</summary>" + tocList(items);
-    var byline = document.querySelector(".nb-byline");
-    if (byline && byline.parentNode)
+    const byline = document.querySelector(".nb-byline");
+    if (byline && byline.parentNode) {
       byline.parentNode.insertBefore(d, byline.nextSibling);
+    }
   }
 
   function normalizeByline() {
     document.querySelectorAll(".nb-byline span").forEach(function (s) {
-      var txt = s.textContent.trim();
+      const txt = s.textContent.trim();
       if (/min read/i.test(txt)) return;
       if (/^\d{4}-\d{2}-\d{2}$/.test(txt)) {
         s.textContent = prettyDate(txt);
@@ -501,45 +493,45 @@
   }
 
   function linkEyebrow(meta) {
-    var eyebrow = document.querySelector(".nb-eyebrow");
+    const eyebrow = document.querySelector(".nb-eyebrow");
     if (!eyebrow || !meta.series || eyebrow.querySelector("a")) return;
-    var wrap = document.createElement("a");
+    const wrap = document.createElement("a");
     wrap.href = ROOT + "series/" + meta.series + "/";
     while (eyebrow.firstChild) wrap.appendChild(eyebrow.firstChild);
     eyebrow.appendChild(wrap);
   }
 
   /* citations: tap opens a source sheet; sources gain ↩ backrefs */
-  var veil = null;
+  let veil = null;
   function closeSheet() {
     if (veil) {
       veil.remove();
       veil = null;
     }
-    var s = document.querySelector(".nb-sheet");
+    const s = document.querySelector(".nb-sheet");
     if (s) s.remove();
   }
 
   function citationContext(citation) {
-    var locator = citation.getAttribute("data-nb-locator");
-    var note = citation.getAttribute("data-nb-note");
-    var url = citation.getAttribute("data-nb-url");
+    const locator = citation.getAttribute("data-nb-locator");
+    const note = citation.getAttribute("data-nb-note");
+    const url = citation.getAttribute("data-nb-url");
     if (!locator && !note && !url) return null;
-    var context = document.createElement("div");
+    const context = document.createElement("div");
     context.className = "nb-sheet-context";
     if (locator) {
-      var location = document.createElement("div");
+      const location = document.createElement("div");
       location.className = "nb-sheet-locator";
       location.textContent = locator;
       context.appendChild(location);
     }
     if (note) {
-      var explanation = document.createElement("p");
+      const explanation = document.createElement("p");
       explanation.textContent = note;
       context.appendChild(explanation);
     }
     if (url) {
-      var direct = document.createElement("a");
+      const direct = document.createElement("a");
       direct.href = url;
       direct.target = "_blank";
       direct.rel = "noopener";
@@ -554,7 +546,7 @@
     veil = document.createElement("div");
     veil.className = "nb-veil";
     veil.addEventListener("click", closeSheet);
-    var body = li.cloneNode(true);
+    const body = li.cloneNode(true);
     body.querySelectorAll(".nb-backref").forEach(function (b) {
       b.remove();
     });
@@ -562,7 +554,7 @@
       a.target = "_blank";
       a.rel = "noopener";
     });
-    var sheet = document.createElement("div");
+    const sheet = document.createElement("div");
     sheet.className = "nb-sheet";
     sheet.innerHTML =
       '<div class="nb-sheet-label">Source ' +
@@ -573,23 +565,23 @@
       "</div>";
     document.body.appendChild(veil);
     document.body.appendChild(sheet);
-    var context = citationContext(citation);
+    const context = citationContext(citation);
     if (context) sheet.querySelector(".nb-sheet-body").appendChild(context);
   }
 
   function normalizeSources() {
     document.querySelectorAll(".nb-sources li").forEach(function (li) {
-      var a = li.querySelector("a[data-nb-source]");
+      const a = li.querySelector("a[data-nb-source]");
       if (!a || a.textContent.trim().toLowerCase() !== "link") return;
-      var parts = [];
-      var node = li.firstChild;
+      const parts = [];
+      let node = li.firstChild;
       while (node && node !== a) {
         parts.push(node.textContent);
-        var next = node.nextSibling;
+        const next = node.nextSibling;
         li.removeChild(node);
         node = next;
       }
-      var title = parts
+      const title = parts
         .join("")
         .replace(/[.\s]+$/, "")
         .trim();
@@ -598,23 +590,23 @@
   }
 
   function bindCitations() {
-    var firstCiter = {};
+    const firstCiter = {};
     document.querySelectorAll("sup.nb-cite a").forEach(function (a, i) {
-      var target = (a.getAttribute("href") || "").slice(1);
+      const target = (a.getAttribute("href") || "").slice(1);
       if (!target) return;
       if (!a.id) a.id = "cite-" + target + (firstCiter[target] ? "-" + i : "");
       if (!firstCiter[target]) firstCiter[target] = a.id;
       a.addEventListener("click", function (e) {
-        var li = document.getElementById(target);
+        const li = document.getElementById(target);
         if (!li) return;
         e.preventDefault();
         openSheet(a.textContent.trim(), li, a);
       });
     });
     Object.keys(firstCiter).forEach(function (target) {
-      var li = document.getElementById(target);
+      const li = document.getElementById(target);
       if (!li || li.querySelector(".nb-backref")) return;
-      var back = document.createElement("a");
+      const back = document.createElement("a");
       back.className = "nb-backref";
       back.href = "#" + firstCiter[target];
       back.textContent = "^";
@@ -631,54 +623,61 @@
      walk their lesson order, everything else walks the dates. Only what
      the catalog holds can render, and the catalog only ever holds
      published articles, so a yet-unwritten next can never appear. */
+  function compareArticleKeys(a, b) {
+    const ka = (a.date || "") + " " + (a.slug || "");
+    const kb = (b.date || "") + " " + (b.slug || "");
+    if (ka < kb) return -1;
+    if (ka > kb) return 1;
+    return 0;
+  }
+
+  function seriesNeighbors(articles, meta) {
+    const sibs = articles.filter(function (e) {
+      return e.series === meta.series;
+    });
+    if (meta.mode === "sequence" && meta.order) {
+      return {
+        prev: sibs.find(function (e) {
+          return e.order === meta.order - 1;
+        }),
+        next: sibs.find(function (e) {
+          return e.order === meta.order + 1;
+        }),
+      };
+    }
+    sibs.sort(compareArticleKeys);
+    const i = sibs.findIndex(function (e) {
+      return e.slug === meta.slug;
+    });
+    if (i < 0) return { prev: null, next: null };
+    return { prev: sibs[i - 1], next: sibs[i + 1] };
+  }
+
+  function seriesNavLink(e, side) {
+    return (
+      '<a href="' +
+      articleUrl(e) +
+      '"' +
+      (side === "next" ? ' class="next"' : "") +
+      '><span class="nb-endnav-label">' +
+      (side === "next" ? "Next →" : "← Previous") +
+      '</span><span class="nb-endnav-title">' +
+      escHtml(e.title) +
+      "</span></a>"
+    );
+  }
+
   function bindSeriesNav(meta) {
     catalog().then(function (cat) {
       if (!cat) return;
-      var sibs = (cat.articles || []).filter(function (e) {
-        return e.series === meta.series;
-      });
-      var prev = null;
-      var next = null;
-      if (meta.mode === "sequence" && meta.order) {
-        prev = sibs.find(function (e) {
-          return e.order === meta.order - 1;
-        });
-        next = sibs.find(function (e) {
-          return e.order === meta.order + 1;
-        });
-      } else {
-        sibs.sort(function (a, b) {
-          var ka = (a.date || "") + " " + (a.slug || "");
-          var kb = (b.date || "") + " " + (b.slug || "");
-          return ka < kb ? -1 : ka > kb ? 1 : 0;
-        });
-        var i = sibs.findIndex(function (e) {
-          return e.slug === meta.slug;
-        });
-        if (i < 0) return;
-        prev = sibs[i - 1];
-        next = sibs[i + 1];
-      }
-      if (!prev && !next) return;
-      function link(e, side) {
-        return (
-          '<a href="' +
-          articleUrl(e) +
-          '"' +
-          (side === "next" ? ' class="next"' : "") +
-          '><span class="nb-endnav-label">' +
-          (side === "next" ? "Next →" : "← Previous") +
-          '</span><span class="nb-endnav-title">' +
-          escHtml(e.title) +
-          "</span></a>"
-        );
-      }
-      var nav = document.createElement("nav");
+      const pair = seriesNeighbors(cat.articles || [], meta);
+      if (!pair.prev && !pair.next) return;
+      const nav = document.createElement("nav");
       nav.className = "nb-endnav";
       nav.innerHTML =
         '<div class="nb-endnav-row">' +
-        (prev ? link(prev, "prev") : "<span></span>") +
-        (next ? link(next, "next") : "") +
+        (pair.prev ? seriesNavLink(pair.prev, "prev") : "<span></span>") +
+        (pair.next ? seriesNavLink(pair.next, "next") : "") +
         "</div>";
       (document.querySelector("article") || document.body).appendChild(nav);
     });
@@ -687,16 +686,16 @@
   /* ---------------------------------------------------------------- search */
 
   function fuzzy(needle, hay) {
-    var i = 0;
-    for (var j = 0; j < hay.length && i < needle.length; j++) {
+    let i = 0;
+    for (let j = 0; j < hay.length && i < needle.length; j++) {
       if (hay[j] === needle[i]) i++;
     }
     if (i < needle.length) return 0;
     /* tightest window from the end backwards → 1.0 means a contiguous run */
-    var end = -1,
-      start = -1;
+    let end = -1;
+    let start = -1;
     i = needle.length - 1;
-    for (var k = hay.length - 1; k >= 0 && i >= 0; k--) {
+    for (let k = hay.length - 1; k >= 0 && i >= 0; k--) {
       if (hay[k] === needle[i]) {
         if (end < 0) end = k;
         start = k;
@@ -715,12 +714,86 @@
       .replace(/'/g, "&#39;");
   }
 
+  function scoreDoc(d, tokens) {
+    /* one search over everything: titles, deks, series, tags, full text */
+    let total = 0;
+    for (let t = 0; t < tokens.length; t++) {
+      const q = tokens[t];
+      let s = 0;
+      if (d.title.indexOf(q) >= 0) s = Math.max(s, 6);
+      else s = Math.max(s, fuzzy(q, d.title) * 3);
+      if (d.dek.indexOf(q) >= 0) s = Math.max(s, 3);
+      if (d.series.indexOf(q) >= 0) s = Math.max(s, 4);
+      else s = Math.max(s, fuzzy(q, d.series) * 2);
+      if (d.tags && d.tags.indexOf(q) >= 0) s = Math.max(s, 4);
+      if (d.text && d.text.indexOf(q) >= 0) s = Math.max(s, 2);
+      if (s <= 0.34) return 0; /* every token must land somewhere */
+      total += s;
+    }
+    return total;
+  }
+
+  function snippet(d, tokens) {
+    for (let t = 0; t < tokens.length; t++) {
+      const i = d.text.indexOf(tokens[t]);
+      if (i >= 0) {
+        const from = Math.max(0, i - 80);
+        const raw =
+          (from > 0 ? "…" : "") + (d.e.text || "").slice(from, i + 100) + "…";
+        let safe = escHtml(raw);
+        tokens.forEach(function (q) {
+          safe = safe.replace(
+            new RegExp(
+              "(" + q.replace(/[.*+?^${}()|[\]\\]/g, "\\$&") + ")",
+              "ig",
+            ),
+            "<mark>$1</mark>",
+          );
+        });
+        return safe;
+      }
+    }
+    return escHtml(d.e.dek || "");
+  }
+
+  function formatTemplateName(name) {
+    const text = String(name || "");
+    return text.charAt(0).toUpperCase() + text.slice(1);
+  }
+
+  function resultRow(d, tokens) {
+    const e = d.e;
+    const series = e.series_name || e.series;
+    const kicker = e.section ? e.section + " — " + series : series;
+    const body =
+      tokens.length && d.text ? snippet(d, tokens) : escHtml(e.dek || "");
+    return (
+      '<a class="nb-item" href="' +
+      articleUrl(e) +
+      '">' +
+      '<div class="nb-kicker">' +
+      escHtml(kicker) +
+      "</div>" +
+      "<h3>" +
+      escHtml(e.title || e.slug) +
+      "</h3>" +
+      '<p class="nb-snippet">' +
+      body +
+      "</p>" +
+      '<div class="nb-meta"><span>' +
+      (e.reading_minutes || "?") +
+      " min read</span><span>" +
+      escHtml(formatTemplateName(e.template)) +
+      "</span></div></a>"
+    );
+  }
+
   function initSearch() {
-    var input = document.getElementById("nb-q");
-    var out = document.getElementById("nb-results");
-    var count = document.getElementById("nb-count");
+    const input = document.getElementById("nb-q");
+    const out = document.getElementById("nb-results");
+    const count = document.getElementById("nb-count");
     if (!input || !out) return;
-    var docs = [];
+    let docs = [];
 
     fetch(ROOT + "search-index.json")
       .then(function (r) {
@@ -749,7 +822,7 @@
       });
 
     function prefill() {
-      var p = new URLSearchParams(location.search);
+      const p = new URLSearchParams(location.search);
       if (p.get("q")) {
         input.value = p.get("q");
         render();
@@ -757,61 +830,19 @@
       input.focus();
     }
 
-    function scoreDoc(d, tokens) {
-      /* one search over everything: titles, deks, series, tags, full text */
-      var total = 0;
-      for (var t = 0; t < tokens.length; t++) {
-        var q = tokens[t],
-          s = 0;
-        if (d.title.indexOf(q) >= 0) s = Math.max(s, 6);
-        else s = Math.max(s, fuzzy(q, d.title) * 3);
-        if (d.dek.indexOf(q) >= 0) s = Math.max(s, 3);
-        if (d.series.indexOf(q) >= 0) s = Math.max(s, 4);
-        else s = Math.max(s, fuzzy(q, d.series) * 2);
-        if (d.tags && d.tags.indexOf(q) >= 0) s = Math.max(s, 4);
-        if (d.text && d.text.indexOf(q) >= 0) s = Math.max(s, 2);
-        if (s <= 0.34) return 0; /* every token must land somewhere */
-        total += s;
-      }
-      return total;
-    }
-
-    function snippet(d, tokens) {
-      for (var t = 0; t < tokens.length; t++) {
-        var i = d.text.indexOf(tokens[t]);
-        if (i >= 0) {
-          var from = Math.max(0, i - 80);
-          var raw =
-            (from > 0 ? "…" : "") + (d.e.text || "").slice(from, i + 100) + "…";
-          var safe = escHtml(raw);
-          tokens.forEach(function (q) {
-            safe = safe.replace(
-              new RegExp(
-                "(" + q.replace(/[.*+?^${}()|[\]\\]/g, "\\$&") + ")",
-                "ig",
-              ),
-              "<mark>$1</mark>",
-            );
-          });
-          return safe;
-        }
-      }
-      return escHtml(d.e.dek || "");
-    }
-
     function renderRecent() {
       /* empty query: the newest articles under month labels, not a dump */
-      var recent = docs.slice(0, 20);
+      const recent = docs.slice(0, 20);
       if (count) count.textContent = "";
-      var seen = null;
+      let seen = null;
       out.innerHTML = recent
         .map(function (d) {
-          var e = d.e;
-          var month = (e.date || "").slice(0, 7);
-          var label = "";
+          const e = d.e;
+          const month = (e.date || "").slice(0, 7);
+          let label = "";
           if (month && month !== seen) {
             seen = month;
-            var mm = MONTHS[parseInt(month.slice(5), 10) - 1] || month;
+            const mm = MONTHS[parseInt(month.slice(5), 10) - 1] || month;
             label =
               '<span class="nb-month-label">' +
               mm +
@@ -824,43 +855,11 @@
         .join("");
     }
 
-    function resultRow(d, tokens) {
-      var e = d.e;
-      var kicker = e.section
-        ? e.section + " — " + (e.series_name || e.series)
-        : e.series_name || e.series;
-      var body =
-        tokens.length && d.text ? snippet(d, tokens) : escHtml(e.dek || "");
-      return (
-        '<a class="nb-item" href="' +
-        articleUrl(e) +
-        '">' +
-        '<div class="nb-kicker">' +
-        escHtml(kicker) +
-        "</div>" +
-        "<h3>" +
-        escHtml(e.title || e.slug) +
-        "</h3>" +
-        '<p class="nb-snippet">' +
-        body +
-        "</p>" +
-        '<div class="nb-meta"><span>' +
-        (e.reading_minutes || "?") +
-        " min read</span><span>" +
-        escHtml(
-          String(e.template || "")
-            .charAt(0)
-            .toUpperCase() + String(e.template || "").slice(1),
-        ) +
-        "</span></div></a>"
-      );
-    }
-
     function render() {
-      var q = (input.value || "").trim().toLowerCase();
-      var tokens = q ? q.split(/\s+/) : [];
+      const q = (input.value || "").trim().toLowerCase();
+      const tokens = q ? q.split(/\s+/) : [];
       if (!tokens.length) return renderRecent();
-      var hits = docs
+      const hits = docs
         .map(function (d) {
           return { d: d, score: scoreDoc(d, tokens) };
         })
@@ -876,7 +875,7 @@
           " of " +
           docs.length +
           " article" +
-          (docs.length !== 1 ? "s" : "");
+          (docs.length === 1 ? "" : "s");
       }
       out.innerHTML =
         hits
@@ -887,7 +886,7 @@
         '<div class="nb-results-count" style="padding:20px 0">No matches.</div>';
     }
 
-    var timer = null;
+    let timer = null;
     input.addEventListener("input", function () {
       clearTimeout(timer);
       timer = setTimeout(render, 90);
@@ -903,7 +902,7 @@
       btn.addEventListener("click", cycleAppearance);
     });
     applyAppearance(hashMode() || getAppearance());
-    var menu = document.querySelector(".nb-menu");
+    const menu = document.querySelector(".nb-menu");
     if (menu) {
       document.addEventListener("click", function (e) {
         if (menu.open && !(e.target.closest && e.target.closest(".nb-menu"))) {
@@ -925,7 +924,7 @@
      Progressive: no JS means the full abstract, clamped only when it
      actually overflows. */
   function bindAbstract() {
-    var abs = document.querySelector(".nb-paper-abstract");
+    const abs = document.querySelector(".nb-paper-abstract");
     if (!abs) return;
     abs.classList.add("nb-clamped");
     if (abs.scrollHeight <= abs.clientHeight + 4) {
@@ -935,8 +934,8 @@
     abs.setAttribute("role", "button");
     abs.setAttribute("aria-expanded", "false");
     abs.setAttribute("tabindex", "0");
-    var toggle = function () {
-      var clamped = abs.classList.toggle("nb-clamped");
+    const toggle = function () {
+      const clamped = abs.classList.toggle("nb-clamped");
       abs.setAttribute("aria-expanded", String(!clamped));
     };
     abs.addEventListener("click", toggle);
@@ -955,7 +954,7 @@
     highlightCode();
     dressTables();
 
-    var meta = articleMeta();
+    const meta = articleMeta();
     if (meta) {
       buildToc();
       normalizeByline();

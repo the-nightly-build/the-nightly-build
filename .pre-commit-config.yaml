@@ -1,89 +1,114 @@
-# Local hooks run the same tools as the CI gate, so local == CI.
-# Setup: uv sync --group figure-capture (Python), npm install (web), and shellcheck + shfmt on PATH
-# (brew install shellcheck shfmt). Install with: uv run pre-commit install
-default_install_hook_types: [pre-commit, pre-push]
-
+# prek runs these before each commit, and CI runs `prek run --all-files`.
+# Formatters fix files rather than only reporting them.
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v5.0.0
+    rev: v6.0.0
     hooks:
-      # Byte-exact test fixtures must not be reflowed.
-      - id: trailing-whitespace
-        exclude: ^engine/tests/fixtures/
       - id: end-of-file-fixer
-        exclude: ^engine/tests/fixtures/
+      - id: trailing-whitespace
       - id: check-merge-conflict
       - id: check-added-large-files
-      - id: check-yaml
-      - id: check-json
-        exclude: \.jsonc$
+        # CI's checkout stages nothing, so check every file it is given.
+        args: [--enforce-all]
+        # Existing committed README banner image (2.68 MB).
+        exclude: ^assets/the-nightly-build-banner\.png$
+
+  - repo: https://github.com/rvben/rumdl-pre-commit
+    rev: v0.3.6
+    hooks:
+      - id: rumdl-check
+        args: [--fix]
 
   - repo: local
     hooks:
-      - id: ruff-check
-        name: ruff check
-        entry: uv run ruff check --fix
-        language: system
-        types: [python]
-      - id: ruff-format
-        name: ruff format
-        entry: uv run ruff format
-        language: system
-        types: [python]
-      - id: ty
-        name: ty type check
-        entry: uv run --group figure-capture ty check
-        language: system
-        types: [python]
-        pass_filenames: false
-      - id: prettier
-        name: prettier
-        entry: npx prettier --write --ignore-unknown
-        language: system
-        files: \.(js|css|html|md|ya?ml|json|jsonc)$
-      - id: eslint
-        name: eslint
-        entry: npx eslint
-        language: system
-        files: \.js$
+      - id: max-file-lines
+        name: max-file-lines
+        # Hard 1,000-line cap on source files; skips lockfiles, generated,
+        # minified, SVG, JSON, data and Markdown files.
+        entry: >-
+          python3 -c 'import pathlib, re, sys;
+          skip_ext = {".lock", ".svg", ".json", ".jsonc", ".csv", ".tsv", ".jsonl", ".ndjson", ".sql", ".xml", ".md", ".mdx", ".markdown", ".map", ".snap", ".po", ".pot"};
+          skip_re = re.compile(r"(^|/)([^/]+-lock\.[^/]+|[^/]+\.(min|generated|gen)\.[^/]+|[^/]+_pb2\.py|[^/]+\.pb\.go)$");
+          bad = [];
+          [bad.append((p, n)) for p in sys.argv[1:]
+           if pathlib.Path(p).suffix.lower() not in skip_ext and not skip_re.search(p)
+           and (n := sum(1 for _ in pathlib.Path(p).open("rb"))) > 1000];
+          [print(f"{p}: {n} lines (limit 1000) - split this file along a domain boundary.", file=sys.stderr) for p, n in bad];
+          sys.exit(1 if bad else 0)'
+        language: python
+        types: [text]
+
       - id: ast-grep
         name: ast-grep (nb.js DOM-sink invariants)
-        entry: npx ast-grep scan --rule scripts/ast-grep/nbjs-innerhtml-escape.yml
+        # Pinned through uvx so Ubuntu CI runs it without a separate install.
+        entry: uvx --from ast-grep-cli@0.51.3 ast-grep scan --rule scripts/ast-grep/nbjs-innerhtml-escape.yml
         language: system
         pass_filenames: false
         files: ^(engine/assets/.*\.js|scripts/ast-grep/nbjs-innerhtml-escape\.yml)$
+
+  # Python
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.17.6
+    hooks:
+      - id: ruff-check
+        args: [--fix]
+      - id: ruff-format
+
+  # Python: ty checks the whole project, with the optional capture/chart groups in uv.lock.
+  - repo: local
+    hooks:
+      - id: ty
+        name: ty
+        entry: uv run --locked --group figure-capture --group charts ty check
+        language: system
+        types: [python]
+        pass_filenames: false
+
+      - id: uv-lock-check
+        name: uv-lock-check
+        entry: uv lock --check
+        language: system
+        files: ^(pyproject\.toml|uv\.lock)$
+        pass_filenames: false
+
+  # Web: oxfmt, oxlint and stylelint run from node_modules, at the versions in
+  # package-lock.json.
+  - repo: local
+    hooks:
+      - id: oxfmt
+        name: oxfmt
+        entry: npx --no-install oxfmt --no-error-on-unmatched-pattern
+        language: system
+        files: \.([cm]?[jt]sx?|css|html|json|ya?ml|toml)$
+      - id: oxlint
+        name: oxlint
+        entry: npx --no-install oxlint --deny-warnings
+        language: system
+        files: \.[cm]?[jt]sx?$
       - id: stylelint
         name: stylelint
-        entry: npx stylelint
+        entry: npx --no-install stylelint
         language: system
-        files: \.css$
-      - id: markdownlint
-        name: markdownlint
-        entry: npx markdownlint-cli2
-        language: system
-        files: \.md$
-        pass_filenames: false
-      - id: shellcheck
-        name: shellcheck
-        entry: shellcheck
-        language: system
-        types: [shell]
+        files: ^(engine/assets|templates)/.*\.css$
+
+  # Shell
+  - repo: local
+    hooks:
       - id: shfmt
         name: shfmt
-        entry: shfmt -w
+        entry: shfmt --write --indent 2
         language: system
         types: [shell]
-      - id: tests
-        name: engine test suite
-        entry: uv run pytest
+        # shfmt has no zsh dialect.
+        exclude: \.zsh$
+      - id: shellcheck
+        name: shellcheck
+        # Check POSIX sh, bash and dash scripts; skip zsh scripts.
+        entry: >-
+          sh -c 'rc=0; for f in "$@"; do
+            case "$f" in *.zsh) continue ;; esac
+            case "$(head -n 1 "$f")" in *zsh*) continue ;; esac
+            shellcheck "$f" || rc=1
+          done; exit $rc' --
         language: system
-        pass_filenames: false
-        always_run: true
-        stages: [pre-push]
-      - id: tests-js
-        name: nb.js behavior suite
-        entry: npm run test:js
-        language: system
-        pass_filenames: false
-        always_run: true
-        stages: [pre-push]
+        types: [shell]

@@ -34,3 +34,19 @@ safe to publish.
 Use this checkout's `nb` command for deterministic operations. Article
 publication and revision go through the validated PR paths owned by the relevant
 workflow.
+
+## Engine development
+
+- **Setup:** install Python dependencies with
+  `uv sync --group figure-capture --group charts`, install web dependencies with
+  `npm ci`, and wire hooks with `prek install`.
+- **Checks:** run `prek run --all-files` for formatting, linting, and type
+  checking; run `uv run pytest` for Python tests and `npm test` for `nb.js`
+  behavior tests.
+- **Branches and commits:** land engine, doc, and test changes on `main` through
+  pull requests using Conventional Commits (for example,
+  `fix(proof): reject malformed source anchors`). Never commit directly to
+  `library`.
+- **Dependencies:** ask before adding a dependency. Keep optional toolchains in
+  their dedicated `pyproject.toml` dependency groups rather than the base
+  runtime.

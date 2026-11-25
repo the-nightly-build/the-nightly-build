@@ -25,7 +25,7 @@ HOSTILE_ED = {
 
 
 @pytest.mark.parametrize("lead", [False, True], ids=["story item", "lead cell"])
-def test_a_hostile_href_is_escaped(lead: bool) -> None:
+def test_a_hostile_href_is_escaped(*, lead: bool) -> None:
     html = build_site.story_item(HOSTILE_ED, {}, lead=lead)
 
     assert 'library/a"&b/c"&d' not in html
@@ -60,13 +60,11 @@ def test_a_hostile_atom_entry_id_stays_well_formed(tmp_path: pathlib.Path) -> No
         ("markets/equity", True),
     ],
 )
-def test_is_safe_tag(tag: str, safe: bool) -> None:
+def test_is_safe_tag(tag: str, *, safe: bool) -> None:
     assert build_site.is_safe_tag(tag) == safe
 
 
-def test_a_traversal_tag_is_dropped_and_writes_nothing_outside_out(
-    testrepo: str, tmp_path: pathlib.Path
-) -> None:
+def test_a_traversal_tag_is_dropped_and_writes_nothing_outside_out(testrepo: str, tmp_path: pathlib.Path) -> None:
     library = str(tmp_path / "library-root")
     write_article(
         library,
@@ -82,9 +80,7 @@ def test_a_traversal_tag_is_dropped_and_writes_nothing_outside_out(
     assert not (out.parent / "pwned").exists()
 
 
-def test_a_nested_tag_page_links_its_assets_at_its_true_depth(
-    testrepo: str, tmp_path: pathlib.Path
-) -> None:
+def test_a_nested_tag_page_links_its_assets_at_its_true_depth(testrepo: str, tmp_path: pathlib.Path) -> None:
     library = str(tmp_path / "library-root")
     write_article(
         library,

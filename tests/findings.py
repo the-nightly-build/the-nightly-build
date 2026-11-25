@@ -14,6 +14,8 @@ its own — a demoted finding is still absent from .blocks — so ask result.cod
 which spans every tier.
 """
 
+from collections.abc import Iterator
+
 from check import Finding, Report
 
 
@@ -24,7 +26,7 @@ class Tier:
     def __contains__(self, code: str) -> bool:
         return any(f.code == code for f in self._findings)
 
-    def __iter__(self):
+    def __iter__(self) -> Iterator[Finding]:
         return iter(self._findings)
 
     def __len__(self) -> int:

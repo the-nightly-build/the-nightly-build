@@ -6,6 +6,8 @@ projects reading time into the standard byline, and refuses files it cannot
 stamp precisely.
 """
 
+from __future__ import annotations
+
 import datetime as dt
 import pathlib
 
@@ -15,9 +17,7 @@ import stamp
 from nb import meta as nb_meta
 from press import article
 
-TEMPLATES = sorted(
-    (pathlib.Path(__file__).parents[1] / "templates").glob("*/skeleton.html")
-)
+TEMPLATES = sorted((pathlib.Path(__file__).parents[1] / "templates").glob("*/skeleton.html"))
 
 
 def test_stamp_writes_the_counted_totals() -> None:
@@ -65,7 +65,8 @@ def test_stamp_is_idempotent_and_preserves_unrelated_markup() -> None:
 
     m_before = nb_meta.META_RE.search(source)
     m_after = nb_meta.META_RE.search(stamped)
-    assert m_before is not None and m_after is not None
+    assert m_before is not None
+    assert m_after is not None
     assert source[: m_before.start(1)] == stamped[: m_after.start(1)]
     assert source[m_before.end(1) :] == stamped[m_after.end(1) :]
 
@@ -82,34 +83,40 @@ def test_stamp_names_missing_count_keys() -> None:
         stamp.stamp_source(source)
 
 
-def test_stamp_cli_writes_in_place(tmp_path) -> None:
+def test_stamp_cli_writes_in_place(tmp_path: pathlib.Path) -> None:
     target = tmp_path / "piece.html"
     target.write_text(article(), encoding="utf-8")
 
     assert stamp.main([str(target)]) == 0
     meta = nb_meta.read_meta(str(target))
-    assert meta is not None and meta["sources"] == 8
+    assert meta is not None
+    assert meta["sources"] == 8
 
 
 @pytest.mark.parametrize("template", TEMPLATES, ids=lambda path: path.parent.name)
-def test_stamp_sets_metadata_and_byline_date_from_utc(template, monkeypatch) -> None:
+def test_stamp_sets_metadata_and_byline_date_from_utc(template: pathlib.Path, monkeypatch: pytest.MonkeyPatch) -> None:
     class Clock(dt.datetime):
         @classmethod
-        def now(cls, tz=None):
+        def now(cls, tz: dt.tzinfo | None = None) -> Clock:
             assert tz is dt.timezone.utc
             return cls(2026, 10, 1, 0, 30, tzinfo=tz)
 
+    # Replace the stdlib UTC clock inside stamp_source without adding a test-only parameter.
+    # ast-grep-ignore: python.question-monkeypatch
     monkeypatch.setattr(stamp.dt, "datetime", Clock)
     source = template.read_text()
     stamped, counts = stamp.stamp_source(source)
 
     metadata = nb_meta.parse_meta(stamped)
-    assert metadata is not None and metadata["date"] == "2026-10-01"
+    assert metadata is not None
+    assert metadata["date"] == "2026-10-01"
     assert "<span>2026-10-01</span>" in stamped
     assert counts == stamp.computed_counts(stamped)
 
 
-def test_revision_cli_preserves_date_and_refreshes_counts(tmp_path) -> None:
+def test_revision_cli_preserves_date_and_refreshes_counts(
+    tmp_path: pathlib.Path,
+) -> None:
     target = tmp_path / "piece.html"
     source = article().replace(
         "</header>",
@@ -122,7 +129,8 @@ def test_revision_cli_preserves_date_and_refreshes_counts(tmp_path) -> None:
 
     stamped = target.read_text()
     metadata = nb_meta.parse_meta(stamped)
-    assert metadata is not None and metadata["date"] == "2026-07-06"
+    assert metadata is not None
+    assert metadata["date"] == "2026-07-06"
     assert "<span>2026-07-06</span>" in stamped
     assert metadata["words"] == stamp.computed_counts(stamped)["words"] > 0
     assert "N min read" not in stamped

@@ -11,9 +11,7 @@ from pages import build_press
 from press import article, write_article
 
 
-def test_a_non_int_sources_value_never_reaches_the_reader_raw(
-    testrepo: str, tmp_path: pathlib.Path
-) -> None:
+def test_a_non_int_sources_value_never_reaches_the_reader_raw(testrepo: str, tmp_path: pathlib.Path) -> None:
     library = str(tmp_path / "library-root")
     write_article(
         library,
