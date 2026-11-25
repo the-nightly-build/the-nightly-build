@@ -35,7 +35,7 @@ jobs:
 
       - uses: taiki-e/install-action@v2
         with:
-          tool: shfmt@3.11.0
+          tool: shfmt@3.14.1
       - name: Install shellcheck
         run: sudo apt-get update && sudo apt-get install -y shellcheck
 
