@@ -1,46 +1,38 @@
 # Ownership and branches
 
-The repository has three distinct kinds of state.
+A Nightly Build repository separates three kinds of state:
 
-## Your press
+| State               | Location                  | Owner    | How it changes                                      |
+| ------------------- | ------------------------- | -------- | --------------------------------------------------- |
+| **Your press**      | `press/` on `main`        | You      | Direct commits or PRs to `main`                     |
+| **The engine**      | Everything else on `main` | Upstream | Synced from upstream (local edits own conflicts)    |
+| **Published paper** | `library` branch          | CI gate  | Validated PRs only (new articles, revisions, syncs) |
 
-`press/` belongs to the paper owner. It holds title, appearance, editorial
-direction, production guidance, series, prompt fragments, themes, furniture, and
-custom templates. The canonical upstream repository carries no `press/`, so a
-user who confines customization to this directory gets a conflict-free engine
-update path.
+## Your press vs. the engine
 
-`examples/` is documentation: a complete sample press the engine never reads.
+Upstream never includes `press/`, so keeping customizations inside `press/`
+(title, appearance, editorial direction, production policy, series, prompt
+fragments, themes, furniture, and custom templates) gives you conflict-free
+engine updates. `examples/` is documentation only and is never read by the
+engine.
 
-## The engine
+Scheduled runs always start from current `main`, where both the engine and your
+press live.
 
-Everything outside `press/` and the published branch is maintained by the
-software project. A fork may change it, but that fork then owns conflicts with
-future upstream changes in the same files.
+## The `library` branch and working state
 
-`main` contains the engine and the user's press. Scheduled work always begins
-from current `main`. Engine updates and press edits target this branch.
+`library` stores published article HTML, article assets, role artifacts, and
+protected publishing workflows. Never push directly to `library`, edit its files
+in place, merge it into `main`, or include it when forking. Every PR type (new
+article, revision, retraction, workflow sync) must match a narrow diff shape.
 
-## The published paper
+The GitHub Pages workflow runs on `main` when `library` changes, builds the
+static site from `library`, and deploys it as a Pages artifact. Generated site
+files, including `catalog.json`, are never committed to `library`.
 
-`library` is downstream publication state. Article HTML, article assets, role
-artifacts, and protected publishing workflows live there. It changes only
-through its validated PR boundary. The Pages workflow builds the static site
-from that state and deploys it as a GitHub Pages artifact. It runs on the `main`
-ref and reads `library` at build time. A push to `library` triggers the
-workflow. The generated site, including `catalog.json`, is not committed to the
-branch.
+Generated article branches are disposable: `nb prepare-pr` branches from
+`origin/library`, proves its single commit, and prepares the PR. Workspaces
+under `.nb-work/` are local scratch state and are never published.
 
-Never push directly to `library`, edit its article files in place, merge it back
-into `main`, or include it when forking upstream. New articles, revisions,
-retractions, and workflow synchronization each have a deliberately narrow PR
-shape.
-
-Generated article branches are disposable working state. `nb prepare-pr` creates
-them from the current `origin/library`, proves their one commit, and opens or
-describes the exact PR. The commit and PR are evidence. The workspace under
-`.nb-work/` is private production state and is never published.
-
-See [Update the engine](../guides/operate/update-engine.md) for the fork
-lifecycle and [Publishing and security](publishing-and-security.md) for the
-trust boundary.
+See [Update the engine](../guides/operate/update-engine.md) and
+[Publishing and security](publishing-and-security.md).

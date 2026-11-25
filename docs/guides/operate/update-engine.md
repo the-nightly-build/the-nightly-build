@@ -1,30 +1,36 @@
 # Update the engine
 
-Your press and the engine have separate ownership. A normal upstream update
-changes engine-owned files on `main` and leaves both `press/` and `library`
-alone.
+Upstream updates modify engine files on `main` and leave `press/` and `library`
+untouched.
 
-From GitHub, use **Sync fork**. The next scheduled run starts with `nb sync` and
-repairs protected publishing workflows through their own CI-gated PR when
-needed. An exact sync PR merges automatically once validated. The sync also
-validates the press against the updated engine and names any retired key or
-template that needs an update. If a series uses a template moved to
-`examples/templates/`, copy it into `press/templates/<id>/` before syncing.
+## Update from GitHub
 
-From a clean local checkout, the complete update is:
+Click **Sync fork** on your repository's GitHub page. The next scheduled run
+starts with `nb sync`, validates your press against the updated engine (naming
+any retired keys or moved templates), and opens an auto-merging workflow-sync PR
+to `library` if protected workflows changed.
+
+If any series uses a template moved to `examples/templates/`, copy it into
+`press/templates/<id>/` before syncing.
+
+## Update from a local checkout
+
+From a clean checkout on `main`:
 
 ```sh
 ./nb sync --update-main-from-upstream
 ```
 
-The explicit flag fetches upstream, merges it into the fork's current `main`,
-pushes, and synchronizes the `library` workflows. Without it, `nb sync` follows
-only the fork's `origin/main`. A merge conflict stops before `library` changes.
+This fetches upstream, merges it into `main`, pushes, and syncs `library`
+workflows. (Without `--update-main-from-upstream`, `nb sync` only tracks
+`origin/main`.) Any merge conflict stops before touching `library`.
 
-After an update, compare the external scheduler prompt with the canonical prompt
-in [Schedule](schedule.md). The schedule lives outside Git and cannot be updated
-by a merge. You may also dispatch the publish workflow to rebuild the back
-catalog immediately.
+## After updating
 
-Never merge `library` into `main`, rerun setup as an update mechanism, or edit
+- Compare your external scheduler prompt with the canonical prompt in
+  [Schedule publication](schedule.md), since Git merges cannot update hosted
+  schedules.
+- Optionally dispatch `publish.yml` to rebuild the back catalog right away.
+
+Never merge `library` into `main`, rerun `./nb setup` as an update, or edit
 protected workflow copies directly on `library`.

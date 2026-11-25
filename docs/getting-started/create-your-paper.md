@@ -1,39 +1,37 @@
 # Create your paper
 
-A paper is the published result. Its press is the configuration under `press/`
-that produces it. A fresh press has three series. Dispatches publishes what you
-ask for, and News Brief and Feature make a morning paper once you schedule a
-run. Until you say otherwise, both are about technology.
+A **paper** is the published site; its **press** is the configuration under
+`press/` that produces it. A fresh press has three series: **Dispatches** (what
+you ask for) plus **News Brief** and **Feature** (scheduled runs, defaulting to
+technology).
 
-## Make it yours
+## Personalize the default paper
 
-Ask your AI to make the paper yours, or to change what it covers. It asks two
-questions, one at a time: what news you want, and what you want to read about.
-Your answers rewrite the paragraph that opens each series prompt, the one that
-says what the series covers, and the sentence in `editorial.md` that says who
-reads the paper when your answers say something about you. Nothing else changes.
-The press is validated, committed, and pushed to `main`, and the next scheduled
-run reads it from there.
+Ask your AI to make the paper yours or change its coverage. It asks two
+questions, one at a time: what news you want and what you want to read about.
+Your answers rewrite the opening coverage paragraph of each series prompt (and
+the reader sentence in `press/editorial.md` if relevant), leaving everything
+else untouched. The change is validated, committed, and pushed to `main` for the
+next scheduled run.
 
-Asking for an article never triggers the questions. The article goes ahead, and
-the paper's shape waits until you ask for it.
+Requesting an article never triggers these questions; the article runs as-is
+until you ask to customize the paper.
 
-## A paper of your own design
+## Design a paper from scratch
 
-This is for when you want more: series with beats of their own, a voice, a
-reading rhythm. You do not need answers prepared. Start the conversation and
-expect the assistant to propose directions, test them with representative
-article ideas and counterexamples, and simulate a first week before asking for
-approval. Every decision the press encodes gets settled this way. At a minimum:
+When you want custom beats, voice, or rhythm, start a design conversation with
+your assistant. It proposes directions, tests them with sample ideas and
+counterexamples, and simulates a first week before asking for approval. The
+press encodes at least:
 
-- what the paper is for and who reads it
-- the subjects each series covers and the topics outside its scope
-- what counts as evidence and which sources qualify
-- how the paper should sound, tested against real examples
-- the reading rhythm: how often, how long, how visual
-- how the runtime is billed and how much production usage you can sustain
+- purpose and target reader
+- each series's scope and explicit exclusions
+- evidence standards and qualifying sources
+- voice, tested against concrete examples
+- cadence, length, and visual density
+- runtime billing model and sustainable production budget
 
-The output becomes a small configuration tree:
+This produces a compact configuration tree:
 
 ```text
 press/
@@ -45,13 +43,10 @@ press/
     └── prompt.md
 ```
 
-Use [Series reference](../reference/series.md) for the exact configuration
-contract. Use
-[appearance and voice](../guides/customize/appearance-and-voice.md) when the
-editorial concept needs a distinct visual system.
+See [Series reference](../reference/series.md) for the schema and
+[Appearance and voice](../guides/customize/appearance-and-voice.md) for custom
+themes and voice guides.
 
-Once the proposed press validates, commit it and push to `main`. Both the
-publishing check and the scheduled run read the press from the remote `main`
-branch, so a press that exists only in a working tree publishes nothing. Then,
-when you want articles without asking, continue to
-[Schedule publication](../guides/operate/schedule.md).
+Commit and push the validated press to `main`. Both CI validation and scheduled
+runs read `press/` from remote `main`, so uncommitted or unpushed changes have
+no effect. Next: [Schedule publication](../guides/operate/schedule.md).

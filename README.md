@@ -2,229 +2,122 @@
 
 ![The Nightly Build](assets/the-nightly-build-banner.png)
 
-<!-- markdownlint-disable MD026 -->
-
-## Your own AI-researched paper.
-
-<!-- markdownlint-enable MD026 -->
+## Your own AI-researched paper
 
 The Nightly Build turns a GitHub repository into a personal newspaper. Fork it,
-point the AI tool you already use at your fork, and ask for an article on
-anything: a topic, a question, a link. It researches, writes, checks its
-citations, and publishes to your GitHub Pages site. When you want a paper
-waiting every morning, add a schedule.
+point an AI coding agent at your fork, and ask for an article on any topic,
+question, or link. It researches, writes, verifies citations, and publishes to
+GitHub Pages. Add a schedule for a fresh edition every morning.
 
-**No backend and no new accounts. It runs on AI tools you already use.**
-
-Your paper and its archive live in your fork. You own it.
+**No backend and no new accounts. Your paper, config, and archive live in your
+fork.**
 
 <!-- prettier-ignore -->
 > [!NOTE]
-> Your articles will be searchable from [the-nightly-build.github.io](https://the-nightly-build.github.io/)
->
-> If you don't want that, opt out in your `site.yaml`:
->
-> ```yaml
-> directory:
->   publish: false
-> ```
+> Public papers appear at [the-nightly-build.github.io](https://the-nightly-build.github.io/).
+> Opt out in `press/site.yaml` with `directory: { publish: false }`.
 
 ## Get started
 
-Fork this repository with **Copy the main branch only** checked, then choose a
-setup path.
+Fork this repository with **Copy the main branch only** checked, then connect an
+agent:
 
-### Terminal with `gh`
+- **Terminal (`gh`):** sign in with `gh` as the fork owner, clone your fork, and
+  open it in Claude Code or Codex.
+- **ChatGPT Work (no terminal):** connect GitHub with branch/PR access to your
+  fork, enable **Actions**, and set **Settings → Pages → Source** to **GitHub
+  Actions**.
 
-1. Sign in to GitHub from `gh` with an account that owns the fork.
-2. Clone your fork and open it in Claude Code or Codex.
-
-### ChatGPT Work, no terminal
-
-1. Connect GitHub in ChatGPT Work and allow access to your fork, including
-   permission to push branches and open pull requests.
-2. In the fork's Actions tab, enable workflows if they are disabled. Under
-   Settings, Pages, set Source to GitHub Actions.
-
-### Ask for your first article
-
-Give the assistant this request:
+Ask the assistant:
 
 > Help me set up my Nightly Build paper in `<owner>/<repo>` and write my first
 > article about `<topic>`. Follow the repository's instructions.
 
-The assistant runs `./nb setup` if the fork has not been set up. Setup prepares
-the repository and lists GitHub settings that may need you. Without `gh`, it
-lists Pages and Actions even if you already enabled them. A clean Article PR
-merges after its `validate` check passes, then GitHub Pages publishes the
-article. Ask to review it first if you want the PR to remain a draft.
-
-For more detail, see:
-
-- [Ask your AI](docs/getting-started/ask-your-ai.md) for the first request.
-- [Documentation](docs/README.md) for the full guide.
-- [Feature catalog](docs/reference/README.md) for supported features.
-
-## Schedule publication
-
-To publish automatically, set up a
-[ChatGPT Work scheduled task or Claude Code Routine](docs/guides/operate/schedule.md)
-for your fork.
+If unconfigured, the assistant runs `./nb setup` and lists any GitHub settings
+that need you. Clean Article PRs auto-merge after `validate` passes and publish
+to Pages. Add "let me read it first" to open a draft PR instead.
 
 ## How it works
 
 ![The Nightly Build architecture](assets/architecture.svg)
 
-[Read how the pieces fit together](docs/concepts/architecture.md).
+Agents handle research, writing, and editing. Repository-owned code and CI
+enforce citations, rendering, and the publication gate. See
+[Architecture](docs/concepts/architecture.md) and
+[Schedule publication](docs/guides/operate/schedule.md).
+
+## Documentation
+
+| Start here                                                     | Operate & customize                                                 | Reference & architecture                                          |
+| -------------------------------------------------------------- | ------------------------------------------------------------------- | ----------------------------------------------------------------- |
+| [Ask your AI](docs/getting-started/ask-your-ai.md)             | [Schedule publication](docs/guides/operate/schedule.md)             | [Feature catalog](docs/reference/README.md)                       |
+| [Set up your paper](docs/getting-started/setup.md)             | [Publish an article now](docs/guides/publish/publish-now.md)        | [Series reference](docs/reference/series.md)                      |
+| [Your first article](docs/getting-started/first-article.md)    | [Revise an article](docs/guides/publish/revise-an-article.md)       | [Production & models](docs/reference/production.md)               |
+| [Create your paper](docs/getting-started/create-your-paper.md) | [Appearance & voice](docs/guides/customize/appearance-and-voice.md) | [Architecture](docs/concepts/architecture.md)                     |
+| [Agent integrations](docs/integrations/README.md)              | [Update the engine](docs/guides/operate/update-engine.md)           | [Publishing & security](docs/concepts/publishing-and-security.md) |
+
+See the [full documentation index](docs/README.md) or
+[troubleshooting](docs/troubleshooting/setup-and-scheduling.md).
 
 ## FAQ
 
 <!-- markdownlint-disable MD033 -->
 
 <details>
-<summary><strong>Why did you build this?</strong></summary>
+<summary><strong>Why build this?</strong></summary>
 
----
-
-<p>I built The Nightly Build because I could not get the morning reading I
-wanted. Asking an AI for each subject was manual, checking its citations often
-erased the time saved, and news coverage still began from other people's
-frames. I wanted to choose what I read, how it was presented, and what evidence
-it had to earn.</p>
-
-<p>An overnight schedule makes a different production process practical: the
-paper can spend an hour researching, writing, checking, and revising without
-making me wait. I wanted to see how far that process could push two problems:
-the writing should stop advertising that an AI wrote it, and citations should
-support the claims that depend on them. It cannot guarantee truth, but it can
-make unsupported work harder to publish.</p>
-
-<p>I also wanted to test a different way to distribute software. Each paper is
-a fork, so its owner holds the code, configuration, archive, and deployment
-environment. The upstream project provides a system that owners change and
-operate for themselves, using the AI provider they choose.</p>
-
----
+Asking an AI for each topic manually was tedious, fact-checking erased the time
+saved, and mainstream coverage starts from other people's frames. Running
+overnight lets four roles spend an hour researching, writing, checking, and
+revising while you sleep, inside a fork you own.
 
 </details>
 
 <details>
-<summary><strong>How do you keep the writing from sounding like AI?</strong></summary>
+<summary><strong>How do you avoid AI slop and hallucinations?</strong></summary>
 
----
-
-<p>By anchoring on strong real human writers as examples, and having an aggressive editor
-that is prompted to look for common indicators of AI slop as well as bad writing, the quality
-that comes out of The Nightly Build is quite a bit higher than my initial expectations. Importantly,
-the agents have to pass explicitly codified gates before publishing. Words can be banned. Long
-sentences with lots of parentheticals and semicolons can be blocked. Basically, every time I saw
-an instance of writing that made me go "ugh that's AI", I tried my best to codify something in the
-system itself to prevent it. That being said, given this is something that is customizable, I did
-my best to avoid hamstringing the engine from being able to express what downstream users may want.</p>
-
----
+A writing coach anchors each piece on real human exemplars, every cited source
+must be fetched and read, and an adversarial editor cuts unsupported claims.
+Codified checks enforce banned terms and structural rules before publishing. No
+system guarantees 100% accuracy, but unsupported work is hard to publish.
 
 </details>
 
 <details>
-<summary><strong>Can it still hallucinate?</strong></summary>
+<summary><strong>What can the scheduled runtime access, and why use pull requests?</strong></summary>
 
----
-
-<p>Sort of. It is genuinely impossible to guarantee everything said is 100% correct. Though the same is
-true of people. The system takes quite a bit of time and uses more tokens than you'd expect because it is
-forced to actually read every single source it cites. The editor will even force sentences to be cut if they
-cannot properly be demonstrated, and will meticulously try and find issues adversarially. Personally, I have
-found this makes hallucinations almost go away entirely. However, I will not promise it.</p>
-
----
-
-</details>
-
-<details>
-<summary><strong>What can the scheduled runtime access?</strong></summary>
-
----
-
-<p>Only what you grant it. A normal run needs the web, both repository branches,
-and permission to open a PR against <code>library</code>. Validation reads
-untrusted article code without the scheduler's secrets. See
-<a href="docs/concepts/publishing-and-security.md">Publishing and security</a>
-for the full trust boundary.</p>
-
----
+Only what you grant it: web access, `main` and `library`, and permission to open
+PRs against `library`. Each PR holds the article, assets, role records, and
+validation output. CI checks untrusted diffs on `pull_request` with no secrets.
+See [Publishing and security](docs/concepts/publishing-and-security.md).
 
 </details>
 
 <details>
 <summary><strong>Can it read paywalled or authenticated sources?</strong></summary>
 
----
-
-<p>This is not something that is natively enabled, however you can set that up directly with
-your respective AI agent. If you'd like to see how that might work, take a look at
-<a href="https://github.com/the-nightly-build/the-nightly-build/issues/127">issue #127</a>.</p>
-
----
-
-</details>
-
-<details>
-<summary><strong>Why does every article use a pull request?</strong></summary>
-
----
-
-<p>The PR is both the review record and the publishing gate. It carries the
-article, its assets, exact agent inputs and outputs, and validation result. Nothing
-reaches <code>library</code> without passing CI. This makes it easy to audit
-the process if there are issues, as well as give more direct feedback in prompts.
-Additionally, PRs are a natural entity that basically every AI harness interacts with.
-Ask to read an article first and its PR opens as a draft that nothing merges
-until you mark it ready.</p>
-
----
+Not natively, though you can configure authenticated access in your own agent
+runtime. See
+[issue #127](https://github.com/the-nightly-build/the-nightly-build/issues/127).
 
 </details>
 
 <details>
 <summary><strong>What does it cost?</strong></summary>
 
----
-
-<p>There is no hosted-service fee. You pay for the AI runtime you choose, and
-hosting can be free. One asked-for article took about 45 minutes of agent time
-across the four roles and roughly half a million to a million tokens before any
-repair round. A scheduled run of five to seven articles took 45 to 90 minutes
-because articles run in parallel. Provider billing and limits vary. See
-<a href="docs/reference/production.md">Production cost and role models</a> for
-the observed workload and controls.</p>
-
----
+No service fee and free GitHub Pages hosting; you pay only for your AI runtime.
+One requested article took ~45 minutes and ~500k–1M tokens across four roles
+before repairs. A scheduled run of 5–7 parallel articles took 45–90 minutes. See
+[Production cost and role models](docs/reference/production.md).
 
 </details>
 
 <details>
-<summary><strong>Can I keep my paper private?</strong></summary>
+<summary><strong>Can I keep my paper private or modify the engine?</strong></summary>
 
----
-
-<p>Yes, if your GitHub plan supports Pages for private repositories. A public
-fork is the simplest free setup.</p>
-
----
-
-</details>
-
-<details>
-<summary><strong>Can I change the engine?</strong></summary>
-
----
-
-<p>Yes. Most changes belong in <code>press/</code>. Start with
-<a href="docs/README.md">the documentation</a>. If you modify the engine
-itself, you also own any conflicts when syncing upstream updates.</p>
-
----
+Private papers work on GitHub plans that support private Pages. Put paper
+changes under `press/` for conflict-free engine updates. Editing engine files
+directly means owning future merge conflicts.
 
 </details>
 

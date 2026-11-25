@@ -1,59 +1,46 @@
 # Use ChatGPT Work
 
-ChatGPT Work can set up a paper and publish an article from a cloud session. Its
-scheduled tasks can run from a fresh cloud checkout without your computer
-running or an API key.
+ChatGPT Work sets up your paper, publishes articles, and runs scheduled editions
+from a cloud checkout with no local terminal or API key.
 
-## Connect GitHub
+## 1. Connect GitHub
 
-Connect the GitHub app to ChatGPT and authorize the account or organization that
-owns your fork. Allow access to the fork and the actions the workflow needs,
-including pushing branches and opening pull requests. Workspace administrators
-may need to enable the app or its write actions. See OpenAI's guides to
-[connect GitHub](https://help.openai.com/en/articles/11145903-connecting-github-to-chatgpt)
+Connect the GitHub app in ChatGPT for the account or organization that owns your
+fork, allowing branch pushes and pull requests. Workspace admins may need to
+enable the app or write actions. See OpenAI's guides on
+[connecting GitHub](https://help.openai.com/en/articles/11145903-connecting-github-to-chatgpt)
 and [connected apps](https://help.openai.com/en/articles/11487775).
 
-## Publish an article now
+## 2. Publish an article now
 
-Create a fork of this repository, then start a Work conversation and name the
-fork as `<owner>/<repo>`. Ask:
+Fork this repository, open a Work conversation, and ask:
 
 > Help me set up my Nightly Build paper in `<owner>/<repo>` and publish my first
 > article about `<topic>`. Follow the repository's instructions. Let me review
 > the article before it publishes.
 
-Work uses a cloud checkout to run setup and the article workflow. The request to
-review first makes the Article PR a draft. To publish without a review hold,
-omit that sentence.
+Work runs setup and the article pipeline in a cloud checkout. Omit the last
+sentence to auto-merge after checks pass instead of opening a draft PR.
 
 ## Schedule publication
 
-Create a recurring scheduled task in ChatGPT Work. Name your fork, choose a
-daily time and timezone, and say whether the task may publish after checks pass
-or should leave a draft PR for you. For example:
+Create a recurring scheduled task in ChatGPT Work naming your fork, daily time
+and timezone, and publication mode (auto-publish or draft PR):
 
 > Schedule The Nightly Build in `<owner>/<repo>` every day at 5:00 AM Eastern.
 > Follow the repository's scheduled publication instructions and auto-publish
 > after checks pass.
 
-Replace the repository name and schedule with yours. For draft-only publication,
-ask Work to leave each Article PR for your review. The task instructions should
-direct Work to start from the current `main` and follow
-`.agents/prompts/run-scheduled-publication.md`. That file is the source of truth
-for the run. See [Schedule publication](../guides/operate/schedule.md) for the
-full prompt.
-
-Review the scheduled task and its GitHub permissions before saving it. You can
-inspect task runs in ChatGPT's Scheduled view. OpenAI's
+Ensure the task starts from current remote `main` and follows
+`.agents/prompts/run-scheduled-publication.md`. See
+[Schedule publication](../guides/operate/schedule.md) for the canonical prompt,
+and OpenAI's
 [scheduled tasks guide](https://help.openai.com/en/articles/10291617-tasks-in-chatgpt)
-covers task setup and availability.
+for task controls and run history.
 
 ## After publication
 
-Your site is `https://<owner>.github.io/<repo>/`. The assistant reports the
-published article and its URL when the workflow completes. If GitHub does not
-start the `validate` check on an Article PR, enable Actions for the fork and
-close and reopen the PR.
-
-For setup problems, see
+Your paper publishes to `https://<owner>.github.io/<repo>/`. If `validate` never
+starts on an Article PR, enable Actions in the fork's **Actions** tab, then
+close and reopen the PR. See
 [Troubleshoot setup and scheduling](../troubleshooting/setup-and-scheduling.md).

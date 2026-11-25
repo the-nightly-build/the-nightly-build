@@ -1,49 +1,57 @@
 # Documentation
 
-The Nightly Build turns a configured press into a published paper. Start with
-the path that matches what you are trying to do.
+The Nightly Build turns a configured press into a published paper.
 
-## Start here
+## Getting started
 
-- [Ask your AI](getting-started/ask-your-ai.md) is the shortest path from this
-  repository to a published article.
-- [Set up](getting-started/setup.md) explains the two ways in, what `nb setup`
-  does on each, and the two settings only an owner can make.
-- [Your first article](getting-started/first-article.md) describes what happens
-  between asking and the live page.
-- [Agent integrations](integrations/README.md) shows the article and scheduling
-  paths for Claude Code, Codex, and ChatGPT Work.
-- [Create your paper](getting-started/create-your-paper.md) explains how to
-  personalize the default paper with two questions or design a paper from
-  scratch.
+- [Ask your AI](getting-started/ask-your-ai.md): shortest path to a first
+  published article
+- [Set up your paper](getting-started/setup.md): terminal vs. ChatGPT Work setup
+  and `./nb setup`
+- [Your first article](getting-started/first-article.md): what happens from
+  request to live page
+- [Create your paper](getting-started/create-your-paper.md): personalize the
+  default press or design one from scratch
+- [Agent integrations](integrations/README.md): setup and scheduling for Claude
+  Code, Codex, and ChatGPT Work
 
-## Operate your paper
+## Guides
 
-- Operate: [schedule publication](guides/operate/schedule.md),
-  [manage your paper](guides/operate/manage-your-paper.md), or
-  [update the engine](guides/operate/update-engine.md)
-- Publish: [publish an article now](guides/publish/publish-now.md) or
+- **Operate:** [schedule publication](guides/operate/schedule.md),
+  [manage your paper](guides/operate/manage-your-paper.md),
+  [update the engine](guides/operate/update-engine.md),
+  [verify the scheduled runtime](guides/operate/verify-scheduled-runtime.md)
+- **Publish:** [publish an article now](guides/publish/publish-now.md),
   [revise a published article](guides/publish/revise-an-article.md)
-- Customize [appearance and voice](guides/customize/appearance-and-voice.md),
-  [furniture](guides/customize/furniture.md), or
+- **Customize:**
+  [appearance and voice](guides/customize/appearance-and-voice.md),
+  [furniture](guides/customize/furniture.md),
   [templates](guides/customize/templates.md)
 
-## Understand and reference the system
+## Concepts
 
-- Start with the [feature catalog](reference/README.md) for the complete map of
-  supported capabilities and their configuration.
-- Concepts: [architecture](concepts/architecture.md),
-  [ownership and branches](concepts/ownership-and-branches.md), and
-  [publishing and security](concepts/publishing-and-security.md)
-- Reference details: [site](reference/site.md), [series](reference/series.md),
-  [templates](reference/templates.md), [furniture](reference/furniture.md),
-  [production](reference/production.md), and [delivery](reference/delivery.md)
-- Troubleshoot [setup and scheduling](troubleshooting/setup-and-scheduling.md)
-  or [Article PRs](troubleshooting/article-prs.md)
+- [Architecture](concepts/architecture.md): orchestrator, editorial roles,
+  engine checks, and PR boundary
+- [Ownership and branches](concepts/ownership-and-branches.md): `press/`, engine
+  files on `main`, and `library`
+- [Publishing and security](concepts/publishing-and-security.md): trust
+  boundaries, auto-merge, and branch protection
 
-These pages explain how the system works and which decisions belong to you.
-Agent instructions live under `.agents/`. Your assistant reads the relevant
-skill file when it handles a task, either with you or on its own.
+## Reference
 
-Files under `spec/` define the requirements for article-making agents and the
-engine. They are for contributors, not a user manual.
+- [Feature catalog](reference/README.md): map of supported capabilities and
+  where each is configured
+- [Site](reference/site.md) · [Series](reference/series.md) ·
+  [Templates](reference/templates.md) · [Furniture](reference/furniture.md) ·
+  [Production](reference/production.md) · [Delivery](reference/delivery.md)
+
+## Troubleshooting
+
+- [Setup and scheduling](troubleshooting/setup-and-scheduling.md)
+- [Article PRs](troubleshooting/article-prs.md)
+
+---
+
+Agent instructions live in `.agents/`, where your assistant loads the skill for
+each task. Contributor specifications for article quality and the engine live in
+`spec/`.

@@ -2,57 +2,45 @@
 
 ## Feeds (zero setup)
 
-Every paper publishes Atom feeds:
+Every paper publishes Atom feeds with full recent article content embedded (no
+secrets or repo config needed):
 
-- `https://<you>.github.io/<repo>/feed.xml` for the whole paper
-- `https://<you>.github.io/<repo>/series/<id>/feed.xml` for one series
+- Paper-wide: `https://<you>.github.io/<repo>/feed.xml`
+- Per-series: `https://<you>.github.io/<repo>/series/<id>/feed.xml`
 
-The newest entries embed the full article content, so a feed reader shows the
-whole article. The feed needs no secrets and no configuration in the repo. For
-email delivery, point an RSS-to-email service at the feed.
+For email delivery, point any RSS-to-email service at a feed URL.
 
 ## catalog.json: the API
 
-`https://<you>.github.io/<repo>/catalog.json` is the machine-readable state of
-the whole library: series with progress and sections, every article's nb-meta
-plus `path`, `position`, and `reading_minutes`, builds grouped by night, and the
-tag index. Generated pages and the catalog come from the same library state.
-External readers and dashboards can use the catalog without touching the repo.
-`search-index.json` carries full text for client-side search.
+| Endpoint            | Contents                                                                                                                                          |
+| ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `catalog.json`      | Machine-readable library state: series progress/sections, article `nb-meta`, `path`, `position`, `reading_minutes`, nightly builds, and tag index |
+| `search-index.json` | Full article text for client-side search                                                                                                          |
+
+Both live at `https://<you>.github.io/<repo>/` and are built from `library`
+alongside the HTML pages. External readers and dashboards can query them without
+touching the repository.
 
 ## The directory
 
-[the-nightly-build.github.io](https://the-nightly-build.github.io/) is a shared
-front page over every published paper: one decentralized, AI-generated
-newspaper, browsable by article or by author. It is a discovery layer over
-independently owned papers, in the spirit of a feed reader or a blog directory.
-It does not review, endorse, or vouch for what any author publishes. You own
-your paper and are responsible for it, the same way you would be on any hosting
-platform.
+[the-nightly-build.github.io](https://the-nightly-build.github.io/) is a
+decentralized directory over independently owned papers, browsable by article or
+author. It links out to your site without copying your articles or reviewing,
+endorsing, or vouching for content. You own and remain responsible for your
+paper.
 
-**You are listed automatically.** Once your paper publishes with a current
-engine (catalog protocol `1.3` or later, stamped in your `catalog.json`), the
-daily crawl discovers your fork, reads your public `catalog.json`, and lists
-you. Add an optional one-line description for your card:
+- **Automatic listing:** once you publish from a fork of the **canonical**
+  repository on catalog protocol `1.3` or later (stamped in `catalog.json`), the
+  daily crawl discovers and lists your paper (one fork per GitHub account,
+  usually within a day). Forking another fork will not be discovered.
+- **Custom domains:** configure your custom domain in GitHub Pages settings
+  only, never in `press/site.yaml`. GitHub redirects `github.io` to your custom
+  domain, and the directory follows the redirect.
+
+Add an optional card description or opt out in `press/site.yaml`:
 
 ```yaml
 directory:
   description: "One line describing your paper (up to 280 characters)."
-```
-
-Your identity in the directory is your GitHub account (one fork per user), and
-your public URL is derived from your GitHub Pages URL at build time, never
-configured. For a custom domain, set it as your GitHub Pages custom domain.
-GitHub redirects your `github.io` URL to it, and the directory, which links
-through `github.io`, follows that redirect automatically. No URL is ever set in
-`press/site.yaml`. Inclusion is automatic, with no approval step, usually within
-a day. Fork the **canonical** repo, not another fork, or the crawler will not
-find you. Your articles are never copied. The directory links out to your own
-site.
-
-**To opt out**, set:
-
-```yaml
-directory:
-  publish: false
+  publish: false # omit or set true to remain listed
 ```

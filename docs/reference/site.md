@@ -1,6 +1,6 @@
 # Site reference
 
-`press/site.yaml` sets paper-wide presentation and delivery settings.
+`press/site.yaml` configures paper-wide presentation and delivery.
 
 ```yaml
 title: "My Paper"
@@ -19,23 +19,22 @@ directory:
   publish: true
 ```
 
-| Key                     | Contract                                                                     |
-| ----------------------- | ---------------------------------------------------------------------------- |
-| `title`                 | Masthead title. Defaults to "The Nightly Build"                              |
-| `theme`                 | Local CSS path. Defaults to the shipped newspaper theme                      |
-| `appearance`            | `auto`, `light`, or `dark`                                                   |
-| `front`                 | `compact` or `comfortable`                                                   |
-| `footer`                | Imprint, at most 80 characters. Defaults to a product credit                 |
-| `assets.scripts/styles` | Entries of `url` (HTTPS), `integrity` (exact SRI hash), and optional `defer` |
-| `directory.description` | Optional public description, at most 280 characters                          |
-| `directory.publish`     | Boolean. Set `false` to opt out of the shared directory                      |
+| Key                     | Type / values               | Default               | Notes                                                               |
+| ----------------------- | --------------------------- | --------------------- | ------------------------------------------------------------------- |
+| `title`                 | string                      | `"The Nightly Build"` | Masthead title                                                      |
+| `theme`                 | local path                  | Shipped newspaper CSS | Custom CSS under `press/themes/`                                    |
+| `appearance`            | `auto` \| `light` \| `dark` | `auto`                | Color scheme mode                                                   |
+| `front`                 | `compact` \| `comfortable`  | `compact`             | Front-page density (`comfortable` includes deks)                    |
+| `footer`                | string (≤ 80 chars)         | Product credit        | Footer imprint                                                      |
+| `assets.scripts/styles` | list of objects             | `[]`                  | Each entry needs `url` (HTTPS), `integrity` (SRI), optional `defer` |
+| `directory.description` | string (≤ 280 chars)        | none                  | Optional public card description                                    |
+| `directory.publish`     | boolean                     | `true`                | Set `false` to opt out of the shared directory                      |
 
-External assets are owner-authored configuration. Scripts do not relax the
-article sandbox: articles still cannot add scripts, handlers, frames, forms, or
-other active content. Pin exact versions and preview both success and
-no-JavaScript behavior. Declared stylesheets also join the proof's class
-inventory, so a dependency's classes are never reported dead. See
-[Furniture reference](furniture.md).
+External assets are owner-authored only and do not relax the article sandbox
+(articles still cannot include scripts, event handlers, frames, or forms). Pin
+exact versions and preview both JS-enabled and no-JS rendering. Declared
+stylesheets join the proof's class inventory so their classes are not flagged as
+dead. See [Furniture reference](furniture.md).
 
-See [Appearance and voice](../guides/customize/appearance-and-voice.md) for
-design practice and [Delivery](delivery.md) for published URLs.
+See [Appearance and voice](../guides/customize/appearance-and-voice.md) and
+[Delivery](delivery.md).

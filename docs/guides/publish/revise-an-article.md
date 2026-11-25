@@ -1,62 +1,54 @@
 # Revise a published article
 
-A revision changes one published article without erasing how it reached the
-paper. It can be a spelling correction, a factual update, a substantial rewrite,
-or a replacement for a bad figure. The process should fit the work. The PR
-contract does not prescribe roles, prompts, or an editorial workflow.
+A revision updates one published article without erasing its production record.
+Whether fixing a typo or rewriting a section, the PR contract is the same.
+Revisions always require human review and never auto-merge.
 
-Revisions always open a human-reviewed PR and never auto-merge.
+## 1. Branch from `origin/library`
 
-## Decide what the revision needs
+Fetch `origin/library` and create a working branch or worktree from that exact
+ref. Never commit or push directly to `library`.
 
-Start from the article and assets currently on `origin/library`. Establish the
-requested outcome and inspect only the context needed to make it safely:
+Match your editorial process to the change:
 
-- correct spelling or markup directly when no judgment is required
-- reopen sources when a claim, citation, number, or interpretation changes
-- use a writer, editor, researcher, or writing coach when their judgment would
-  materially improve the result
-- regenerate, replace, add, or remove matching assets when the visual evidence
-  or presentation is wrong
+- Fix spelling or markup directly when no editorial judgment is needed.
+- Reopen sources whenever a claim, citation, number, or interpretation changes.
+- Invoke roles (researcher, writer, editor, writing coach) when their judgment
+  improves the change. Keep their scratch output local, outside the PR.
+- Add, replace, or remove files under `library/SERIES/SLUG/` when visuals need
+  fixing.
 
-Those are editorial choices, not CI requirements. A large LLM-assisted rewrite
-and a one-character correction produce the same narrow kind of PR.
+## 2. Add a revision note
 
-Fetch `origin/library` and create an ordinary branch or worktree from that exact
-ref. Edit the published files in place on the new branch. Never commit or push
-directly to the `library` branch.
-
-## Record the reason
-
-Add exactly one new Markdown file:
+Create one new Markdown file using the next two-digit sequence number (starting
+at `01.md`, independent of role invocation numbers):
 
 ```text
 agent-artifacts/SERIES/SLUG/revisions/NN.md
 ```
 
-Use the next two-digit number: an article with no revision notes starts at
-`01.md`, then `02.md`, and so on. This sequence is independent of any role
-invocation numbers in the original production record.
+No fixed heading or schema is required. State why the revision was needed, what
+materially changed, and how it was verified. Write for a reader auditing the
+article's history, not about AI tool mechanics. Never edit or delete prior
+revision notes or historical role artifacts.
 
-There is no required heading or schema. Write for a future reader who needs to
-understand the article's history. Explain why the revision was needed and what
-materially changed, and include the verification performed when it helps
-establish trust. Keep the note about the revision, not the mechanics of
-operating an AI.
+## 3. Stamp, check, and open the PR
 
-Do not edit or delete an earlier revision note or any historical role artifact.
-If you use article-making roles during the work, their scratch output can stay
-local. It is not part of the revision PR.
+After editing article text, refresh counts and reading time while preserving the
+original publication date:
 
-## Prove and deliver the result
+```sh
+nb stamp FILE --revision
+```
 
-After editing article text, run `nb stamp FILE --revision` to refresh counts and
-reading time while preserving the original publication date. While iterating on
-the file itself, preflight it locally with
-`nb check FILE --series ID --library DIR --revision`. The flag skips the
-already-published and paused-series blocks, exactly as the PR proof does for a
-revision diff. Commit the revision branch, then run the full PR proof through
-the current `main` checkout:
+Preflight the edited file locally (skipping already-published and paused-series
+blocks):
+
+```sh
+nb check FILE --series ID --library DIR --revision
+```
+
+Commit the revision branch and run the full PR proof from a `main` checkout:
 
 ```sh
 PATH-TO-MAIN/nb check --pr \
@@ -67,25 +59,20 @@ PATH-TO-MAIN/nb check --pr \
   --library .
 ```
 
-Preview the page whenever markup, layout, furniture, or assets changed, and
-compare it with both the published page and the requested outcome. Push the
-branch and open a human-reviewed PR against `library`.
+Preview the rendered page if markup, layout, furniture, or assets changed, then
+push the branch and open a PR against `library`.
 
-The generated PR must:
+## PR contract
 
-- modify `library/SERIES/SLUG.html`, its matching assets, or both
-- add, modify, or delete files only under the matching `library/SERIES/SLUG/`
-  asset directory
+A revision PR must:
+
+- modify `library/SERIES/SLUG.html`, matching files under
+  `library/SERIES/SLUG/`, or both
 - add exactly the next `agent-artifacts/SERIES/SLUG/revisions/NN.md`
-- leave every other article and historical artifact untouched
+- leave all other articles and historical artifacts untouched
+- keep the article's `series` and `slug` metadata matching its file path
+  (renaming or moving an article is not an in-place revision)
 
-The article may change any prose, structure, title, metadata, citation, or
-template choice that the normal current proof accepts. Its path remains fixed:
-the `series` and `slug` metadata must still agree with
-`library/SERIES/SLUG.html`. Moving or renaming an article is not an in-place
-revision.
-
-CI reruns the normal proof and browser-render check. It permits corrections to
-paused and already-published series, and to articles whose slug is no longer a
-configured item, so a revision never requires restoring old configuration. The
-series must still exist, and the result must satisfy its template contract.
+CI runs the full proof and browser render check. Revisions are permitted on
+paused or already-published series and on retired configured items, provided the
+series still exists and the revised article satisfies its template contract.
